@@ -1,0 +1,45 @@
+import { PGlite } from "@electric-sql/pglite";
+import { readdir, readFile } from "node:fs/promises";
+
+export const root = new URL("../../", import.meta.url);
+
+export async function createDatabase() {
+  const db = new PGlite();
+  // Minimal Supabase Auth contract; this is an isolated, in-memory Postgres.
+  await db.exec(`
+    create role anon nologin;
+    create role authenticated nologin;
+    create schema auth;
+    create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz);
+    create function auth.uid() returns uuid language sql stable as $$
+      select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+    $$;
+    grant usage on schema auth to authenticated, anon;
+    grant execute on function auth.uid() to authenticated, anon;
+  `);
+  for (const file of (await readdir(new URL("supabase/migrations/", root)))
+    .filter((x) => x.endsWith(".sql"))
+    .sort()) {
+    try {
+      await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), "utf8"));
+    } catch (error) {
+      throw new Error(`${file}: ${error.message}`, { cause: error });
+    }
+  }
+  return db;
+}
+
+export async function seedDatabase(db) {
+  const report = JSON.parse(await readFile(new URL("supabase/seed/report.json", root), "utf8"));
+  for (const file of report.seed_order) {
+    const sql = await readFile(new URL(`supabase/seed/${file}`, root), "utf8");
+    if ((sql.match(/^insert into /gm) || []).length > 300)
+      throw new Error(`${file} exceeds 300 rows`);
+    try {
+      await db.exec(sql);
+    } catch (error) {
+      throw new Error(`${file}: ${error.message}; ${error.detail || ""}`);
+    }
+  }
+  return report;
+}
