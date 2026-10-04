@@ -164,4 +164,3 @@ Quedan tres fixtures históricos con TODO y `skip` por falta de costos/cantidade
 Pendientes externos: fuente BLOQUES SPA; revisión de los registros de importación; costos de esos tres fixtures; fotos, textos, T&C y datos bancarios reales; secretos, despliegue y cron en Lovable Cloud; prueba real de Storage/Resend/LLM en ese entorno. La conexión de estas funciones a la interfaz corresponde a Lovable; no se modificaron rutas, componentes ni integraciones.
 
 Referencias de API: [react-pdf v4](https://react-pdf.org/docs/v4/advanced), [Resend Send Email](https://resend.com/docs/api-reference/emails/send-email), [Anthropic Messages](https://platform.claude.com/docs/en/api/messages/create).
-

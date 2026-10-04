@@ -276,4 +276,3 @@ grant execute on function public.transition_quote(uuid,public.quote_status,text)
  public.create_quote_snapshot(jsonb,jsonb),public.insert_quote_item(uuid,jsonb,boolean),public.edit_quote_item(uuid,jsonb,boolean,boolean),
  public.save_quote_calculation(uuid,timestamptz,jsonb),public.promote_quote_template(uuid) to authenticated;
 commit;
-
