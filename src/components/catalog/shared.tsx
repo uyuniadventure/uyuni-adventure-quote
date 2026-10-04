@@ -22,7 +22,7 @@ export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export function StatusBadge({ status }: { status: string }) {
   const cls =
     status === "activo" || status === "aprobado"
-      ? "bg-success/15 text-success border-success/30"
+      ? "bg-primary/10 text-primary border-primary/30"
       : status === "pendiente"
         ? "bg-brand-orange/15 text-brand-orange-deep border-brand-orange/30"
         : "bg-muted text-muted-foreground border-border";

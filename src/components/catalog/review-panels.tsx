@@ -141,7 +141,7 @@ export function ChangeRequestsPanel({ onOpenService }: { onOpenService: (id: str
 }
 
 function RateLine({ label, r, currency, highlight }: {
-  label: string; r: Partial<RateValues>; currency?: string | null; highlight?: boolean;
+  label: string; r: Partial<RateValues>; currency?: string | null | undefined; highlight?: boolean;
 }) {
   const rr = { valid_from: r.valid_from ?? null, valid_to: r.valid_to ?? null, pax_min: r.pax_min ?? null, pax_max: r.pax_max ?? null };
   return (

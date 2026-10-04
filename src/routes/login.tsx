@@ -141,7 +141,7 @@ function AuthForm() {
   }
 
   async function resetPassword() {
-    if (!email) return toast.error("Escribe tu correo primero.");
+    if (!email) { toast.error("Escribe tu correo primero."); return; }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });

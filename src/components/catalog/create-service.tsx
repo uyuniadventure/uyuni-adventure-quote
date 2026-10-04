@@ -35,7 +35,7 @@ export function CreateServiceDialog({
         sku: f.sku.trim(),
         name: f.name.trim(),
         type: f.type as TablesInsert<"services">["type"],
-        pricing_unit: f.pricing_unit as TablesInsert<"services">["pricing_unit"],
+        pricing_unit: f.pricing_unit as NonNullable<TablesInsert<"services">["pricing_unit"]>,
         currency: f.currency,
         country: f.country.trim() || null,
         location: f.location.trim() || null,
