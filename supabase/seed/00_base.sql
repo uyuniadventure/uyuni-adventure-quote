@@ -1,0 +1,27 @@
+-- Unidades de moneda nativa por USD; tasas iniciales, no cotizaciones actuales.
+begin;
+insert into public.currencies (id, code, name) values ('8032dd62-33f1-507f-b384-c6e2f56cc6de', 'USD', 'Dólar estadounidense') on conflict do nothing;
+insert into public.currencies (id, code, name) values ('c71ef397-90fa-5a20-bafc-80e94ca3f2f3', 'CLP', 'Peso chileno') on conflict do nothing;
+insert into public.currencies (id, code, name) values ('00d0a0f7-d6ea-56f5-9abf-fc9b575b2cdc', 'BOB', 'Boliviano') on conflict do nothing;
+insert into public.currencies (id, code, name) values ('0edfd7ff-27f4-5da8-bd59-45eda9131ff4', 'ARS', 'Peso argentino') on conflict do nothing;
+insert into public.currencies (id, code, name) values ('630b0447-2f43-53ed-8ff6-2dc8cee7c3e6', 'PEN', 'Sol peruano') on conflict do nothing;
+insert into public.currencies (id, code, name) values ('e6c0d08b-9f4f-528d-be25-906899894160', 'EUR', 'Euro') on conflict do nothing;
+insert into public.exchange_rates (id, currency, rate_to_usd, valid_from) values ('2f6cf42d-3036-548f-9f60-aec1a49da193', 'USD', 1, '2026-01-01') on conflict do nothing;
+insert into public.exchange_rates (id, currency, rate_to_usd, valid_from) values ('56b03beb-4232-50a6-a100-82e6a20f8b8c', 'CLP', 885, '2026-01-01') on conflict do nothing;
+insert into public.exchange_rates (id, currency, rate_to_usd, valid_from) values ('7ae8cedf-7d72-58e3-b520-fb88c05c9afd', 'BOB', 6.91, '2026-01-01') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('f1d42f38-f033-54ca-afbd-92d9325e9e44', 'SPA', 'San Pedro de Atacama', 'CHILE') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('58dd9a17-ab41-555a-b7c2-204080a7d14f', 'UYU', 'Uyuni', 'BOLIVIA') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('30edba5a-5cf4-5e1f-b55c-e9f4e07e498b', 'CJC', 'Calama', 'CHILE') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('10bef33f-e861-53ac-adee-333dc7b22da1', 'LPB', 'La Paz', 'BOLIVIA') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('1eac15bd-233d-52d1-8473-6bf996014871', 'SRE', 'Sucre', 'BOLIVIA') on conflict do nothing;
+insert into public.location_codes (id, code, name, country) values ('3e6826ae-c702-5dc1-aeeb-0e4b15ae0335', 'STG', 'Santiago', 'CHILE') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('86fbe841-b3b2-5584-a5ba-e1bfec5ce565', 'P', 'Palacio de Sal') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('341ac825-cb5e-5c2d-ace2-9e8cac615d4c', 'Td', 'Tayka del Desierto') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('a4bf2f60-0362-5611-83af-360bb41d267f', 'M', 'Mallku Cueva') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('81980ecf-6b93-5403-9f1c-e56361791ab2', 'L', 'Luna Salada') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('924bcc5f-a531-5408-a8f1-661ccb0b4be9', 'F', 'Los Flamencos') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('dbba2a4f-2c43-50d0-a9ec-3450fa18ee10', 'K', 'Kachi') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('7f742ce8-f570-5fbe-9d19-7f8cfdb330f5', 'J', 'Jardines de Uyuni') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('6cad5188-444f-563e-b4c9-65253e8c8057', 'Ñ', 'Coscaña') on conflict do nothing;
+insert into public.hotel_codes (id, code, name) values ('b9dd7d8c-9dfd-533c-86e7-b4a4b23ec810', 'S', 'Sky Dream') on conflict do nothing;
+commit;

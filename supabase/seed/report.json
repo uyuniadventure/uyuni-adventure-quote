@@ -1,0 +1,3964 @@
+{
+  "source_rows": 1206,
+  "services": 857,
+  "rates": 1169,
+  "suppliers": 69,
+  "sku_aliases": 1159,
+  "rack_fallbacks": 238,
+  "seed_order": [
+    "00_base.sql",
+    "01_tarifario_001.sql",
+    "01_tarifario_002.sql",
+    "01_tarifario_003.sql",
+    "01_tarifario_004.sql",
+    "01_tarifario_005.sql",
+    "01_tarifario_006.sql",
+    "01_tarifario_007.sql",
+    "01_tarifario_008.sql",
+    "01_tarifario_009.sql",
+    "01_tarifario_010.sql",
+    "01_tarifario_011.sql"
+  ],
+  "omitted": [
+    {
+      "row": 168,
+      "sku": "TRF_ALVARO_LPB_CBBA_7_9PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 169,
+      "sku": "TRF_ALVARO_LPB_CBBA_7_9PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 191,
+      "sku": "CAMP_SPA_CDS_CAMPING_110_CLP",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 192,
+      "sku": "CAMP_SPA_CDS_TREK_CAMP_110_CLP",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 193,
+      "sku": "CAMP_SPA_CDS_TREK_APR_110_CLP",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 194,
+      "sku": "CAMP_SPA_CDS_ASTRO_110_CLP",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 195,
+      "sku": "CAMP_SPA_CDS_TRANSFER_110_CLP",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 196,
+      "sku": "CAMP_SPA_CDS_CAMPING_110_USD",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 197,
+      "sku": "CAMP_SPA_CDS_TREK_CAMP_110_USD",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 198,
+      "sku": "CAMP_SPA_CDS_TREK_APR_110_USD",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 199,
+      "sku": "CAMP_SPA_CDS_ASTRO_110_USD",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 200,
+      "sku": "CAMP_SPA_CDS_TRANSFER_110_USD",
+      "issues": "etiqueta_dup;solo_precio_rack;mismo_servicio_en_2_monedas"
+    },
+    {
+      "row": 361,
+      "sku": "FNB_SPA_LASCAR_BOXLUNCH_2026",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 362,
+      "sku": "FNB_SPA_LASCAR_BOXLUNCH_2026",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 393,
+      "sku": "TRF_SPA_HC_SUV_3PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 394,
+      "sku": "TRF_SPA_HC_SPR15_8PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 395,
+      "sku": "TRF_SPA_HC_SPR19_14PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 396,
+      "sku": "TRF_SPA_HC_VOL27_20PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 397,
+      "sku": "TRF_SPA_HC_VOL32_25PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 398,
+      "sku": "TRF_SPA_HC_VOL35_30PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 399,
+      "sku": "TRF_SPA_HC_COM37_34PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 400,
+      "sku": "TRF_SPA_REST_SUV_3PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 401,
+      "sku": "TRF_SPA_REST_SPR15_8PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 402,
+      "sku": "TRF_SPA_REST_SPR19_14PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 403,
+      "sku": "TRF_SPA_REST_VOL27_20PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 404,
+      "sku": "TRF_SPA_REST_VOL32_25PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 405,
+      "sku": "TRF_SPA_REST_VOL35_30PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 406,
+      "sku": "TRF_SPA_REST_COM37_34PAX_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 460,
+      "sku": "EXP_UYU_LEO_SUNRISE",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 490,
+      "sku": "EXP_UYU_LEO_SUNRISE",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 785,
+      "sku": "TRF_SPA_CJC_H1_2026",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 787,
+      "sku": "TRF_SPA_HC_H1_2026",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 806,
+      "sku": "TRF_SPA_CJC_H1_2026",
+      "issues": "sku_dup | etiqueta_dup"
+    },
+    {
+      "row": 807,
+      "sku": "TRF_SPA_HC_H1_2026",
+      "issues": "sku_dup"
+    },
+    {
+      "row": 841,
+      "sku": "HTL_SAMAY_VILLAMAR_TRP_BATH_2026_BOB",
+      "issues": "etiqueta_dup;mismo_servicio_en_2_monedas"
+    }
+  ],
+  "exchange_rate_rows": [
+    {
+      "row": 1138,
+      "sku": "CONVERSIÓN BOB-USD",
+      "destination": "00_base.sql / exchange_rates"
+    },
+    {
+      "row": 1139,
+      "sku": "USD DIA",
+      "destination": "00_base.sql / exchange_rates"
+    }
+  ],
+  "grouped_services": [
+    {
+      "sku": "TRF_ALVARO_LPB_AIRPORT_DAY_1_2PAX_2026",
+      "rows": [
+        2,
+        3,
+        4
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_AIRPORT_DAY_1_2PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_DAY_3_6PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_DAY_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_AIRPORT_NIGHT_1_2PAX_2026",
+      "rows": [
+        5,
+        6,
+        7
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_AIRPORT_NIGHT_1_2PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_NIGHT_3_6PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_NIGHT_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_AIRPORT_ZSUR_DAY_1_2PAX_2026",
+      "rows": [
+        8,
+        9,
+        10
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_DAY_1_2PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_DAY_3_6PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_DAY_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_AIRPORT_ZSUR_NIGHT_1_2PAX_2026",
+      "rows": [
+        11,
+        12,
+        13
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_NIGHT_1_2PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_NIGHT_3_6PAX_2026",
+        "TRF_ALVARO_LPB_AIRPORT_ZSUR_NIGHT_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_BUS_HCENTRO_DAY_1_2PAX_2026",
+      "rows": [
+        14,
+        15,
+        16
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_BUS_HCENTRO_DAY_1_2PAX_2026",
+        "TRF_ALVARO_LPB_BUS_HCENTRO_DAY_3_6PAX_2026",
+        "TRF_ALVARO_LPB_BUS_HCENTRO_DAY_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_BUS_HCENTRO_NIGHT_1_2PAX_2026",
+      "rows": [
+        17,
+        18,
+        19
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_BUS_HCENTRO_NIGHT_1_2PAX_2026",
+        "TRF_ALVARO_LPB_BUS_HCENTRO_NIGHT_3_6PAX_2026",
+        "TRF_ALVARO_LPB_BUS_HCENTRO_NIGHT_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_BUS_ZSUR_DAY_1_2PAX_2026",
+      "rows": [
+        20,
+        21,
+        22
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_BUS_ZSUR_DAY_1_2PAX_2026",
+        "TRF_ALVARO_LPB_BUS_ZSUR_DAY_3_6PAX_2026",
+        "TRF_ALVARO_LPB_BUS_ZSUR_DAY_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_BUS_ZSUR_NIGHT_1_2PAX_2026",
+      "rows": [
+        23,
+        24,
+        25
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_BUS_ZSUR_NIGHT_1_2PAX_2026",
+        "TRF_ALVARO_LPB_BUS_ZSUR_NIGHT_3_6PAX_2026",
+        "TRF_ALVARO_LPB_BUS_ZSUR_NIGHT_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HCENTRO_RCENTRO_MEAL_1_2PAX_2026",
+      "rows": [
+        26,
+        27,
+        28
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_MEAL_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_MEAL_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_MEAL_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HCENTRO_RZSUR_MEAL_1_2PAX_2026",
+      "rows": [
+        29,
+        30,
+        31
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HCENTRO_RZSUR_MEAL_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RZSUR_MEAL_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RZSUR_MEAL_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HZSUR_RCENTRO_MEAL_1_2PAX_2026",
+      "rows": [
+        32,
+        33,
+        34
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_MEAL_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_MEAL_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_MEAL_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HZSUR_RZSUR_MEAL_1_2PAX_2026",
+      "rows": [
+        35,
+        36,
+        37
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HZSUR_RZSUR_MEAL_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RZSUR_MEAL_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RZSUR_MEAL_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HCENTRO_RCENTRO_PENA_1_2PAX_2026",
+      "rows": [
+        38,
+        39,
+        40
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_PENA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_PENA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HCENTRO_RCENTRO_PENA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HZSUR_RCENTRO_PENA_1_2PAX_2026",
+      "rows": [
+        41,
+        42,
+        43
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_PENA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_PENA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HZSUR_RCENTRO_PENA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_CITY_LUNA_TELEFERICO_HD_1_2PAX_2026",
+      "rows": [
+        45,
+        46,
+        47
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_CITY_LUNA_TELEFERICO_HD_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_TELEFERICO_HD_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_TELEFERICO_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_1PAX_2026",
+      "rows": [
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_1PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_2PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_3PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_4PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_5PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_6_7PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_8_10PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_11_13PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_14_16PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_17_19PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_CITY_CENTRAL_HCENTRO_HD_1_2PAX_2026",
+      "rows": [
+        58,
+        59,
+        60
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HCENTRO_HD_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HCENTRO_HD_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HCENTRO_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_CITY_CENTRAL_HZSUR_HD_1_2PAX_2026",
+      "rows": [
+        61,
+        62,
+        63
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HZSUR_HD_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HZSUR_HD_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_CITY_CENTRAL_HZSUR_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_VALLE_LUNA_1_2PAX_2026",
+      "rows": [
+        64,
+        65,
+        66
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_VALLE_LUNA_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_VALLE_LUNA_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_VALLE_LUNA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_VALLE_ANIMAS_1_2PAX_2026",
+      "rows": [
+        67,
+        68,
+        69
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_VALLE_ANIMAS_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_VALLE_ANIMAS_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_VALLE_ANIMAS_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_ALVARO_LPB_MUELA_DIABLO_HD_1_2PAX_2026",
+      "rows": [
+        70,
+        71,
+        72
+      ],
+      "aliases": [
+        "TOUR_ALVARO_LPB_MUELA_DIABLO_HD_1_2PAX_2026",
+        "TOUR_ALVARO_LPB_MUELA_DIABLO_HD_3_6PAX_2026",
+        "TOUR_ALVARO_LPB_MUELA_DIABLO_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "SRV_ALVARO_LPB_10H_RADIO_1_2PAX_2026",
+      "rows": [
+        73,
+        74,
+        75
+      ],
+      "aliases": [
+        "SRV_ALVARO_LPB_10H_RADIO_1_2PAX_2026",
+        "SRV_ALVARO_LPB_10H_RADIO_3_6PAX_2026",
+        "SRV_ALVARO_LPB_10H_RADIO_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "SRV_ALVARO_LPB_HOUR_RADIO_1_2PAX_2026",
+      "rows": [
+        76,
+        77,
+        78
+      ],
+      "aliases": [
+        "SRV_ALVARO_LPB_HOUR_RADIO_1_2PAX_2026",
+        "SRV_ALVARO_LPB_HOUR_RADIO_3_6PAX_2026",
+        "SRV_ALVARO_LPB_HOUR_RADIO_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_COPACABANA_FD_1_2PAX_2026",
+      "rows": [
+        79,
+        80,
+        81
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_COPACABANA_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_COPACABANA_KASANI_1_2PAX_2026",
+      "rows": [
+        82,
+        83,
+        84
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_COPACABANA_KASANI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_KASANI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_KASANI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_COPACABANA_YAMPUPATA_1_2PAX_2026",
+      "rows": [
+        85,
+        86,
+        87
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_COPACABANA_YAMPUPATA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_YAMPUPATA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_COPACABANA_YAMPUPATA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_OKOLA_FD_1_2PAX_2026",
+      "rows": [
+        88,
+        89,
+        90
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_OKOLA_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_OKOLA_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_OKOLA_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TIQUINA_FD_1_2PAX_2026",
+      "rows": [
+        91,
+        92,
+        93
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TIQUINA_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TIQUINA_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TIQUINA_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TIQUINA_HD_1_2PAX_2026",
+      "rows": [
+        94,
+        95,
+        96
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TIQUINA_HD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TIQUINA_HD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TIQUINA_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CHUA_HD_1_2PAX_2026",
+      "rows": [
+        97,
+        98,
+        99
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CHUA_HD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CHUA_HD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_CHUA_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HUATAJATA_HD_1_2PAX_2026",
+      "rows": [
+        100,
+        101,
+        102
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HUATAJATA_HD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HUATAJATA_HD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HUATAJATA_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HUATAJATA_FD_1_2PAX_2026",
+      "rows": [
+        103,
+        104,
+        105
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HUATAJATA_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HUATAJATA_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HUATAJATA_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_DESAGUADERO_1_2PAX_2026",
+      "rows": [
+        106,
+        107,
+        108
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_DESAGUADERO_1_2PAX_2026",
+        "TRF_ALVARO_LPB_DESAGUADERO_3_6PAX_2026",
+        "TRF_ALVARO_LPB_DESAGUADERO_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_DESAGUADERO_TIWANAKU_FD_1_2PAX_2026",
+      "rows": [
+        109,
+        110,
+        111
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_DESAGUADERO_TIWANAKU_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_DESAGUADERO_TIWANAKU_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_DESAGUADERO_TIWANAKU_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TIWANAKU_HD_1_2PAX_2026",
+      "rows": [
+        112,
+        113,
+        114
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TIWANAKU_HD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_HD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_HD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TIWANAKU_FD_1_2PAX_2026",
+      "rows": [
+        115,
+        116,
+        117
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TIWANAKU_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TIWANAKU_HUATAJATA_1_2PAX_2026",
+      "rows": [
+        118,
+        119,
+        120
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TIWANAKU_HUATAJATA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_HUATAJATA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TIWANAKU_HUATAJATA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_PALCA_FD_1_2PAX_2026",
+      "rows": [
+        121,
+        122,
+        123
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_PALCA_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_PALCA_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_PALCA_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_SORATA_1_2PAX_2026",
+      "rows": [
+        124,
+        125,
+        126
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_SORATA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_SORATA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_SORATA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_COROICO_FD_1_2PAX_2026",
+      "rows": [
+        127,
+        128,
+        129
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_COROICO_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_COROICO_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_COROICO_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CUMBRE_1_2PAX_2026",
+      "rows": [
+        130,
+        131,
+        132
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CUMBRE_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CUMBRE_3_6PAX_2026",
+        "TRF_ALVARO_LPB_CUMBRE_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_HUAYNA_POTOSI_1_2PAX_2026",
+      "rows": [
+        133,
+        134,
+        135
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_HUAYNA_POTOSI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_HUAYNA_POTOSI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_HUAYNA_POTOSI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CHACALTAYA_1_2PAX_2026",
+      "rows": [
+        136,
+        137,
+        138
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CHACALTAYA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CHACALTAYA_3_6PAX_2026",
+        "TRF_ALVARO_LPB_CHACALTAYA_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CHARQUINI_1_2PAX_2026",
+      "rows": [
+        139,
+        140,
+        141
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CHARQUINI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CHARQUINI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_CHARQUINI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CONDORIRI_1_2PAX_2026",
+      "rows": [
+        142,
+        143,
+        144
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CONDORIRI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CONDORIRI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_CONDORIRI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_SAJAMA_TOMARAPI_1_2PAX_2026",
+      "rows": [
+        145,
+        146,
+        147
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_SAJAMA_TOMARAPI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_SAJAMA_TOMARAPI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_SAJAMA_TOMARAPI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "PKG_ALVARO_LPB_SAJAMA_2D_1_2PAX_2026",
+      "rows": [
+        148,
+        149,
+        150
+      ],
+      "aliases": [
+        "PKG_ALVARO_LPB_SAJAMA_2D_1_2PAX_2026",
+        "PKG_ALVARO_LPB_SAJAMA_2D_3_6PAX_2026",
+        "PKG_ALVARO_LPB_SAJAMA_2D_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_TAMBO_QUEMADO_FD_1_2PAX_2026",
+      "rows": [
+        151,
+        152,
+        153
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_TAMBO_QUEMADO_FD_1_2PAX_2026",
+        "TRF_ALVARO_LPB_TAMBO_QUEMADO_FD_3_6PAX_2026",
+        "TRF_ALVARO_LPB_TAMBO_QUEMADO_FD_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_ORURO_1_2PAX_2026",
+      "rows": [
+        154,
+        155,
+        156
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_ORURO_1_2PAX_2026",
+        "TRF_ALVARO_LPB_ORURO_3_6PAX_2026",
+        "TRF_ALVARO_LPB_ORURO_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_UYUNI_1_2PAX_2026",
+      "rows": [
+        157,
+        158,
+        159
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_UYUNI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_UYUNI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_UYUNI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "PKG_ALVARO_LPB_UYUNI_RT_2WAIT_1_2PAX_2026",
+      "rows": [
+        160,
+        161,
+        162
+      ],
+      "aliases": [
+        "PKG_ALVARO_LPB_UYUNI_RT_2WAIT_1_2PAX_2026",
+        "PKG_ALVARO_LPB_UYUNI_RT_2WAIT_3_6PAX_2026",
+        "PKG_ALVARO_LPB_UYUNI_RT_2WAIT_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_POTOSI_1_2PAX_2026",
+      "rows": [
+        163,
+        164,
+        165
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_POTOSI_1_2PAX_2026",
+        "TRF_ALVARO_LPB_POTOSI_3_6PAX_2026",
+        "TRF_ALVARO_LPB_POTOSI_7_9PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_ALVARO_LPB_CBBA_1_2PAX_2026",
+      "rows": [
+        166,
+        167
+      ],
+      "aliases": [
+        "TRF_ALVARO_LPB_CBBA_1_2PAX_2026",
+        "TRF_ALVARO_LPB_CBBA_3_6PAX_2026"
+      ]
+    },
+    {
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX1_2026",
+      "rows": [
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244
+      ],
+      "aliases": [
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX1_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX2_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX3_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX4_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX5_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX6_2026",
+        "PKG_EVT_CBB_TOROTORO_2D1N_PAX8_2026"
+      ]
+    },
+    {
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX1_2026",
+      "rows": [
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
+      ],
+      "aliases": [
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX1_2026",
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX2_2026",
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX3_2026",
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX4_2026",
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX5_2026",
+        "PKG_EVT_CBB_TOROTORO_3D1N_PAX6_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_CERRO_TOCO_1PAX_2026",
+      "rows": [
+        268,
+        269
+      ],
+      "aliases": [
+        "TOUR_SPA_CERRO_TOCO_1PAX_2026",
+        "TOUR_SPA_CERRO_TOCO_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_LASCAR_1PAX_2026",
+      "rows": [
+        271,
+        272
+      ],
+      "aliases": [
+        "TOUR_SPA_LASCAR_1PAX_2026",
+        "TOUR_SPA_LASCAR_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_SAUCE_1PAX_2026",
+      "rows": [
+        274,
+        275
+      ],
+      "aliases": [
+        "TOUR_SPA_SAUCE_1PAX_2026",
+        "TOUR_SPA_SAUCE_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_SIRECABUR_1PAX_2026",
+      "rows": [
+        277,
+        278
+      ],
+      "aliases": [
+        "TOUR_SPA_SIRECABUR_1PAX_2026",
+        "TOUR_SPA_SIRECABUR_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_LICANCABUR_1PAX_2026",
+      "rows": [
+        280,
+        281
+      ],
+      "aliases": [
+        "TOUR_SPA_LICANCABUR_1PAX_2026",
+        "TOUR_SPA_LICANCABUR_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_TOCO_DH_1PAX_2026",
+      "rows": [
+        283,
+        284
+      ],
+      "aliases": [
+        "TOUR_SPA_TOCO_DH_1PAX_2026",
+        "TOUR_SPA_TOCO_DH_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_CATARPE_MTB_1PAX_2026",
+      "rows": [
+        286,
+        287
+      ],
+      "aliases": [
+        "TOUR_SPA_CATARPE_MTB_1PAX_2026",
+        "TOUR_SPA_CATARPE_MTB_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_SPA_CANYONING_1PAX_2026",
+      "rows": [
+        289,
+        290
+      ],
+      "aliases": [
+        "TOUR_SPA_CANYONING_1PAX_2026",
+        "TOUR_SPA_CANYONING_2PAX_2026"
+      ]
+    },
+    {
+      "sku": "GUIDE_MOUNTAIN_UTURUNKU_GRP_1_6_2026",
+      "rows": [
+        293,
+        294
+      ],
+      "aliases": [
+        "GUIDE_MOUNTAIN_UTURUNKU_GRP_1_6_2026",
+        "GUIDE_MOUNTAIN_UTURUNKU_GRP_7_12_2026"
+      ]
+    },
+    {
+      "sku": "GUIDE_MOUNTAIN_TUNUPA_GRP_1_6_2026",
+      "rows": [
+        295,
+        296
+      ],
+      "aliases": [
+        "GUIDE_MOUNTAIN_TUNUPA_GRP_1_6_2026",
+        "GUIDE_MOUNTAIN_TUNUPA_GRP_7_12_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_DESBAS_1_2_2026",
+      "rows": [
+        345,
+        346,
+        347,
+        348
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_DESBAS_1_2_2026",
+        "FNB_SPA_LASCAR_DESBAS_3_5_2026",
+        "FNB_SPA_LASCAR_DESBAS_6_9_2026",
+        "FNB_SPA_LASCAR_DESBAS_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_DESPREM_1_2_2026",
+      "rows": [
+        349,
+        350,
+        351,
+        352
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_DESPREM_1_2_2026",
+        "FNB_SPA_LASCAR_DESPREM_3_5_2026",
+        "FNB_SPA_LASCAR_DESPREM_6_9_2026",
+        "FNB_SPA_LASCAR_DESPREM_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_DESVIP_1_2_2026",
+      "rows": [
+        353,
+        354,
+        355,
+        356
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_DESVIP_1_2_2026",
+        "FNB_SPA_LASCAR_DESVIP_3_5_2026",
+        "FNB_SPA_LASCAR_DESVIP_6_9_2026",
+        "FNB_SPA_LASCAR_DESVIP_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_ALMBAS_1_2_2026",
+      "rows": [
+        357,
+        358,
+        359,
+        360
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_ALMBAS_1_2_2026",
+        "FNB_SPA_LASCAR_ALMBAS_3_5_2026",
+        "FNB_SPA_LASCAR_ALMBAS_6_9_2026",
+        "FNB_SPA_LASCAR_ALMBAS_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_ALMVIP_1_2_2026",
+      "rows": [
+        363,
+        364,
+        365,
+        366
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_ALMVIP_1_2_2026",
+        "FNB_SPA_LASCAR_ALMVIP_3_5_2026",
+        "FNB_SPA_LASCAR_ALMVIP_6_9_2026",
+        "FNB_SPA_LASCAR_ALMVIP_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_WRAPFAJ_1_2_2026",
+      "rows": [
+        367,
+        368,
+        369,
+        370
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_WRAPFAJ_1_2_2026",
+        "FNB_SPA_LASCAR_WRAPFAJ_3_5_2026",
+        "FNB_SPA_LASCAR_WRAPFAJ_6_9_2026",
+        "FNB_SPA_LASCAR_WRAPFAJ_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_OP1_1_2_2026",
+      "rows": [
+        371,
+        372,
+        373
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_OP1_1_2_2026",
+        "FNB_SPA_LASCAR_OP1_3_5_2026",
+        "FNB_SPA_LASCAR_OP1_6_9_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_FINE_1_2_2026",
+      "rows": [
+        374,
+        375,
+        376
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_FINE_1_2_2026",
+        "FNB_SPA_LASCAR_FINE_3_5_2026",
+        "FNB_SPA_LASCAR_FINE_6_9_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_COCKB_1_2_2026",
+      "rows": [
+        377,
+        378,
+        379,
+        380
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_COCKB_1_2_2026",
+        "FNB_SPA_LASCAR_COCKB_3_5_2026",
+        "FNB_SPA_LASCAR_COCKB_6_9_2026",
+        "FNB_SPA_LASCAR_COCKB_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_COCKS_1_2_2026",
+      "rows": [
+        381,
+        382,
+        383,
+        384
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_COCKS_1_2_2026",
+        "FNB_SPA_LASCAR_COCKS_3_5_2026",
+        "FNB_SPA_LASCAR_COCKS_6_9_2026",
+        "FNB_SPA_LASCAR_COCKS_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_DEGUST_1_2_2026",
+      "rows": [
+        385,
+        386,
+        387,
+        388
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_DEGUST_1_2_2026",
+        "FNB_SPA_LASCAR_DEGUST_3_5_2026",
+        "FNB_SPA_LASCAR_DEGUST_6_9_2026",
+        "FNB_SPA_LASCAR_DEGUST_10P_2026"
+      ]
+    },
+    {
+      "sku": "FNB_SPA_LASCAR_AGUA_1_2_2026",
+      "rows": [
+        389,
+        390,
+        391,
+        392
+      ],
+      "aliases": [
+        "FNB_SPA_LASCAR_AGUA_1_2_2026",
+        "FNB_SPA_LASCAR_AGUA_3_5_2026",
+        "FNB_SPA_LASCAR_AGUA_6_9_2026",
+        "FNB_SPA_LASCAR_AGUA_10P_2026"
+      ]
+    },
+    {
+      "sku": "GUIDE_SPA_LASKAR_HD_ESEN_12",
+      "rows": [
+        428,
+        429,
+        430
+      ],
+      "aliases": [
+        "GUIDE_SPA_LASKAR_HD_ESEN_12",
+        "GUIDE_SPA_LASKAR_HD_ESEN_39",
+        "GUIDE_SPA_LASKAR_HD_ESEN_1015"
+      ]
+    },
+    {
+      "sku": "GUIDE_SPA_LASKAR_TR_ESEN_12",
+      "rows": [
+        431,
+        432,
+        433
+      ],
+      "aliases": [
+        "GUIDE_SPA_LASKAR_TR_ESEN_12",
+        "GUIDE_SPA_LASKAR_TR_ESEN_39",
+        "GUIDE_SPA_LASKAR_TR_ESEN_1015"
+      ]
+    },
+    {
+      "sku": "GUIDE_SPA_LASKAR_FD_ESEN_12",
+      "rows": [
+        434,
+        435,
+        436
+      ],
+      "aliases": [
+        "GUIDE_SPA_LASKAR_FD_ESEN_12",
+        "GUIDE_SPA_LASKAR_FD_ESEN_39",
+        "GUIDE_SPA_LASKAR_FD_ESEN_1015"
+      ]
+    },
+    {
+      "sku": "GUIDE_SPA_LASKAR_FDP_ESEN_12",
+      "rows": [
+        437,
+        438,
+        439
+      ],
+      "aliases": [
+        "GUIDE_SPA_LASKAR_FDP_ESEN_12",
+        "GUIDE_SPA_LASKAR_FDP_ESEN_39",
+        "GUIDE_SPA_LASKAR_FDP_ESEN_1015"
+      ]
+    },
+    {
+      "sku": "GUIDE_SPA_LASKAR_ADD_ESEN_12",
+      "rows": [
+        440,
+        441,
+        442
+      ],
+      "aliases": [
+        "GUIDE_SPA_LASKAR_ADD_ESEN_12",
+        "GUIDE_SPA_LASKAR_ADD_ESEN_39",
+        "GUIDE_SPA_LASKAR_ADD_ESEN_1015"
+      ]
+    },
+    {
+      "sku": "LH_APT_1P",
+      "rows": [
+        510,
+        511,
+        512,
+        513,
+        514,
+        515
+      ],
+      "aliases": [
+        "LH_APT_1P",
+        "LH_APT_2P",
+        "LH_APT_3_6",
+        "LH_APT_7_10",
+        "LH_APT_11_15",
+        "LH_APT_16P"
+      ]
+    },
+    {
+      "sku": "LH_BUS_1P",
+      "rows": [
+        516,
+        517,
+        518,
+        519,
+        520,
+        521
+      ],
+      "aliases": [
+        "LH_BUS_1P",
+        "LH_BUS_2P",
+        "LH_BUS_3_6",
+        "LH_BUS_7_10",
+        "LH_BUS_11_15",
+        "LH_BUS_16P"
+      ]
+    },
+    {
+      "sku": "LH_SRE_POT_1P",
+      "rows": [
+        522,
+        523,
+        524,
+        525,
+        526,
+        527
+      ],
+      "aliases": [
+        "LH_SRE_POT_1P",
+        "LH_SRE_POT_2P",
+        "LH_SRE_POT_3_6",
+        "LH_SRE_POT_7_10",
+        "LH_SRE_POT_11_15",
+        "LH_SRE_POT_16P"
+      ]
+    },
+    {
+      "sku": "LH_SRE_UYU_1P",
+      "rows": [
+        529,
+        530,
+        531,
+        532,
+        533,
+        534
+      ],
+      "aliases": [
+        "LH_SRE_UYU_1P",
+        "LH_SRE_UYU_2P",
+        "LH_SRE_UYU_3_6",
+        "LH_SRE_UYU_7_10",
+        "LH_SRE_UYU_11_15",
+        "LH_SRE_UYU_16P"
+      ]
+    },
+    {
+      "sku": "LH_CT_HD_1P",
+      "rows": [
+        536,
+        537,
+        538,
+        539,
+        540,
+        541
+      ],
+      "aliases": [
+        "LH_CT_HD_1P",
+        "LH_CT_HD_2P",
+        "LH_CT_HD_3_6",
+        "LH_CT_HD_7_10",
+        "LH_CT_HD_11_15",
+        "LH_CT_HD_16P"
+      ]
+    },
+    {
+      "sku": "LH_CT_FD_1P",
+      "rows": [
+        542,
+        543,
+        544,
+        545,
+        546,
+        547
+      ],
+      "aliases": [
+        "LH_CT_FD_1P",
+        "LH_CT_FD_2P",
+        "LH_CT_FD_3_6",
+        "LH_CT_FD_7_10",
+        "LH_CT_FD_11_15",
+        "LH_CT_FD_16P"
+      ]
+    },
+    {
+      "sku": "LH_PC_HD_1P",
+      "rows": [
+        548,
+        549,
+        550,
+        551,
+        552,
+        553
+      ],
+      "aliases": [
+        "LH_PC_HD_1P",
+        "LH_PC_HD_2P",
+        "LH_PC_HD_3_6",
+        "LH_PC_HD_7_10",
+        "LH_PC_HD_11_15",
+        "LH_PC_HD_16P"
+      ]
+    },
+    {
+      "sku": "LH_TRF_TBD_1P",
+      "rows": [
+        554,
+        555,
+        556,
+        557,
+        558,
+        559
+      ],
+      "aliases": [
+        "LH_TRF_TBD_1P",
+        "LH_TRF_TBD_2P",
+        "LH_TRF_TBD_3_6",
+        "LH_TRF_TBD_7_10",
+        "LH_TRF_TBD_11_15",
+        "LH_TRF_TBD_16P"
+      ]
+    },
+    {
+      "sku": "LH_TRF_PS_1P",
+      "rows": [
+        560,
+        561,
+        562,
+        563,
+        564,
+        565
+      ],
+      "aliases": [
+        "LH_TRF_PS_1P",
+        "LH_TRF_PS_2P",
+        "LH_TRF_PS_3_6",
+        "LH_TRF_PS_7_10",
+        "LH_TRF_PS_11_15",
+        "LH_TRF_PS_16P"
+      ]
+    },
+    {
+      "sku": "LH_TRF_PU_1P",
+      "rows": [
+        566,
+        567,
+        568,
+        569,
+        570,
+        571
+      ],
+      "aliases": [
+        "LH_TRF_PU_1P",
+        "LH_TRF_PU_2P",
+        "LH_TRF_PU_3_6",
+        "LH_TRF_PU_7_10",
+        "LH_TRF_PU_11_15",
+        "LH_TRF_PU_16P"
+      ]
+    },
+    {
+      "sku": "LH_MINA_1P",
+      "rows": [
+        572,
+        573,
+        574,
+        575,
+        576,
+        577
+      ],
+      "aliases": [
+        "LH_MINA_1P",
+        "LH_MINA_2P",
+        "LH_MINA_3_6",
+        "LH_MINA_7_10",
+        "LH_MINA_11_15",
+        "LH_MINA_16P"
+      ]
+    },
+    {
+      "sku": "LH_KK_1P",
+      "rows": [
+        578,
+        579,
+        580,
+        581,
+        582,
+        583
+      ],
+      "aliases": [
+        "LH_KK_1P",
+        "LH_KK_2P",
+        "LH_KK_3P",
+        "LH_KK_4P",
+        "LH_KK_5P",
+        "LH_KK_6P"
+      ]
+    },
+    {
+      "sku": "LH_CTCHD_1P",
+      "rows": [
+        584,
+        585,
+        586,
+        587,
+        588,
+        589
+      ],
+      "aliases": [
+        "LH_CTCHD_1P",
+        "LH_CTCHD_2P",
+        "LH_CTCHD_3_6",
+        "LH_CTCHD_7_10",
+        "LH_CTCHD_11_15",
+        "LH_CTCHD_16P"
+      ]
+    },
+    {
+      "sku": "LH_CTPFD_1P",
+      "rows": [
+        590,
+        591,
+        592,
+        593,
+        594,
+        595
+      ],
+      "aliases": [
+        "LH_CTPFD_1P",
+        "LH_CTPFD_2P",
+        "LH_CTPFD_3_6",
+        "LH_CTPFD_7_10",
+        "LH_CTPFD_11_15",
+        "LH_CTPFD_16P"
+      ]
+    },
+    {
+      "sku": "TRF_MAS_AIRPORT_SPR_5_9",
+      "rows": [
+        650,
+        651
+      ],
+      "aliases": [
+        "TRF_MAS_AIRPORT_SPR_5_9",
+        "TRF_MAS_AIRPORT_SPR_10_14"
+      ]
+    },
+    {
+      "sku": "TRF_MAS_HITO_SPR_5_9",
+      "rows": [
+        653,
+        654
+      ],
+      "aliases": [
+        "TRF_MAS_HITO_SPR_5_9",
+        "TRF_MAS_HITO_SPR_10_14"
+      ]
+    },
+    {
+      "sku": "UTURUNKU_GUIA_1_6",
+      "rows": [
+        929,
+        930
+      ],
+      "aliases": [
+        "UTURUNKU_GUIA_1_6",
+        "UTURUNKU_GUIA_6_12"
+      ]
+    },
+    {
+      "sku": "TUNUPA_GUIA_1_6",
+      "rows": [
+        931,
+        932
+      ],
+      "aliases": [
+        "TUNUPA_GUIA_1_6",
+        "TUNUPA_GUIA_6_12"
+      ]
+    },
+    {
+      "sku": "TT_CBB_2D1N_1P",
+      "rows": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007
+      ],
+      "aliases": [
+        "TT_CBB_2D1N_1P",
+        "TT_CBB_2D1N_2P",
+        "TT_CBB_2D1N_3P",
+        "TT_CBB_2D1N_4P",
+        "TT_CBB_2D1N_5P",
+        "TT_CBB_2D1N_6P",
+        "TT_CBB_2D1N_8P"
+      ]
+    },
+    {
+      "sku": "TT_CBB_3D1N_1P",
+      "rows": [
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013
+      ],
+      "aliases": [
+        "TT_CBB_3D1N_1P",
+        "TT_CBB_3D1N_2P",
+        "TT_CBB_3D1N_3P",
+        "TT_CBB_3D1N_4P",
+        "TT_CBB_3D1N_5P",
+        "TT_CBB_3D1N_6P"
+      ]
+    },
+    {
+      "sku": "PP_ISL_SUR_1_5",
+      "rows": [
+        1014,
+        1015,
+        1016,
+        1017,
+        1018
+      ],
+      "aliases": [
+        "PP_ISL_SUR_1_5",
+        "PP_ISL_SUR_6_10",
+        "PP_ISL_SUR_11_15",
+        "PP_ISL_SUR_16_20",
+        "PP_ISL_SUR_21_35"
+      ]
+    },
+    {
+      "sku": "PP_ISL_LUNA_1_5",
+      "rows": [
+        1019,
+        1020,
+        1021,
+        1022,
+        1023
+      ],
+      "aliases": [
+        "PP_ISL_LUNA_1_5",
+        "PP_ISL_LUNA_6_10",
+        "PP_ISL_LUNA_11_15",
+        "PP_ISL_LUNA_16_20",
+        "PP_ISL_LUNA_21_35"
+      ]
+    },
+    {
+      "sku": "PP_ISL_FULL_1_5",
+      "rows": [
+        1024,
+        1025,
+        1026,
+        1027,
+        1028
+      ],
+      "aliases": [
+        "PP_ISL_FULL_1_5",
+        "PP_ISL_FULL_6_10",
+        "PP_ISL_FULL_11_15",
+        "PP_ISL_FULL_16_20",
+        "PP_ISL_FULL_21_35"
+      ]
+    },
+    {
+      "sku": "PP_GUIA_1_3",
+      "rows": [
+        1029,
+        1030,
+        1031,
+        1032,
+        1033,
+        1034
+      ],
+      "aliases": [
+        "PP_GUIA_1_3",
+        "PP_GUIA_4_5",
+        "PP_GUIA_6_10",
+        "PP_GUIA_11_15",
+        "PP_GUIA_16_20",
+        "PP_GUIA_21_35"
+      ]
+    },
+    {
+      "sku": "TRF_DIEGO_COLQUE_SPA_AIRPORT_2_4PAX_2026",
+      "rows": [
+        1147,
+        1148,
+        1149
+      ],
+      "aliases": [
+        "TRF_DIEGO_COLQUE_SPA_AIRPORT_2_4PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_AIRPORT_5_9PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_AIRPORT_10_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+      "rows": [
+        1150,
+        1151,
+        1152
+      ],
+      "aliases": [
+        "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_5_9PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_10_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_DIEGO_COLQUE_SPA_ANTOFAGASTA_1_9PAX_2026",
+      "rows": [
+        1154,
+        1155
+      ],
+      "aliases": [
+        "TRF_DIEGO_COLQUE_SPA_ANTOFAGASTA_1_9PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_ANTOFAGASTA_10_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_DIEGO_COLQUE_SPA_OLLAGUE_1_9PAX_2026",
+      "rows": [
+        1156,
+        1157
+      ],
+      "aliases": [
+        "TRF_DIEGO_COLQUE_SPA_OLLAGUE_1_9PAX_2026",
+        "TRF_DIEGO_COLQUE_SPA_OLLAGUE_10_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_VALLE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+      "rows": [
+        1158,
+        1159,
+        1160
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_VALLE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLE_ARCOIRIS_HIERBAS_BUENAS_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLE_ARCOIRIS_HIERBAS_BUENAS_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_ARQUEOLOGICO_TULOR_CATARPE_2_4PAX_2026",
+      "rows": [
+        1161,
+        1162,
+        1163
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_ARQUEOLOGICO_TULOR_CATARPE_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_ARQUEOLOGICO_TULOR_CATARPE_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_ARQUEOLOGICO_TULOR_CATARPE_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_CEJAR_OJOS_TEBENQUICHE_2_4PAX_2026",
+      "rows": [
+        1164,
+        1165,
+        1166
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_CEJAR_OJOS_TEBENQUICHE_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_CEJAR_OJOS_TEBENQUICHE_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_CEJAR_OJOS_TEBENQUICHE_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_SALAR_ATACAMA_TOCONAO_2_4PAX_2026",
+      "rows": [
+        1167,
+        1168,
+        1169
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_SALAR_ATACAMA_TOCONAO_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_SALAR_ATACAMA_TOCONAO_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_SALAR_ATACAMA_TOCONAO_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_FOTOGRAFICO_DIURNO_NOCTURNO_1_9PAX_2026",
+      "rows": [
+        1170,
+        1171
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_FOTOGRAFICO_DIURNO_NOCTURNO_1_9PAX_2026",
+        "TOUR_DIEGO_COLQUE_FOTOGRAFICO_DIURNO_NOCTURNO_10_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_TREKKING_GUATIN_2_4PAX_2026",
+      "rows": [
+        1172,
+        1173,
+        1174
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_TREKKING_GUATIN_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_TREKKING_GUATIN_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_TREKKING_GUATIN_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_VALLE_LUNA_KARI_2_4PAX_2026",
+      "rows": [
+        1175,
+        1176,
+        1177
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_VALLE_LUNA_KARI_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLE_LUNA_KARI_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLE_LUNA_KARI_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_VALLECITO_2_4PAX_2026",
+      "rows": [
+        1178,
+        1179,
+        1180
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_VALLECITO_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLECITO_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_VALLECITO_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_TERMAS_PURITAMA_2_4PAX_2026",
+      "rows": [
+        1181,
+        1182,
+        1183
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_TERMAS_PURITAMA_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_TERMAS_PURITAMA_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_TERMAS_PURITAMA_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_RIO_GRANDE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+      "rows": [
+        1184,
+        1185,
+        1186
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_RIO_GRANDE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_RIO_GRANDE_ARCOIRIS_HIERBAS_BUENAS_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_RIO_GRANDE_ARCOIRIS_HIERBAS_BUENAS_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_SALAR_ALTIPLANICAS_TOCONAO_SOCAIRE_2_4PAX_2026",
+      "rows": [
+        1187,
+        1188,
+        1189
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_SALAR_ALTIPLANICAS_TOCONAO_SOCAIRE_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_SALAR_ALTIPLANICAS_TOCONAO_SOCAIRE_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_SALAR_ALTIPLANICAS_TOCONAO_SOCAIRE_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_GEISER_TATIO_MACHUCA_2_4PAX_2026",
+      "rows": [
+        1190,
+        1191,
+        1192
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_GEISER_TATIO_MACHUCA_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_GEISER_TATIO_MACHUCA_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_GEISER_TATIO_MACHUCA_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_TATIO_PUEBLOS_ANDINOS_AIRPORT_2_8PAX_2026",
+      "rows": [
+        1193,
+        1194
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_TATIO_PUEBLOS_ANDINOS_AIRPORT_2_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_TATIO_PUEBLOS_ANDINOS_AIRPORT_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TOUR_DIEGO_COLQUE_TUJACTU_ALTIPLANICAS_SALAR_PIEDRAS_ROJAS_2_4PAX_2026",
+      "rows": [
+        1195,
+        1196,
+        1197
+      ],
+      "aliases": [
+        "TOUR_DIEGO_COLQUE_TUJACTU_ALTIPLANICAS_SALAR_PIEDRAS_ROJAS_2_4PAX_2026",
+        "TOUR_DIEGO_COLQUE_TUJACTU_ALTIPLANICAS_SALAR_PIEDRAS_ROJAS_5_8PAX_2026",
+        "TOUR_DIEGO_COLQUE_TUJACTU_ALTIPLANICAS_SALAR_PIEDRAS_ROJAS_9_16PAX_2026"
+      ]
+    },
+    {
+      "sku": "TRF_TRANSFERTURISMO_LEONARDO_HOTEL_SCL_AIRPORT_10_12PAX_2026",
+      "rows": [
+        1202,
+        1203
+      ],
+      "aliases": [
+        "TRF_TRANSFERTURISMO_LEONARDO_HOTEL_SCL_AIRPORT_10_12PAX_2026",
+        "TRF_TRANSFERTURISMO_LEONARDO_HOTEL_SCL_AIRPORT_14_16PAX_2026"
+      ]
+    }
+  ],
+  "review": [
+    {
+      "row": 175,
+      "sku": "HTL_BA_UYUNI_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 176,
+      "sku": "HTL_BA_UYUNI_TWN_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 177,
+      "sku": "HTL_BA_UYUNI_DBL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 178,
+      "sku": "HTL_BA_UYUNI_SUITE_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 180,
+      "sku": "MEAL_BA_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 181,
+      "sku": "MEAL_BA_BREAKFAST_EXTRA_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 182,
+      "sku": "TRF_SPA_HITO_CAJON_CLP",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 184,
+      "sku": "HTL_CP_SCZ_TRP_STD_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 190,
+      "sku": "MEAL_PP_COPACABANA_LUNCH_PP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 201,
+      "sku": "HTL_COSC_UYUNI_SGL_STD_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 202,
+      "sku": "HTL_COSC_UYUNI_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 203,
+      "sku": "HTL_COSC_UYUNI_DBL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 204,
+      "sku": "HTL_COSC_UYUNI_FAM4_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 205,
+      "sku": "HTL_COSC_UYUNI_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 239,
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX2_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 240,
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX3_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 241,
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX4_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 242,
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX5_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 243,
+      "sku": "PKG_EVT_CBB_TOROTORO_2D1N_PAX6_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 245,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX1_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 246,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX2_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 247,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX3_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 248,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX4_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 249,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX5_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 250,
+      "sku": "PKG_EVT_CBB_TOROTORO_3D1N_PAX6_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 252,
+      "sku": "BUS_UYU_LPZ",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 253,
+      "sku": "BUS_UYU_SUCRE",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 254,
+      "sku": "BUS_UYU_POT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 255,
+      "sku": "BUS_UYU_SCZ",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 256,
+      "sku": "BUS_UYU_CBB",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 297,
+      "sku": "HTL_HQ_QUETENA_SGL_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 299,
+      "sku": "HTL_HQ_QUETENA_TRP_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 300,
+      "sku": "HTL_HQ_QUETENA_SGL_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 303,
+      "sku": "HTL_HV_VILLAMAR_SGL_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 305,
+      "sku": "HTL_HV_VILLAMAR_TRP_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 306,
+      "sku": "HTL_HV_VILLAMAR_SGL_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 307,
+      "sku": "HTL_HV_VILLAMAR_DBL_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 308,
+      "sku": "HTL_HV_VILLAMAR_TRP_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 309,
+      "sku": "HTL_SPA_COPART_DBL_2026",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 310,
+      "sku": "HTL_SPA_COPART_TRP_2026",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 311,
+      "sku": "HTL_SPA_COPART_QDP_2026",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 312,
+      "sku": "HTL_HSUCRE_SGL_BOB_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 314,
+      "sku": "HTL_HSUCRE_DBL_MAT_BOB_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 315,
+      "sku": "HTL_HSUCRE_TRP_BOB_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 320,
+      "sku": "HTL_JDU_UYUNI_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 321,
+      "sku": "HTL_JDU_UYUNI_DBLMAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 322,
+      "sku": "HTL_JDU_UYUNI_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 326,
+      "sku": "EARLY_JDU_UYUNI_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 329,
+      "sku": "LATE_JDU_UYUNI_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 332,
+      "sku": "MEAL_JDU_DINNER_PP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 333,
+      "sku": "HTL_KACHI_UYUNI_SGL_STD_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 335,
+      "sku": "HTL_KACHI_UYUNI_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 336,
+      "sku": "HTL_KACHI_UYUNI_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 337,
+      "sku": "HTL_KACHI_UYUNI_SUITE_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 338,
+      "sku": "HTL_KACHI_UYUNI_SUITE_FAM_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 339,
+      "sku": "HTL_KACHI_UYUNI_QUAD_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 341,
+      "sku": "MEAL_KACHI_MEAL_PP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 343,
+      "sku": "MEAL_PIEDRITAS_DINNER_PP_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 344,
+      "sku": "MEAL_PIEDRITAS_BREAKFAST_PP_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 371,
+      "sku": "FNB_SPA_LASCAR_OP1_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 372,
+      "sku": "FNB_SPA_LASCAR_OP1_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 373,
+      "sku": "FNB_SPA_LASCAR_OP1_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 374,
+      "sku": "FNB_SPA_LASCAR_FINE_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 375,
+      "sku": "FNB_SPA_LASCAR_FINE_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 376,
+      "sku": "FNB_SPA_LASCAR_FINE_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 377,
+      "sku": "FNB_SPA_LASCAR_COCKB_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 378,
+      "sku": "FNB_SPA_LASCAR_COCKB_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 379,
+      "sku": "FNB_SPA_LASCAR_COCKB_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 380,
+      "sku": "FNB_SPA_LASCAR_COCKB_10P_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 381,
+      "sku": "FNB_SPA_LASCAR_COCKS_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 382,
+      "sku": "FNB_SPA_LASCAR_COCKS_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 383,
+      "sku": "FNB_SPA_LASCAR_COCKS_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 384,
+      "sku": "FNB_SPA_LASCAR_COCKS_10P_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 385,
+      "sku": "FNB_SPA_LASCAR_DEGUST_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 386,
+      "sku": "FNB_SPA_LASCAR_DEGUST_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 387,
+      "sku": "FNB_SPA_LASCAR_DEGUST_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 388,
+      "sku": "FNB_SPA_LASCAR_DEGUST_10P_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 389,
+      "sku": "FNB_SPA_LASCAR_AGUA_1_2_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 390,
+      "sku": "FNB_SPA_LASCAR_AGUA_3_5_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 391,
+      "sku": "FNB_SPA_LASCAR_AGUA_6_9_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 392,
+      "sku": "FNB_SPA_LASCAR_AGUA_10P_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 464,
+      "sku": "FNB_UYU_LEO_BUFFET_APTHAPI",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 479,
+      "sku": "IMPORT_REVIEW_0479",
+      "issues": "sin_codigo;unidad_desconocida"
+    },
+    {
+      "row": 480,
+      "sku": "IMPORT_REVIEW_0480",
+      "issues": "sin_codigo;unidad_desconocida"
+    },
+    {
+      "row": 481,
+      "sku": "LH_UYU_TQ",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 482,
+      "sku": "TRF_UYU_LEO_FULLDAY_UYU_HITO",
+      "issues": "sin_precio"
+    },
+    {
+      "row": 483,
+      "sku": "TRF_UYU_LEO_UYUVILLAZON",
+      "issues": "sin_precio"
+    },
+    {
+      "row": 493,
+      "sku": "TRF_UYU_LEO_COL_APT",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 510,
+      "sku": "LH_APT_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 511,
+      "sku": "LH_APT_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 512,
+      "sku": "LH_APT_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 513,
+      "sku": "LH_APT_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 514,
+      "sku": "LH_APT_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 515,
+      "sku": "LH_APT_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 516,
+      "sku": "LH_BUS_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 517,
+      "sku": "LH_BUS_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 518,
+      "sku": "LH_BUS_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 519,
+      "sku": "LH_BUS_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 520,
+      "sku": "LH_BUS_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 521,
+      "sku": "LH_BUS_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 522,
+      "sku": "LH_SRE_POT_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 523,
+      "sku": "LH_SRE_POT_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 524,
+      "sku": "LH_SRE_POT_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 525,
+      "sku": "LH_SRE_POT_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 526,
+      "sku": "LH_SRE_POT_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 527,
+      "sku": "LH_SRE_POT_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 528,
+      "sku": "LH_BUS_POT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 529,
+      "sku": "LH_SRE_UYU_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 530,
+      "sku": "LH_SRE_UYU_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 531,
+      "sku": "LH_SRE_UYU_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 532,
+      "sku": "LH_SRE_UYU_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 533,
+      "sku": "LH_SRE_UYU_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 534,
+      "sku": "LH_SRE_UYU_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 535,
+      "sku": "LH_BUS_UYU",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 536,
+      "sku": "LH_CT_HD_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 537,
+      "sku": "LH_CT_HD_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 538,
+      "sku": "LH_CT_HD_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 539,
+      "sku": "LH_CT_HD_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 540,
+      "sku": "LH_CT_HD_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 541,
+      "sku": "LH_CT_HD_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 542,
+      "sku": "LH_CT_FD_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 543,
+      "sku": "LH_CT_FD_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 544,
+      "sku": "LH_CT_FD_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 545,
+      "sku": "LH_CT_FD_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 546,
+      "sku": "LH_CT_FD_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 547,
+      "sku": "LH_CT_FD_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 548,
+      "sku": "LH_PC_HD_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 549,
+      "sku": "LH_PC_HD_2P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 550,
+      "sku": "LH_PC_HD_3_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 551,
+      "sku": "LH_PC_HD_7_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 552,
+      "sku": "LH_PC_HD_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 553,
+      "sku": "LH_PC_HD_16P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 604,
+      "sku": "MEAL_LF_DINNER_PP_2026",
+      "issues": "etiqueta_dup;comidas_no_reconocidas"
+    },
+    {
+      "row": 605,
+      "sku": "MEAL_LF_LUNCH_PP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 606,
+      "sku": "MEAL_LF_BREAKFAST_PP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 608,
+      "sku": "HTL_LS_COLCHANI_SGL_STD_NO_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 609,
+      "sku": "HTL_LS_COLCHANI_SGL_STD_SALT_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 610,
+      "sku": "HTL_LS_COLCHANI_TWN_STD_NO_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 611,
+      "sku": "HTL_LS_COLCHANI_TWN_STD_SALT_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 612,
+      "sku": "HTL_LS_COLCHANI_DBL_STD_NO_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 613,
+      "sku": "HTL_LS_COLCHANI_DBL_STD_SALT_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 614,
+      "sku": "HTL_LS_COLCHANI_TRP_STD_NO_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 615,
+      "sku": "HTL_LS_COLCHANI_SUITE_FAM_STD_NO_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 616,
+      "sku": "HTL_LS_COLCHANI_SUITE_FAM_STD_SALT_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 617,
+      "sku": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SALT_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 618,
+      "sku": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SUNRISE_VIEW_DU_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 631,
+      "sku": "MEAL_LS_BOXLUNCH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 635,
+      "sku": "MEAL_LS_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 640,
+      "sku": "HTL_MALLKU_VILLAMAR_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 641,
+      "sku": "HTL_MALLKU_VILLAMAR_DBL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 642,
+      "sku": "HTL_MALLKU_VILLAMAR_DAYUSE_SGL_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 643,
+      "sku": "HTL_MALLKU_VILLAMAR_DAYUSE_DBL_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 644,
+      "sku": "HTL_MALLKU_VILLAMAR_EARLY_SGL_2026",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 645,
+      "sku": "HTL_MALLKU_VILLAMAR_EARLY_DBL_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 646,
+      "sku": "HTL_MALLKU_VILLAMAR_LATE_SGL_2026",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 647,
+      "sku": "HTL_MALLKU_VILLAMAR_LATE_DBL_2026",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 648,
+      "sku": "MEAL_MALLKU_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 718,
+      "sku": "TRF_UYU_MELVA_COL_APT",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 719,
+      "sku": "TOUR_UYU_MELVA_FD_SH",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 720,
+      "sku": "TOUR_UYU_MELVA_NIGHT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 721,
+      "sku": "TOUR_UYU_MELVA_STARS",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 722,
+      "sku": "TOUR_UYU_MELVA_4D3N_RT_SH1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 723,
+      "sku": "TOUR_UYU_MELVA_4D3N_RT_PR1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 724,
+      "sku": "TOUR_UYU_MELVA_3D2N_OW_SH",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 725,
+      "sku": "TOUR_UYU_MELVA_3D2N_OW_PR",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 726,
+      "sku": "SPA_RT_BC_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 727,
+      "sku": "SPA_RT_BC_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 728,
+      "sku": "SPA_RT_BC_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 729,
+      "sku": "SPA_RT_BC_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 730,
+      "sku": "SPA_RT_BC_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 731,
+      "sku": "SPA_RT_BP_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 732,
+      "sku": "SPA_RT_BP_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 733,
+      "sku": "SPA_RT_BP_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 734,
+      "sku": "SPA_RT_BP_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 735,
+      "sku": "SPA_RT_BP_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 736,
+      "sku": "SPA_OW_BC_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 737,
+      "sku": "SPA_OW_BC_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 738,
+      "sku": "SPA_OW_BC_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 739,
+      "sku": "SPA_OW_BC_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 740,
+      "sku": "SPA_OW_BC_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 741,
+      "sku": "SPA_OW_BP_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 742,
+      "sku": "SPA_OW_BP_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 743,
+      "sku": "SPA_OW_BP_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 744,
+      "sku": "SPA_OW_BP_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 745,
+      "sku": "SPA_OW_BP_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 746,
+      "sku": "TRF_SPA_UYU_MELVA",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 747,
+      "sku": "GUIA_MELVA_INT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 748,
+      "sku": "GUIA_MELVA_DE",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 749,
+      "sku": "HTL_PDS_COLCHANI_DBL_RAIN_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 782,
+      "sku": "MEAL_PDS_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 798,
+      "sku": "TOUR_SPA_PURITAMA_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 799,
+      "sku": "TOUR_SPA_ARCOIRIS_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 800,
+      "sku": "TOUR_SPA_SALARES_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 802,
+      "sku": "TOUR_SPA_TATIO_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 805,
+      "sku": "TOUR_SPA_ASTRO_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 808,
+      "sku": "TRF_SPA_JAMA_H1_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 809,
+      "sku": "TOUR_SPA_SUNSET_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 810,
+      "sku": "TOUR_SPA_JACUZZI_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 811,
+      "sku": "TOUR_SPA_CASCADA_2026",
+      "issues": "etiqueta_dup;sin_precio;comidas_no_reconocidas"
+    },
+    {
+      "row": 826,
+      "sku": "HTL_PPECO_ISLA_DBL_TWN_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 827,
+      "sku": "HTL_PPECO_ISLA_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 828,
+      "sku": "HTL_PPECO_ISLA_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 829,
+      "sku": "HTL_PPECO_ISLA_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 830,
+      "sku": "HTL_PPECO_ISLA_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 837,
+      "sku": "TOUR_UYU_SAJAMA_4D3N",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 838,
+      "sku": "TOUR_UYU_SAJAMA_3D2N",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 839,
+      "sku": "HTL_SAMAY_VILLAMAR_SGL_ROOM_2026_BOB",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 840,
+      "sku": "HTL_SAMAY_VILLAMAR_DBL_MAT_ROOM_2026_BOB",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 842,
+      "sku": "HTL_SAMAY_VILLAMAR_SGL_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 843,
+      "sku": "HTL_SAMAY_VILLAMAR_DBL_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 844,
+      "sku": "HTL_SAMAY_VILLAMAR_TRP_BATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 845,
+      "sku": "HTL_SAMAY_VILLAMAR_SGL_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 846,
+      "sku": "HTL_SAMAY_VILLAMAR_DBL_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 847,
+      "sku": "HTL_SAMAY_VILLAMAR_TRP_NOBATH_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 849,
+      "sku": "MEAL_SAMAY_VILLAMAR_MATE_2026",
+      "issues": "unidad_desconocida"
+    },
+    {
+      "row": 851,
+      "sku": "MEAL_SKYDREAM_BREAKFAST_PP_2026",
+      "issues": "etiqueta_dup;comidas_no_reconocidas"
+    },
+    {
+      "row": 852,
+      "sku": "MEAL_SKYDREAM_DINNER_PP_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 853,
+      "sku": "HTL_TCL_COQUESA_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 854,
+      "sku": "HTL_TCL_COQUESA_TWN_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 855,
+      "sku": "HTL_TCL_COQUESA_DBL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 856,
+      "sku": "HTL_TCL_COQUESA_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 857,
+      "sku": "HTL_TCL_COQUESA_SUITE_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 858,
+      "sku": "HTL_TCL_COQUESA_SUITE_FAM_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 859,
+      "sku": "MEAL_TCL_COQUESA_DINNER_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 860,
+      "sku": "MEAL_TCL_COQUESA_LUNCH_ROUTE_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 861,
+      "sku": "MEAL_TCL_COQUESA_BREAKFAST_EXTRA_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 862,
+      "sku": "HTL_TAYKA_SAL_HAB_SGL",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 863,
+      "sku": "HTL_TAYKA_SAL_HAB_DBL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 864,
+      "sku": "HTL_TAYKA_SAL_HAB_MAT",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 865,
+      "sku": "HTL_TAYKA_SAL_HAB_TPL",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 866,
+      "sku": "HTL_TAYKA_SAL_HAB_QRLP",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 867,
+      "sku": "HTL_TAYKA_SAL_HAB_STAFF",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 868,
+      "sku": "MEAL_TAYKA_SAL_BREAKFAST_ADD",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 869,
+      "sku": "MEAL_TAYKA_SAL_LUNCH",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 870,
+      "sku": "MEAL_TAYKA_SAL_LUNCH_ROUTE",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 871,
+      "sku": "MEAL_TAYKA_SAL_BOX_LUNCH",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 872,
+      "sku": "MEAL_TAYKA_SAL_BOX_DINNER",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 873,
+      "sku": "HTL_TAYKA_DESERT_SGL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 874,
+      "sku": "HTL_TAYKA_DESERT_DBL_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 875,
+      "sku": "HTL_TAYKA_DESERT_TRP_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 876,
+      "sku": "HTL_TAYKA_DESERT_QUAD_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 877,
+      "sku": "HTL_TAYKA_DESERT_MAT_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 882,
+      "sku": "MEAL_TAYKA_DESERT_LUNCH",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 883,
+      "sku": "MEAL_TAYKA_DESERT_ROUTE_LUNCH",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 884,
+      "sku": "MEAL_TAYKA_DESERT_BREAKFAST ADD",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 885,
+      "sku": "MEAL_TAYKA_DESERT_BOX LUNCH",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 886,
+      "sku": "MEAL_TAYKA_DESERT_DINNER",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 899,
+      "sku": "TKT_SPA_ASTRO_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 901,
+      "sku": "TKT_SPA_CASCADA_2026",
+      "issues": "etiqueta_dup;sin_precio"
+    },
+    {
+      "row": 902,
+      "sku": "TKT_SPA_TATIO_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 904,
+      "sku": "TKT_SPA_JACUZZI_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 910,
+      "sku": "TKT_SPA_TUYAJTO_2026",
+      "issues": "sin_precio"
+    },
+    {
+      "row": 917,
+      "sku": "TKT_SPA_PURITAMA_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 918,
+      "sku": "TKT_SPA_SALARES_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 920,
+      "sku": "TKT_SPA_SUNSET_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 922,
+      "sku": "TKT_SPA_TRANSFER_CJC_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 924,
+      "sku": "TKT_SPA_TRANSFER_JAMA_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 928,
+      "sku": "TKT_SPA_ARCOIRIS_2026",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 929,
+      "sku": "UTURUNKU_GUIA_1_6",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 930,
+      "sku": "UTURUNKU_GUIA_6_12",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 931,
+      "sku": "TUNUPA_GUIA_1_6",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 932,
+      "sku": "TUNUPA_GUIA_6_12",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 933,
+      "sku": "ALM_LH_UTU_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 934,
+      "sku": "ALM_LH_UTU_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 935,
+      "sku": "ALM_LH_UTU_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 936,
+      "sku": "ALM_LH_UTU_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 937,
+      "sku": "ALM_LH_UTU_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 938,
+      "sku": "ALM_LH_UTU_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 939,
+      "sku": "ALM_LH_STD_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 940,
+      "sku": "ALM_LH_STD_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 941,
+      "sku": "ALM_LH_STD_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 942,
+      "sku": "ALM_LH_STD_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 943,
+      "sku": "ALM_LH_STD_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 944,
+      "sku": "ALM_LH_STD_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 945,
+      "sku": "ALM_LH_BUF_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 946,
+      "sku": "ALM_LH_BUF_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 947,
+      "sku": "ALM_LH_BUF_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 948,
+      "sku": "ALM_LH_BUF_4",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 949,
+      "sku": "ALM_LH_BUF_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 950,
+      "sku": "ALM_LH_BUF_6",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 951,
+      "sku": "COC_LH_BASIC_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 952,
+      "sku": "COC_LH_BASIC_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 953,
+      "sku": "COC_LH_VIP_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 954,
+      "sku": "COC_LH_VIP_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 955,
+      "sku": "LUNCH_LH_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 956,
+      "sku": "BIKE_LH_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 957,
+      "sku": "BIKE_LH_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 958,
+      "sku": "ROUL_LH_12",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 959,
+      "sku": "FOTO_CM_FD",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 960,
+      "sku": "FOTO_CM_HD",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 961,
+      "sku": "DRON_CM_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 962,
+      "sku": "DRON_CM_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 963,
+      "sku": "FOTO_SM_FD",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 964,
+      "sku": "FOTO_SM_HD",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 965,
+      "sku": "DRON_SM_1",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 966,
+      "sku": "DRON_SM_2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 971,
+      "sku": "HTL_CP_DBL_TWN",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 972,
+      "sku": "CT9_TRF_APT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 973,
+      "sku": "ET10_TRF_BIO",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 974,
+      "sku": "AMB_FD_TKT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 975,
+      "sku": "AMB_ENT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 976,
+      "sku": "ET11_BIO_ENT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 977,
+      "sku": "ET12_FLIGHT",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 978,
+      "sku": "ATIX_LPZ_SGL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 979,
+      "sku": "ATIX_LPZ_DBL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 980,
+      "sku": "ATIX_LPZ_SUP_REF",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 981,
+      "sku": "ATIX_LPZ_SUP_NR",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 982,
+      "sku": "ATIX_LPZ_SUP_REF_DBL",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 983,
+      "sku": "HS_SCR_SGL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 984,
+      "sku": "HS_SCR_SGL2",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 985,
+      "sku": "HS_SCR_DBL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 986,
+      "sku": "HS_SCR_TPL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 987,
+      "sku": "HC_POT_SGL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 988,
+      "sku": "HC_POT_DBL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 989,
+      "sku": "HC_POT_TPL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 990,
+      "sku": "HC_POT_QDP",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 991,
+      "sku": "HC_POT_SSL",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 992,
+      "sku": "HC_POT_SDB",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 993,
+      "sku": "HC_POT_STP",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 994,
+      "sku": "HC_POT_SQP",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 995,
+      "sku": "CH_CBB_EJS",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 996,
+      "sku": "CH_CBB_MAT",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 997,
+      "sku": "CH_CBB_GST",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 998,
+      "sku": "CH_CBB_DBL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 999,
+      "sku": "CH_CBB_TPL",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1000,
+      "sku": "CH_CBB_FAM",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1001,
+      "sku": "TT_CBB_2D1N_1P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1002,
+      "sku": "TT_CBB_2D1N_2P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1003,
+      "sku": "TT_CBB_2D1N_3P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1004,
+      "sku": "TT_CBB_2D1N_4P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1005,
+      "sku": "TT_CBB_2D1N_5P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1006,
+      "sku": "TT_CBB_2D1N_6P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1007,
+      "sku": "TT_CBB_2D1N_8P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1008,
+      "sku": "TT_CBB_3D1N_1P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1009,
+      "sku": "TT_CBB_3D1N_2P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1010,
+      "sku": "TT_CBB_3D1N_3P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1011,
+      "sku": "TT_CBB_3D1N_4P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1012,
+      "sku": "TT_CBB_3D1N_5P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1013,
+      "sku": "TT_CBB_3D1N_6P",
+      "issues": "etiqueta_dup;solo_precio_rack"
+    },
+    {
+      "row": 1014,
+      "sku": "PP_ISL_SUR_1_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1015,
+      "sku": "PP_ISL_SUR_6_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1016,
+      "sku": "PP_ISL_SUR_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1017,
+      "sku": "PP_ISL_SUR_16_20",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1018,
+      "sku": "PP_ISL_SUR_21_35",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1019,
+      "sku": "PP_ISL_LUNA_1_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1020,
+      "sku": "PP_ISL_LUNA_6_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1021,
+      "sku": "PP_ISL_LUNA_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1022,
+      "sku": "PP_ISL_LUNA_16_20",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1023,
+      "sku": "PP_ISL_LUNA_21_35",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1024,
+      "sku": "PP_ISL_FULL_1_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1025,
+      "sku": "PP_ISL_FULL_6_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1026,
+      "sku": "PP_ISL_FULL_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1027,
+      "sku": "PP_ISL_FULL_16_20",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1028,
+      "sku": "PP_ISL_FULL_21_35",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1029,
+      "sku": "PP_GUIA_1_3",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1030,
+      "sku": "PP_GUIA_4_5",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1031,
+      "sku": "PP_GUIA_6_10",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1032,
+      "sku": "PP_GUIA_11_15",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1033,
+      "sku": "PP_GUIA_16_20",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1034,
+      "sku": "PP_GUIA_21_35",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1035,
+      "sku": "PP_ING_SUR",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1036,
+      "sku": "PP_ING_LUNA",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1037,
+      "sku": "PP_ING_NORTE",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1038,
+      "sku": "HTL_DT_SGL_STD_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1039,
+      "sku": "HTL_DT_SGL_STD_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1040,
+      "sku": "HTL_DT_DBL_STD_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1041,
+      "sku": "HTL_DT_DBL_STD_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1042,
+      "sku": "HTL_DT_TRP_STD_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1043,
+      "sku": "HTL_DT_TRP_STD_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1044,
+      "sku": "HTL_DT_SGL_SUP_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1045,
+      "sku": "HTL_DT_SGL_SUP_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1046,
+      "sku": "HTL_DT_DBL_SUP_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1047,
+      "sku": "HTL_DT_DBL_SUP_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1048,
+      "sku": "HTL_DT_TRP_SUP_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1049,
+      "sku": "HTL_DT_TRP_SUP_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1050,
+      "sku": "HTL_DT_SGL_REF_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1051,
+      "sku": "HTL_DT_SGL_REF_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1052,
+      "sku": "HTL_DT_DBL_REF_NAC_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1053,
+      "sku": "HTL_DT_DBL_REF_EXT_2027",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1064,
+      "sku": "ROSARIO_UYU_CENA",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 1071,
+      "sku": "HTL_SC_LUNCH_BOB_2026",
+      "issues": "temporada_no_reconocida"
+    },
+    {
+      "row": 1072,
+      "sku": "HTL_SC_LUNCH_USD_2026",
+      "issues": "temporada_no_reconocida"
+    },
+    {
+      "row": 1073,
+      "sku": "HTL_SC_DINNER_BOB_2026",
+      "issues": "temporada_no_reconocida"
+    },
+    {
+      "row": 1074,
+      "sku": "HTL_SC_DINNER_USD_2026",
+      "issues": "temporada_no_reconocida"
+    },
+    {
+      "row": 1077,
+      "sku": "HDR_MEAL_BF_DINNER_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1080,
+      "sku": "HDR_MEAL_BOB_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1081,
+      "sku": "FNB_SAM_COOLER_BREAKFAST_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1082,
+      "sku": "FNB_SAM_COOLER_COCKTAIL_2026",
+      "issues": "comidas_no_reconocidas"
+    },
+    {
+      "row": 1083,
+      "sku": "FNB_SAM_BOX_LUNCH_2026",
+      "issues": "etiqueta_dup;comidas_no_reconocidas"
+    },
+    {
+      "row": 1090,
+      "sku": "IMPORT_REVIEW_1090",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1091,
+      "sku": "IMPORT_REVIEW_1091",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1092,
+      "sku": "IMPORT_REVIEW_1092",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1093,
+      "sku": "IMPORT_REVIEW_1093",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1094,
+      "sku": "IMPORT_REVIEW_1094",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1095,
+      "sku": "IMPORT_REVIEW_1095",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1096,
+      "sku": "IMPORT_REVIEW_1096",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1098,
+      "sku": "IMPORT_REVIEW_1098",
+      "issues": "sin_codigo;sin_sku;unidad_desconocida"
+    },
+    {
+      "row": 1136,
+      "sku": "FNB_UYU_LEO_BUFFET",
+      "issues": "etiqueta_dup"
+    },
+    {
+      "row": 1137,
+      "sku": "LH_UYU_TUP-5P",
+      "issues": "solo_precio_rack"
+    },
+    {
+      "row": 1204,
+      "sku": "HTL_HARDROAD_SPA_SNG_DBL_CLP_2026",
+      "issues": "solo_precio_rack;comidas_no_reconocidas"
+    }
+  ]
+}
