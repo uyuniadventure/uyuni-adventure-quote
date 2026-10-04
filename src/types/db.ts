@@ -554,6 +554,53 @@ export type Database = {
           },
         ];
       };
+      followup_email_runs: {
+        Row: {
+          id: string;
+          seller_id: string;
+          day: string;
+          recipient: string;
+          body: string;
+          status: Database["public"]["Enums"]["email_status"];
+          provider_id: string | null;
+          last_error: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          seller_id: string;
+          day: string;
+          recipient: string;
+          body: string;
+          status?: Database["public"]["Enums"]["email_status"];
+          provider_id?: string | null;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          seller_id?: string;
+          day?: string;
+          recipient?: string;
+          body?: string;
+          status?: Database["public"]["Enums"]["email_status"];
+          provider_id?: string | null;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "followup_email_runs_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       hotel_codes: {
         Row: {
           id: string;
@@ -1288,6 +1335,9 @@ export type Database = {
           created_at: string;
           updated_at: string;
           idempotency_key: string | null;
+          provider_id: string | null;
+          last_error: string | null;
+          pdf_path: string | null;
         };
         Insert: {
           id?: string;
@@ -1302,6 +1352,9 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           idempotency_key?: string | null;
+          provider_id?: string | null;
+          last_error?: string | null;
+          pdf_path?: string | null;
         };
         Update: {
           id?: string;
@@ -1316,6 +1369,9 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           idempotency_key?: string | null;
+          provider_id?: string | null;
+          last_error?: string | null;
+          pdf_path?: string | null;
         };
         Relationships: [
           {
@@ -1703,6 +1759,7 @@ export type Database = {
           pricing_config: Json;
           calculation: Json | null;
           document_snapshot: Json;
+          pdf_path: string | null;
         };
         Insert: {
           id?: string;
@@ -1745,6 +1802,7 @@ export type Database = {
           pricing_config?: Json;
           calculation?: Json | null;
           document_snapshot?: Json;
+          pdf_path?: string | null;
         };
         Update: {
           id?: string;
@@ -1787,6 +1845,7 @@ export type Database = {
           pricing_config?: Json;
           calculation?: Json | null;
           document_snapshot?: Json;
+          pdf_path?: string | null;
         };
         Relationships: [
           {
@@ -2271,6 +2330,10 @@ export type Database = {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
       };
+      claim_quote_email: {
+        Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
+        Returns: Database["public"]["Tables"]["quote_emails"]["Row"];
+      };
       compute_real_margin: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
@@ -2301,6 +2364,10 @@ export type Database = {
       save_quote_calculation: {
         Args: { p_id: string; p_updated_at: string; p_result: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      save_quote_pdf: {
+        Args: { p_id: string; p_updated_at: string; p_path: string; p_url: string };
+        Returns: string;
       };
       transition_quote: {
         Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
