@@ -69,6 +69,7 @@ export type Database = {
           id: string
           lang: string
           module_id: string
+          reviewed: boolean
           title: string
           updated_at: string
         }
@@ -78,6 +79,7 @@ export type Database = {
           id?: string
           lang: string
           module_id: string
+          reviewed?: boolean
           title: string
           updated_at?: string
         }
@@ -87,6 +89,7 @@ export type Database = {
           id?: string
           lang?: string
           module_id?: string
+          reviewed?: boolean
           title?: string
           updated_at?: string
         }
@@ -295,11 +298,16 @@ export type Database = {
         Row: {
           applies_tc: boolean | null
           block_id: string
+          coverage_key: string | null
+          coverage_start_day: number | null
           created_at: string
           id: string
           included: boolean
           is_optional: boolean
+          item_snapshot: Json | null
           margin_applicable: boolean | null
+          multi_day_span: number
+          pricing_config: Json
           qty: number
           service_id: string
           updated_at: string
@@ -307,11 +315,16 @@ export type Database = {
         Insert: {
           applies_tc?: boolean | null
           block_id: string
+          coverage_key?: string | null
+          coverage_start_day?: number | null
           created_at?: string
           id?: string
           included?: boolean
           is_optional?: boolean
+          item_snapshot?: Json | null
           margin_applicable?: boolean | null
+          multi_day_span?: number
+          pricing_config?: Json
           qty?: number
           service_id: string
           updated_at?: string
@@ -319,11 +332,16 @@ export type Database = {
         Update: {
           applies_tc?: boolean | null
           block_id?: string
+          coverage_key?: string | null
+          coverage_start_day?: number | null
           created_at?: string
           id?: string
           included?: boolean
           is_optional?: boolean
+          item_snapshot?: Json | null
           margin_applicable?: boolean | null
+          multi_day_span?: number
+          pricing_config?: Json
           qty?: number
           service_id?: string
           updated_at?: string
@@ -624,6 +642,7 @@ export type Database = {
           guide_language: string | null
           hotel_combo: string | null
           id: string
+          import_warnings: Json
           includes_guide: boolean
           includes_staff_lodging_meals: boolean
           main_places: string[]
@@ -648,6 +667,7 @@ export type Database = {
           guide_language?: string | null
           hotel_combo?: string | null
           id?: string
+          import_warnings?: Json
           includes_guide?: boolean
           includes_staff_lodging_meals?: boolean
           main_places?: string[]
@@ -672,6 +692,7 @@ export type Database = {
           guide_language?: string | null
           hotel_combo?: string | null
           id?: string
+          import_warnings?: Json
           includes_guide?: boolean
           includes_staff_lodging_meals?: boolean
           main_places?: string[]
@@ -1282,6 +1303,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          idempotency_key: string | null
           pdf_url: string | null
           quote_id: string
           recipient: string
@@ -1295,6 +1317,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           pdf_url?: string | null
           quote_id: string
           recipient: string
@@ -1308,6 +1331,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           pdf_url?: string | null
           quote_id?: string
           recipient?: string
@@ -1402,6 +1426,7 @@ export type Database = {
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null
           override_note: string | null
           price_overridden: boolean
+          pricing_snapshot: Json
           pricing_unit: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master: boolean
           qty: number
@@ -1410,6 +1435,9 @@ export type Database = {
           route: string | null
           service_id: string | null
           sku: string | null
+          supplier_id: string | null
+          total_cost_local: number | null
+          total_cost_usd: number | null
           type: Database["public"]["Enums"]["service_type"]
           unit_cost_original: number
           unit_cost_usd: number
@@ -1434,6 +1462,7 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
           override_note?: string | null
           price_overridden?: boolean
+          pricing_snapshot?: Json
           pricing_unit: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master?: boolean
           qty?: number
@@ -1442,6 +1471,9 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          supplier_id?: string | null
+          total_cost_local?: number | null
+          total_cost_usd?: number | null
           type: Database["public"]["Enums"]["service_type"]
           unit_cost_original: number
           unit_cost_usd: number
@@ -1466,6 +1498,7 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
           override_note?: string | null
           price_overridden?: boolean
+          pricing_snapshot?: Json
           pricing_unit?: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master?: boolean
           qty?: number
@@ -1474,6 +1507,9 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          supplier_id?: string | null
+          total_cost_local?: number | null
+          total_cost_usd?: number | null
           type?: Database["public"]["Enums"]["service_type"]
           unit_cost_original?: number
           unit_cost_usd?: number
@@ -1499,6 +1535,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -1646,6 +1689,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           balance_due_days: number
+          calculation: Json | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -1653,6 +1697,7 @@ export type Database = {
           code: string
           created_at: string
           deposit_pct: number
+          document_snapshot: Json
           fx_snapshot: Json
           id: string
           language: string
@@ -1665,6 +1710,7 @@ export type Database = {
           payment_schedule: Json | null
           pdf_url: string | null
           price_per_pax_usd: number | null
+          pricing_config: Json
           rooming: Json
           rounding_rule: Json
           seller_id: string
@@ -1677,6 +1723,7 @@ export type Database = {
           total_cost_usd: number | null
           total_margin_usd: number | null
           total_price_usd: number | null
+          tour_sku: string | null
           updated_at: string
           vehicles: Json
           version: number
@@ -1684,6 +1731,7 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           balance_due_days?: number
+          calculation?: Json | null
           card_surcharge_pct?: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -1691,6 +1739,7 @@ export type Database = {
           code: string
           created_at?: string
           deposit_pct?: number
+          document_snapshot?: Json
           fx_snapshot?: Json
           id?: string
           language?: string
@@ -1703,6 +1752,7 @@ export type Database = {
           payment_schedule?: Json | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
+          pricing_config?: Json
           rooming?: Json
           rounding_rule?: Json
           seller_id?: string
@@ -1715,6 +1765,7 @@ export type Database = {
           total_cost_usd?: number | null
           total_margin_usd?: number | null
           total_price_usd?: number | null
+          tour_sku?: string | null
           updated_at?: string
           vehicles?: Json
           version?: number
@@ -1722,6 +1773,7 @@ export type Database = {
         Update: {
           archived_at?: string | null
           balance_due_days?: number
+          calculation?: Json | null
           card_surcharge_pct?: number
           category?: Database["public"]["Enums"]["tour_category"]
           client_id?: string
@@ -1729,6 +1781,7 @@ export type Database = {
           code?: string
           created_at?: string
           deposit_pct?: number
+          document_snapshot?: Json
           fx_snapshot?: Json
           id?: string
           language?: string
@@ -1741,6 +1794,7 @@ export type Database = {
           payment_schedule?: Json | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
+          pricing_config?: Json
           rooming?: Json
           rounding_rule?: Json
           seller_id?: string
@@ -1753,6 +1807,7 @@ export type Database = {
           total_cost_usd?: number | null
           total_margin_usd?: number | null
           total_price_usd?: number | null
+          tour_sku?: string | null
           updated_at?: string
           vehicles?: Json
           version?: number
