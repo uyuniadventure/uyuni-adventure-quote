@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SECTIONS, SectionShell, sectionHead } from "@/components/section";
 
-const s = SECTIONS["bloques-diarios"];
+const s = SECTIONS.tarifario;
 
-export const Route = createFileRoute("/bloques-diarios")({
+export const Route = createFileRoute("/_authenticated/tarifario")({
   head: () => sectionHead(s),
   component: () => <SectionShell section={s} />,
 });
