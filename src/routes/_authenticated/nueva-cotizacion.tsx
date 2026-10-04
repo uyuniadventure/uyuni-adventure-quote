@@ -7,7 +7,7 @@ const s = SECTIONS["nueva-cotizacion"];
 
 export const Route = createFileRoute("/_authenticated/nueva-cotizacion")({
   validateSearch: (search: Record<string, unknown>): { quote?: string } =>
-    typeof search.quote === "string" && search.quote ? { quote: search.quote } : {},
+    typeof search['quote'] === "string" && search['quote'] ? { quote: search['quote'] } : {},
   head: () => sectionHead(s),
   component: NewQuotePage,
 });

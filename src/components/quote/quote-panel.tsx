@@ -33,7 +33,7 @@ function fromQuote(q: Data["quote"]): PanelState {
   };
 }
 
-function NumIn({ value, onChange, disabled, step, className }: { value: number; onChange: (n: number) => void; disabled?: boolean; step?: string; className?: string }) {
+function NumIn({ value, onChange, disabled, step, className }: { value: number; onChange: (n: number) => void; disabled?: boolean; step?: string | undefined; className?: string }) {
   return <Input type="number" min={0} step={step ?? "1"} value={Number.isFinite(value) ? value : 0} disabled={!!disabled}
     onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))} className={`h-8 ${className ?? ""}`} />;
 }
@@ -48,7 +48,7 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
   const [s, setS] = useState<PanelState>(() => fromQuote(quote));
   const [dirty, setDirty] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const roomTypes = useMemo(() => [...new Set([...BASE_ROOMS, ...items.map((i) => snap(i).room_type).filter(Boolean) as string[], ...Object.keys(s.rooming.paying), ...Object.keys(s.rooming.tc)])], [items, s.rooming]);
   const segments = useMemo(() => [...new Set([...items.filter((i) => i.pricing_unit === "per_vehicle").map((i) => snap(i).vehicle_segment).filter(Boolean) as string[], ...Object.keys(s.vehicles)])], [items, s.vehicles]);
@@ -82,7 +82,7 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
     total_cost_usd: Number(quote.total_cost_usd), total_margin_usd: Number(quote.total_margin_usd), total_price_usd: Number(quote.total_price_usd),
     price_per_pax_usd: Number(quote.price_per_pax_usd), single_supplement_pp: Number(quote.single_supplement_pp ?? 0), scenarios: [], warnings: [],
   } : null);
-  const missingFx = currencies.filter((c) => !(s.fx_snapshot[c] > 0));
+  const missingFx = currencies.filter((c) => !((s.fx_snapshot[c] ?? 0) > 0));
 
   const setScenario = (i: number, sc: PaxScenario) => update((p) => ({ ...p, pax_scenarios: p.pax_scenarios.map((x, j) => (j === i ? sc : x)) }));
 
