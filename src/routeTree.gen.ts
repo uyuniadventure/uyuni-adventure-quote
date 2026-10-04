@@ -10,33 +10,206 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BloquesDiariosRouteImport } from './routes/bloques-diarios'
+import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as CotizacionesRouteImport } from './routes/cotizaciones'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MediaRouteImport } from './routes/media'
+import { Route as ModulosActividadRouteImport } from './routes/modulos-actividad'
+import { Route as NuevaCotizacionRouteImport } from './routes/nueva-cotizacion'
+import { Route as OperacionRouteImport } from './routes/operacion'
+import { Route as PlantillasRouteImport } from './routes/plantillas'
+import { Route as ProveedoresRouteImport } from './routes/proveedores'
+import { Route as RevisionImportacionRouteImport } from './routes/revision-importacion'
+import { Route as TarifarioRouteImport } from './routes/tarifario'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BloquesDiariosRoute = BloquesDiariosRouteImport.update({
+  id: '/bloques-diarios',
+  path: '/bloques-diarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CotizacionesRoute = CotizacionesRouteImport.update({
+  id: '/cotizaciones',
+  path: '/cotizaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaRoute = MediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosActividadRoute = ModulosActividadRouteImport.update({
+  id: '/modulos-actividad',
+  path: '/modulos-actividad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NuevaCotizacionRoute = NuevaCotizacionRouteImport.update({
+  id: '/nueva-cotizacion',
+  path: '/nueva-cotizacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperacionRoute = OperacionRouteImport.update({
+  id: '/operacion',
+  path: '/operacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlantillasRoute = PlantillasRouteImport.update({
+  id: '/plantillas',
+  path: '/plantillas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProveedoresRoute = ProveedoresRouteImport.update({
+  id: '/proveedores',
+  path: '/proveedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevisionImportacionRoute = RevisionImportacionRouteImport.update({
+  id: '/revision-importacion',
+  path: '/revision-importacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TarifarioRoute = TarifarioRouteImport.update({
+  id: '/tarifario',
+  path: '/tarifario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/bloques-diarios': typeof BloquesDiariosRoute
+  '/clientes': typeof ClientesRoute
+  '/cotizaciones': typeof CotizacionesRoute
+  '/login': typeof LoginRoute
+  '/media': typeof MediaRoute
+  '/modulos-actividad': typeof ModulosActividadRoute
+  '/nueva-cotizacion': typeof NuevaCotizacionRoute
+  '/operacion': typeof OperacionRoute
+  '/plantillas': typeof PlantillasRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/revision-importacion': typeof RevisionImportacionRoute
+  '/tarifario': typeof TarifarioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/bloques-diarios': typeof BloquesDiariosRoute
+  '/clientes': typeof ClientesRoute
+  '/cotizaciones': typeof CotizacionesRoute
+  '/login': typeof LoginRoute
+  '/media': typeof MediaRoute
+  '/modulos-actividad': typeof ModulosActividadRoute
+  '/nueva-cotizacion': typeof NuevaCotizacionRoute
+  '/operacion': typeof OperacionRoute
+  '/plantillas': typeof PlantillasRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/revision-importacion': typeof RevisionImportacionRoute
+  '/tarifario': typeof TarifarioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/bloques-diarios': typeof BloquesDiariosRoute
+  '/clientes': typeof ClientesRoute
+  '/cotizaciones': typeof CotizacionesRoute
+  '/login': typeof LoginRoute
+  '/media': typeof MediaRoute
+  '/modulos-actividad': typeof ModulosActividadRoute
+  '/nueva-cotizacion': typeof NuevaCotizacionRoute
+  '/operacion': typeof OperacionRoute
+  '/plantillas': typeof PlantillasRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/revision-importacion': typeof RevisionImportacionRoute
+  '/tarifario': typeof TarifarioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/bloques-diarios'
+    | '/clientes'
+    | '/cotizaciones'
+    | '/login'
+    | '/media'
+    | '/modulos-actividad'
+    | '/nueva-cotizacion'
+    | '/operacion'
+    | '/plantillas'
+    | '/proveedores'
+    | '/revision-importacion'
+    | '/tarifario'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/bloques-diarios'
+    | '/clientes'
+    | '/cotizaciones'
+    | '/login'
+    | '/media'
+    | '/modulos-actividad'
+    | '/nueva-cotizacion'
+    | '/operacion'
+    | '/plantillas'
+    | '/proveedores'
+    | '/revision-importacion'
+    | '/tarifario'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/bloques-diarios'
+    | '/clientes'
+    | '/cotizaciones'
+    | '/login'
+    | '/media'
+    | '/modulos-actividad'
+    | '/nueva-cotizacion'
+    | '/operacion'
+    | '/plantillas'
+    | '/proveedores'
+    | '/revision-importacion'
+    | '/tarifario'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  BloquesDiariosRoute: typeof BloquesDiariosRoute
+  ClientesRoute: typeof ClientesRoute
+  CotizacionesRoute: typeof CotizacionesRoute
+  LoginRoute: typeof LoginRoute
+  MediaRoute: typeof MediaRoute
+  ModulosActividadRoute: typeof ModulosActividadRoute
+  NuevaCotizacionRoute: typeof NuevaCotizacionRoute
+  OperacionRoute: typeof OperacionRoute
+  PlantillasRoute: typeof PlantillasRoute
+  ProveedoresRoute: typeof ProveedoresRoute
+  RevisionImportacionRoute: typeof RevisionImportacionRoute
+  TarifarioRoute: typeof TarifarioRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +221,115 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bloques-diarios': {
+      id: '/bloques-diarios'
+      path: '/bloques-diarios'
+      fullPath: '/bloques-diarios'
+      preLoaderRoute: typeof BloquesDiariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cotizaciones': {
+      id: '/cotizaciones'
+      path: '/cotizaciones'
+      fullPath: '/cotizaciones'
+      preLoaderRoute: typeof CotizacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media': {
+      id: '/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modulos-actividad': {
+      id: '/modulos-actividad'
+      path: '/modulos-actividad'
+      fullPath: '/modulos-actividad'
+      preLoaderRoute: typeof ModulosActividadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nueva-cotizacion': {
+      id: '/nueva-cotizacion'
+      path: '/nueva-cotizacion'
+      fullPath: '/nueva-cotizacion'
+      preLoaderRoute: typeof NuevaCotizacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operacion': {
+      id: '/operacion'
+      path: '/operacion'
+      fullPath: '/operacion'
+      preLoaderRoute: typeof OperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plantillas': {
+      id: '/plantillas'
+      path: '/plantillas'
+      fullPath: '/plantillas'
+      preLoaderRoute: typeof PlantillasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proveedores': {
+      id: '/proveedores'
+      path: '/proveedores'
+      fullPath: '/proveedores'
+      preLoaderRoute: typeof ProveedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revision-importacion': {
+      id: '/revision-importacion'
+      path: '/revision-importacion'
+      fullPath: '/revision-importacion'
+      preLoaderRoute: typeof RevisionImportacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarifario': {
+      id: '/tarifario'
+      path: '/tarifario'
+      fullPath: '/tarifario'
+      preLoaderRoute: typeof TarifarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  BloquesDiariosRoute: BloquesDiariosRoute,
+  ClientesRoute: ClientesRoute,
+  CotizacionesRoute: CotizacionesRoute,
+  LoginRoute: LoginRoute,
+  MediaRoute: MediaRoute,
+  ModulosActividadRoute: ModulosActividadRoute,
+  NuevaCotizacionRoute: NuevaCotizacionRoute,
+  OperacionRoute: OperacionRoute,
+  PlantillasRoute: PlantillasRoute,
+  ProveedoresRoute: ProveedoresRoute,
+  RevisionImportacionRoute: RevisionImportacionRoute,
+  TarifarioRoute: TarifarioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
