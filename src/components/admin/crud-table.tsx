@@ -122,7 +122,7 @@ export function CrudTable({ table, title, columns, orderBy, filter, defaults, on
 
 function CrudDialog({ table, title, columns, row, defaults, onClose, onSaved }: {
   table: string; title: string; columns: CrudColumn[]; row: Row | null;
-  defaults?: Record<string, unknown>; onClose: () => void; onSaved: () => void;
+  defaults?: Record<string, unknown> | undefined; onClose: () => void; onSaved: () => void;
 }) {
   const init: Record<string, string> = {};
   for (const c of columns) {
@@ -136,7 +136,7 @@ function CrudDialog({ table, title, columns, row, defaults, onClose, onSaved }: 
   const save = async () => {
     const payload: Record<string, unknown> = {};
     for (const c of columns) {
-      const raw = values[c.key].trim();
+      const raw = (values[c.key] ?? "").trim();
       if (c.required && !raw) { toast.error(`${c.label} es obligatorio.`); return; }
       payload[c.key] = raw === "" ? null : c.type === "number" ? Number(raw) : raw;
     }

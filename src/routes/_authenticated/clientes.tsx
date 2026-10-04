@@ -261,13 +261,13 @@ function TermsPanel() {
         title="Textos de términos y condiciones"
         orderBy={[{ column: "scope" }, { column: "lang" }]}
         defaults={{ scope: "B2C_general", lang: "es" }}
-        filter={(r) => (scope === ALL || r.scope === scope) && (lang === ALL || r.lang === lang)}
+        filter={(r) => (scope === ALL || r['scope'] === scope) && (lang === ALL || r['lang'] === lang)}
         columns={[
           { key: "scope", label: "Tipo", type: "select", options: Object.entries(SCOPE_LABELS), required: true },
           { key: "lang", label: "Idioma", type: "select", options: LANGS.map(([v, l]) => [v, l]), required: true },
           { key: "client_id", label: "Cliente (solo B2B por cliente)", type: "select", options: clientOpts },
           { key: "content", label: "Contenido", type: "textarea", required: true,
-            render: (r) => <span className="text-xs text-muted-foreground">{String(r.content).slice(0, 90)}…</span> },
+            render: (r) => <span className="text-xs text-muted-foreground">{String(r['content']).slice(0, 90)}…</span> },
         ]}
       />
     </div>
