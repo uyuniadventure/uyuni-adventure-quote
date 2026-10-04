@@ -832,6 +832,13 @@ export type Database = {
             foreignKeyName: "ops_communications_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_communications_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "ops_services"
             referencedColumns: ["id"]
           },
@@ -929,6 +936,13 @@ export type Database = {
             foreignKeyName: "ops_items_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "ops_services"
             referencedColumns: ["id"]
           },
@@ -988,6 +1002,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ops_passengers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ops_passengers_service_id_fkey"
             columns: ["service_id"]
@@ -1125,6 +1146,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "currencies"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "ops_supplier_payables_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "ops_supplier_payables_service_id_fkey"
@@ -2155,10 +2183,135 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ops_active_accommodation_bookings: {
+        Row: {
+          booking_code: string | null
+          booking_status: Database["public"]["Enums"]["booking_status"] | null
+          check_in: string | null
+          check_out: string | null
+          due_date: string | null
+          hotel: string | null
+          hotel_email: string | null
+          id: string | null
+          paid_date: string | null
+          room_distribution: Json | null
+          service_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_pending_payables: {
+        Row: {
+          balance_usd: number | null
+          cost_local: number | null
+          cost_usd: number | null
+          created_at: string | null
+          currency: string | null
+          detail: string | null
+          due_date: string | null
+          id: string | null
+          paid_date: string | null
+          paid_usd: number | null
+          service_id: string | null
+          status: Database["public"]["Enums"]["payable_status"] | null
+          supplier_id: string | null
+          supplier_name: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_supplier_payables_currency_fkey"
+            columns: ["currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "ops_supplier_payables_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_service_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_supplier_payables_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "ops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_supplier_payables_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_service_summary: {
+        Row: {
+          booking_code: string | null
+          end_date: string | null
+          id: string | null
+          pax: number | null
+          quoted_cost_usd: number | null
+          real_cost_usd: number | null
+          real_margin_usd: number | null
+          sale_price_usd: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["ops_status"] | null
+        }
+        Insert: {
+          booking_code?: string | null
+          end_date?: string | null
+          id?: string | null
+          pax?: number | null
+          quoted_cost_usd?: number | null
+          real_cost_usd?: number | null
+          real_margin_usd?: number | null
+          sale_price_usd?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ops_status"] | null
+        }
+        Update: {
+          booking_code?: string | null
+          end_date?: string | null
+          id?: string | null
+          pax?: number | null
+          quoted_cost_usd?: number | null
+          real_cost_usd?: number | null
+          real_margin_usd?: number | null
+          sale_price_usd?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ops_status"] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      current_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      next_quote_code: {
+        Args: { p_language: string; p_sku: string }
+        Returns: string
+      }
     }
     Enums: {
       activity_duration: "HD_AM" | "HD_PM" | "FD" | "NOCHE" | "TRASLADO"
