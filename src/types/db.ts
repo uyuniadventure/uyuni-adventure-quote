@@ -61,6 +61,7 @@ export type Database = {
           description: string;
           created_at: string;
           updated_at: string;
+          reviewed: boolean;
         };
         Insert: {
           id?: string;
@@ -70,6 +71,7 @@ export type Database = {
           description: string;
           created_at?: string;
           updated_at?: string;
+          reviewed?: boolean;
         };
         Update: {
           id?: string;
@@ -79,6 +81,7 @@ export type Database = {
           description?: string;
           created_at?: string;
           updated_at?: string;
+          reviewed?: boolean;
         };
         Relationships: [
           {
@@ -285,7 +288,7 @@ export type Database = {
         Row: {
           id: string;
           block_id: string;
-          service_id: string;
+          service_id: string | null;
           qty: number;
           applies_tc: boolean | null;
           margin_applicable: boolean | null;
@@ -293,11 +296,16 @@ export type Database = {
           included: boolean;
           created_at: string;
           updated_at: string;
+          multi_day_span: number;
+          coverage_key: string | null;
+          coverage_start_day: number | null;
+          pricing_config: Json;
+          item_snapshot: Json | null;
         };
         Insert: {
           id?: string;
           block_id: string;
-          service_id: string;
+          service_id?: string | null;
           qty?: number;
           applies_tc?: boolean | null;
           margin_applicable?: boolean | null;
@@ -305,11 +313,16 @@ export type Database = {
           included?: boolean;
           created_at?: string;
           updated_at?: string;
+          multi_day_span?: number;
+          coverage_key?: string | null;
+          coverage_start_day?: number | null;
+          pricing_config?: Json;
+          item_snapshot?: Json | null;
         };
         Update: {
           id?: string;
           block_id?: string;
-          service_id?: string;
+          service_id?: string | null;
           qty?: number;
           applies_tc?: boolean | null;
           margin_applicable?: boolean | null;
@@ -317,6 +330,11 @@ export type Database = {
           included?: boolean;
           created_at?: string;
           updated_at?: string;
+          multi_day_span?: number;
+          coverage_key?: string | null;
+          coverage_start_day?: number | null;
+          pricing_config?: Json;
+          item_snapshot?: Json | null;
         };
         Relationships: [
           {
@@ -536,6 +554,53 @@ export type Database = {
           },
         ];
       };
+      followup_email_runs: {
+        Row: {
+          id: string;
+          seller_id: string;
+          day: string;
+          recipient: string;
+          body: string;
+          status: Database["public"]["Enums"]["email_status"];
+          provider_id: string | null;
+          last_error: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          seller_id: string;
+          day: string;
+          recipient: string;
+          body: string;
+          status?: Database["public"]["Enums"]["email_status"];
+          provider_id?: string | null;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          seller_id?: string;
+          day?: string;
+          recipient?: string;
+          body?: string;
+          status?: Database["public"]["Enums"]["email_status"];
+          provider_id?: string | null;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "followup_email_runs_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       hotel_codes: {
         Row: {
           id: string;
@@ -628,6 +693,7 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          import_warnings: Json;
         };
         Insert: {
           id?: string;
@@ -652,6 +718,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_warnings?: Json;
         };
         Update: {
           id?: string;
@@ -676,6 +743,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_warnings?: Json;
         };
         Relationships: [
           {
@@ -1005,6 +1073,8 @@ export type Database = {
           real_margin_usd: number | null;
           created_at: string;
           updated_at: string;
+          language: string;
+          client_name: string | null;
         };
         Insert: {
           id?: string;
@@ -1023,6 +1093,8 @@ export type Database = {
           real_margin_usd?: number | null;
           created_at?: string;
           updated_at?: string;
+          language?: string;
+          client_name?: string | null;
         };
         Update: {
           id?: string;
@@ -1041,6 +1113,8 @@ export type Database = {
           real_margin_usd?: number | null;
           created_at?: string;
           updated_at?: string;
+          language?: string;
+          client_name?: string | null;
         };
         Relationships: [
           {
@@ -1260,6 +1334,10 @@ export type Database = {
           status: Database["public"]["Enums"]["email_status"];
           created_at: string;
           updated_at: string;
+          idempotency_key: string | null;
+          provider_id: string | null;
+          last_error: string | null;
+          pdf_path: string | null;
         };
         Insert: {
           id?: string;
@@ -1273,6 +1351,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["email_status"];
           created_at?: string;
           updated_at?: string;
+          idempotency_key?: string | null;
+          provider_id?: string | null;
+          last_error?: string | null;
+          pdf_path?: string | null;
         };
         Update: {
           id?: string;
@@ -1286,6 +1368,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["email_status"];
           created_at?: string;
           updated_at?: string;
+          idempotency_key?: string | null;
+          provider_id?: string | null;
+          last_error?: string | null;
+          pdf_path?: string | null;
         };
         Relationships: [
           {
@@ -1384,6 +1470,10 @@ export type Database = {
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null;
           created_at: string;
           updated_at: string;
+          pricing_snapshot: Json;
+          supplier_id: string | null;
+          total_cost_usd: number | null;
+          total_cost_local: number | null;
         };
         Insert: {
           id?: string;
@@ -1416,6 +1506,10 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null;
           created_at?: string;
           updated_at?: string;
+          pricing_snapshot?: Json;
+          supplier_id?: string | null;
+          total_cost_usd?: number | null;
+          total_cost_local?: number | null;
         };
         Update: {
           id?: string;
@@ -1448,6 +1542,10 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null;
           created_at?: string;
           updated_at?: string;
+          pricing_snapshot?: Json;
+          supplier_id?: string | null;
+          total_cost_usd?: number | null;
+          total_cost_local?: number | null;
         };
         Relationships: [
           {
@@ -1469,6 +1567,13 @@ export type Database = {
             columns: ["service_id"];
             isOneToOne: false;
             referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quote_items_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
             referencedColumns: ["id"];
           },
         ];
@@ -1650,6 +1755,11 @@ export type Database = {
           pdf_url: string | null;
           created_at: string;
           updated_at: string;
+          tour_sku: string | null;
+          pricing_config: Json;
+          calculation: Json | null;
+          document_snapshot: Json;
+          pdf_path: string | null;
         };
         Insert: {
           id?: string;
@@ -1688,6 +1798,11 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           updated_at?: string;
+          tour_sku?: string | null;
+          pricing_config?: Json;
+          calculation?: Json | null;
+          document_snapshot?: Json;
+          pdf_path?: string | null;
         };
         Update: {
           id?: string;
@@ -1726,6 +1841,11 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           updated_at?: string;
+          tour_sku?: string | null;
+          pricing_config?: Json;
+          calculation?: Json | null;
+          document_snapshot?: Json;
+          pdf_path?: string | null;
         };
         Relationships: [
           {
@@ -2206,11 +2326,54 @@ export type Database = {
       };
     };
     Functions: {
+      build_supplier_payables: {
+        Args: { p_id: string };
+        Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
+      };
+      claim_quote_email: {
+        Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
+        Returns: Database["public"]["Tables"]["quote_emails"]["Row"];
+      };
+      compute_real_margin: {
+        Args: { p_id: string };
+        Returns: Database["public"]["Tables"]["ops_services"]["Row"];
+      };
+      create_quote_snapshot: {
+        Args: { p_quote: Json; p_days: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
       current_role: {
         Args: Record<PropertyKey, never>;
-        Returns: Database["public"]["Enums"]["app_role"] | null;
+        Returns: Database["public"]["Enums"]["app_role"];
+      };
+      edit_quote_item: {
+        Args: { p_id: string; p_changes: Json; p_add?: boolean; p_promote?: boolean };
+        Returns: Json;
+      };
+      generate_communication_plan: {
+        Args: { p_id: string; p_messages: Json };
+        Returns: Database["public"]["Tables"]["ops_communications"]["Row"][];
+      };
+      insert_quote_item: {
+        Args: { p_day: string; p_item: Json; p_promote?: boolean };
+        Returns: Database["public"]["Tables"]["quote_items"]["Row"];
       };
       next_quote_code: { Args: { p_sku: string; p_language: string }; Returns: string };
+      promote_quote_template: { Args: { p_id: string }; Returns: string };
+      quote_document_context: { Args: { p_id: string }; Returns: Json };
+      save_quote_calculation: {
+        Args: { p_id: string; p_updated_at: string; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      save_quote_pdf: {
+        Args: { p_id: string; p_updated_at: string; p_path: string; p_url: string };
+        Returns: undefined;
+      };
+      transition_quote: {
+        Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      version_quote: { Args: { p_id: string }; Returns: string };
     };
     Enums: {
       activity_duration: "HD_AM" | "HD_PM" | "FD" | "NOCHE" | "TRASLADO";

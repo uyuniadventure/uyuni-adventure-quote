@@ -1,1 +1,11 @@
 project_id = "bdewqhmaafzufyegbkts"
+
+[functions.send-quote-email]
+verify_jwt = true
+
+[functions.translate-block]
+verify_jwt = true
+
+[functions.followup-reminders]
+# Dedicated cron token is checked inside the handler (no user JWT for pg_cron).
+verify_jwt = false

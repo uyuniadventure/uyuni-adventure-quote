@@ -1,0 +1,1713 @@
+{
+  "counts": {
+    "itinerary_templates": 40,
+    "day_blocks": 143,
+    "day_block_translations": 143,
+    "day_block_items": 562,
+    "template_days": 138
+  },
+  "seed_order": [
+    "02_bloques_001.sql",
+    "02_bloques_002.sql",
+    "02_bloques_003.sql",
+    "02_bloques_004.sql"
+  ],
+  "missing_budgets": [
+    "SPAUYU-3D2N-HK",
+    "SPASPA-4D3N-ScRF",
+    "SPASPA-4D3N-FJM",
+    "SPASPA-4D3N-FJJ",
+    "SPASPA-4D3N-ScLM",
+    "SPASPA-4D3N-ScJF",
+    "SPASPA-4D3N-ScJTd",
+    "UYUUYU-3D2N-PF",
+    "UYUUYU-3D2N-ÑF",
+    "UYUUYU-3D2N-CkHj",
+    "UYUSPA-3D2N-LM",
+    "UYUSPA-3D2N-KDr"
+  ],
+  "missing_skus": [
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 9,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 14,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 24,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 29,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FJ",
+      "sheet": "SPA UYU - 3D2N - FJ",
+      "item": 44,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 9,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 14,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 24,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 29,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FP",
+      "sheet": "SPA UYU - 3D2N - FP",
+      "item": 44,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 9,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 14,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 24,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 29,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-FL",
+      "sheet": "SPA UYU - 3D2N - FL",
+      "item": 44,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 7,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 25,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 33,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "SPAUYU-3D2N-MP",
+      "sheet": "SPA UYU - 3D2N - MP",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 7,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 25,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 33,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "SPAUYU-3D2N-ML",
+      "sheet": "SPA UYU - 3D2N - ML",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 7,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 25,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 39,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPAUYU-3D2N-ScK",
+      "sheet": "SPA UYU - 3D2N - ScK",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 53,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 54,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MRF",
+      "sheet": "SPA SPA 4D3N MRF",
+      "item": 60,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 34,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 47,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 54,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑLTd",
+      "sheet": "SPA SPA - 4D3N - ÑLTd",
+      "item": 58,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 47,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 52,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-LLTd",
+      "sheet": "SPA SPA - 4D3N - LLTd",
+      "item": 58,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 47,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 52,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-PPTd",
+      "sheet": "SPA SPA - 4D3N - PPTd",
+      "item": 58,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ÑÑF",
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPF",
+      "sheet": "SPA SPA - 4D3N - MPF",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLTd",
+      "sheet": "SPA SPA - 4D3N - MLTd",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MLF",
+      "sheet": "SPA SPA - 4D3N - MLF",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MJF",
+      "sheet": "SPA SPA - 4D3N - MJF",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MÑF",
+      "sheet": "SPA SPA - 4D3N - MÑF",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 16,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 25,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 30,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 34,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 43,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 44,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 49,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-ScKS",
+      "sheet": "SPA SPA - 4D3N - ScKS",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 7,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 12,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 18,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 27,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 32,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 38,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 47,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 48,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 53,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "SPASPA-4D3N-MPTd",
+      "sheet": "SPA SPA - 4D3N - MPTd",
+      "item": 59,
+      "sku": null,
+      "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 26,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 40,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 48,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUUYU-3D2N-PTd",
+      "sheet": "UYU UYU - 3D2N - PTd",
+      "item": 49,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 26,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 40,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-LTd",
+      "sheet": "UYU UYU - 3D2N - LTd",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 26,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 40,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-JTd",
+      "sheet": "UYU UYU - 3D2N - JTd",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 20,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 26,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 40,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-ÑTd",
+      "sheet": "UYU UYU - 3D2N - ÑTd",
+      "item": 48,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 10,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 18,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 22,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 30,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 34,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 42,
+      "sku": null,
+      "description": "INCLUIDO EN OPCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 43,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUUYU-3D2N-KS",
+      "sheet": "UYU UYU - 3D2N - KS",
+      "item": 47,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 21,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 27,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 36,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 42,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-PTd",
+      "sheet": "UYU SPA - 3D2N PTd",
+      "item": 50,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 21,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 27,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 36,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 42,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-LTd",
+      "sheet": "UYU SPA - 3D2N LTd",
+      "item": 51,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 21,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 27,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 36,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 42,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-JTd",
+      "sheet": "UYU SPA - 3D2N JTd",
+      "item": 51,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 12,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 21,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 27,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 36,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 42,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-ÑTd",
+      "sheet": "UYU SPA 3D2N - ÑTd",
+      "item": 51,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 6,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 10,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 19,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 23,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 32,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 36,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 45,
+      "sku": null,
+      "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+    },
+    {
+      "template": "UYUSPA-3D2N-KS",
+      "sheet": "UYU SPA - 3D2N - KS",
+      "item": 46,
+      "sku": null,
+      "description": "3D2N UYUNI – UYUNI"
+    }
+  ],
+  "rejected_programs": [
+    {
+      "index": 6,
+      "sku": "SPAUYU-3D2N-FL",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    },
+    {
+      "index": 24,
+      "sku": "SPASPA-4D3N-MRF",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    },
+    {
+      "index": 28,
+      "sku": "SPAUYU-3D3N-FTL",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    },
+    {
+      "index": 44,
+      "sku": "UYUUYU-2D1N-L",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    },
+    {
+      "index": 45,
+      "sku": "UYUSPA-3D2N-JTd",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    },
+    {
+      "index": 46,
+      "sku": "SPA4D/",
+      "reason": "SKU inválido, duplicado o duración inconsistente"
+    }
+  ],
+  "ambiguous_budgets": [
+    {
+      "sheet": "SPA SPA - 4D3N - ÑÑF",
+      "declared": "SPASPA-4D3N-MÑF",
+      "used": "SPASPA-4D3N-ÑÑF"
+    },
+    "COTIZAR____SPA SPA - 4D3N - FJJ",
+    "COTIZAR ---- UYU SPA - 2D1N P"
+  ],
+  "missing_modules": [
+    "BLOQUES SPA no está presente en la extracción; se requiere la hoja con grupos de actividades."
+  ]
+}

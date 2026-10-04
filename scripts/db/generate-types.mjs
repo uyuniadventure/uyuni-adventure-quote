@@ -92,14 +92,41 @@ try {
     columns.filter((x) => x.table_type === "VIEW").map((x) => x.table_name),
   ))
     definition(table, true);
-  lines.push(
-    "    }",
-    "    Functions: {",
-    "      current_role: { Args: Record<PropertyKey, never>; Returns: Database['public']['Enums']['app_role'] | null }",
-    "      next_quote_code: { Args: { p_sku: string; p_language: string }; Returns: string }",
-    "    }",
-    "    Enums: {",
+  lines.push("    }", "    Functions: {");
+  const { rows: functions } = await db.query(
+    `select p.proname,p.proargnames,p.proargtypes::oid[] argtypes,p.pronargdefaults,p.prorettype::regtype::text rettype,p.proretset from pg_proc p where p.pronamespace='public'::regnamespace and p.prorettype<>'trigger'::regtype and has_function_privilege('authenticated',p.oid,'EXECUTE') order by p.proname`,
   );
+  const { rows: types } = await db.query("select oid,typname from pg_type");
+  const typeNames = new Map(types.map((t) => [t.oid, t.typname]));
+  const tableNames = new Set(
+    columns.filter((c) => c.table_type === "BASE TABLE").map((c) => c.table_name),
+  );
+  const rpcType = (t) =>
+    t === "void"
+      ? "undefined"
+      : tableNames.has(t)
+        ? `Database['public']['Tables']['${t}']['Row']`
+        : enumNames.has(t)
+          ? `Database['public']['Enums']['${t}']`
+          : ["json", "jsonb"].includes(t)
+            ? "Json"
+            : ["bool", "boolean"].includes(t)
+              ? "boolean"
+              : ["integer", "numeric", "int4"].includes(t)
+                ? "number"
+                : "string";
+  for (const f of functions) {
+    const args = (f.proargnames || [])
+      .map(
+        (name, i) =>
+          `${name}${i >= f.argtypes.length - f.pronargdefaults ? "?" : ""}: ${rpcType(typeNames.get(f.argtypes[i]))}`,
+      )
+      .join("; ");
+    lines.push(
+      `      ${f.proname}: { Args: ${args ? "{ " + args + " }" : "Record<PropertyKey, never>"}; Returns: ${rpcType(f.rettype)}${f.proretset ? "[]" : ""} }`,
+    );
+  }
+  lines.push("    }", "    Enums: {");
   for (const name of enumNames)
     lines.push(
       `      ${name}: ${enums
