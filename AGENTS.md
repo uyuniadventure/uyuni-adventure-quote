@@ -17,6 +17,7 @@
 - Permisos de UI por rol se leen con `useCurrentUser()`/`canManageCatalog()` de `src/hooks/use-auth.ts`; la autorización real la hace RLS.
 - Los datos de navegación (secciones, grupos, metadata head de cada sección) se definen una sola vez en `src/components/section.tsx` (`SECTIONS`, `SECTION_GROUPS`, `sectionHead`, `SectionShell`); el sidebar y las rutas consumen de ahí para evitar divergencia.
 - Las pantallas de catálogo (módulos, bloques, plantillas, revisión) reutilizan `src/components/catalog/kit.tsx` (filtros, buscador, permisos de fila, panel de traducciones que invoca la Edge Function `translate-block`) y un editor en Sheet por entidad; así la revisión de importación abre el mismo editor que cada sección.
+- Nueva cotización vive en `/nueva-cotizacion?quote=<id>` (`src/components/quote/`): toda escritura + `recalculateQuote` pasa por una cola serializada (`useQuoteActions`) porque `save_quote_calculation` exige `updated_at` vigente; las operaciones de días que `src/lib` no expone están aisladas en `quote-ops.ts` para migrarlas a `src/lib/quotes`.
 - Todos los colores van por tokens semánticos en `src/styles.css` (`@theme inline` + `:root`); nada de colores hardcodeados en componentes.
 
 ## Reglas para Codex
