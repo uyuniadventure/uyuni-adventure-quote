@@ -35,3 +35,4 @@ TanStack Start (React, rutas basadas en archivos en src/routes) + TypeScript + T
 7. Nunca pongas claves secretas en el frontend. La service_role key solo se usa en Edge Functions.
 8. Moneda de venta: USD. Los costos se guardan en su moneda original y se convierten con el tipo de cambio congelado en la cotización.
 9. Al terminar, resume en el PR qué cambió, qué migraciones hay que aplicar y cómo probarlo.
+10. La base de datos es Lovable Cloud y Codex no tiene acceso directo. Todo cambio de base se entrega como migración o seed SQL en `supabase/`; el PR debe indicar el orden exacto de ejecución para que Lovable lo aplique. No ejecutar cambios contra una base remota.
