@@ -1,0 +1,1960 @@
+-- Generado por scripts/db/generate_blocks.py; ejecutar después de 00 y 01 y migración 003.
+begin;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('7641c767-1f5b-541c-9da9-dacd29f6d038', '757a8023-5f45-5cd0-a090-a2c6c86da20e', 'd68d0735-4b95-5b8a-b363-77d36646a285', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('f0fc166a-e318-5311-a2d0-5eb3826f0c43', '287413e0-49b4-5708-9871-ffd236128363', 3, '757a8023-5f45-5cd0-a090-a2c6c86da20e') on conflict do nothing;
+insert into public.itinerary_templates (id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, status, import_warnings) values ('7d37719c-7fcb-5622-b0f8-f7d3101441e7', 'UYUSPA-3D2N-JTd', 'ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)', 'UYU', 'SPA', 'ONEWAY', 3, 2, 'COMFORT', 'JTd', 'pendiente', '["Validar cantidades, variantes y servicios de origen antes de revisar.", "7 filas sin SKU enlazable."]') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('83871815-4379-5ab2-981a-bbb4d2ce27bd', 'DAY_8387181543795ab2981a', 'UYU', NULL, '03b03981-6b01-5a24-88b4-4b4bd66fcb2f', 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('7dddff4b-3796-5f9d-8511-1009cd74df21', '83871815-4379-5ab2-981a-bbb4d2ce27bd', 'es', 'Uyuni · Colchani · Isla Incahuasi ·', 'La aventura comienza a las 10:30 a.m. con una visita al Cementerio de Trenes de Uyuni, hogar de las primeras locomotoras de Bolivia y un impactante recordatorio del pasado ferroviario del país. Luego continuamos hacia Colchani, un pueblo tradicional conocido por su producción artesanal de sal y sus artesanías locales. Posteriormente, ingresamos al vasto e impresionante Salar de Uyuni, visitando atractivos como los Ojos del Salar, el Museo de Sal construido completamente con bloques de sal, y la icónica Isla Incahuasi. En la isla, realizamos una caminata hasta la cima para admirar cactus gigantes y formaciones de coral fosilizado, con tiempo suficiente para fotografía creativa. Disfruta del atardecer en el salar antes de regresar a tu hotel en Uyuni.
+Alojamiento: Hotel Jardines de Uyuni', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('b7d81c31-7fe2-59b0-b3ac-2e0fdb5cda7a', '83871815-4379-5ab2-981a-bbb4d2ce27bd', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '7513f5db-f8d1-57ae-a1c3-db400169a5cc', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('990df792-a73d-5297-ab49-f0460f8f1b7c', '83871815-4379-5ab2-981a-bbb4d2ce27bd', 'c1a0c70d-d40c-5eb2-b844-db8cb194ba4b', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('4f642473-4b7d-5a7b-85ce-182a11a83bf6', '83871815-4379-5ab2-981a-bbb4d2ce27bd', '02bb6245-5732-58eb-8c2a-4e1c42dddf51', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('6f87f639-d453-5eb8-916d-64a52d757b1f', '83871815-4379-5ab2-981a-bbb4d2ce27bd', 'ecd656cd-9c28-55e2-b248-36bc8f5901ab', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('01265b3d-c47f-5fe5-aee3-2e7b304254f8', '83871815-4379-5ab2-981a-bbb4d2ce27bd', '03b03981-6b01-5a24-88b4-4b4bd66fcb2f', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('780dd455-3500-5563-9de4-20740a117922', '83871815-4379-5ab2-981a-bbb4d2ce27bd', '113ed8f7-8532-5bcf-85ff-c51e2c0cf91e', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('21bdd356-b99f-5a63-b1d5-2925fafb5530', '83871815-4379-5ab2-981a-bbb4d2ce27bd', 'c42e75f2-488a-52ed-863d-a740cc5d78cf', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('6d23a5d7-a277-5b08-857f-57ba7037b267', '7d37719c-7fcb-5622-b0f8-f7d3101441e7', 1, '83871815-4379-5ab2-981a-bbb4d2ce27bd') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'DAY_4c743212282a5fd3b08a', NULL, NULL, 'f36e2c3f-b286-5781-9928-155a28b45931', 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('8eb41034-9674-5e97-8d72-3665b68ddf43', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'es', 'Puerto Chuvica · Lagunas Altiplánicas · Laguna Colorada', 'Continuamos hacia el impresionante Valle de las Rocas, donde formaciones naturales esculpidas por el viento durante siglos crean un paisaje surrealista. También visitamos comunidades tradicionales para conocer la vida local en el Altiplano. El viaje continúa hacia las hermosas lagunas altiplánicas — Cañapa, Ramaditas, Honda y Hedionda — donde cientos de flamencos habitan en un extraordinario entorno andino. Más tarde, atravesamos el vasto Desierto de Siloli, rodeado de volcanes y paisajes de gran altitud.
+Alojamiento: Hotel Tayka del Desierto', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('858f2f1d-c6b4-5157-933f-0eb30a71101f', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '7513f5db-f8d1-57ae-a1c3-db400169a5cc', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('be8af3ae-711c-508f-af1e-ed1c52701d0b', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('8205a545-4338-52ce-a881-bb5ffc236462', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', '4c8c52df-18b9-5a1a-b1a0-41c11e9cd9af', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('49371a18-4352-5e4b-9f91-93a1b6c92e01', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'f36e2c3f-b286-5781-9928-155a28b45931', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('a3617aad-5abf-5dde-9b94-468ac5c286f4', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'ee86e0d2-04fc-5288-9b3a-3da87e264fae', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('d90d2f36-4419-5a78-9a65-127f94204fb2', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', 'af2523ea-4a7c-5944-b07e-d3ce8bc4f80b', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('56a66039-539f-5df1-a342-3ae06ab3cf1a', '4c743212-282a-5fd3-b08a-a619a0cfdc2d', '81770c42-cbf6-5433-a1bd-4f75bf940632', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('5d1695c9-8c1e-5379-99c0-4c5c56a44213', '7d37719c-7fcb-5622-b0f8-f7d3101441e7', 2, '4c743212-282a-5fd3-b08a-a619a0cfdc2d') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('9f435644-e75a-570a-8234-13707b6d97c7', 'DAY_9f435644e75a570a8234', NULL, 'SPA', NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('093746ac-0af3-5573-aba2-dec1eeb2e8cb', '9f435644-e75a-570a-8234-13707b6d97c7', 'es', 'Sol de la Mañana · Hito Cajón  · San Pedro de Atacama', 'Salida temprano hacia los Géiseres Sol de la Mañana, ubicados a casi 5.000 metros sobre el nivel del mar, seguido de una visita a las relajantes aguas termales de Polques. Luego cruzamos el surrealista Desierto de Dalí y visitamos la Laguna Verde y la Laguna Blanca, al pie del majestuoso Volcán Licancabur. Traslado en vehículo chileno desde la frontera boliviana hacia San Pedro de Atacama.
+Alojamiento: No incluído', 'Almuerzo', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('25be9641-409c-5b0b-aff9-1c5d89332c55', '9f435644-e75a-570a-8234-13707b6d97c7', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '7513f5db-f8d1-57ae-a1c3-db400169a5cc', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('ad261f1f-1e14-560d-9e15-f61345bb74d8', '9f435644-e75a-570a-8234-13707b6d97c7', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('6f2259a3-e4af-5841-bc89-17f35ffe7291', '9f435644-e75a-570a-8234-13707b6d97c7', 'fd01d0d5-04f6-57cf-8538-f1ce8daf05fc', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('fe16461a-7967-578b-93ba-e11eac2aee30', '9f435644-e75a-570a-8234-13707b6d97c7', 'd68d0735-4b95-5b8a-b363-77d36646a285', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('1f524b3c-ca87-505c-a3bd-ba133f72ec3b', '7d37719c-7fcb-5622-b0f8-f7d3101441e7', 3, '9f435644-e75a-570a-8234-13707b6d97c7') on conflict do nothing;
+insert into public.itinerary_templates (id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, status, import_warnings) values ('242291b9-7094-5c71-a396-87da68e5b217', 'UYUSPA-3D2N-ÑTd', 'ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)', 'UYU', 'SPA', 'ONEWAY', 3, 2, 'MIXTO', 'ÑTd', 'pendiente', '["Validar cantidades, variantes y servicios de origen antes de revisar.", "7 filas sin SKU enlazable."]') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('7f1727d8-00ba-5981-a67e-0a6396357ecd', 'DAY_7f1727d800ba5981a67e', 'UYU', NULL, '4f92cc8a-a8c4-517f-987e-eb7142359327', 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('2e924432-d25e-50d4-972b-39f614429b2e', '7f1727d8-00ba-5981-a67e-0a6396357ecd', 'es', 'Uyuni · Colchani · Isla Incahuasi · Puerto Chuvica', 'La aventura comienza a las 10:30 a.m. con una visita al Cementerio de Trenes de Uyuni, hogar de las primeras locomotoras de Bolivia y un impactante recordatorio del pasado ferroviario del país. Luego continuamos hacia Colchani, un pueblo tradicional conocido por su producción artesanal de sal y sus artesanías locales. Posteriormente, ingresamos al vasto e impresionante Salar de Uyuni, visitando atractivos como los Ojos del Salar, el Museo de Sal construido completamente con bloques de sal, y la icónica Isla Incahuasi. En la isla, realizamos una caminata hasta la cima para admirar cactus gigantes y formaciones de coral fosilizado, con tiempo suficiente para fotografía creativa. Disfruta del atardecer en el salar antes de regresar a tu hotel en Uyuni.
+Alojamiento: Hotel Coscaña', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('21989f52-4324-562a-9a3f-bfe7e21d992b', '7f1727d8-00ba-5981-a67e-0a6396357ecd', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, 'c3189e5f-6fcc-5ec8-8ea6-1b7130c35410', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('162683ec-7c26-5b70-aff2-d27947f04ade', '7f1727d8-00ba-5981-a67e-0a6396357ecd', 'c1a0c70d-d40c-5eb2-b844-db8cb194ba4b', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('caa9123e-0a80-5c5a-9932-da7ee44146a8', '7f1727d8-00ba-5981-a67e-0a6396357ecd', '02bb6245-5732-58eb-8c2a-4e1c42dddf51', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('7979fb9b-fcd4-5230-8644-9f06fb432456', '7f1727d8-00ba-5981-a67e-0a6396357ecd', '4e78b66d-0113-529a-a8f6-76bb10131eee', 1, false, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('884dd370-5fc3-56c2-b612-37ccfcb3c8cb', '7f1727d8-00ba-5981-a67e-0a6396357ecd', '4f92cc8a-a8c4-517f-987e-eb7142359327', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('2d55dd07-00dc-5f52-8755-a8418be6efec', '7f1727d8-00ba-5981-a67e-0a6396357ecd', 'fe8f8a8e-f51b-5460-9be0-ea2934436a65', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('a574886f-e41e-5bcc-a13d-ae22536807e9', '7f1727d8-00ba-5981-a67e-0a6396357ecd', 'fa33cfd5-f099-5049-934f-ac1376653382', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('406b3a3c-0a5f-56c9-a46a-859bdb721f52', '242291b9-7094-5c71-a396-87da68e5b217', 1, '7f1727d8-00ba-5981-a67e-0a6396357ecd') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('7202757f-0d5e-5dc5-9817-212a90c653f9', 'DAY_7202757f0d5e5dc59817', NULL, NULL, 'f36e2c3f-b286-5781-9928-155a28b45931', 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('5dd5ef82-d863-5769-a634-418bf06eb505', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'es', 'Puerto Chuvica · Lagunas Altiplánicas · Laguna Colorada', 'Continuamos hacia el impresionante Valle de las Rocas, donde formaciones naturales esculpidas por el viento durante siglos crean un paisaje surrealista. También visitamos comunidades tradicionales para conocer la vida local en el Altiplano. El viaje continúa hacia las hermosas lagunas altiplánicas — Cañapa, Ramaditas, Honda y Hedionda — donde cientos de flamencos habitan en un extraordinario entorno andino. Más tarde, atravesamos el vasto Desierto de Siloli, rodeado de volcanes y paisajes de gran altitud.
+Alojamiento: Hotel Tayka del Desierto', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('f0f6c894-c83d-541b-8996-611949986e75', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, 'c3189e5f-6fcc-5ec8-8ea6-1b7130c35410', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('b2a170f7-6881-5a98-9aa5-be0dbf31a42d', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('e707b657-31e0-5c15-8a17-03d59e05c3c8', '7202757f-0d5e-5dc5-9817-212a90c653f9', '4c8c52df-18b9-5a1a-b1a0-41c11e9cd9af', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('efcb62ac-3097-56bb-b8e3-22810d3f0138', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'f36e2c3f-b286-5781-9928-155a28b45931', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('73c0b6c8-1baf-56da-894b-bea727e8abdd', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'ee86e0d2-04fc-5288-9b3a-3da87e264fae', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('d8f70c25-2e9f-5fd6-a2c9-08e204b74c0c', '7202757f-0d5e-5dc5-9817-212a90c653f9', 'af2523ea-4a7c-5944-b07e-d3ce8bc4f80b', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('26e8a4e2-d714-5ea3-9e1d-41b8a6769211', '7202757f-0d5e-5dc5-9817-212a90c653f9', '81770c42-cbf6-5433-a1bd-4f75bf940632', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('9affb311-9d83-5e78-97d0-2e1302eed08c', '242291b9-7094-5c71-a396-87da68e5b217', 2, '7202757f-0d5e-5dc5-9817-212a90c653f9') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'DAY_0f2786dc11435a258c55', NULL, 'SPA', NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('d8b54538-b66b-55c2-b51e-87382425f7b1', '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'es', 'Sol de la Mañana · Hito Cajón  · San Pedro de Atacama', 'Salida temprano hacia los Géiseres Sol de la Mañana, ubicados a casi 5.000 metros sobre el nivel del mar, seguido de una visita a las relajantes aguas termales de Polques. Luego cruzamos el surrealista Desierto de Dalí y visitamos la Laguna Verde y la Laguna Blanca, al pie del majestuoso Volcán Licancabur. Traslado en vehículo chileno desde la frontera boliviana hacia San Pedro de Atacama.
+Alojamiento: No incluido', 'Almuerzo', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('76c72f92-fccc-5f79-95a2-e5d69ac81b17', '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, 'c3189e5f-6fcc-5ec8-8ea6-1b7130c35410', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('f67b12e7-6132-5f14-9271-9873edab6ddf', '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('909a4ad8-1296-5595-a60f-2600d752a40f', '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'fd01d0d5-04f6-57cf-8538-f1ce8daf05fc', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('a43f61ad-ea2f-51b7-bfee-84a09bdef9ca', '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d', 'd68d0735-4b95-5b8a-b363-77d36646a285', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('8dd6cadf-8c2d-5129-b33f-03d3be5a4bf6', '242291b9-7094-5c71-a396-87da68e5b217', 3, '0f2786dc-1143-5a25-8c55-9a26eaf9cd8d') on conflict do nothing;
+insert into public.itinerary_templates (id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, status, import_warnings) values ('8ced6997-e743-57da-8679-b8202f48256e', 'UYUSPA-3D2N-KS', 'ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)', 'UYU', 'SPA', 'ONEWAY', 3, 2, 'MIXTO', 'KS', 'pendiente', '["Validar cantidades, variantes y servicios de origen antes de revisar.", "8 filas sin SKU enlazable."]') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('99dc888e-7146-57ba-ade2-be11f4c120bf', 'DAY_99dc888e714657baade2', 'UYU', NULL, 'ac4f09a4-e6fb-5732-a04b-16537f6ebc07', 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('11e24789-351c-5f91-bd72-9ef37fd9ad58', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'es', 'Uyuni · Colchani · Isla Incahuasi · Puerto Chuvica', 'La aventura comienza a las 10:30 a.m. con una visita al Cementerio de Trenes de Uyuni, hogar de las primeras locomotoras de Bolivia y un impactante recordatorio del pasado ferroviario del país. Luego continuamos hacia Colchani, un pueblo tradicional conocido por su producción artesanal de sal y sus artesanías locales. Posteriormente, ingresamos al vasto e impresionante Salar de Uyuni, visitando atractivos como los Ojos del Salar, el Museo de Sal construido completamente con bloques de sal, y la icónica Isla Incahuasi. En la isla, realizamos una caminata hasta la cima para admirar cactus gigantes y formaciones de coral fosilizado, con tiempo suficiente para fotografía creativa. Disfruta del atardecer en el salar antes de regresar a tu hotel en Uyuni.
+Alojamiento: Hotel Kachi', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas
+- Traslado San Pedro – Calama', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('05292e20-06e6-503a-b97f-0b4f12cd4271', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '928ca1e1-a1e7-5339-b5a8-3fdcfc5e67e5', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('3a105641-2f31-5525-994c-29b2e0599ed2', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'c1a0c70d-d40c-5eb2-b844-db8cb194ba4b', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('42f670f0-6bf1-5bff-95aa-40d781bea27b', '99dc888e-7146-57ba-ade2-be11f4c120bf', '02bb6245-5732-58eb-8c2a-4e1c42dddf51', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('a80b62d0-3715-5ac5-a13d-abf7fd366989', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'a9f5afb8-374d-5c0c-8413-99aaae578359', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('c69aa6a5-67aa-5770-a27a-a72c87d48b03', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'ac4f09a4-e6fb-5732-a04b-16537f6ebc07', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('498800fc-26d3-560b-b73d-c2c821a51f24', '99dc888e-7146-57ba-ade2-be11f4c120bf', '3f93d6d1-5344-5390-aade-fe9b9be74129', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('26e792a2-b27c-5fb9-9c00-7e74aa722159', '99dc888e-7146-57ba-ade2-be11f4c120bf', '7542eeab-7698-5514-b7bc-d3ac470b03f4', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('abb37bbb-6714-5c86-87ee-8f1a83618fe8', '99dc888e-7146-57ba-ade2-be11f4c120bf', 'ab659ba3-46d0-5798-ac53-dc1d32caa7d5', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('f1696989-155a-5038-8929-00c08396bce4', '8ced6997-e743-57da-8679-b8202f48256e', 1, '99dc888e-7146-57ba-ade2-be11f4c120bf') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('6ba9368d-d086-567b-861f-928a0f989b96', 'DAY_6ba9368dd086567b861f', NULL, NULL, 'ab659ba3-46d0-5798-ac53-dc1d32caa7d5', 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('44d83740-147a-53a7-9ab7-96763b984977', '6ba9368d-d086-567b-861f-928a0f989b96', 'es', 'Puerto Chuvica · Lagunas Altiplánicas · Laguna Colorada', 'Continuamos hacia el impresionante Valle de las Rocas, donde formaciones naturales esculpidas por el viento durante siglos crean un paisaje surrealista. También visitamos comunidades tradicionales para conocer la vida local en el Altiplano. El viaje continúa hacia las hermosas lagunas altiplánicas — Cañapa, Ramaditas, Honda y Hedionda — donde cientos de flamencos habitan en un extraordinario entorno andino. Más tarde, atravesamos el vasto Desierto de Siloli, rodeado de volcanes y paisajes de gran altitud.
+Alojamiento: Hotel Sky Dream', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas
+- Traslado San Pedro – Calama', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('a0ecde43-81d4-58b5-8450-89c8de56ee0d', '6ba9368d-d086-567b-861f-928a0f989b96', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '928ca1e1-a1e7-5339-b5a8-3fdcfc5e67e5', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('f532967e-afae-5abd-8a9a-206953b502d4', '6ba9368d-d086-567b-861f-928a0f989b96', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('6e8d4911-89be-59fd-a370-8ce775c95380', '6ba9368d-d086-567b-861f-928a0f989b96', '81270178-5ac4-5c82-b566-4c7d3224b368', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('40ab5ab7-0b59-53a0-83e3-af96ea9c7ffb', '6ba9368d-d086-567b-861f-928a0f989b96', 'ab659ba3-46d0-5798-ac53-dc1d32caa7d5', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('861829b9-b7b2-53bc-bb9e-8517e79cca3d', '8ced6997-e743-57da-8679-b8202f48256e', 2, '6ba9368d-d086-567b-861f-928a0f989b96') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'DAY_ce6d64fbc0415e1c8c83', NULL, 'SPA', NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('f73a9fba-d64e-5ab5-9c90-a6bb03f92dd4', 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'es', 'Sol de la Mañana · Hito Cajón · San Pedro de Atacama', 'Salida temprano hacia los Géiseres Sol de la Mañana, ubicados a casi 5.000 metros sobre el nivel del mar, seguido de una visita a las relajantes aguas termales de Polques. Luego cruzamos el surrealista Desierto de Dalí y visitamos la Laguna Verde y la Laguna Blanca, al pie del majestuoso Volcán Licancabur. Traslado en vehículo chileno desde la frontera boliviana hacia San Pedro de Atacama.
+Alojamiento: No incluido', 'Almuerzo', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas
+- Traslado San Pedro – Calama', false) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('cb28e208-de4f-5706-997c-e8d155f79e3c', 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'dfdec903-cf0e-5add-853d-055cfae40c63', 1, true, 3, '928ca1e1-a1e7-5339-b5a8-3fdcfc5e67e5', 1) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('9326c82e-5625-5aae-bcf2-ea8c04017ed5', 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'f7e84c94-e708-5606-bee7-861d569cd595', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('fdcb055e-60c8-5e13-b690-35ec7f5515aa', 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'fd01d0d5-04f6-57cf-8538-f1ce8daf05fc', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.day_block_items (id, block_id, service_id, qty, included, multi_day_span, coverage_key, coverage_start_day) values ('838fa403-20ac-558c-a094-e6e8b512e28c', 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315', 'd68d0735-4b95-5b8a-b363-77d36646a285', 1, true, 1, NULL, NULL) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('a0b5d834-160b-50a1-b1bc-b836d097831d', '8ced6997-e743-57da-8679-b8202f48256e', 3, 'ce6d64fb-c041-5e1c-8c83-10ecaddc3315') on conflict do nothing;
+insert into public.itinerary_templates (id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, status, import_warnings) values ('1f6782ea-17d1-54b6-8ba8-95d3c6c89e7e', 'UYUSPA-3D2N-LM', 'ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA', 'UYU', 'SPA', 'ONEWAY', 3, 2, 'MIXTO', 'LM', 'pendiente', '["Validar cantidades, variantes y servicios de origen antes de revisar.", "Sin presupuesto enlazado."]') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('f0fb157a-342f-5239-8695-4fe6f0602e14', 'DAY_f0fb157a342f52398695', 'UYU', NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('4bdaff8d-c03c-5172-bcbc-c0816be95bd7', 'f0fb157a-342f-5239-8695-4fe6f0602e14', 'es', 'Uyuni · Colchani · Salar de Uyuni', 'La aventura comienza a las 10:30 AM con la visita al Cementerio de Trenes de Uyuni, símbolo histórico del altiplano boliviano. Continuamos hacia Colchani, donde conoceremos el proceso artesanal de extracción y refinamiento de la sal.  Ingreso al majestuoso Salar de Uyuni, visitando los Ojos del Salar, el Museo de Sal, las esculturas de sal, la icónica Isla Incahuasi, famosa por sus cactus gigantes y vistas panorámicas del salar. Almuerzo tradicional Apthapi en medio del salar y atardecer sobre el desierto blanco.
+Alojamiento: Hotel Luna Salada', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('ce820d1d-1055-5a05-be9e-6d014d237bb9', '1f6782ea-17d1-54b6-8ba8-95d3c6c89e7e', 1, 'f0fb157a-342f-5239-8695-4fe6f0602e14') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('72cc8225-36fa-5f13-b688-678083f8b484', 'DAY_72cc822536fa5f13b688', NULL, NULL, NULL, 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('6dfc1f62-6676-5ddf-ab78-5368a685d36a', '72cc8225-36fa-5f13-b688-678083f8b484', 'es', 'Valle de las Rocas · Cañón de la Anaconda', 'Salida hacia el espectacular Valle de las Rocas, seguido de un recorrido por el impresionante Cañón de la Anaconda, formado por siglos de erosión natural, antes de continuar hacia Villamar.
+Alojamiento: Hotel Mallku Cueva', 'Desayuno · Almuerzo · Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('e9e4b2ca-21ec-5b60-bf7b-8dad331cfe2c', '1f6782ea-17d1-54b6-8ba8-95d3c6c89e7e', 2, '72cc8225-36fa-5f13-b688-678083f8b484') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('f9fd009b-4be1-500d-864e-5d2273db3e1b', 'DAY_f9fd009b4be1500d864e', NULL, NULL, NULL, 4, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('6848ae81-0695-5897-b596-84040e600d19', 'f9fd009b-4be1-500d-864e-5d2273db3e1b', 'es', 'Sol de la Mañana · Hito Cajón · San Pedro de Atacama', 'Salida temprano para visitar los géiseres de Sol de la Mañana, ubicados a casi 5.000 metros sobre el nivel del mar, donde la actividad geotérmica crea fumarolas y pozas de barro hirviendo. Continuación hacia las Termas de Polques, donde podrás relajarte en aguas termales naturales. Luego cruzarás el surrealista Desierto Dalí y visitarás la Laguna Verde y la Laguna Blanca al pie del volcán Licancabur. Traslado en vehículo chileno desde la frontera boliviana (Hito Cajón) hacia San Pedro de Atacama antes de las 17:00 hrs.', 'Desayuno · Almuerzo', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('09201346-6ebd-5e99-8a53-ce5ae26fef7b', '1f6782ea-17d1-54b6-8ba8-95d3c6c89e7e', 4, 'f9fd009b-4be1-500d-864e-5d2273db3e1b') on conflict do nothing;
+insert into public.itinerary_templates (id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, status, import_warnings) values ('ede37172-1e3b-5f87-8a34-14e3c81133e3', 'UYUSPA-3D2N-KDr', 'ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA   (SOLO IDA)', 'UYU', 'SPA', 'ONEWAY', 3, 2, 'BUDGET', 'KDr', 'pendiente', '["Validar cantidades, variantes y servicios de origen antes de revisar.", "Sin presupuesto enlazado."]') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('2d5a994a-7e25-5f71-a08c-4ddad27b2613', 'DAY_2d5a994a7e255f71a08c', 'UYU', NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('181e342f-3c78-5c54-837b-f8f4dddd72de', '2d5a994a-7e25-5f71-a08c-4ddad27b2613', 'es', 'Uyuni · Colchani · Isla Incahuasi - Full day Salar', 'La aventura comienza a las 10:30 a.m. con una visita al Cementerio de Trenes de Uyuni, hogar de las primeras locomotoras de Bolivia y un impactante recordatorio del pasado ferroviario del país. Luego continuamos hacia Colchani, un pueblo tradicional conocido por su producción artesanal de sal y sus artesanías locales. Posteriormente, ingresamos al vasto e impresionante Salar de Uyuni, visitando atractivos como los Ojos del Salar, el Museo de Sal construido completamente con bloques de sal, y la icónica Isla Incahuasi. En la isla, realizamos una caminata hasta la cima para admirar cactus gigantes y formaciones de coral fosilizado, con tiempo suficiente para fotografía creativa. Disfruta del atardecer en el salar antes de regresar a tu hotel en Uyuni.
+Alojamiento: Hotel Kachi', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('f312f99a-b612-5158-a77a-d5d7af262a06', 'ede37172-1e3b-5f87-8a34-14e3c81133e3', 1, '2d5a994a-7e25-5f71-a08c-4ddad27b2613') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('48ac169c-0410-5a7e-b8a4-8cf63859b053', 'DAY_48ac169c04105a7eb8a4', NULL, NULL, NULL, 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('3c1c11f0-fc1f-548e-ba25-dc81011d6f1f', '48ac169c-0410-5a7e-b8a4-8cf63859b053', 'es', 'Lagunas Altiplánicas · Laguna Colorada', 'Continuamos hacia el impresionante Valle de las Rocas, donde formaciones naturales esculpidas por el viento durante siglos crean un paisaje surrealista. También visitamos comunidades tradicionales para conocer la vida local en el Altiplano. El viaje continúa hacia las hermosas lagunas altiplánicas — Cañapa, Ramaditas, Honda y Hedionda — donde cientos de flamencos habitan en un extraordinario entorno andino. Más tarde, atravesamos el vasto Desierto de Siloli, rodeado de volcanes y paisajes de gran altitud.
+Alojamiento: Refugio de Montaña en Laguna Colorada', 'Almuerzo, Cena', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('a9cdab6b-efca-521e-bc7c-029aea90a230', 'ede37172-1e3b-5f87-8a34-14e3c81133e3', 2, '48ac169c-0410-5a7e-b8a4-8cf63859b053') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('f562c363-4981-532c-9ce7-b7ef01657b2f', 'DAY_f562c3634981532c9ce7', NULL, 'SPA', NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('c7aa4db7-7b16-5f23-ba85-a720692209a1', 'f562c363-4981-532c-9ce7-b7ef01657b2f', 'es', 'Sol de la Mañana · Hito Cajón ·  San Pedro de Atacama', 'Salida temprano hacia los Géiseres Sol de la Mañana, ubicados a casi 5.000 metros sobre el nivel del mar, seguido de una visita a las relajantes aguas termales de Polques. Luego cruzamos el surrealista Desierto de Dalí y visitamos la Laguna Verde y la Laguna Blanca, al pie del majestuoso Volcán Licancabur. Traslado en vehículo chileno desde la frontera boliviana hacia San Pedro de Atacama.
+Alojamiento: No incluído', 'Almuerzo', '- Tasas fronterizas y migratorias
+- Alojamiento en San Pedro de Atacama
+- Actividades opcionales
+- Gastos personales
+- Seguro de viaje
+- Propinas
+- Vuelos
+- Comidas o bebestible no mencionadas', false) on conflict do nothing;
+insert into public.template_days (id, template_id, day_number, block_id) values ('5f71956c-7e64-5a99-b169-086f5fc89955', 'ede37172-1e3b-5f87-8a34-14e3c81133e3', 3, 'f562c363-4981-532c-9ce7-b7ef01657b2f') on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('5c5d4d46-dfa3-5411-9ea1-df76ee45c511', 'DAY_5c5d4d46dfa354119ea1', 'SPA', NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('0b9a8b7b-8f14-588e-b578-f9e5856cf4f9', '5c5d4d46-dfa3-5411-9ea1-df76ee45c511', 'es', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('3e1e15ba-be72-55eb-aae1-5283ba6ef9d8', 'DAY_3e1e15babe7255ebaae1', NULL, NULL, NULL, 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('6ce4d36d-df26-52b1-98e2-e8f75c597919', '3e1e15ba-be72-55eb-aae1-5283ba6ef9d8', 'es', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('64379a12-8339-5c3d-8ef9-fa5bcd9579a0', 'DAY_64379a1283395c3d8ef9', NULL, 'UYU', NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('8f22f94c-7acd-5724-b1d8-dcb614135313', '64379a12-8339-5c3d-8ef9-fa5bcd9579a0', 'es', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', 'Lagunas Altiplánicas y Desierto de Siloli Salida desde su hotel en San Pedro de Atacama (Chile), cruzando la frontera por Hito Cajón. Durante la jornada se visitan la Laguna Blanca, Laguna Verde, el Desierto de Dalí, Aguas Termales Polques, el campo geotérmico de los Géiseres Sol de Mañana y la impresionante Laguna Colorada. La ruta continúa a través del vasto Desierto de Siloli y las lagunas Honda y Hedionda, hábitat natural de flamencos andinos en un entorno volcánico de gran impacto visual. Alojamiento: Hotel Los Flamencos (Laguna Hedionda)  Comidas incluidas: Almuerzo · Cena', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('cf8b52bb-79a8-514e-9442-110c5791dd22', 'DAY_cf8b52bb79a8514e9442', NULL, NULL, NULL, 4, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('7523b1b4-927c-5c32-afe2-4e345ec8f30d', 'cf8b52bb-79a8-514e-9442-110c5791dd22', 'es', '(opcional)  – Vuelo hacia La Paz Transfer Hotel aeropuerto a las 7.30am. Alojamiento: No incluido Comidas incluidas: Desayuno Fin del servicio', 'El itinerario puede variar debido a acumulación de agua por lluvias. La Isla Incahuasi podría no estar accesible y la ruta puede modificarse sin previo aviso.', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('6184c14b-bea6-5ca8-8533-cdfbf9662683', 'DAY_6184c14bbea65ca88533', 'UYU', NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('b815e966-bad9-5661-a751-12cf9a1bdec6', '6184c14b-bea6-5ca8-8533-cdfbf9662683', 'es', 'Salar de Uyuni · Colchani · Isla Incahuasi · Cóctel al Atardecer', 'La aventura comienza a las 10:30 AM con la visita al Cementerio de Trenes de Uyuni, hogar de las primeras locomotoras de Bolivia y un importante recuerdo histórico del pasado ferroviario del país.
+Alojamiento: Luna Salada', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('2f887349-19e2-552e-b21d-014b7f238097', 'DAY_2f88734919e2552eb21d', NULL, 'UYU', NULL, 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('c4d22597-5c6f-5a6c-8ff2-83f8ef95e96d', '2f887349-19e2-552e-b21d-014b7f238097', 'es', 'Valle de las Rocas · Lagunas Altiplánicas · Retorno a Uyuni', 'Después del desayuno, iniciaremos una jornada de exploración hacia el Valle de las Rocas, una zona de formaciones volcánicas esculpidas por el viento y la erosión natural. Durante el recorrido podremos observar paisajes de gran amplitud, formaciones rocosas singulares y escenarios característicos del altiplano boliviano.
+Alojamiento: No incluido', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('678603a2-5f6a-5ee6-a2b5-9163cdd68270', 'DAY_678603a25f6a5ee6a2b5', 'UYU', NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('ee881262-8bbb-5bb8-b36e-0c22bdffb6ac', '678603a2-5f6a-5ee6-a2b5-9163cdd68270', 'es', '12/08 · Exploración alrededor del Salar de Uyuni', 'Día completo dedicado a la exploración de los alrededores del Salar de Uyuni, recorriendo algunos de sus principales atractivos y paisajes característicos. Durante esta jornada se visitarán sectores del salar y zonas cercanas, con tiempo para fotografías y contemplación del entorno.
+Alojamiento: Hotel Jardines de Uyuni · 2 habitaciones', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('822d5a32-c6af-5c41-bd5a-6a352fdf47fe', 'DAY_822d5a32c6af5c41bd5a', NULL, 'UYU', NULL, 2, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('757e58bf-6236-526c-b355-8d6f3a07c5d4', '822d5a32-c6af-5c41-bd5a-6a352fdf47fe', 'es', '13/08 · Uyuni · Sajama · Tambo Quemado', 'Salida desde Uyuni hacia Tambo Quemado, siguiendo una ruta paisajística por el altiplano boliviano vía Sajama. Durante el recorrido se atravesarán extensas planicies de altura, paisajes volcánicos, pueblos andinos y zonas de gran valor escénico, con vistas hacia el entorno del Parque Nacional Sajama.
+Alojamiento: Hospedaje rústico en ruta / zona Sajama – Tambo Quemado', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('1abf416c-49a2-5649-9c62-62fc8edf65bb', 'DAY_1abf416c49a256499c62', NULL, NULL, NULL, 3, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('77fd7e00-4a97-558b-84bc-c7e5931e7e59', '1abf416c-49a2-5649-9c62-62fc8edf65bb', 'es', '14/08 · Termas · Tambo Quemado · Lago Chungará · Putre', 'Después del desayuno, visita a las termas de la zona para disfrutar de un momento de descanso antes de continuar hacia la frontera. Posteriormente, traslado hacia Tambo Quemado para realizar el cruce fronterizo alrededor de las 11:30 AM.
+Alojamiento: No incluido · Se sugiere Terraza Lodge en Putre', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('5c6cb615-2d88-5884-9c95-c65bf7561022', 'DAY_5c6cb6152d8858849c95', NULL, NULL, NULL, 4, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('f2637296-6bb4-5fa5-b68f-64c310b3aff1', '5c6cb615-2d88-5884-9c95-c65bf7561022', 'es', '15/08 · Putre · Museo de San Miguel de Azapa · Arica · Aeropuerto', 'Salida desde Putre hacia Arica, realizando paradas en ruta para apreciar los paisajes de la precordillera y el descenso hacia la costa del norte de Chile.
+Alojamiento: No incluido', NULL, NULL, false) on conflict do nothing;
+insert into public.day_blocks (id, code, route_from, route_to, hotel_service_id, default_day_position, status) values ('047293b8-3f49-5cad-9a29-5b754bbbf7f5', 'DAY_047293b83f495cad9a29', NULL, NULL, NULL, 1, 'pendiente') on conflict do nothing;
+insert into public.day_block_translations (id, block_id, lang, title, description, includes, excludes, reviewed) values ('bddcff59-eef0-5bbc-9055-504daa8fb829', '047293b8-3f49-5cad-9a29-5b754bbbf7f5', 'es', 'Hito Cajón › San Pedro de Atacama › Tarde libre + Tour Astronómico Llegada a Hito Cajón y traslado directo hacia San Pedro de Atacama. Tendrás tiempo libre por la tarde para descansar o recorrer el pueblo. Por la noche, disfrutarás un tour astronómico, que incluye observación guiada del cielo andino,  Guia Certificada en Inglés, las entradas correspondientes y el traslado de vuelta a su hotel. Día 2 – Full Day Piedras Rojas + Laguna Chaxa Salida en la mañana para un full day que combina los paisajes altiplánicos de Piedras Rojas y la fauna del Salar de Atacama en Laguna Chaxa. El programa incluye Transporte privado, Guia Certificada en Inglés, Entradas y Box Lunch durante el recorrido. Día 3 – Geysers del Tatio + Valle de la Luna Muy temprano visitarás los Geysers del Tatio, uno de los campos geotérmicos más altos del mundo, con desayuno básico y entradas incluidas. Por la tarde, se realiza la excursión al Valle de la Luna, donde podrás apreciar formaciones únicas y un paisaje lunar espectacular. El programa incluye Transporte privado, Guia Certificada en Inglés, Entradas durante el recorrido. Día 4 – Valle del Arcoíris + Laguna Cejar Por la mañana visitarás el Valle del Arcoíris, conocido por sus montañas de minerales que forman un paisaje multicolor. Por la tarde, el recorrido continúa hacia Laguna Cejar, famosa por su alta concentración de sal que permite flotar fácilmente. El programa incluye Transporte privado, Guia Certificada en Inglés, Entradas durante el recorrido.', 'Fin de Servicio.  Incluye Transporte en Hito Cajón  –  San Pedro A Chofer/guía en idioma Inglés Entradas a todas las experiencias mencionadas. Box lunch, desayuno básico y cóctel según programa. No incluido Alojamiento en San Pedro de Atacama. Cenas y almuerzos no mencionados. Actividades opcionales (por ejemplo, tours en bicicleta, excursiones adicionales) Gastos personales (snacks, bebidas, souvenirs) Seguro de viaje y de salud Propinas para conductores, guías y personal local Vuelos internacionales o domésticos Almuerzos/cenas no mencionados Transfer San Pedro–Calama (CJC) SKU: SPA2D-TATIO-CEJAR-LUNA
+Alojamiento: No incluido', NULL, NULL, false) on conflict do nothing;
+commit;
+
+-- Auditoría de fuentes (sin precios inventados):
+-- {
+--   "missing_budgets": [
+--     "SPAUYU-3D2N-HK",
+--     "SPASPA-4D3N-ScRF",
+--     "SPASPA-4D3N-FJM",
+--     "SPASPA-4D3N-FJJ",
+--     "SPASPA-4D3N-ScLM",
+--     "SPASPA-4D3N-ScJF",
+--     "SPASPA-4D3N-ScJTd",
+--     "UYUUYU-3D2N-PF",
+--     "UYUUYU-3D2N-ÑF",
+--     "UYUUYU-3D2N-CkHj",
+--     "UYUSPA-3D2N-LM",
+--     "UYUSPA-3D2N-KDr"
+--   ],
+--   "missing_skus": [
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 9,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 14,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 24,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 29,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FJ",
+--       "sheet": "SPA UYU - 3D2N - FJ",
+--       "item": 44,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 9,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 14,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 24,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 29,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FP",
+--       "sheet": "SPA UYU - 3D2N - FP",
+--       "item": 44,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 9,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 14,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 24,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 29,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-FL",
+--       "sheet": "SPA UYU - 3D2N - FL",
+--       "item": 44,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 7,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 25,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 33,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-MP",
+--       "sheet": "SPA UYU - 3D2N - MP",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 7,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 25,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 33,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ML",
+--       "sheet": "SPA UYU - 3D2N - ML",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 7,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 25,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 39,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPAUYU-3D2N-ScK",
+--       "sheet": "SPA UYU - 3D2N - ScK",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 54,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MRF",
+--       "sheet": "SPA SPA 4D3N MRF",
+--       "item": 60,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 34,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 47,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 54,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑLTd",
+--       "sheet": "SPA SPA - 4D3N - ÑLTd",
+--       "item": 58,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 47,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 52,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-LLTd",
+--       "sheet": "SPA SPA - 4D3N - LLTd",
+--       "item": 58,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 47,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 52,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-PPTd",
+--       "sheet": "SPA SPA - 4D3N - PPTd",
+--       "item": 58,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ÑÑF",
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPF",
+--       "sheet": "SPA SPA - 4D3N - MPF",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLTd",
+--       "sheet": "SPA SPA - 4D3N - MLTd",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MLF",
+--       "sheet": "SPA SPA - 4D3N - MLF",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MJF",
+--       "sheet": "SPA SPA - 4D3N - MJF",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MÑF",
+--       "sheet": "SPA SPA - 4D3N - MÑF",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 16,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 25,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 30,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 34,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 43,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 44,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 49,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-ScKS",
+--       "sheet": "SPA SPA - 4D3N - ScKS",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 7,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 18,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 32,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 38,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 47,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 53,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "SPASPA-4D3N-MPTd",
+--       "sheet": "SPA SPA - 4D3N - MPTd",
+--       "item": 59,
+--       "sku": null,
+--       "description": "TRANSPORTE 4X4 HITO - HITO 4D3N"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 26,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 40,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-PTd",
+--       "sheet": "UYU UYU - 3D2N - PTd",
+--       "item": 49,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 26,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 40,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-LTd",
+--       "sheet": "UYU UYU - 3D2N - LTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 26,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 40,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-JTd",
+--       "sheet": "UYU UYU - 3D2N - JTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 20,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 26,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 40,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-ÑTd",
+--       "sheet": "UYU UYU - 3D2N - ÑTd",
+--       "item": 48,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 10,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 18,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 22,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 30,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 34,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 42,
+--       "sku": null,
+--       "description": "INCLUIDO EN OPCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 43,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUUYU-3D2N-KS",
+--       "sheet": "UYU UYU - 3D2N - KS",
+--       "item": 47,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 21,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 36,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 42,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-PTd",
+--       "sheet": "UYU SPA - 3D2N PTd",
+--       "item": 50,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 21,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 36,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 42,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-LTd",
+--       "sheet": "UYU SPA - 3D2N LTd",
+--       "item": 51,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 21,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 36,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 42,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-JTd",
+--       "sheet": "UYU SPA - 3D2N JTd",
+--       "item": 51,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 12,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 21,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 27,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 36,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 42,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-ÑTd",
+--       "sheet": "UYU SPA 3D2N - ÑTd",
+--       "item": 51,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 6,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 10,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 19,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 23,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 32,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 36,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 45,
+--       "sku": null,
+--       "description": "INCLUIDO EN DISTRIBUCIÓN ARRIBA"
+--     },
+--     {
+--       "template": "UYUSPA-3D2N-KS",
+--       "sheet": "UYU SPA - 3D2N - KS",
+--       "item": 46,
+--       "sku": null,
+--       "description": "3D2N UYUNI – UYUNI"
+--     }
+--   ],
+--   "rejected_programs": [
+--     {
+--       "index": 6,
+--       "sku": "SPAUYU-3D2N-FL",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     },
+--     {
+--       "index": 24,
+--       "sku": "SPASPA-4D3N-MRF",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     },
+--     {
+--       "index": 28,
+--       "sku": "SPAUYU-3D3N-FTL",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     },
+--     {
+--       "index": 44,
+--       "sku": "UYUUYU-2D1N-L",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     },
+--     {
+--       "index": 45,
+--       "sku": "UYUSPA-3D2N-JTd",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     },
+--     {
+--       "index": 46,
+--       "sku": "SPA4D/",
+--       "reason": "SKU inválido, duplicado o duración inconsistente"
+--     }
+--   ],
+--   "ambiguous_budgets": [
+--     {
+--       "sheet": "SPA SPA - 4D3N - ÑÑF",
+--       "declared": "SPASPA-4D3N-MÑF",
+--       "used": "SPASPA-4D3N-ÑÑF"
+--     },
+--     "COTIZAR____SPA SPA - 4D3N - FJJ",
+--     "COTIZAR ---- UYU SPA - 2D1N P"
+--   ],
+--   "missing_modules": [
+--     "BLOQUES SPA no está presente en la extracción; se requiere la hoja con grupos de actividades."
+--   ]
+-- }

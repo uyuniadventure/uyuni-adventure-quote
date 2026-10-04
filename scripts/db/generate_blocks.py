@@ -35,10 +35,12 @@ def main():
 
     by_sku = {}
     for b in budgets:
-        k = norm(b.get('sku_tpl'))
+        sheet = norm(b['sheet'])
+        k = sheet or norm(b.get('sku_tpl'))
         if not k:
             continue
-        sheet = norm(b['sheet'])
+        if sheet and norm(b.get('sku_tpl')) and sheet != norm(b.get('sku_tpl')):
+            audit['ambiguous_budgets'].append(dict(sheet=b['sheet'],declared=b['sku_tpl'],used=sheet))
         if k in by_sku:
             old = by_sku[k]
             if sheet == k and norm(old['sheet']) != k:
@@ -57,14 +59,16 @@ def main():
 
     def block(candidate, hotel, n, sku, items, includes=None, excludes=None):
         # Different hotel OR services = different block; never union two budgets.
-        identity = json.dumps([candidate['title'], candidate['desc'], hotel, items, includes, excludes], ensure_ascii=False, sort_keys=True)
+        route_from = sku[:3] if sku and n==1 else None
+        route_to = sku[3:6] if sku and n==int(re.search(r'-(\d+)D',sku)[1]) else None
+        identity = json.dumps([candidate['title'], candidate['desc'], hotel, items, includes, excludes,route_from,route_to], ensure_ascii=False, sort_keys=True)
         bid = uid('block', identity)
         if bid in blocks:
             return bid
         blocks[bid] = True
         hotel_sku = next((i['sku'] for i in items if services[i['sku']]['type'] == 'alojamiento'), None)
-        emit('day_blocks', dict(id=bid, code='DAY_'+bid.replace('-','')[:20], route_from=sku[:3] if sku else None,
-             route_to=sku[3:6] if sku else None, hotel_service_id=uid('service',hotel_sku) if hotel_sku else None,
+        emit('day_blocks', dict(id=bid, code='DAY_'+bid.replace('-','')[:20], route_from=route_from,
+             route_to=route_to, hotel_service_id=uid('service',hotel_sku) if hotel_sku else None,
              default_day_position=n, status='pendiente'))
         description = candidate['desc'] + (f'\nAlojamiento: {hotel}' if hotel else '')
         emit('day_block_translations', dict(id=uid('block_es',bid), block_id=bid, lang='es', title=candidate['title'],
