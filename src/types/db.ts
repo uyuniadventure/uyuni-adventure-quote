@@ -61,6 +61,7 @@ export type Database = {
           description: string;
           created_at: string;
           updated_at: string;
+          reviewed: boolean;
         };
         Insert: {
           id?: string;
@@ -70,6 +71,7 @@ export type Database = {
           description: string;
           created_at?: string;
           updated_at?: string;
+          reviewed?: boolean;
         };
         Update: {
           id?: string;
@@ -79,6 +81,7 @@ export type Database = {
           description?: string;
           created_at?: string;
           updated_at?: string;
+          reviewed?: boolean;
         };
         Relationships: [
           {
@@ -293,6 +296,11 @@ export type Database = {
           included: boolean;
           created_at: string;
           updated_at: string;
+          multi_day_span: number;
+          coverage_key: string | null;
+          coverage_start_day: number | null;
+          pricing_config: Json;
+          item_snapshot: Json | null;
         };
         Insert: {
           id?: string;
@@ -305,6 +313,11 @@ export type Database = {
           included?: boolean;
           created_at?: string;
           updated_at?: string;
+          multi_day_span?: number;
+          coverage_key?: string | null;
+          coverage_start_day?: number | null;
+          pricing_config?: Json;
+          item_snapshot?: Json | null;
         };
         Update: {
           id?: string;
@@ -317,6 +330,11 @@ export type Database = {
           included?: boolean;
           created_at?: string;
           updated_at?: string;
+          multi_day_span?: number;
+          coverage_key?: string | null;
+          coverage_start_day?: number | null;
+          pricing_config?: Json;
+          item_snapshot?: Json | null;
         };
         Relationships: [
           {
@@ -628,6 +646,7 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          import_warnings: Json;
         };
         Insert: {
           id?: string;
@@ -652,6 +671,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_warnings?: Json;
         };
         Update: {
           id?: string;
@@ -676,6 +696,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_warnings?: Json;
         };
         Relationships: [
           {
@@ -1260,6 +1281,7 @@ export type Database = {
           status: Database["public"]["Enums"]["email_status"];
           created_at: string;
           updated_at: string;
+          idempotency_key: string | null;
         };
         Insert: {
           id?: string;
@@ -1273,6 +1295,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["email_status"];
           created_at?: string;
           updated_at?: string;
+          idempotency_key?: string | null;
         };
         Update: {
           id?: string;
@@ -1286,6 +1309,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["email_status"];
           created_at?: string;
           updated_at?: string;
+          idempotency_key?: string | null;
         };
         Relationships: [
           {
@@ -1384,6 +1408,10 @@ export type Database = {
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null;
           created_at: string;
           updated_at: string;
+          pricing_snapshot: Json;
+          supplier_id: string | null;
+          total_cost_usd: number | null;
+          total_cost_local: number | null;
         };
         Insert: {
           id?: string;
@@ -1416,6 +1444,10 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null;
           created_at?: string;
           updated_at?: string;
+          pricing_snapshot?: Json;
+          supplier_id?: string | null;
+          total_cost_usd?: number | null;
+          total_cost_local?: number | null;
         };
         Update: {
           id?: string;
@@ -1448,6 +1480,10 @@ export type Database = {
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null;
           created_at?: string;
           updated_at?: string;
+          pricing_snapshot?: Json;
+          supplier_id?: string | null;
+          total_cost_usd?: number | null;
+          total_cost_local?: number | null;
         };
         Relationships: [
           {
@@ -1469,6 +1505,13 @@ export type Database = {
             columns: ["service_id"];
             isOneToOne: false;
             referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quote_items_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
             referencedColumns: ["id"];
           },
         ];
@@ -1650,6 +1693,10 @@ export type Database = {
           pdf_url: string | null;
           created_at: string;
           updated_at: string;
+          tour_sku: string | null;
+          pricing_config: Json;
+          calculation: Json | null;
+          document_snapshot: Json;
         };
         Insert: {
           id?: string;
@@ -1688,6 +1735,10 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           updated_at?: string;
+          tour_sku?: string | null;
+          pricing_config?: Json;
+          calculation?: Json | null;
+          document_snapshot?: Json;
         };
         Update: {
           id?: string;
@@ -1726,6 +1777,10 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           updated_at?: string;
+          tour_sku?: string | null;
+          pricing_config?: Json;
+          calculation?: Json | null;
+          document_snapshot?: Json;
         };
         Relationships: [
           {
