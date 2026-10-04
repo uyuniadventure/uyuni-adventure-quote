@@ -26,7 +26,7 @@ Proyecto nuevo e independiente: no comparte base de datos con otros sistemas exi
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React + Vite + TypeScript + Tailwind + shadcn/ui (generado con Lovable) |
+| Frontend | TanStack Start (React, rutas basadas en archivos en src/routes) + TypeScript + Tailwind + shadcn/ui (generado con Lovable) |
 | Backend | Supabase: Postgres, Auth, Row Level Security, Storage, Edge Functions |
 | Repo | GitHub, sincronizado con Lovable |
 | PDF | `@react-pdf/renderer` (generado en cliente, subido a Storage) |
