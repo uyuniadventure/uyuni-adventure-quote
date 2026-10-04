@@ -1,8 +1,21 @@
-import { useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Compass, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SECTION_GROUPS } from "@/components/section";
+
+const SidebarContext = createContext<{
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+  mobileOpen: boolean;
+  toggleMobileOpen: () => void;
+  closeMobile: () => void;
+} | null>(null);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -23,16 +36,6 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const SidebarContext = createContext<{
-  collapsed: boolean;
-  toggleCollapsed: () => void;
-  mobileOpen: boolean;
-  toggleMobileOpen: () => void;
-  closeMobile: () => void;
-} | null>(null);
-
-import { createContext, useContext } from "react";
-
 export function useSidebar() {
   const ctx = useContext(SidebarContext);
   if (!ctx) throw new Error("useSidebar must be used within SidebarProvider");
@@ -42,8 +45,8 @@ export function useSidebar() {
 export function useCurrentSectionTitle() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   for (const group of SECTION_GROUPS) {
-    for (const slug of group.items) {
-      if (slug.path === pathname) return slug.title;
+    for (const item of group.items) {
+      if (item.path === pathname) return item.title;
     }
   }
   return "Cotizador Uyuni Adventure";
@@ -64,19 +67,15 @@ export function AppSidebar() {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar text-sidebar-foreground shadow-xl transition-transform duration-200 ease-out",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar text-sidebar-foreground shadow-xl transition-all duration-200 ease-out",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0 lg:shadow-none",
           collapsed ? "lg:w-16" : "lg:w-64",
         )}
       >
-        <div
-          className={cn(
-            "flex h-14 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4",
-          )}
-        >
+        <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary">
-            <Compass className="h-4.5 w-4.5 text-sidebar-primary-foreground" />
+            <Compass className="h-4 w-4 text-sidebar-primary-foreground" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
@@ -106,7 +105,7 @@ export function AppSidebar() {
                   {group.label}
                 </p>
               )}
-              {group.label && collapsed && gi > 0 && (
+              {group.label && collapsed && (
                 <div className="mx-3 my-2 border-t border-sidebar-border" />
               )}
               <ul>
@@ -131,7 +130,9 @@ export function AppSidebar() {
                             <span className="absolute -left-3 h-5 w-1 rounded-r-full bg-brand-orange" />
                           )}
                         </span>
-                        {!collapsed && <span className="truncate">{item.title}</span>}
+                        {!collapsed && (
+                          <span className="truncate">{item.title}</span>
+                        )}
                       </Link>
                     </li>
                   );
