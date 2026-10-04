@@ -19,7 +19,7 @@ import {
 /** null = usa el valor por defecto del servicio. */
 export function TriState({ value, onChange, disabled }: { value: boolean | null; onChange: (v: boolean | null) => void; disabled?: boolean }) {
   return (
-    <Select value={value === null ? "d" : value ? "y" : "n"} onValueChange={(v) => onChange(v === "d" ? null : v === "y")} disabled={disabled}>
+    <Select value={value === null ? "d" : value ? "y" : "n"} onValueChange={(v) => onChange(v === "d" ? null : v === "y")} disabled={!!disabled}>
       <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
       <SelectContent>
         <SelectItem value="d">Por defecto</SelectItem>

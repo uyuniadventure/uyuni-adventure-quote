@@ -312,8 +312,8 @@ function TranslationForm({ kind, lang, row, hasSource, canEdit, translating, onT
   const [reviewed, setReviewed] = useState(row?.reviewed ?? lang === "es");
   const [saving, setSaving] = useState(false);
 
-  const save = async () => {
-    if (!title.trim() || !description.trim()) return toast.error("Título y descripción son obligatorios.");
+  const save = async (): Promise<void> => {
+    if (!title.trim() || !description.trim()) { toast.error("Título y descripción son obligatorios."); return; }
     setSaving(true);
     try {
       await onSave({
