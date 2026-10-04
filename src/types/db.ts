@@ -288,7 +288,7 @@ export type Database = {
         Row: {
           id: string;
           block_id: string;
-          service_id: string;
+          service_id: string | null;
           qty: number;
           applies_tc: boolean | null;
           margin_applicable: boolean | null;
@@ -305,7 +305,7 @@ export type Database = {
         Insert: {
           id?: string;
           block_id: string;
-          service_id: string;
+          service_id?: string | null;
           qty?: number;
           applies_tc?: boolean | null;
           margin_applicable?: boolean | null;
@@ -322,7 +322,7 @@ export type Database = {
         Update: {
           id?: string;
           block_id?: string;
-          service_id?: string;
+          service_id?: string | null;
           qty?: number;
           applies_tc?: boolean | null;
           margin_applicable?: boolean | null;
@@ -1026,6 +1026,8 @@ export type Database = {
           real_margin_usd: number | null;
           created_at: string;
           updated_at: string;
+          language: string;
+          client_name: string | null;
         };
         Insert: {
           id?: string;
@@ -1044,6 +1046,8 @@ export type Database = {
           real_margin_usd?: number | null;
           created_at?: string;
           updated_at?: string;
+          language?: string;
+          client_name?: string | null;
         };
         Update: {
           id?: string;
@@ -1062,6 +1066,8 @@ export type Database = {
           real_margin_usd?: number | null;
           created_at?: string;
           updated_at?: string;
+          language?: string;
+          client_name?: string | null;
         };
         Relationships: [
           {
@@ -2261,11 +2267,46 @@ export type Database = {
       };
     };
     Functions: {
+      build_supplier_payables: {
+        Args: { p_id: string };
+        Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
+      };
+      compute_real_margin: {
+        Args: { p_id: string };
+        Returns: Database["public"]["Tables"]["ops_services"]["Row"];
+      };
+      create_quote_snapshot: {
+        Args: { p_quote: Json; p_days: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
       current_role: {
         Args: Record<PropertyKey, never>;
-        Returns: Database["public"]["Enums"]["app_role"] | null;
+        Returns: Database["public"]["Enums"]["app_role"];
+      };
+      edit_quote_item: {
+        Args: { p_id: string; p_changes: Json; p_add?: boolean; p_promote?: boolean };
+        Returns: Json;
+      };
+      generate_communication_plan: {
+        Args: { p_id: string; p_messages: Json };
+        Returns: Database["public"]["Tables"]["ops_communications"]["Row"][];
+      };
+      insert_quote_item: {
+        Args: { p_day: string; p_item: Json; p_promote?: boolean };
+        Returns: Database["public"]["Tables"]["quote_items"]["Row"];
       };
       next_quote_code: { Args: { p_sku: string; p_language: string }; Returns: string };
+      promote_quote_template: { Args: { p_id: string }; Returns: string };
+      quote_document_context: { Args: { p_id: string }; Returns: Json };
+      save_quote_calculation: {
+        Args: { p_id: string; p_updated_at: string; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      transition_quote: {
+        Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      version_quote: { Args: { p_id: string }; Returns: string };
     };
     Enums: {
       activity_duration: "HD_AM" | "HD_PM" | "FD" | "NOCHE" | "TRASLADO";
