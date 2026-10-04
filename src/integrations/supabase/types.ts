@@ -1042,10 +1042,12 @@ export type Database = {
       ops_services: {
         Row: {
           booking_code: string
+          client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
           end_date: string
           id: string
+          language: string
           pax: number
           quote_id: string
           quoted_cost_usd: number | null
@@ -1060,10 +1062,12 @@ export type Database = {
         }
         Insert: {
           booking_code: string
+          client_name?: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
           end_date: string
           id?: string
+          language?: string
           pax: number
           quote_id: string
           quoted_cost_usd?: number | null
@@ -1078,10 +1082,12 @@ export type Database = {
         }
         Update: {
           booking_code?: string
+          client_name?: string | null
           client_type?: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
           end_date?: string
           id?: string
+          language?: string
           pax?: number
           quote_id?: string
           quoted_cost_usd?: number | null
@@ -2359,6 +2365,60 @@ export type Database = {
       }
     }
     Functions: {
+      build_supplier_payables: {
+        Args: { p_id: string }
+        Returns: {
+          balance_usd: number | null
+          cost_local: number
+          cost_usd: number
+          created_at: string
+          currency: string
+          detail: string | null
+          due_date: string | null
+          id: string
+          paid_date: string | null
+          paid_usd: number
+          service_id: string
+          status: Database["public"]["Enums"]["payable_status"]
+          supplier_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ops_supplier_payables"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      compute_real_margin: {
+        Args: { p_id: string }
+        Returns: {
+          booking_code: string
+          client_name: string | null
+          client_type: Database["public"]["Enums"]["ops_client_type"]
+          created_at: string
+          end_date: string
+          id: string
+          language: string
+          pax: number
+          quote_id: string
+          quoted_cost_usd: number | null
+          real_cost_usd: number | null
+          real_margin_usd: number | null
+          responsible_id: string | null
+          sale_price_usd: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["ops_status"]
+          tour_sku: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ops_services"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_quote_snapshot: {
         Args: { p_days: Json; p_quote: Json }
         Returns: {
@@ -2423,6 +2483,26 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_communication_plan: {
+        Args: { p_id: string; p_messages: Json }
+        Returns: {
+          channel: Database["public"]["Enums"]["communication_channel"]
+          created_at: string
+          id: string
+          message: string
+          milestone: number
+          scheduled_at: string
+          service_id: string
+          status: Database["public"]["Enums"]["communication_status"]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ops_communications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean }
         Returns: {
@@ -2473,6 +2553,7 @@ export type Database = {
         Returns: string
       }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
+      quote_document_context: { Args: { p_id: string }; Returns: Json }
       save_quote_calculation: {
         Args: { p_id: string; p_result: Json; p_updated_at: string }
         Returns: {
