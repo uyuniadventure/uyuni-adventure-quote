@@ -309,7 +309,7 @@ export type Database = {
           multi_day_span: number
           pricing_config: Json
           qty: number
-          service_id: string
+          service_id: string | null
           updated_at: string
         }
         Insert: {
@@ -326,7 +326,7 @@ export type Database = {
           multi_day_span?: number
           pricing_config?: Json
           qty?: number
-          service_id: string
+          service_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -343,7 +343,7 @@ export type Database = {
           multi_day_span?: number
           pricing_config?: Json
           qty?: number
-          service_id?: string
+          service_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1042,10 +1042,12 @@ export type Database = {
       ops_services: {
         Row: {
           booking_code: string
+          client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
           end_date: string
           id: string
+          language: string
           pax: number
           quote_id: string
           quoted_cost_usd: number | null
@@ -1060,10 +1062,12 @@ export type Database = {
         }
         Insert: {
           booking_code: string
+          client_name?: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
           end_date: string
           id?: string
+          language?: string
           pax: number
           quote_id: string
           quoted_cost_usd?: number | null
@@ -1078,10 +1082,12 @@ export type Database = {
         }
         Update: {
           booking_code?: string
+          client_name?: string | null
           client_type?: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
           end_date?: string
           id?: string
+          language?: string
           pax?: number
           quote_id?: string
           quoted_cost_usd?: number | null
@@ -2359,14 +2365,302 @@ export type Database = {
       }
     }
     Functions: {
+      build_supplier_payables: {
+        Args: { p_id: string }
+        Returns: {
+          balance_usd: number | null
+          cost_local: number
+          cost_usd: number
+          created_at: string
+          currency: string
+          detail: string | null
+          due_date: string | null
+          id: string
+          paid_date: string | null
+          paid_usd: number
+          service_id: string
+          status: Database["public"]["Enums"]["payable_status"]
+          supplier_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ops_supplier_payables"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      compute_real_margin: {
+        Args: { p_id: string }
+        Returns: {
+          booking_code: string
+          client_name: string | null
+          client_type: Database["public"]["Enums"]["ops_client_type"]
+          created_at: string
+          end_date: string
+          id: string
+          language: string
+          pax: number
+          quote_id: string
+          quoted_cost_usd: number | null
+          real_cost_usd: number | null
+          real_margin_usd: number | null
+          responsible_id: string | null
+          sale_price_usd: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["ops_status"]
+          tour_sku: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ops_services"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_quote_snapshot: {
+        Args: { p_days: Json; p_quote: Json }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      edit_quote_item: {
+        Args: {
+          p_add?: boolean
+          p_changes: Json
+          p_id: string
+          p_promote?: boolean
+        }
+        Returns: Json
+      }
+      generate_communication_plan: {
+        Args: { p_id: string; p_messages: Json }
+        Returns: {
+          channel: Database["public"]["Enums"]["communication_channel"]
+          created_at: string
+          id: string
+          message: string
+          milestone: number
+          scheduled_at: string
+          service_id: string
+          status: Database["public"]["Enums"]["communication_status"]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ops_communications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      insert_quote_item: {
+        Args: { p_day: string; p_item: Json; p_promote?: boolean }
+        Returns: {
+          airline: string | null
+          applies_tc: boolean
+          arr_time: string | null
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          currency: string
+          day_span: number
+          dep_time: string | null
+          description: string
+          fare_notes: string | null
+          flight_no: string | null
+          id: string
+          included: boolean
+          margin_applicable: boolean
+          meal_plan: Database["public"]["Enums"]["meal_plan"] | null
+          override_note: string | null
+          price_overridden: boolean
+          pricing_snapshot: Json
+          pricing_unit: Database["public"]["Enums"]["pricing_unit"]
+          promote_to_master: boolean
+          qty: number
+          quote_day_id: string
+          room_distribution: Json | null
+          route: string | null
+          service_id: string | null
+          sku: string | null
+          supplier_id: string | null
+          total_cost_local: number | null
+          total_cost_usd: number | null
+          type: Database["public"]["Enums"]["service_type"]
+          unit_cost_original: number
+          unit_cost_usd: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quote_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       next_quote_code: {
         Args: { p_language: string; p_sku: string }
         Returns: string
       }
+      promote_quote_template: { Args: { p_id: string }; Returns: string }
+      quote_document_context: { Args: { p_id: string }; Returns: Json }
+      save_quote_calculation: {
+        Args: { p_id: string; p_result: Json; p_updated_at: string }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      transition_quote: {
+        Args: {
+          p_id: string
+          p_note?: string
+          p_to: Database["public"]["Enums"]["quote_status"]
+        }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      version_quote: { Args: { p_id: string }; Returns: string }
     }
     Enums: {
       activity_duration: "HD_AM" | "HD_PM" | "FD" | "NOCHE" | "TRASLADO"
