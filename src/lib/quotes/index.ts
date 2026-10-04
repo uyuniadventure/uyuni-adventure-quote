@@ -209,6 +209,26 @@ export async function createQuoteFromTemplate(
       items,
     });
   }
+  // A module may introduce a multi-day purchase outside the imported budget links.
+  for (const day of days) {
+    for (const item of [...day.items]) {
+      if ((item.day_span ?? 1) <= 1) continue;
+      const pricing = item.pricing_snapshot as { coverage_key: string; coverage_start_day: number };
+      if (day.day_number !== pricing.coverage_start_day) continue;
+      for (let n = day.day_number + 1; n < day.day_number + (item.day_span ?? 1); n++) {
+        const target = days.find((d) => d.day_number === n);
+        if (!target) throw new Error(`Multi-day service extends beyond itinerary: ${item.sku}`);
+        if (
+          !target.items.some(
+            (i) =>
+              (i.pricing_snapshot as { coverage_key?: string })?.coverage_key ===
+              pricing.coverage_key,
+          )
+        )
+          target.items.push(structuredClone(item));
+      }
+    }
+  }
   return create(basics, days, template);
 }
 export async function updateQuoteItem(
@@ -275,7 +295,11 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
         .map(
           (i) =>
             ({
-              ...(i.pricing_snapshot as object),
+              ...Object.fromEntries(
+                Object.entries(i.pricing_snapshot as object).filter(
+                  ([key]) => !key.startsWith("_") && key !== "service",
+                ),
+              ),
               id: i.id,
               pricing_unit: i.pricing_unit,
               currency: i.currency,

@@ -33,9 +33,9 @@ begin
       raise exception 'Resolve source import warnings first';
     end if;
   end if;
-  if (to_jsonb(new)-array['updated_at','status','lost_reason','archived_at','next_followup_at','calculation','total_cost_usd','total_margin_usd','total_price_usd','price_per_pax_usd','single_supplement_pp','pdf_url']) is distinct from
-     (to_jsonb(old)-array['updated_at','status','lost_reason','archived_at','next_followup_at','calculation','total_cost_usd','total_margin_usd','total_price_usd','price_per_pax_usd','single_supplement_pp','pdf_url']) then
-    new.calculation:=null; new.pdf_url:=null;
+  if (to_jsonb(new)-array['updated_at','status','lost_reason','archived_at','next_followup_at','calculation','total_cost_usd','total_margin_usd','total_price_usd','price_per_pax_usd','single_supplement_pp','pdf_url','pdf_path']) is distinct from
+     (to_jsonb(old)-array['updated_at','status','lost_reason','archived_at','next_followup_at','calculation','total_cost_usd','total_margin_usd','total_price_usd','price_per_pax_usd','single_supplement_pp','pdf_url','pdf_path']) then
+    new.calculation:=null; new.pdf_url:=null; new.pdf_path:=null;
   end if;
   return new;
 end; $$;
@@ -59,10 +59,10 @@ language plpgsql set search_path='' as $$
 declare qid uuid; q public.quotes;
 begin
   if tg_table_name='quote_items' then
-    if tg_op='UPDATE' and new.quote_day_id<>old.quote_day_id then raise exception 'Cannot reparent snapshot items'; end if;
+    if tg_op='UPDATE' and new.quote_day_id<>old.quote_day_id then raise exception 'Cannot reparent snapshot items' using errcode='42501'; end if;
     select quote_id into qid from public.quote_days where id=case when tg_op='DELETE' then old.quote_day_id else new.quote_day_id end;
   else
-    if tg_op='UPDATE' and new.quote_id<>old.quote_id then raise exception 'Cannot reparent snapshot days'; end if;
+    if tg_op='UPDATE' and new.quote_id<>old.quote_id then raise exception 'Cannot reparent snapshot days' using errcode='42501'; end if;
     qid:=case when tg_op='DELETE' then old.quote_id else new.quote_id end;
   end if;
   select * into q from public.quotes where id=qid for update;
@@ -72,7 +72,7 @@ begin
   end if;
   if q.status not in ('borrador','revisada') or q.archived_at is not null then raise exception 'Snapshot is immutable; create a version'; end if;
   -- Child writes invalidate totals/PDF and serialize against payment/transition.
-  update public.quotes set calculation=null,pdf_url=null where id=qid;
+  update public.quotes set calculation=null,pdf_url=null,pdf_path=null where id=qid;
   if tg_op='DELETE' then return old; end if;
   return new;
 end; $$;
@@ -104,7 +104,7 @@ begin
   update public.quotes set archived_at=now() where id=original_id;
   q.id:=next_id; q.parent_quote_id:=original_id; q.version:=q.version+1;
   q.code:=regexp_replace(q.code,'-v[0-9]+$','')||'-v'||q.version;
-  q.status:='borrador'; q.archived_at:=null; q.pdf_url:=null; q.calculation:=null;
+  q.status:='borrador'; q.archived_at:=null; q.pdf_url:=null; q.pdf_path:=null; q.calculation:=null;
   q.total_cost_usd:=null; q.total_margin_usd:=null; q.total_price_usd:=null; q.price_per_pax_usd:=null;
   q.created_at:=now(); q.updated_at:=now();
   insert into public.quotes select q.*;
@@ -170,7 +170,7 @@ end; $$;
 
 create function public.edit_quote_item(p_id uuid,p_changes jsonb,p_add boolean default false,p_promote boolean default false) returns jsonb
 language plpgsql set search_path='' as $$
-declare qid uuid; newqid uuid; did uuid; dayno int; i public.quote_items; old_item public.quote_items;
+declare qid uuid; newqid uuid; did uuid; dayno int; i public.quote_items; old_item public.quote_items; purchase text; n int; covered_day uuid;
 begin
   if p_add then
     select quote_id,id,day_number into strict qid,did,dayno from public.quote_days where id=p_id;
@@ -181,7 +181,16 @@ begin
   newqid:=public.version_quote(qid);
   if newqid<>qid then select id into strict did from public.quote_days where quote_id=newqid and day_number=dayno; end if;
   if p_add then
+    if coalesce((p_changes->>'day_span')::int,1)>1 then
+      p_changes:=jsonb_set(p_changes,'{pricing_snapshot}',coalesce(p_changes->'pricing_snapshot','{}')||jsonb_build_object('coverage_key',gen_random_uuid()::text,'coverage_start_day',dayno));
+    end if;
     i:=public.insert_quote_item(did,p_changes,p_promote);
+    if i.day_span>1 then
+      for n in dayno+1..dayno+i.day_span-1 loop
+        select id into strict covered_day from public.quote_days where quote_id=newqid and day_number=n;
+        perform public.insert_quote_item(covered_day,to_jsonb(i),false);
+      end loop;
+    end if;
   else
     -- Copy mapping based on stable source ID stored during this transaction is unnecessary:
     -- locate the corresponding row by its original immutable content, then require exactly one.
@@ -189,6 +198,7 @@ begin
       select * into strict i from public.quote_items x where quote_day_id=did and pricing_snapshot->>'_version_source_id'=old_item.id::text;
     else i:=old_item; end if;
     if p_changes ?| array['id','quote_day_id','created_at','updated_at','total_cost_usd','total_cost_local','service_id','supplier_id','promote_to_master'] then raise exception 'Immutable item fields'; end if;
+    purchase:=i.pricing_snapshot->>'coverage_key';
     old_item:=jsonb_populate_record(i,p_changes);
     update public.quote_items set sku=old_item.sku,description=old_item.description,type=old_item.type,
       pricing_unit=old_item.pricing_unit,qty=old_item.qty,unit_cost_original=old_item.unit_cost_original,currency=old_item.currency,
@@ -197,6 +207,15 @@ begin
       airline=old_item.airline,flight_no=old_item.flight_no,route=old_item.route,dep_time=old_item.dep_time,arr_time=old_item.arr_time,
       fare_notes=old_item.fare_notes,check_in=old_item.check_in,check_out=old_item.check_out,room_distribution=old_item.room_distribution,meal_plan=old_item.meal_plan
     where id=i.id returning * into i;
+    if i.day_span>1 and purchase is not null then
+      -- Every display row belongs to the same purchase; propagate billing edits.
+      update public.quote_items x set pricing_unit=i.pricing_unit,qty=i.qty,currency=i.currency,
+       unit_cost_original=i.unit_cost_original,applies_tc=i.applies_tc,margin_applicable=i.margin_applicable,
+       included=i.included,day_span=i.day_span,price_overridden=i.price_overridden,override_note=i.override_note,
+       pricing_snapshot=i.pricing_snapshot
+      where x.id<>i.id and x.pricing_snapshot->>'coverage_key'=purchase and
+       x.quote_day_id in(select id from public.quote_days where quote_id=newqid);
+    end if;
   end if;
   return jsonb_build_object('quote_id',newqid,'item',to_jsonb(i));
 end; $$;
@@ -209,7 +228,7 @@ begin
   if q.updated_at<>p_updated_at then raise exception 'Quote changed; recalculate again' using errcode='40001'; end if;
   if q.status not in ('borrador','revisada') then raise exception 'Cannot recalculate a sent quote'; end if;
   for x in select value from jsonb_array_elements(p_result->'items') loop
-    update public.quote_items set unit_cost_original=(x->>'unit_cost_original')::numeric,unit_cost_usd=(x->>'unit_cost_usd')::numeric,
+    update public.quote_items set unit_cost_original=case when coalesce((x->>'covered')::boolean,false) then unit_cost_original else (x->>'unit_cost_original')::numeric end,unit_cost_usd=(x->>'unit_cost_usd')::numeric,
       total_cost_usd=(x->>'total_cost_usd')::numeric,total_cost_local=(x->>'quantity')::numeric*(x->>'unit_cost_original')::numeric
       where id=(x->>'id')::uuid and quote_day_id in(select id from public.quote_days where quote_id=p_id);
     if not found then raise exception 'Calculation contains an unknown item'; end if;
@@ -257,3 +276,4 @@ grant execute on function public.transition_quote(uuid,public.quote_status,text)
  public.create_quote_snapshot(jsonb,jsonb),public.insert_quote_item(uuid,jsonb,boolean),public.edit_quote_item(uuid,jsonb,boolean,boolean),
  public.save_quote_calculation(uuid,timestamptz,jsonb),public.promote_quote_template(uuid) to authenticated;
 commit;
+

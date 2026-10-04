@@ -151,6 +151,37 @@ try {
     () => db.query("select public.build_supplier_payables($1)", [op]),
     /supplier/,
   );
+  const supplier = await scalar("select id from suppliers limit 1");
+  await db.query("update ops_items set supplier_id=$1 where service_id=$2", [supplier, op]);
+  await db.query("select public.build_supplier_payables($1)", [op]);
+  await db.query("update ops_supplier_payables set paid_usd=50 where service_id=$1", [op]);
+  await db.query("select public.build_supplier_payables($1)", [op]);
+  assert.equal(
+    await scalar("select balance_usd from ops_supplier_payables where service_id=$1", [op]),
+    "150.0000",
+  );
+  await db.query(
+    "update ops_items set booking_status='cancelado' where id=(select id from ops_items where service_id=$1 limit 1)",
+    [op],
+  );
+  await db.query("select public.build_supplier_payables($1)", [op]);
+  assert.equal(
+    await scalar("select balance_usd from ops_supplier_payables where service_id=$1", [op]),
+    "50.0000",
+  );
+  assert.equal(
+    (await scalar("select to_jsonb(public.compute_real_margin($1))", [op])).real_margin_usd,
+    140,
+  );
+  for (let n = 0; n < 2; n++)
+    await db.query("select public.generate_communication_plan($1,$2)", [
+      op,
+      ["Welcome", "48h", "24h", "Day 1", "Survey"],
+    ]);
+  assert.equal(
+    await scalar("select count(*)::int from ops_communications where service_id=$1", [op]),
+    5,
+  );
   console.log(
     "PASS workflow: snapshots, duplicate-item version mapping, state guards, stale calculations, deposits, operations, history",
   );

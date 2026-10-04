@@ -192,7 +192,7 @@ try {
       `insert into public.quote_payments(quote_id,amount,currency,date,method,type) values ('${q2}',1,'USD','2026-10-04','cash','deposito')`,
     );
     await db.exec(
-      `insert into public.quote_payments(quote_id,amount,currency,date,method,type) values ('${q1}',1,'USD','2026-10-04','cash','deposito')`,
+      `insert into public.quote_payments(quote_id,amount,currency,date,method,type) values ('${q1}',1,'USD','2026-10-04','cash','otro')`,
     );
     const codes = await query(
       `select public.next_quote_code('UYUSPA-3D2N-PTd','it') code from generate_series(1,25)`,

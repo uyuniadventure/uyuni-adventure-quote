@@ -134,7 +134,9 @@ export function selectRate(
       (r.pax_min === null || pax >= r.pax_min) &&
       (r.pax_max === null || pax <= r.pax_max) &&
       (!r.room_type || r.room_type === item.room_type) &&
-      (r.season === "ALL" || active.includes(r.season)),
+      (r.season === "ALL" ||
+        active.includes(r.season) ||
+        (seasons.length === 0 && !!r.valid_from && !!r.valid_to)),
   );
   const seasonal = candidates.filter((r) => r.season !== "ALL");
   const chosen = seasonal.length ? seasonal : candidates;
@@ -207,7 +209,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           day.day_number >= item.coverage_start_day + span
         )
           throw new Error("Item outside coverage");
-        const signature = JSON.stringify({ ...item, id: undefined });
+        const signature = JSON.stringify({
+          ...item,
+          id: undefined,
+          unit_cost_original: item.price_overridden ? item.unit_cost_original : undefined,
+        });
         const previous = coverages.get(item.coverage_key);
         if (previous && previous !== signature) throw new Error("Inconsistent multi-day copies");
         if (!previous && day.day_number !== item.coverage_start_day)

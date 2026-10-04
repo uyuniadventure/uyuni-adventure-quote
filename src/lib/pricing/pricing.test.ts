@@ -35,6 +35,37 @@ const base: QuoteInput = {
   days: [{ day_number: 1, items: [item] }],
 };
 describe("pricing", () => {
+  it("selects dated seasonal rates without inventing a climate calendar", () => {
+    expect(
+      calculateQuote({
+        ...base,
+        days: [
+          {
+            day_number: 1,
+            items: [
+              {
+                ...item,
+                rates: [
+                  { ...rate, season: "ALTA", valid_from: "2026-12-01", valid_to: "2027-01-31" },
+                ],
+              },
+            ],
+          },
+        ],
+      }).total_cost_usd,
+    ).toBe(300);
+  });
+  it("recalculates persisted multi-day rates despite zero display costs", () => {
+    const purchase = { ...item, day_span: 2, coverage_key: "same", coverage_start_day: 1 };
+    const result = calculateQuote({
+      ...base,
+      days: [
+        { day_number: 1, items: [{ ...purchase, id: "first", unit_cost_original: 100 }] },
+        { day_number: 2, items: [{ ...purchase, id: "covered", unit_cost_original: 0 }] },
+      ],
+    });
+    expect(result.total_cost_usd).toBe(300);
+  });
   it("charges TC without dividing by TC and marks up only eligible costs", () => {
     const result = calculateQuote({
       ...base,
