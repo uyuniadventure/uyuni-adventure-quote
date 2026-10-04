@@ -18,6 +18,8 @@
 - Los datos de navegación (secciones, grupos, metadata head de cada sección) se definen una sola vez en `src/components/section.tsx` (`SECTIONS`, `SECTION_GROUPS`, `sectionHead`, `SectionShell`); el sidebar y las rutas consumen de ahí para evitar divergencia.
 - Las pantallas de catálogo (módulos, bloques, plantillas, revisión) reutilizan `src/components/catalog/kit.tsx` (filtros, buscador, permisos de fila, panel de traducciones que invoca la Edge Function `translate-block`) y un editor en Sheet por entidad; así la revisión de importación abre el mismo editor que cada sección.
 - Nueva cotización vive en `/nueva-cotizacion?quote=<id>` (`src/components/quote/`): toda escritura + `recalculateQuote` pasa por una cola serializada (`useQuoteActions`) porque `save_quote_calculation` exige `updated_at` vigente; las operaciones de días que `src/lib` no expone están aisladas en `quote-ops.ts` para migrarlas a `src/lib/quotes`.
+- Las tablas de configuración simples (Admin, T&C) usan el CRUD genérico `src/components/admin/crud-table.tsx` (config de columnas, cliente sin tipar, RLS decide el acceso) para no duplicar formularios por tabla.
+- Media sube a un bucket privado de Storage `media` (rutas `places/<id>/…` y `hotels/<id>/…`) y muestra URLs firmadas.
 - Todos los colores van por tokens semánticos en `src/styles.css` (`@theme inline` + `:root`); nada de colores hardcodeados en componentes.
 
 ## Reglas para Codex
