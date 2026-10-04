@@ -4,6 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "test:db": "node scripts/db/test.mjs",
+    "db:types": "node scripts/db/generate-types.mjs",
+    "db:seed:generate": "python scripts/db/generate_seed.py",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -72,6 +75,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^2.24.0",
     "@testing-library/jest-dom": "^6.6.0",
