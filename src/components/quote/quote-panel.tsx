@@ -171,7 +171,7 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
                     onChange={(n) => setScenario(i, { ...sc, rooming: { ...sc.rooming, paying: { ...sc.rooming.paying, [rt]: Math.round(n) } } })} /></label>
                 ))}
                 {segments.map((sg) => (
-                  <label key={sg} className="flex items-center gap-1">🚙 {sg}<NumIn className="w-14" value={sc.vehicles[sg] ?? 0} disabled={!editable}
+                  <label key={sg} className="flex items-center gap-1">{sg}<NumIn className="w-14" value={sc.vehicles[sg] ?? 0} disabled={!editable}
                     onChange={(n) => setScenario(i, { ...sc, vehicles: { ...sc.vehicles, [sg]: Math.round(n) } })} /></label>
                 ))}
               </div>
