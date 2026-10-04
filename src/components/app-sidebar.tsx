@@ -4,8 +4,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Compass, X } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Compass, LogOut, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { SECTION_GROUPS } from "@/components/section";
 
@@ -142,29 +145,54 @@ export function AppSidebar() {
           ))}
         </nav>
 
-        <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
-          <div
-            className={cn(
-              "flex items-center gap-2.5",
-              collapsed && "lg:justify-center",
-            )}
-          >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
-              UA
-            </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-white">
-                  Admin Uyuni
-                </p>
-                <p className="truncate text-[11px] text-sidebar-foreground/60">
-                  Sesión de diseño
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        <SidebarUser collapsed={collapsed} />
       </aside>
     </>
+  );
+}
+
+function SidebarUser({ collapsed }: { collapsed: boolean }) {
+  const { fullName, role } = useCurrentUser();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const initials = fullName
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  }
+
+  return (
+    <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
+      <div className={cn("flex items-center gap-2.5", collapsed && "lg:flex-col lg:justify-center")}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
+          {initials || "UA"}
+        </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold text-white">{fullName}</p>
+            <p className="truncate text-[11px] text-sidebar-foreground/60">
+              {role ? ROLE_LABELS[role] : "Sin rol asignado"}
+            </p>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={signOut}
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
   );
 }

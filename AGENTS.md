@@ -13,7 +13,8 @@
 
 ## Reglas del proyecto
 
-- TanStack Start v1 con rutas file-based en `src/routes/`; el shell (sidebar + header) vive en `src/routes/__root.tsx` y `/login` se renderiza sin sidebar (check de pathname en `RootComponent`).
+- TanStack Start v1 con rutas file-based en `src/routes/`; todas las pantallas internas van bajo `src/routes/_authenticated/` (gate `ssr:false` que redirige a `/login` y expone `auth` = usuario + rol de `profiles`); el shell (sidebar + header) vive en `_authenticated/route.tsx`, así login y reset-password quedan sin sidebar.
+- Permisos de UI por rol se leen con `useCurrentUser()`/`canManageCatalog()` de `src/hooks/use-auth.ts`; la autorización real la hace RLS.
 - Los datos de navegación (secciones, grupos, metadata head de cada sección) se definen una sola vez en `src/components/section.tsx` (`SECTIONS`, `SECTION_GROUPS`, `sectionHead`, `SectionShell`); el sidebar y las rutas consumen de ahí para evitar divergencia.
 - Todos los colores van por tokens semánticos en `src/styles.css` (`@theme inline` + `:root`); nada de colores hardcodeados en componentes.
 

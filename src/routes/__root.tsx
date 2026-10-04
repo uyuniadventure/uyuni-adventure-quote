@@ -4,23 +4,16 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { cn } from "@/lib/utils";
-import {
-  SidebarProvider,
-  AppSidebar,
-  useSidebar,
-  useCurrentSectionTitle,
-} from "@/components/app-sidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -148,81 +141,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const isLogin = useRouterState({
-    select: (s) => s.location.pathname === "/login",
-  });
+  const router = useRouter();
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      router.invalidate();
+      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isLogin ? (
-        <Outlet />
-      ) : (
-        <SidebarProvider>
-          <AppLayout />
-        </SidebarProvider>
-      )}
+      <Outlet />
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
-  );
-}
-
-function AppLayout() {
-  const { collapsed, mobileOpen, toggleCollapsed, toggleMobileOpen } =
-    useSidebar();
-  const sectionTitle = useCurrentSectionTitle();
-
-  return (
-    <div className="min-h-screen w-full bg-background">
-      <AppSidebar />
-      <div
-        className={cn(
-          "flex min-h-screen flex-col transition-[margin] duration-200 ease-out",
-          collapsed ? "lg:ml-16" : "lg:ml-64",
-        )}
-      >
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur lg:px-6">
-          <button
-            type="button"
-            onClick={toggleMobileOpen}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:hidden"
-            aria-label="Abrir menú"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="hidden h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:inline-flex"
-            aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-          >
-            {collapsed ? (
-              <PanelLeftOpen className="h-5 w-5" />
-            ) : (
-              <PanelLeftClose className="h-5 w-5" />
-            )}
-          </button>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">
-              {sectionTitle}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-navy text-xs font-semibold text-white">
-              UA
-            </div>
-            <div className="hidden text-right sm:block">
-              <p className="text-xs font-semibold text-foreground">
-                Admin Uyuni
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Uyuni Adventure DMC
-              </p>
-            </div>
-          </div>
-        </header>
-        <main className="flex-1 px-4 py-6 lg:px-8">
-          <Outlet />
-        </main>
-      </div>
-    </div>
   );
 }
