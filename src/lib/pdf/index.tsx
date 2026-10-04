@@ -18,6 +18,8 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   const optional_prices: Record<string, number> = {};
   for (const day of input.days) {
     for (const item of day.items.filter((i) => !i.included)) {
+      const saved = data.items.find((i) => i.id === item.id);
+      if (!(saved?.pricing_snapshot as { is_optional?: boolean })?.is_optional) continue;
       // Only explicitly priced options appear; free exclusions remain in 'not included'.
       if (!item.rates?.length && !item.price_overridden) continue;
       const result = calculateQuote({

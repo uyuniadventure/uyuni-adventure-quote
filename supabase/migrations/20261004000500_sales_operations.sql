@@ -18,7 +18,9 @@ begin
   if opid is not null then
     insert into public.ops_items(service_id,quote_item_id,item_snapshot,date,type,description,supplier_id,cost_usd,cost_local,currency,check_in,check_out,room_distribution,meal_plan)
     select opid,i.id,to_jsonb(i),d.date,i.type,i.description,i.supplier_id,i.total_cost_usd,i.total_cost_local,i.currency,i.check_in,i.check_out,i.room_distribution,i.meal_plan
-    from public.quote_items i join public.quote_days d on d.id=i.quote_day_id where d.quote_id=new.id and i.included;
+    from public.quote_items i join public.quote_days d on d.id=i.quote_day_id where d.quote_id=new.id and i.included
+     and exists(select 1 from jsonb_array_elements(new.calculation->'items') r where r->>'id'=i.id::text and
+       ((r->>'quantity')::numeric>0 or coalesce((r->>'covered')::boolean,false)));
   end if;
   return new;
 end; $$;

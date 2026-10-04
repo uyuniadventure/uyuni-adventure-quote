@@ -199,6 +199,10 @@ function safeLink(url: string) {
 }
 export function QuoteDocument({ data }: { data: QuotePdfData }) {
   const { quote: q, days, items, content: c, calculation: totals } = data;
+  const isIncluded = (i: Tables<"quote_items">) => {
+    const priced = totals.items.find((r) => r.id === i.id);
+    return i.included && (!priced || priced.quantity > 0 || priced.covered);
+  };
   const language = q.language.split("-")[0] as keyof typeof labels;
   const l = labels[language];
   if (!l) throw new Error(`PDF labels required for language ${q.language}`);
@@ -286,7 +290,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
               {l.included}
             </Text>
             {items
-              .filter((i) => i.quote_day_id === d.id && i.included)
+              .filter((i) => i.quote_day_id === d.id && isIncluded(i))
               .map((i) => (
                 <Text key={i.id} style={styles.item}>
                   {text(i)}
@@ -302,7 +306,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
               ))}
             {d.excludes && <Text>{d.excludes}</Text>}
             {items
-              .filter((i) => i.quote_day_id === d.id && i.type === "alojamiento" && i.included)
+              .filter((i) => i.quote_day_id === d.id && i.type === "alojamiento" && isIncluded(i))
               .map((i) => (
                 <Text key={i.id} style={styles.item}>
                   {l.hotel}: {text(i)} · {i.meal_plan ?? ""} ·{" "}
@@ -331,11 +335,11 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
               ))}
           </>
         )}
-        {items.some((i) => i.type === "alojamiento" && i.included) && (
+        {items.some((i) => i.type === "alojamiento" && isIncluded(i)) && (
           <Text style={styles.h2}>{l.hotels}</Text>
         )}
         {items
-          .filter((i) => i.type === "alojamiento" && i.included)
+          .filter((i) => i.type === "alojamiento" && isIncluded(i))
           .map((i) => (
             <Text key={i.id} style={styles.item}>
               {text(i)} · {i.check_in ?? ""} — {i.check_out ?? ""} · {i.meal_plan ?? ""} ·{" "}

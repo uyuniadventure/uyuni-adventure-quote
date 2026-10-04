@@ -91,6 +91,7 @@ async function serviceItem(
     applies_tc: boolean | null;
     margin_applicable: boolean | null;
     included?: boolean;
+    is_optional?: boolean;
     multi_day_span?: number;
     coverage_key?: string | null;
     coverage_start_day?: number | null;
@@ -132,6 +133,7 @@ async function serviceItem(
     day_span: span,
     meal_plan: s.meal_plan,
     pricing_snapshot: json({
+      is_optional: row.is_optional ?? false,
       rates,
       room_type: s.room_type,
       vehicle_segment: s.vehicle_type,

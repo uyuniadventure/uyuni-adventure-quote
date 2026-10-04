@@ -2367,7 +2367,7 @@ export type Database = {
       };
       save_quote_pdf: {
         Args: { p_id: string; p_updated_at: string; p_path: string; p_url: string };
-        Returns: string;
+        Returns: undefined;
       };
       transition_quote: {
         Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };

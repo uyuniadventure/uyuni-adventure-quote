@@ -102,17 +102,19 @@ try {
     columns.filter((c) => c.table_type === "BASE TABLE").map((c) => c.table_name),
   );
   const rpcType = (t) =>
-    tableNames.has(t)
-      ? `Database['public']['Tables']['${t}']['Row']`
-      : enumNames.has(t)
-        ? `Database['public']['Enums']['${t}']`
-        : ["json", "jsonb"].includes(t)
-          ? "Json"
-          : ["bool", "boolean"].includes(t)
-            ? "boolean"
-            : ["integer", "numeric", "int4"].includes(t)
-              ? "number"
-              : "string";
+    t === "void"
+      ? "undefined"
+      : tableNames.has(t)
+        ? `Database['public']['Tables']['${t}']['Row']`
+        : enumNames.has(t)
+          ? `Database['public']['Enums']['${t}']`
+          : ["json", "jsonb"].includes(t)
+            ? "Json"
+            : ["bool", "boolean"].includes(t)
+              ? "boolean"
+              : ["integer", "numeric", "int4"].includes(t)
+                ? "number"
+                : "string";
   for (const f of functions) {
     const args = (f.proargnames || [])
       .map(
