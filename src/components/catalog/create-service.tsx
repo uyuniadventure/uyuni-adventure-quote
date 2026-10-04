@@ -40,7 +40,7 @@ export function CreateServiceDialog({
         country: f.country.trim() || null,
         location: f.location.trim() || null,
         supplier_id: f.supplier_id === "none" ? null : f.supplier_id,
-        modality: f.modality as TablesInsert<"services">["modality"],
+        modality: f.modality as NonNullable<TablesInsert<"services">["modality"]>,
         status: manager ? "activo" : "pendiente",
         created_by: user.id,
       };
