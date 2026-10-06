@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 
 export const root = new URL("../../", import.meta.url);
 
-export async function createDatabase() {
+export async function createDatabase({ migrationFiles } = {}) {
   const db = new PGlite();
   // Minimal Supabase Auth contract; this is an isolated, in-memory Postgres.
   await db.exec(`
@@ -24,9 +24,10 @@ export async function createDatabase() {
     grant usage on schema auth to authenticated, anon;
     grant execute on function auth.uid() to authenticated, anon;
   `);
-  for (const file of (await readdir(new URL("supabase/migrations/", root)))
-    .filter((x) => x.endsWith(".sql"))
-    .sort()) {
+  const files =
+    migrationFiles ??
+    (await readdir(new URL("supabase/migrations/", root))).filter((x) => x.endsWith(".sql")).sort();
+  for (const file of files) {
     try {
       await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), "utf8"));
     } catch (error) {
@@ -37,7 +38,9 @@ export async function createDatabase() {
 }
 
 export async function seedDatabase(db) {
-  const report = JSON.parse(await readFile(new URL("supabase/seed/applied/report.json", root), "utf8"));
+  const report = JSON.parse(
+    await readFile(new URL("supabase/seed/applied/report.json", root), "utf8"),
+  );
   for (const file of report.seed_order) {
     const sql = await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8");
     if ((sql.match(/^insert into /gm) || []).length > 300)
