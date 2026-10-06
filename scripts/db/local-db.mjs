@@ -37,9 +37,9 @@ export async function createDatabase() {
 }
 
 export async function seedDatabase(db) {
-  const report = JSON.parse(await readFile(new URL("supabase/seed/report.json", root), "utf8"));
+  const report = JSON.parse(await readFile(new URL("supabase/seed/applied/report.json", root), "utf8"));
   for (const file of report.seed_order) {
-    const sql = await readFile(new URL(`supabase/seed/${file}`, root), "utf8");
+    const sql = await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8");
     if ((sql.match(/^insert into /gm) || []).length > 300)
       throw new Error(`${file} exceeds 300 rows`);
     try {
