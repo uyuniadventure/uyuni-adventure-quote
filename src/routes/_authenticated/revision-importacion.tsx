@@ -81,9 +81,39 @@ function usePending() {
 function ReviewPage() {
   const { role } = useCurrentUser();
   const manager = canManageCatalog(role);
+  const isAdmin = role === "admin";
   const qc = useQueryClient();
   const q = usePending();
   const [open, setOpen] = useState<{ kind: Kind; id: string } | null>(null);
+  const [selected, setSelected] = useState<Record<Kind, Set<string>>>({
+    services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set(),
+  });
+
+  const toggle = (k: Kind, id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev[k]);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return { ...prev, [k]: next };
+    });
+  };
+
+  const bulkApprove = useMutation({
+    mutationFn: async ({ kind, ids }: { kind: Kind; ids: string[] }) => {
+      const results = await Promise.allSettled(
+        ids.map((id) => db.from(kind).update({ status: "activo" as Enums<"catalog_status"> }).eq("id", id).then((r) => { if (r.error) throw r.error; }))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      return { ok: results.length - failed, failed };
+    },
+    onSuccess: ({ ok, failed }) => {
+      if (failed === 0) toast.success(`${ok} aprobados.`);
+      else if (ok === 0) toast.error("Ninguno se pudo aprobar: faltan datos obligatorios (moneda / unidad de precio).");
+      else toast.warning(`${ok} aprobados, ${failed} con error: faltan datos obligatorios (moneda / unidad de precio).`);
+      setSelected({ services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set() });
+      qc.invalidateQueries({ queryKey: ["import-review"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const decide = useMutation({
     mutationFn: async ({ kind, id, status }: { kind: Kind; id: string; status: Enums<"catalog_status"> }) => {
