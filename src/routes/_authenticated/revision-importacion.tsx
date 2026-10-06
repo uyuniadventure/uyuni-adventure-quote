@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Check, Pencil, X } from "lucide-react";
+import { AlertTriangle, Check, CheckSquare, Pencil, Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import type { Enums } from "@/types/db";
@@ -81,9 +81,39 @@ function usePending() {
 function ReviewPage() {
   const { role } = useCurrentUser();
   const manager = canManageCatalog(role);
+  const isAdmin = role === "admin";
   const qc = useQueryClient();
   const q = usePending();
   const [open, setOpen] = useState<{ kind: Kind; id: string } | null>(null);
+  const [selected, setSelected] = useState<Record<Kind, Set<string>>>({
+    services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set(),
+  });
+
+  const toggle = (k: Kind, id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev[k]);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return { ...prev, [k]: next };
+    });
+  };
+
+  const bulkApprove = useMutation({
+    mutationFn: async ({ kind, ids }: { kind: Kind; ids: string[] }) => {
+      const results = await Promise.allSettled(
+        ids.map((id) => db.from(kind).update({ status: "activo" as Enums<"catalog_status"> }).eq("id", id).then((r) => { if (r.error) throw r.error; }))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      return { ok: results.length - failed, failed };
+    },
+    onSuccess: ({ ok, failed }) => {
+      if (failed === 0) toast.success(`${ok} aprobados.`);
+      else if (ok === 0) toast.error("Ninguno se pudo aprobar: faltan datos obligatorios (moneda / unidad de precio).");
+      else toast.warning(`${ok} aprobados, ${failed} con error: faltan datos obligatorios (moneda / unidad de precio).`);
+      setSelected({ services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set() });
+      qc.invalidateQueries({ queryKey: ["import-review"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const decide = useMutation({
     mutationFn: async ({ kind, id, status }: { kind: Kind; id: string; status: Enums<"catalog_status"> }) => {
@@ -114,12 +144,48 @@ function ReviewPage() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {kinds.map((k) => (
+        {kinds.map((k) => {
+          const items = q.data?.[k] ?? [];
+          const sel = selected[k];
+          const allSelected = items.length > 0 && items.every((it) => sel.has(it.id));
+          return (
           <TabsContent key={k} value={k} className="mt-4 space-y-3">
             {q.isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
-            {q.data?.[k].length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
-            {q.data?.[k].map((it) => (
+            {items.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
+            {isAdmin && items.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2">
+                <Button
+                  size="sm" variant="ghost" disabled={bulkApprove.isPending}
+                  onClick={() => setSelected((prev) => ({ ...prev, [k]: allSelected ? new Set<string>() : new Set(items.map((it) => it.id)) }))}
+                >
+                  {allSelected ? <CheckSquare className="mr-1.5 h-4 w-4" /> : <Square className="mr-1.5 h-4 w-4" />}
+                  {allSelected ? "Quitar selección" : "Seleccionar todos"}
+                </Button>
+                <span className="text-xs text-muted-foreground">{sel.size} de {items.length} seleccionados</span>
+                <div className="ml-auto flex gap-2">
+                  <Button
+                    size="sm" disabled={sel.size === 0 || bulkApprove.isPending}
+                    onClick={() => bulkApprove.mutate({ kind: k, ids: items.filter((it) => sel.has(it.id)).map((it) => it.id) })}
+                  >
+                    <Check className="mr-1 h-3.5 w-3.5" />Aprobar seleccionados{sel.size > 0 ? ` (${sel.size})` : ""}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={bulkApprove.isPending} onClick={() => bulkApprove.mutate({ kind: k, ids: items.map((it) => it.id) })}>
+                    <CheckSquare className="mr-1 h-3.5 w-3.5" />Aprobar todos ({items.length})
+                  </Button>
+                </div>
+              </div>
+            )}
+            {items.map((it) => (
               <Card key={it.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
+                {isAdmin && (
+                  <button
+                    type="button" aria-label={sel.has(it.id) ? "Quitar de la selección" : "Seleccionar"}
+                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => toggle(k, it.id)}
+                  >
+                    {sel.has(it.id) ? <CheckSquare className="h-4 w-4 text-primary" /> : <Square className="h-4 w-4" />}
+                  </button>
+                )}
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="font-medium text-foreground">{it.title}</div>
                   <div className="font-mono text-xs text-muted-foreground">{it.code}</div>
@@ -140,7 +206,8 @@ function ReviewPage() {
               </Card>
             ))}
           </TabsContent>
-        ))}
+          );
+        })}
       </Tabs>
       <ServiceDetail serviceId={open?.kind === "services" ? open.id : null} onClose={close} />
       <ModuleEditor id={open?.kind === "activity_modules" ? open.id : null} onClose={close} onCreated={() => {}} />
