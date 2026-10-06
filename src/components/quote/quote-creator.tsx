@@ -133,15 +133,16 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
     queryKey: ["quote-suggestions", b.route_from, b.route_to, b.days, b.category, b.modality],
     queryFn: async () => {
       let query = db.from("itinerary_templates")
-        .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, template_days(count)")
-        .eq("status", "activo").order("days").limit(60);
+        .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, template_days(count)")
+        .in("status", ["activo", "pendiente"]).order("days").limit(60);
       if (b.route_from) query = query.eq("route_from", b.route_from);
       if (b.route_to) query = query.eq("route_to", b.route_to);
-      if (Number(b.days) > 0) query = query.lte("days", Number(b.days));
+      const wanted = Number(b.days);
+      if (wanted > 0) query = query.gte("days", wanted - 1).lte("days", wanted + 1);
       const { data, error } = await query;
       if (error) throw error;
-      // Coincidencias exactas de categoría y modalidad primero.
-      const score = (t: (typeof data)[number]) => (t.category === b.category ? 2 : 0) + (t.modality === b.modality ? 1 : 0) + (Number(b.days) === t.days ? 1 : 0);
+      // Coincidencias exactas de categoría, modalidad y duración primero (ordenan, no excluyen).
+      const score = (t: (typeof data)[number]) => (t.category === b.category ? 2 : 0) + (t.modality === b.modality ? 1 : 0) + (wanted === t.days ? 1 : 0);
       return [...data].sort((x, y) => score(y) - score(x));
     },
   });
@@ -188,7 +189,10 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
                 <Badge variant="secondary">{t.route_from ?? "—"} → {t.route_to ?? "—"}</Badge>
                 <Badge variant={t.modality === b.modality ? "default" : "outline"}>{cap(t.modality)}</Badge>
                 {t.meals_summary && <Badge variant="secondary">{t.meals_summary}</Badge>}
+                {t.status === "pendiente" && <Badge variant="outline" className="border-brand-orange-deep text-brand-orange-deep">Pendiente de revisión</Badge>}
+                {Number(b.days) > 0 && t.days !== Number(b.days) && <Badge variant="outline">Duración distinta</Badge>}
               </div>
+              {t.hotel_combo && <p className="font-mono text-xs text-muted-foreground">Hoteles: {t.hotel_combo}</p>}
               {built !== t.days && <p className="text-xs text-brand-orange-deep">Solo {built} de {t.days} días armados.</p>}
               <Button size="sm" className="mt-auto self-end" disabled={create.isPending} onClick={() => create.mutate(t.id)}>Usar plantilla</Button>
             </Card>
