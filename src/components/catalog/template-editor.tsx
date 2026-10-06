@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUSES, StatusBadge, cap } from "./shared";
 import {
-  CATEGORIES, Field, IT_MODALITIES, ROUTE_TYPES, SearchPicker, blockTitle, canEditCatalogRow, fetchBlocks, useLocationCodes,
+  CATEGORIES, DURATION_LABELS, Field, IT_MODALITIES, ROUTE_TYPES, SearchPicker, blockTitle, canEditCatalogRow, fetchBlocks, useLocationCodes,
 } from "./kit";
 
 export function TemplateEditor({ id, onClose, onCreated }: { id: string | null; onClose: () => void; onCreated: (id: string) => void }) {
@@ -325,7 +325,7 @@ function DayBlockPreview({ blockId }: { blockId: string }) {
                   {m.time ? <><Clock className="h-3 w-3" />{m.time.slice(0, 5)}</> : "—"}
                 </span>
                 <span className="min-w-0"><span className="font-medium text-foreground">{m.name}</span>{" "}
-                  <span className="font-mono text-xs text-muted-foreground">{m.code} · {DURATIONS[m.duration]}</span></span>
+                  <span className="font-mono text-xs text-muted-foreground">{m.code} · {DURATION_LABELS[m.duration]}</span></span>
               </li>
             ))}
           </ol>
