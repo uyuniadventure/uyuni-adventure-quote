@@ -189,7 +189,10 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
                 <Badge variant="secondary">{t.route_from ?? "—"} → {t.route_to ?? "—"}</Badge>
                 <Badge variant={t.modality === b.modality ? "default" : "outline"}>{cap(t.modality)}</Badge>
                 {t.meals_summary && <Badge variant="secondary">{t.meals_summary}</Badge>}
+                {t.status === "pendiente" && <Badge variant="outline" className="border-brand-orange-deep text-brand-orange-deep">Pendiente de revisión</Badge>}
+                {Number(b.days) > 0 && t.days !== Number(b.days) && <Badge variant="outline">Duración distinta</Badge>}
               </div>
+              {t.hotel_combo && <p className="font-mono text-xs text-muted-foreground">Hoteles: {t.hotel_combo}</p>}
               {built !== t.days && <p className="text-xs text-brand-orange-deep">Solo {built} de {t.days} días armados.</p>}
               <Button size="sm" className="mt-auto self-end" disabled={create.isPending} onClick={() => create.mutate(t.id)}>Usar plantilla</Button>
             </Card>
