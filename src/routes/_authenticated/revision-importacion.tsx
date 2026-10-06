@@ -144,12 +144,48 @@ function ReviewPage() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {kinds.map((k) => (
+        {kinds.map((k) => {
+          const items = q.data?.[k] ?? [];
+          const sel = selected[k];
+          const allSelected = items.length > 0 && items.every((it) => sel.has(it.id));
+          return (
           <TabsContent key={k} value={k} className="mt-4 space-y-3">
             {q.isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
-            {q.data?.[k].length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
-            {q.data?.[k].map((it) => (
+            {items.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
+            {isAdmin && items.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2">
+                <Button
+                  size="sm" variant="ghost" disabled={bulkApprove.isPending}
+                  onClick={() => setSelected((prev) => ({ ...prev, [k]: allSelected ? new Set<string>() : new Set(items.map((it) => it.id)) }))}
+                >
+                  {allSelected ? <CheckSquare className="mr-1.5 h-4 w-4" /> : <Square className="mr-1.5 h-4 w-4" />}
+                  {allSelected ? "Quitar selección" : "Seleccionar todos"}
+                </Button>
+                <span className="text-xs text-muted-foreground">{sel.size} de {items.length} seleccionados</span>
+                <div className="ml-auto flex gap-2">
+                  <Button
+                    size="sm" disabled={sel.size === 0 || bulkApprove.isPending}
+                    onClick={() => bulkApprove.mutate({ kind: k, ids: items.filter((it) => sel.has(it.id)).map((it) => it.id) })}
+                  >
+                    <Check className="mr-1 h-3.5 w-3.5" />Aprobar seleccionados{sel.size > 0 ? ` (${sel.size})` : ""}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={bulkApprove.isPending} onClick={() => bulkApprove.mutate({ kind: k, ids: items.map((it) => it.id) })}>
+                    <CheckSquare className="mr-1 h-3.5 w-3.5" />Aprobar todos ({items.length})
+                  </Button>
+                </div>
+              </div>
+            )}
+            {items.map((it) => (
               <Card key={it.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
+                {isAdmin && (
+                  <button
+                    type="button" aria-label={sel.has(it.id) ? "Quitar de la selección" : "Seleccionar"}
+                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => toggle(k, it.id)}
+                  >
+                    {sel.has(it.id) ? <CheckSquare className="h-4 w-4 text-primary" /> : <Square className="h-4 w-4" />}
+                  </button>
+                )}
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="font-medium text-foreground">{it.title}</div>
                   <div className="font-mono text-xs text-muted-foreground">{it.code}</div>
@@ -170,7 +206,8 @@ function ReviewPage() {
               </Card>
             ))}
           </TabsContent>
-        ))}
+          );
+        })}
       </Tabs>
       <ServiceDetail serviceId={open?.kind === "services" ? open.id : null} onClose={close} />
       <ModuleEditor id={open?.kind === "activity_modules" ? open.id : null} onClose={close} onCreated={() => {}} />
