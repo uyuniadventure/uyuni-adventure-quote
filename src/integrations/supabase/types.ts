@@ -1714,6 +1714,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -1756,6 +1757,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios?: Json | null
           payment_schedule?: Json | null
+          pdf_path?: string | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
           pricing_config?: Json
@@ -1798,6 +1800,7 @@ export type Database = {
           pax_paying?: number
           pax_scenarios?: Json | null
           payment_schedule?: Json | null
+          pdf_path?: string | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
           pricing_config?: Json
@@ -2443,6 +2446,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -2578,6 +2582,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -2604,6 +2609,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_quote_pdf: {
+        Args: {
+          p_id: string
+          p_path: string
+          p_updated_at: string
+          p_url: string
+        }
+        Returns: undefined
       }
       transition_quote: {
         Args: {
@@ -2633,6 +2647,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
