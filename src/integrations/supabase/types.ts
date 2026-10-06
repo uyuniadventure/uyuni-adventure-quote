@@ -564,6 +564,53 @@ export type Database = {
           },
         ]
       }
+      followup_email_runs: {
+        Row: {
+          body: string
+          created_at: string
+          day: string
+          id: string
+          last_error: string | null
+          provider_id: string | null
+          recipient: string
+          seller_id: string
+          status: Database["public"]["Enums"]["email_status"]
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          day: string
+          id?: string
+          last_error?: string | null
+          provider_id?: string | null
+          recipient: string
+          seller_id: string
+          status?: Database["public"]["Enums"]["email_status"]
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          day?: string
+          id?: string
+          last_error?: string | null
+          provider_id?: string | null
+          recipient?: string
+          seller_id?: string
+          status?: Database["public"]["Enums"]["email_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "followup_email_runs_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotel_codes: {
         Row: {
           code: string
@@ -1310,7 +1357,10 @@ export type Database = {
           created_at: string
           id: string
           idempotency_key: string | null
+          last_error: string | null
+          pdf_path: string | null
           pdf_url: string | null
+          provider_id: string | null
           quote_id: string
           recipient: string
           sent_at: string | null
@@ -1324,7 +1374,10 @@ export type Database = {
           created_at?: string
           id?: string
           idempotency_key?: string | null
+          last_error?: string | null
+          pdf_path?: string | null
           pdf_url?: string | null
+          provider_id?: string | null
           quote_id: string
           recipient: string
           sent_at?: string | null
@@ -1338,7 +1391,10 @@ export type Database = {
           created_at?: string
           id?: string
           idempotency_key?: string | null
+          last_error?: string | null
+          pdf_path?: string | null
           pdf_url?: string | null
+          provider_id?: string | null
           quote_id?: string
           recipient?: string
           sent_at?: string | null
@@ -1714,6 +1770,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -1756,6 +1813,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios?: Json | null
           payment_schedule?: Json | null
+          pdf_path?: string | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
           pricing_config?: Json
@@ -1798,6 +1856,7 @@ export type Database = {
           pax_paying?: number
           pax_scenarios?: Json | null
           payment_schedule?: Json | null
+          pdf_path?: string | null
           pdf_url?: string | null
           price_per_pax_usd?: number | null
           pricing_config?: Json
@@ -2390,6 +2449,37 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_quote_email: {
+        Args: {
+          p_body: string
+          p_id: string
+          p_recipient: string
+          p_subject: string
+        }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          pdf_path: string | null
+          pdf_url: string | null
+          provider_id: string | null
+          quote_id: string
+          recipient: string
+          sent_at: string | null
+          sent_by: string
+          status: Database["public"]["Enums"]["email_status"]
+          subject: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quote_emails"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       compute_real_margin: {
         Args: { p_id: string }
         Returns: {
@@ -2443,6 +2533,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -2474,6 +2565,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      due_followups: { Args: never; Returns: Json }
       edit_quote_item: {
         Args: {
           p_add?: boolean
@@ -2482,6 +2574,10 @@ export type Database = {
           p_promote?: boolean
         }
         Returns: Json
+      }
+      finish_quote_email: {
+        Args: { p_id: string; p_provider_id: string }
+        Returns: undefined
       }
       generate_communication_plan: {
         Args: { p_id: string; p_messages: Json }
@@ -2578,6 +2674,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
@@ -2604,6 +2701,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_quote_pdf: {
+        Args: {
+          p_id: string
+          p_path: string
+          p_updated_at: string
+          p_url: string
+        }
+        Returns: undefined
       }
       transition_quote: {
         Args: {
@@ -2633,6 +2739,7 @@ export type Database = {
           pax_paying: number
           pax_scenarios: Json | null
           payment_schedule: Json | null
+          pdf_path: string | null
           pdf_url: string | null
           price_per_pax_usd: number | null
           pricing_config: Json
