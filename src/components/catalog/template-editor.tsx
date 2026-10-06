@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GripVertical, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, GripVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -10,13 +10,14 @@ import type { Enums, Tables } from "@/types/db";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUSES, StatusBadge, cap } from "./shared";
 import {
-  CATEGORIES, Field, IT_MODALITIES, ROUTE_TYPES, SearchPicker, blockTitle, canEditCatalogRow, fetchBlocks, useLocationCodes,
+  CATEGORIES, DURATION_LABELS, Field, IT_MODALITIES, ROUTE_TYPES, SearchPicker, blockTitle, canEditCatalogRow, fetchBlocks, useLocationCodes,
 } from "./kit";
 
 export function TemplateEditor({ id, onClose, onCreated }: { id: string | null; onClose: () => void; onCreated: (id: string) => void }) {
@@ -250,20 +251,116 @@ function TemplateDays({ template, canEdit }: { template: Tables<"itinerary_templ
 
 function DayItem({ row, n, canEdit, onRemove }: { row: DayRow; n: number; canEdit: boolean; onRemove: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: row.key, disabled: !canEdit });
+  const [open, setOpen] = useState(false);
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`flex items-center gap-3 rounded-md border bg-card p-3 ${isDragging ? "z-10 shadow-lg ring-2 ring-brand-orange/40" : ""}`}>
-      {canEdit && (
-        <button type="button" className="cursor-grab touch-none text-muted-foreground hover:text-foreground" aria-label="Arrastrar" {...attributes} {...listeners}>
-          <GripVertical className="h-5 w-5" />
-        </button>
-      )}
-      <span className="flex h-8 w-14 shrink-0 items-center justify-center rounded bg-primary text-xs font-semibold text-primary-foreground">Día {n}</span>
-      <div className="min-w-0 flex-1">
-        <div className="truncate font-medium text-foreground">{row.title}</div>
-        <div className="truncate font-mono text-xs text-muted-foreground">{row.code}</div>
+      className={`space-y-3 rounded-md border bg-card p-3 ${isDragging ? "z-10 shadow-lg ring-2 ring-brand-orange/40" : ""}`}>
+      <div className="flex items-center gap-3">
+        {canEdit && (
+          <button type="button" className="cursor-grab touch-none text-muted-foreground hover:text-foreground" aria-label="Arrastrar" {...attributes} {...listeners}>
+            <GripVertical className="h-5 w-5" />
+          </button>
+        )}
+        <span className="flex h-8 w-14 shrink-0 items-center justify-center rounded bg-primary text-xs font-semibold text-primary-foreground">Día {n}</span>
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium text-foreground">{row.title}</div>
+          <div className="truncate font-mono text-xs text-muted-foreground">{row.code}</div>
+        </div>
+        <Button size="icon" variant="ghost" aria-label={open ? "Ocultar itinerario" : "Ver itinerario"} onClick={() => setOpen((v) => !v)}>
+          {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </Button>
+        {canEdit && <Button size="icon" variant="ghost" onClick={onRemove}><Trash2 className="h-4 w-4" /></Button>}
       </div>
-      {canEdit && <Button size="icon" variant="ghost" onClick={onRemove}><Trash2 className="h-4 w-4" /></Button>}
+      {open && <DayBlockPreview blockId={row.block_id} />}
     </li>
+  );
+}
+
+interface BlockDetail {
+  mods: { id: string; time: string | null; name: string; code: string; duration: Enums<"activity_duration"> }[];
+  items: { id: string; qty: number; included: boolean; optional: boolean; name: string; sku: string | null; type: Enums<"service_type"> | null }[];
+  texts: { lang: string; title: string; description: string; includes: string | null; excludes: string | null }[];
+}
+
+function DayBlockPreview({ blockId }: { blockId: string }) {
+  const q = useQuery({
+    queryKey: ["day_block_preview", blockId],
+    enabled: !!blockId,
+    queryFn: async (): Promise<BlockDetail> => {
+      const [md, it, tr] = await Promise.all([
+        db.from("day_block_modules").select("id, time, activity_modules(code, name, duration)").eq("block_id", blockId).order("order"),
+        db.from("day_block_items").select("id, qty, included, is_optional, services(sku, name, type)").eq("block_id", blockId).order("created_at"),
+        db.from("day_block_translations").select("lang, title, description, includes, excludes").eq("block_id", blockId),
+      ]);
+      for (const r of [md, it, tr]) if (r.error) throw r.error;
+      return {
+        mods: (md.data ?? []).map((m) => ({
+          id: m.id, time: m.time, code: m.activity_modules?.code ?? "?", name: m.activity_modules?.name ?? "Módulo eliminado",
+          duration: m.activity_modules?.duration ?? ("FD" as Enums<"activity_duration">),
+        })),
+        items: (it.data ?? []).map((x) => ({
+          id: x.id, qty: x.qty, included: x.included, optional: x.is_optional,
+          name: x.services?.name ?? "Servicio eliminado", sku: x.services?.sku ?? null, type: x.services?.type ?? null,
+        })),
+        texts: tr.data ?? [],
+      };
+    },
+  });
+
+  if (q.isLoading) return <p className="text-sm text-muted-foreground">Cargando itinerario…</p>;
+  if (q.isError) return <p className="text-sm text-destructive">No se pudo cargar el detalle del bloque.</p>;
+  const d = q.data!;
+  const es = d.texts.find((t) => t.lang === "es") ?? d.texts[0];
+
+  return (
+    <div className="space-y-3 rounded-md bg-muted/30 p-3">
+      {es?.description && <p className="text-sm text-muted-foreground">{es.description}</p>}
+      {d.mods.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Itinerario del día</p>
+          <ol className="space-y-1">
+            {d.mods.map((m) => (
+              <li key={m.id} className="flex items-start gap-2 text-sm">
+                <span className="mt-0.5 flex w-16 shrink-0 items-center gap-1 font-mono text-xs text-muted-foreground">
+                  {m.time ? <><Clock className="h-3 w-3" />{m.time.slice(0, 5)}</> : "—"}
+                </span>
+                <span className="min-w-0"><span className="font-medium text-foreground">{m.name}</span>{" "}
+                  <span className="font-mono text-xs text-muted-foreground">{m.code} · {DURATION_LABELS[m.duration]}</span></span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      {d.items.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Servicios del día</p>
+          <ul className="space-y-1">
+            {d.items.map((x) => (
+              <li key={x.id} className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-medium text-foreground">{x.name}</span>
+                <span className="font-mono text-xs text-muted-foreground">{x.sku}{x.qty > 1 ? ` ×${x.qty}` : ""}</span>
+                <Badge variant="secondary" className="font-normal">{cap(x.type ?? "")}</Badge>
+                {x.included ? <Badge className="font-normal">Incluido</Badge> : <Badge variant="outline" className="font-normal text-brand-orange-deep">No incluido</Badge>}
+                {x.optional && <Badge variant="secondary" className="font-normal">Opcional</Badge>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {(d.mods.length === 0 && d.items.length === 0) && (
+        <p className="text-sm text-muted-foreground">El bloque no tiene módulos ni servicios asignados.</p>
+      )}
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Incluye</p>
+          <p className="whitespace-pre-line text-sm text-foreground">{es?.includes?.trim() || "—"}</p>
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">No incluye</p>
+          <p className="whitespace-pre-line text-sm text-foreground">{es?.excludes?.trim() || "—"}</p>
+        </div>
+      </div>
+      {es && !["es"].includes(es.lang) && <p className="text-xs text-muted-foreground">Textos mostrados en idioma: {es.lang.toUpperCase()} (sin traducción al español).</p>}
+    </div>
   );
 }
