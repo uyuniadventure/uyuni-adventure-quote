@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Check, Pencil, X } from "lucide-react";
+import { AlertTriangle, Check, CheckSquare, Pencil, Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import type { Enums } from "@/types/db";
