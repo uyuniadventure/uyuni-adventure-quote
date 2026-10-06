@@ -80,11 +80,18 @@ function TemplateForm({ row, canEdit, onSaved }: { row: Tables<"itinerary_templa
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
   const suggested = f.route_from && f.route_to ? `${f.route_from}${f.route_to}-${f.days}D${f.nights}N${f.hotel_combo ? `-${f.hotel_combo}` : ""}` : "";
 
+  const skuFormatOk = SKU_RE.test(f.sku.trim());
+
   const save = useMutation({
     mutationFn: async () => {
       const days = Number(f.days), nights = Number(f.nights);
       if (!f.sku.trim() || !f.name.trim()) throw new Error("SKU y nombre son obligatorios.");
       if (!(days > 0) || nights < 0 || nights > days) throw new Error("Días debe ser > 0 y noches entre 0 y días.");
+      let dup = db.from("itinerary_templates").select("id", { count: "exact", head: true }).eq("sku", f.sku.trim());
+      if (row) dup = dup.neq("id", row.id);
+      const { count, error: dupErr } = await dup;
+      if (dupErr) throw dupErr;
+      if (count) throw new Error("Este SKU ya existe");
       const values = {
         sku: f.sku.trim(), name: f.name.trim(), route_from: f.route_from || null, route_to: f.route_to || null,
         route_type: f.route_type, days, nights, modality: f.modality, category: f.category,
@@ -108,7 +115,7 @@ function TemplateForm({ row, canEdit, onSaved }: { row: Tables<"itinerary_templa
       qc.invalidateQueries({ queryKey: ["import-review"] });
       onSaved(id);
     },
-    onError: (e: Error) => toast.error(e.message.includes("duplicate") ? "Ya existe una plantilla con ese SKU." : e.message),
+    onError: (e: Error) => toast.error(e.message.includes("duplicate") ? "Este SKU ya existe" : e.message),
   });
 
   const locSelect = (k: "route_from" | "route_to") => (
@@ -135,6 +142,9 @@ function TemplateForm({ row, canEdit, onSaved }: { row: Tables<"itinerary_templa
             <Input value={f.sku} onChange={(e) => set("sku", e.target.value.toUpperCase())} placeholder="UYUSPA-3D2N-PTd" className="font-mono" disabled={!canEdit} />
             {canEdit && suggested && suggested !== f.sku && <Button type="button" variant="outline" onClick={() => set("sku", suggested)}>Usar {suggested}</Button>}
           </div>
+          {f.sku.trim() && !skuFormatOk && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-brand-orange-deep"><AlertTriangle className="h-3.5 w-3.5" />El SKU no sigue el formato {"{ORIGEN}{DESTINO}-{N}D{N}N-{COMBO}[-SUFIJOS]"} (ej. UYUSPA-3D2N-PTd). Puedes guardar igual.</p>
+          )}
         </Field>
         <Field label="Estado">
           {manager ? (
