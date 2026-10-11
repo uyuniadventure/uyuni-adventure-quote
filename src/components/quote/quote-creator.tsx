@@ -17,7 +17,7 @@ import {
 import { cap } from "@/components/catalog/shared";
 import { latestFx } from "./quote-ops";
 
-export const DEFAULT_MARGIN = 20;
+export const DEFAULT_MARGIN = 25;
 
 interface Basics {
   client: PickOption | null;
@@ -133,7 +133,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
     queryKey: ["quote-suggestions", b.route_from, b.route_to, b.days, b.category, b.modality],
     queryFn: async () => {
       let query = db.from("itinerary_templates")
-        .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, template_days(count)")
+        .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, quote_defaults, template_days(count)")
         .in("status", ["activo", "pendiente"]).order("days").limit(60);
       if (b.route_from) query = query.eq("route_from", b.route_from);
       if (b.route_to) query = query.eq("route_to", b.route_to);
@@ -179,6 +179,8 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
       <div className="grid gap-3 sm:grid-cols-2">
         {q.data?.map((t) => {
           const built = (t.template_days as unknown as { count: number }[])[0]?.count ?? 0;
+          const defaults = t.quote_defaults as { pax_paying?: number; tc_count?: number };
+          const incompatible = defaults.pax_paying != null && (Number(b.pax_paying) !== defaults.pax_paying || Number(b.tc_count) !== defaults.tc_count);
           return (
             <Card key={t.id} className="flex flex-col gap-2 p-4">
               <div className="font-mono text-xs text-muted-foreground">{t.sku}</div>
@@ -193,8 +195,10 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
                 {Number(b.days) > 0 && t.days !== Number(b.days) && <Badge variant="outline">Duración distinta</Badge>}
               </div>
               {t.hotel_combo && <p className="font-mono text-xs text-muted-foreground">Hoteles: {t.hotel_combo}</p>}
+              {defaults.pax_paying != null && <p className="text-xs text-muted-foreground">Configuración de referencia: {defaults.pax_paying} pasajeros + {defaults.tc_count} TC, con habitaciones y staff cargados.</p>}
+              {incompatible && <p className="text-xs text-brand-orange-deep">Vuelve a los datos básicos para usar el escenario de referencia.</p>}
               {built !== t.days && <p className="text-xs text-brand-orange-deep">Solo {built} de {t.days} días armados.</p>}
-              <Button size="sm" className="mt-auto self-end" disabled={create.isPending} onClick={() => create.mutate(t.id)}>Usar plantilla</Button>
+              <Button size="sm" className="mt-auto self-end" disabled={create.isPending || incompatible} onClick={() => create.mutate(t.id)}>Usar plantilla</Button>
             </Card>
           );
         })}

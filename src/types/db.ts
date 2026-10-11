@@ -694,6 +694,7 @@ export type Database = {
           created_at: string;
           updated_at: string;
           import_warnings: Json;
+          quote_defaults: Json;
         };
         Insert: {
           id?: string;
@@ -719,6 +720,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           import_warnings?: Json;
+          quote_defaults?: Json;
         };
         Update: {
           id?: string;
@@ -744,6 +746,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           import_warnings?: Json;
+          quote_defaults?: Json;
         };
         Relationships: [
           {

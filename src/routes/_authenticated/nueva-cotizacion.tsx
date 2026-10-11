@@ -15,6 +15,6 @@ export const Route = createFileRoute("/_authenticated/nueva-cotizacion")({
 function NewQuotePage() {
   const { quote } = Route.useSearch();
   const navigate = useNavigate({ from: "/nueva-cotizacion" });
-  if (quote) return <QuoteWorkspace quoteId={quote} onReset={() => navigate({ search: {} })} />;
+  if (quote) return <QuoteWorkspace key={quote} quoteId={quote} onReset={() => navigate({ search: {} })} />;
   return <QuoteCreator onCreated={(id) => navigate({ search: { quote: id } })} />;
 }

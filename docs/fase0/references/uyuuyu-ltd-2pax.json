@@ -1,0 +1,206 @@
+{
+  "sku": "UYUUYU-3D2N-LTd",
+  "source": {
+    "url": "https://docs.google.com/spreadsheets/d/1FkL5rTr1QH5XRPZi-cD0RHdyHIp2nEYwvCKmOueen5M/edit?gid=71315723#gid=71315723",
+    "sheet": "*UYU UYU - 3D2N - LTd ",
+    "read_date": "2026-10-11",
+    "range": "A34:F64",
+    "total_cell": "F64",
+    "sales_price_cell": "D37",
+    "sales_price_value": null
+  },
+  "pax_paying": 2,
+  "tc_count": 0,
+  "cost_usd": 1475,
+  "margin_pct": 25,
+  "total_price_usd": 1843.75,
+  "price_per_pax_usd": 921.88,
+  "margin_source": "User confirmed editable margin, usually 25%; markup on eligible costs per SPEC §6.",
+  "rooming": {
+    "paying": {
+      "TWN_STD_NO_VIEW": 1,
+      "DBL": 1
+    },
+    "tc": {}
+  },
+  "staff": {
+    "drivers": 1,
+    "guides": 0
+  },
+  "vehicles": {},
+  "transport_note": "One group circuit purchase, charged once for three days. Source does not specify a vehicle model/count separately.",
+  "rows": [
+    {
+      "source_cell": "F48",
+      "day": 1,
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "description": "3D2N UYUNI – UYUNI",
+      "pricing_unit": "per_group",
+      "quantity": 1,
+      "multi_day_span": 3,
+      "config": {},
+      "cost_usd": 690,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"TOUR_UYU_LEO_3D2N_LOOP\",TARIFARIO_MAESTRO!$A:$A,0))"
+    },
+    {
+      "source_cell": "F49",
+      "day": 1,
+      "sku": "FNB_UYU_LEO_BUFFET_APTHAPI",
+      "description": "ALMUERZO APTHAPI BUFFET SALAR",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 40,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"FNB_UYU_LEO_BUFFET_APTHAPI\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F50",
+      "day": 1,
+      "sku": "TICKETS_LEO_UYU",
+      "description": "ENTRADAS A PARQUES",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 60,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"TICKETS_LEO_UYU\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F51",
+      "day": 1,
+      "sku": "MEAL_LS_DINNER_2026",
+      "description": "CENA",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 80,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"MEAL_LS_DINNER_2026\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F52",
+      "day": 1,
+      "sku": "HTL_LS_COLCHANI_TWN_STD_NO_VIEW_2026",
+      "description": "1 HAB TWIN STANDARD - SIN VISTA SALAR",
+      "pricing_unit": "per_room",
+      "quantity": 1,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 221,
+      "formula": "=SWITCH(D52,\"1 HAB TWIN STANDARD - SIN VISTA SALAR\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_TWN_STD_NO_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB TWIN STANDARD - VISTA SALAR\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_TWN_STD_SALT_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB MATRIMONIAL STANDARD - SIN VISTA SALAR\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_DBL_STD_NO_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB MATRIMONIAL STANDARD - VISTA SALAR\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_DBL_STD_SALT_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB MAT/TWIN DELUXE - VISTA SALAR\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_MAT_TWN_DELUXE_SALT_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB MAT/TWIN DELUXE - VISTA AMANECER\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_MAT_TWN_DELUXE_SUNRISE_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"2 HAB SINGLE STANDARD - VISTA SALAR\",2*INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_LS_COLCHANI_SGL_STD_SALT_VIEW_2026\",TARIFARIO_MAESTRO!$A:$A,0)))"
+    },
+    {
+      "source_cell": "F54",
+      "day": 2,
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "description": "3D2N UYUNI – UYUNI",
+      "pricing_unit": "per_group",
+      "quantity": 0,
+      "multi_day_span": 3,
+      "config": {},
+      "cost_usd": 0,
+      "formula": null
+    },
+    {
+      "source_cell": "F55",
+      "day": 2,
+      "sku": "FNB_UYU_LEO_LUNCH",
+      "description": "ALMUERZO PLATO SERVIDO",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"FNB_UYU_LEO_LUNCH\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F56",
+      "day": 2,
+      "sku": "MEAL_TAYKA_DESERT_DINNER",
+      "description": "CENA CHOFER",
+      "pricing_unit": "per_staff",
+      "quantity": 1,
+      "multi_day_span": 1,
+      "config": {
+        "staff_type": "drivers"
+      },
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"MEAL_TAYKA_DESERT_DINNER\",TARIFARIO_MAESTRO!$A:$A,0))"
+    },
+    {
+      "source_cell": "F57",
+      "day": 2,
+      "sku": "HTL_TAYKA_DESERT_HAB_COMP_CHOFER",
+      "description": "HAB COMPARTIDA CHOFER",
+      "pricing_unit": "per_staff",
+      "quantity": 1,
+      "multi_day_span": 1,
+      "config": {
+        "staff_type": "drivers"
+      },
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_TAYKA_DESERT_HAB_COMP_CHOFER\",TARIFARIO_MAESTRO!$A:$A,0))"
+    },
+    {
+      "source_cell": "F58",
+      "day": 2,
+      "sku": "MEAL_TAYKA_DESERT_DINNER",
+      "description": "CENA",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 60,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"MEAL_TAYKA_DESERT_DINNER\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F59",
+      "day": 2,
+      "sku": "HTL_TAYKA_DESERT_DBL_2026",
+      "description": "1 HAB DOBLE",
+      "pricing_unit": "per_room",
+      "quantity": 1,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 184,
+      "formula": "=SWITCH(D59,\"1 HAB DOBLE\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_TAYKA_DESERT_DBL_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"1 HAB MATRIMONIAL\",INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_TAYKA_DESERT_MAT_2026\",TARIFARIO_MAESTRO!$A:$A,0)),\"2 HAB SINGLE\",2*INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"HTL_TAYKA_DESERT_SGL_2026\",TARIFARIO_MAESTRO!$A:$A,0)))"
+    },
+    {
+      "source_cell": "F61",
+      "day": 3,
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "description": "3D2N UYUNI – UYUNI",
+      "pricing_unit": "per_group",
+      "quantity": 0,
+      "multi_day_span": 3,
+      "config": {},
+      "cost_usd": 0,
+      "formula": null
+    },
+    {
+      "source_cell": "F62",
+      "day": 3,
+      "sku": "FNB_UYU_LEO_LUNCH",
+      "description": "ALMUERZO PLATO SERVIDO",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"FNB_UYU_LEO_LUNCH\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    },
+    {
+      "source_cell": "F63",
+      "day": 3,
+      "sku": "FNB_UYU_LEO_COCKTAIL",
+      "description": "CÓCTEL SALAR",
+      "pricing_unit": "per_person",
+      "quantity": 2,
+      "multi_day_span": 1,
+      "config": {},
+      "cost_usd": 20,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$K:$K,MATCH(\"FNB_UYU_LEO_COCKTAIL\",TARIFARIO_MAESTRO!$A:$A,0))*2"
+    }
+  ]
+}
