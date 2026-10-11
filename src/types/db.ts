@@ -2392,7 +2392,7 @@ export type Database = {
           p_updated_at: string;
           p_result: Json;
         };
-        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+        Returns: Json;
       };
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };

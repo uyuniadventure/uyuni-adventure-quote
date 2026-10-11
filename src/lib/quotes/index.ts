@@ -59,6 +59,7 @@ export async function updateQuoteItem(
 ): Promise<{ quote_id: string; item: Tables<"quote_items"> }> {
   if (changes.price_overridden && !changes.override_note?.trim())
     throw new Error("Price override requires a note");
+  if (changes.adjustment_pct !== undefined) adjustmentPctSchema.parse(changes.adjustment_pct);
   return unwrap(
     await db.rpc("edit_quote_item", { p_id: itemId, p_changes: json(changes) }),
   ) as unknown as { quote_id: string; item: Tables<"quote_items"> };
@@ -165,17 +166,27 @@ export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {
   return result;
 }
 /** Replace (never compound) adjustments and save the recalculation in one RPC. */
+export interface BulkAdjustmentInput {
+  filtro: AdjustmentFilter;
+  pct: number;
+  nota?: string | null;
+}
+export interface BulkAdjustmentResult {
+  quote_id: string;
+  matched_item_ids: string[];
+  affected_item_ids: string[];
+  items: Tables<"quote_items">[];
+  calculation: QuoteResult;
+}
 export async function applyAdjustmentBulk(
   quoteId: string,
-  filter: AdjustmentFilter,
-  pct: number,
-  note?: string | null,
-) {
+  { filtro: filter, pct, nota: note }: BulkAdjustmentInput,
+): Promise<BulkAdjustmentResult> {
   adjustmentPctSchema.parse(pct);
   const data = await loadQuote(quoteId);
   if (data.quote.archived_at || !["borrador", "revisada"].includes(data.quote.status))
     throw new Error("Crea una nueva versión antes de ajustar una cotización enviada");
-  const { matchedIds, affectedIds } = adjustmentTargets(data.days, data.items, filter);
+  const { affectedIds } = adjustmentTargets(data.days, data.items, filter);
   const adjustmentNote = note?.trim() || null;
   const updated = {
     ...data,
@@ -188,7 +199,7 @@ export async function applyAdjustmentBulk(
   const result = calculateQuote(quotePricingInput(updated));
   if (result.status !== "ok")
     throw new Error(result.warnings.join("; ") || "No se puede recalcular la cotización");
-  unwrap(
+  return unwrap(
     await db.rpc("apply_quote_adjustment_bulk", {
       p_id: quoteId,
       p_filter: json(filter),
@@ -197,13 +208,7 @@ export async function applyAdjustmentBulk(
       p_updated_at: data.quote.updated_at,
       p_result: json(result),
     }),
-  );
-  return {
-    quote_id: quoteId,
-    matched_item_ids: matchedIds,
-    affected_item_ids: affectedIds,
-    calculation: result,
-  };
+  ) as unknown as BulkAdjustmentResult;
 }
 export async function generateQuoteCode(quote: {
   tour_sku: string;

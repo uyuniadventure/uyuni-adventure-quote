@@ -234,7 +234,7 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
       <TableCell className="text-center"><Switch checked={item.applies_tc} disabled={!editable} onCheckedChange={(v) => upd({ applies_tc: v })} /></TableCell>
       <TableCell className="text-center"><Switch checked={item.margin_applicable} disabled={!editable} onCheckedChange={(v) => upd({ margin_applicable: v })} /></TableCell>
       <TableCell className="whitespace-nowrap text-right text-sm">{r ? money(r.base_cost_usd === undefined ? r.total_cost_usd : r.base_cost_usd) : "—"}</TableCell>
-      <TableCell className="text-right text-sm" title={item.adjustment_note ?? undefined}>{item.adjustment_pct ?? 0} %{item.adjustment_note && <div className="max-w-40 text-xs text-muted-foreground">{item.adjustment_note}</div>}</TableCell>
+      <TableCell className="text-right text-sm" title={item.adjustment_note ?? undefined}>{Number(((item.adjustment_pct ?? 0) * 100).toFixed(6))} %{item.adjustment_note && <div className="max-w-40 text-xs text-muted-foreground">{item.adjustment_note}</div>}</TableCell>
       <TableCell className="whitespace-nowrap text-right text-sm">
         {r ? <>{money(r.total_cost_usd)}<div className="text-xs text-muted-foreground">{money(r.unit_cost_original, item.currency)} × {r.quantity}</div></> : "—"}
       </TableCell>

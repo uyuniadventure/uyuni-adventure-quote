@@ -43,11 +43,12 @@ function quote(pct = 0, margin = 0): QuoteInput {
 }
 describe("ajuste de costo de la cotización", () => {
   it.each([
-    [6.4, 106.4],
-    [-10, 90],
+    [0.064, 106.4],
+    [-0.1, 90],
     [0, 100],
-    [-100, 0],
-  ])("100 con %s %% cuesta %s", (pct, expected) => {
+    [-0.5, 50],
+    [1, 200],
+  ])("100 con fracción %s cuesta %s", (pct, expected) => {
     const input = quote(pct);
     const before = structuredClone(input);
     const result = calculateQuote(input);
@@ -55,18 +56,23 @@ describe("ajuste de costo de la cotización", () => {
     expect(result.items[0]!.base_cost_usd).toBe(100);
     expect(result.items[0]!.adjustment_pct).toBe(pct);
     expect(result.items[0]!.adjustment_amount_usd).toBeCloseTo(expected - 100, 10);
+    expect(result.items[0]!.costo_base).toBe(100);
+    expect(result.items[0]!.adjustment_usd).toBeCloseTo(expected - 100, 10);
+    expect(result.items[0]!.costo_ajustado).toBe(expected);
+    expect(result.total_adjustments_usd).toBeCloseTo(expected - 100, 10);
     expect(input).toEqual(before);
   });
-  it("uses base margin + adjustment, as confirmed by Andrea: 100 + 25 + 4 = 129", () => {
-    const result = calculateQuote(quote(4, 25));
+  it("applies markup to adjusted cost: 100 × 1.04 × 1.25 = 130", () => {
+    const result = calculateQuote(quote(0.04, 25));
     expect(result).toMatchObject({
       total_cost_usd: 104,
-      total_margin_usd: 25,
-      total_price_usd: 129,
+      total_margin_usd: 26,
+      total_price_usd: 130,
+      total_adjustments_usd: 4,
     });
   });
   it("adjusts after quantities and FX; excluded items stay zero and ineligible margin stays zero", () => {
-    const input = quote(6.4, 25);
+    const input = quote(0.064, 25);
     const item = input.days[0]!.items[0]!;
     item.currency = "BOB";
     item.qty = 2;
@@ -85,7 +91,7 @@ describe("ajuste de costo de la cotización", () => {
     });
   });
   it("uses an override as base, carries adjustments to pax scenarios and does not hide missing rates", () => {
-    const input = quote(10);
+    const input = quote(0.1);
     const item = input.days[0]!.items[0]!;
     item.pricing_unit = "per_person";
     item.price_overridden = true;
@@ -95,6 +101,7 @@ describe("ajuste de costo de la cotización", () => {
     const result = calculateQuote(input);
     expect(result.total_cost_usd).toBe(220);
     expect(result.scenarios[0]!.total_cost_usd).toBe(440);
+    expect(result.scenarios[0]!.total_adjustments_usd).toBe(40);
     delete item.price_overridden;
     item.rates[0]!.price_net = null;
     expect(calculateQuote(input).items[0]).toMatchObject({
@@ -102,9 +109,28 @@ describe("ajuste de costo de la cotización", () => {
       base_cost_usd: null,
       adjustment_amount_usd: null,
       total_cost_usd: null,
+      costo_base: null,
+      adjustment_usd: null,
+      costo_ajustado: null,
     });
+    expect(calculateQuote(input).total_adjustments_usd).toBeNull();
   });
-  it.each([-100.01, NaN, Infinity, -Infinity])("rejects an invalid percentage %s", (pct) => {
-    expect(() => calculateQuote(quote(pct))).toThrow();
+  it("applies margin_on_price and gross commission to the adjusted amount", () => {
+    const result = calculateQuote({
+      ...quote(0.064, 25),
+      margin_mode: "margin_on_price",
+      client_type: "B2B",
+      commission_mode: "gross",
+      commission_pct: 10,
+    });
+    expect(result.total_cost_usd).toBe(106.4);
+    expect(result.total_margin_usd).toBe(35.47);
+    expect(result.total_price_usd).toBe(157.63);
   });
+  it.each([-0.500001, 1.000001, 6.4, NaN, Infinity, -Infinity])(
+    "rejects an invalid fraction %s",
+    (pct) => {
+      expect(() => calculateQuote(quote(pct))).toThrow();
+    },
+  );
 });
