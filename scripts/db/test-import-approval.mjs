@@ -126,6 +126,16 @@ try {
   await template("MISSING_DAY", [goodBlock], 2);
   await template("EXTRA_DAY", [goodBlock, moduleBlock], 1);
   await template("EMPTY_DAY", [await block("EMPTY", null)]);
+  const unlinkedBlocks = [];
+  for (const serviceId of [null, net]) {
+    const unlinked = await block(`UNLINKED_${unlinkedBlocks.length}`, serviceId);
+    await db.query("insert into public.day_block_items(block_id,item_snapshot) values($1,$2)", [
+      unlinked,
+      { sku: "PRIVATE_ITEM", description: "Ítem sin catálogo", unit_cost_original: 10 },
+    ]);
+    unlinkedBlocks.push(unlinked);
+    await template(`UNLINKED_TEMPLATE_${unlinkedBlocks.length}`, [unlinked]);
+  }
   await template("BAD_SERVICE", [await block("BAD_SERVICE", missingUnit)]);
   await template("INACTIVE_SERVICE", [await block("INACTIVE_SERVICE", inactive)]);
   await template("BAD_HOTEL", [await block("BAD_HOTEL", net, "pendiente", noRates)]);
@@ -165,6 +175,12 @@ try {
     "simulate same-batch service approvals, including hotel and module",
   );
   assert.equal(preview.templates.items.find((t) => t.id === goodTemplate).reasons.length, 0);
+  assert(
+    preview.templates.items
+      .filter((t) => t.code.startsWith("UNLINKED_TEMPLATE_"))
+      .every((t) => t.reasons.some((reason) => reason.includes("sin vínculo al catálogo"))),
+    "a snapshot without a catalog service cannot count as an approved service",
+  );
   assert(
     preview.templates.items.filter((t) => t.id !== goodTemplate).every((t) => t.reasons.length),
   );

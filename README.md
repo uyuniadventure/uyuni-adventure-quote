@@ -83,6 +83,11 @@ verificable, no que el costo sea cero. Estos dos fallos también hacen fallar `b
    `supabase/migrations/20261011000500_bulk_catalog_approval.sql` (después de
    `20261011000400_margin_and_agency_commission.sql`). La nueva migración instala
    la RPC, columnas de motivos y permisos de lectura; **no aprueba registros**.
+   Aplicar también `20261011000700_import_approval_unlinked_items.sql`: impide
+   aprobar plantillas con ítems sin vínculo al catálogo, aunque tengan un snapshot
+   con precio o compartan el día con servicios válidos. Solo sustituye la RPC;
+   tampoco aprueba registros. Depende de `20261011000500`, no de la migración
+   independiente de ajustes `20261011000600`.
 2. Desplegar el frontend de esta rama después de la migración. Como Admin, abrir
    `/revision-importacion` y pulsar **Aprobar todo lo válido**. Esto llama a
    `approve_valid_imports()` en simulación: muestra todos los pendientes y sus
