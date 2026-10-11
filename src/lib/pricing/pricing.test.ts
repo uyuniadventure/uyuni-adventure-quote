@@ -335,13 +335,8 @@ describe("pricing", () => {
     expect(result.total_price_usd).toBe(490);
     expect(result.scenarios[0]?.total_price_usd).toBe(140);
   });
-  it("rejects ambiguous/missing rates, FX and vehicle assumptions", () => {
-    for (const change of [
-      { rates: [] },
-      { rates: [rate, rate] },
-      { currency: "EUR" },
-      { pricing_unit: "per_vehicle" as const },
-    ])
+  it("rejects ambiguous/missing rates and FX", () => {
+    for (const change of [{ rates: [] }, { rates: [rate, rate] }, { currency: "EUR" }])
       expect(() =>
         calculateQuote({ ...base, days: [{ day_number: 1, items: [{ ...item, ...change }] }] }),
       ).toThrow();

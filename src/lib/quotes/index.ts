@@ -2,6 +2,7 @@ import { db, json, unwrap } from "../db";
 import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } from "../pricing";
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
 import { applyTemplateDefaults } from "./template-defaults";
+import { parsePricingConfig } from "../pricing/config";
 
 export interface QuoteBasics extends Omit<
   QuoteInput,
@@ -130,13 +131,25 @@ async function serviceItem(
     )
   )
     throw new Error(`Invalid template pricing unit: ${s.sku}`);
+  const unit = config.pricing_unit ?? s.pricing_unit;
+  // Older link JSON also holds import provenance/description/unit overrides.
+  // Validate only the calculation fields, preserving that metadata separately.
+  const raw = row.pricing_config as Record<string, unknown> | null;
+  const calculationConfig = parsePricingConfig(
+    unit,
+    Object.fromEntries(
+      Object.entries(raw ?? {}).filter(([key]) =>
+        ["room_type", "nights", "vehicle_segment", "rate_band", "staff_type"].includes(key),
+      ),
+    ),
+  );
   const span = row.multi_day_span ?? s.multi_day_span;
   return {
     service_id: s.id,
     sku: s.sku,
     description: config.description ?? s.name,
     type: s.type,
-    pricing_unit: config.pricing_unit ?? s.pricing_unit,
+    pricing_unit: unit,
     qty: row.qty,
     unit_cost_original: 0,
     unit_cost_usd: 0,
@@ -151,10 +164,18 @@ async function serviceItem(
       is_optional: row.is_optional ?? false,
       rates,
       room_type: s.room_type,
+      lodging_key:
+        unit === "per_room"
+          ? `${s.supplier_id ?? s.id}:${s.source ?? ""}:${s.location ?? ""}`
+          : undefined,
+      // A day→hotel link covers that day's night unless explicitly configured.
+      nights: unit === "per_room" ? 1 : undefined,
       vehicle_segment: s.vehicle_type,
+      vehicle_max_pax: s.vehicle_max_pax,
       coverage_key: row.coverage_key ?? (span > 1 ? `${s.id}:${day}` : undefined),
       coverage_start_day: row.coverage_start_day ?? day,
       ...(typeof row.pricing_config === "object" ? row.pricing_config : {}),
+      pricing_config: calculationConfig,
       service: s,
     }),
   };
@@ -323,6 +344,7 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
                 ),
               ),
               id: i.id,
+              label: i.sku ?? i.description,
               pricing_unit: i.pricing_unit,
               currency: i.currency,
               qty: i.qty,

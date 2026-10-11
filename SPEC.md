@@ -110,6 +110,7 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
 - **`day_block_translations`**: block_id, `lang`, `title`, `description` (narrativa para el cliente), `includes`, `excludes`, `reviewed` (bool).
 - **`day_block_modules`**: block_id, module_id, `order`, `time`.
 - **`day_block_items`**: block_id, service_id, `qty` (por defecto 1), `applies_tc` (override), `margin_applicable` (override), `is_optional`, `included` (bool). Son los ítems sueltos del día: alojamiento, comidas, traslados. Los ítems con `included = false` alimentan el "no incluye" (ej. "Cena libre").
+  - `pricing_config` se valida con Zod en `src/lib/pricing/config.ts`: habitación (`room_type`: SGL, DBL, TPL o MAT; `nights`), vehículo (`vehicle_segment` y tramo opcional `rate_band`: pax_min/pax_max), persona/grupo (`{}`). Los campos ausentes se resuelven al calcular y generan avisos; se conservan los metadatos de importación fuera de esa configuración. La misma validación se aplica a enlaces de módulos.
 
 ### 4.4 Plantillas (biblioteca)
 - **`itinerary_templates`**:
@@ -215,8 +216,8 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 4. **Cantidad según `pricing_unit`:**
    - `per_person`: `pax_paying + (applies_tc ? tc_count : 0)`.
    - `per_group`: `qty` (normalmente 1). Ej.: guía local, se paga por grupo.
-   - `per_vehicle`: número de vehículos **definido manualmente** por el vendedor (la app no elige el vehículo).
-   - `per_room`: según `rooming` (habitaciones por tipo × noches); el TC ocupa su propia habitación si `applies_tc`.
+   - `per_vehicle`: la cantidad definida para el tramo en `vehicles` tiene prioridad. Si falta, se propone una unidad con el tramo vigente que cubre pagantes + TC + choferes + guías, con aviso. Si la tarifa no tiene límites ni capacidad informada, se avisa que hay que revisar la capacidad. No se sustituyen tarifas vencidas, ambiguas o con límites insuficientes por un precio inventado.
+   - `per_room`: según el `rooming` propio de la cotización (habitaciones por tipo × noches). Si no hay distribución positiva: pagantes en DBL y un SGL si son impares; TC en SGL separado, cobrado solo si `applies_tc`. La distribución explícita sustituye esta regla (4 pax = 2 DBL; 5 pax = 1 TPL + 1 DBL). Sin noches configuradas, un enlace diario de hotel representa una noche. Las categorías como STANDARD no son ocupaciones: sin tipo, se usa la distribución con las tarifas disponibles y un aviso. Nunca se omite silenciosamente una variante solicitada que no tenga tarifa.
    - `per_staff`: número de choferes o guías según `staff` (ej. "cena chofer", "habitación compartida chofer").
    - `per_unit`: `qty` libre.
    - **Servicios multi-día** (`multi_day_span > 1`): se cobran una sola vez, en el primer día que cubren; en los días siguientes aparecen con costo 0 y el texto "incluido" (como hoy el transporte 3D2N).
