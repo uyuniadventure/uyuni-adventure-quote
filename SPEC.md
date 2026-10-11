@@ -128,7 +128,9 @@ una tarifa vigente en la fecha de Santiago con costo neto o rack; cero explícit
 Una plantilla necesita todos sus días numerados del 1 a su duración, con servicios
 aprobados (incluidos hoteles y servicios dentro de módulos, también los aprobables en
 la misma operación). Días vacíos, módulos vacíos y bloques/módulos inactivos impiden
-aprobarla. Los motivos se guardan en `approval_issues` al aplicar, sin sustituir las
+aprobarla. Un ítem sin vínculo a un servicio del catálogo tampoco se considera
+aprobado, aunque tenga un snapshot con precio. Los motivos se guardan en
+`approval_issues` al aplicar, sin sustituir las
 advertencias de importación. Los registros activos o inactivos no se modifican.
 El vendedor puede leer los bloques y módulos de una plantilla activa sin cambiar
 el estado propio de esos bloques/módulos ni ganar permisos de edición.
