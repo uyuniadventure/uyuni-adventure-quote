@@ -2392,7 +2392,7 @@ export type Database = {
           p_updated_at: string;
           p_result: Json;
         };
-        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+        Returns: Json;
       };
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };
@@ -2410,6 +2410,10 @@ export type Database = {
       compute_real_margin: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
+      };
+      create_quote_from_template: {
+        Args: { p_template: string; p_quote: Json; p_days: Json; p_source: Json; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
       };
       create_quote_snapshot: {
         Args: { p_quote: Json; p_days: Json };

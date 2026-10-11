@@ -49,7 +49,6 @@ const basics = (): QuoteBasics => ({
   tc_count: reference.tc_count,
   rooming: { paying: {}, tc: {} },
   vehicles: {},
-  staff: { drivers: 0, guides: 0 },
   fx_snapshot: { USD: 1 },
   margin_pct: reference.margin_pct,
   rounding_rule: { mode: "none", increment: 1 },
@@ -75,6 +74,8 @@ beforeAll(async () => {
     )
   ).rows[0]!.id;
   transport.client = pgliteSupabase(pg);
+  // Approval belongs to this isolated fixture, never to the archived seed.
+  await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
 }, 30000);
 afterAll(async () => {
   await pg?.close();
