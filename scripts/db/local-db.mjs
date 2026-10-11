@@ -4,7 +4,7 @@ import { beforeMigration, afterMigration } from "./migration-fixtures.mjs";
 
 export const root = new URL("../../", import.meta.url);
 
-export async function createDatabase({ throughMigration } = {}) {
+export async function createDatabase({ migrationFiles, throughMigration } = {}) {
   const db = new PGlite();
   // Minimal Supabase Auth contract; this is an isolated, in-memory Postgres.
   await db.exec(`
@@ -25,12 +25,13 @@ export async function createDatabase({ throughMigration } = {}) {
     grant usage on schema auth to authenticated, anon;
     grant execute on function auth.uid() to authenticated, anon;
   `);
-  for (const file of (await readdir(new URL("supabase/migrations/", root)))
-    .filter((x) => x.endsWith(".sql"))
-    .sort()) {
+  const files =
+    migrationFiles ??
+    (await readdir(new URL("supabase/migrations/", root))).filter((x) => x.endsWith(".sql")).sort();
+  for (const file of files) {
     // A historical checkpoint is used only to test a later data migration with
     // alternate counts. By default every real migration runs with test fixtures.
-    if (throughMigration && file > throughMigration) break;
+    if (throughMigration && file > throughMigration) continue;
     try {
       await beforeMigration(db, file);
       await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), "utf8"));
