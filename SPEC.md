@@ -119,6 +119,9 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
 
 ### 4.5 Clientes y condiciones
 - **`clients`**: `type` (`B2B | B2C`), nombre o agencia, contacto, email, país, `language` (es, it, en, …), `terms_id`.
+  - `margin_pct` opcional: se hereda si la cotización no especifica un porcentaje. Cero es un valor explícito.
+  - Comisión de agencias B2B: `commission_mode` (`none`, predeterminado, o `gross`) y `commission_pct` (0 por defecto, siempre menor que 100).
+- **`pricing_settings`**: configuración global única; `margin_mode` (`markup` por defecto, confirmado por Andrea el 2026-10-11) y `margin_pct` (25 por defecto). El equipo puede leerla para cotizar; solo Admin puede modificarla.
 - **`terms_conditions`**: `scope` (`B2C_general | B2B_general | B2B_cliente`), client_id (si es B2B específico), `lang`, contenido.
 - **`info_blocks`**: textos fijos por destino e idioma para el PDF (efectivo y entradas, salud y altitud, sobre la experiencia, notas importantes, métodos de pago).
 - **`bank_accounts`**: datos bancarios por entidad (Ando Libre LLC); se insertan en el PDF.
@@ -132,7 +135,7 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
   - `category` (`BUDGET | COMFORT | VIP | MIXTO`).
   - **Condiciones de pago:** `deposit_pct` (default 30), `balance_due_days` (default 5 días antes en B2C; en grupos se define por cliente, ej. 45), `card_surcharge_pct` (default 3), `payment_schedule` (json opcional con hitos y penalidades específicas, como en el programa SIVOLA).
   - `single_supplement_pp` (calculado, ver §6).
-  - `fx_snapshot` (json con las tasas usadas), `margin_pct`, `rounding_rule`.
+  - `fx_snapshot` (json con las tasas usadas), `margin_pct`, `margin_mode`, `commission_mode`, `commission_pct`, `rounding_rule`. La política efectiva se congela al crear la cotización; las versiones la conservan. Los cambios posteriores en cliente o Admin afectan solo a nuevas cotizaciones.
   - Totales calculados: `total_cost_usd`, `total_margin_usd`, `total_price_usd`, `price_per_pax_usd`.
   - `pax_scenarios` (json opcional para tabla B2B: lista de pax, por ejemplo [2,4,6,10], con su configuración de vehículos y habitaciones por escenario).
   - `status`, `lost_reason`, `next_followup_at`.
@@ -218,8 +221,9 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
    - `per_unit`: `qty` libre.
    - **Servicios multi-día** (`multi_day_span > 1`): se cobran una sola vez, en el primer día que cubren; en los días siguientes aparecen con costo 0 y el texto "incluido" (como hoy el transporte 3D2N).
 5. **Costo total** = Σ (cantidad × unit_cost_usd).
-6. **Margen:** `margin_pct` variable por cotización, aplicado al final **solo sobre ítems con `margin_applicable = true`**.
-   `precio_total = costo_total + Σ(costo_ítems_con_margen) × margin_pct`.
+6. **Margen:** porcentaje de la cotización; si falta, el del cliente; si falta, el global de Admin. Un cero explícito no se reemplaza. Se aplica **solo sobre ítems con `margin_applicable = true`**. Con `p = margin_pct / 100`: `markup` da venta = costo × (1 + p); `margin_on_price` da venta = costo ÷ (1 − p), con p menor que 1. El margen es venta menos costo. Los ítems no elegibles conservan su costo sin margen.
+   **Comisión B2B:** `none` no añade comisión. Con `gross` y `c = commission_pct / 100`, la venta a la agencia = (costo + margen) ÷ (1 − c), con c menor que 1. La comisión es la diferencia respecto a costo + margen; se aplica al precio completo a la agencia, incluidos los ítems sin margen. B2C no tiene comisión.
+   `calculateQuote` devuelve costo, margen, comisión, total USD y precio por pax pagante. El redondeo existente se aplica después; su diferencia se informa como `rounding_adjustment_usd`. Los escenarios y suplementos single usan la misma política.
 7. **Precio por pasajero** = `precio_total / pax_paying` (el TC nunca divide).
 8. **Redondeo** configurable (por ejemplo, al dólar o a 5 USD superiores).
 9. **Suplemento single** (por persona) = (costo SGL − costo de media habitación doble) × noches, con margen aplicado. Se muestra cuando la base es twin.

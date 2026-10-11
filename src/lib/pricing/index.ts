@@ -1,4 +1,7 @@
 import type { Enums } from "../../types/db";
+import { marginAmount, resolvePricingPolicy, type PricingPolicyInput } from "./policy";
+export { DEFAULT_PRICING, resolvePricingPolicy } from "./policy";
+export type { MarginMode, CommissionMode, ClientPricing, AdminPricing } from "./policy";
 
 export interface Rate {
   id?: string;
@@ -45,10 +48,9 @@ export interface PaxScenario {
   vehicles: Record<string, number>;
   staff?: { drivers: number; guides: number };
 }
-export interface QuoteInput extends PaxScenario {
+export interface QuoteInput extends PaxScenario, PricingPolicyInput {
   start_date: string;
   fx_snapshot: Record<string, number>;
-  margin_pct: number; // percentage points: 20 means 20%, never 0.20
   rounding_rule: { increment: number; mode: "ceil" | "nearest" | "none"; per_pax?: boolean };
   days: { day_number: number; items: PricingItem[] }[];
   // Seasons are configured per itinerary; do not invent DRY/RAIN dates.
@@ -78,6 +80,8 @@ export interface ItemResult {
 export interface QuoteTotals {
   total_cost_usd: number;
   total_margin_usd: number;
+  total_commission_usd: number;
+  rounding_adjustment_usd: number;
   total_price_usd: number;
   price_per_pax_usd: number;
   single_supplement_pp: number;
@@ -85,6 +89,7 @@ export interface QuoteTotals {
 type NullableTotals = { [K in keyof QuoteTotals]: number | null };
 export interface QuoteResult extends NullableTotals {
   status: "ok" | "error";
+  pricing_policy: ReturnType<typeof resolvePricingPolicy>;
   items: ItemResult[];
   days: { day_number: number; total_cost_usd: number | null; total_margin_usd: number | null }[];
   warnings: string[];
@@ -110,7 +115,11 @@ export function assertCompleteCalculation(
       totals.total_price_usd,
       totals.price_per_pax_usd,
       totals.single_supplement_pp,
-    ].some((n) => n == null || !Number.isFinite(n));
+    ].some((n) => n == null || !Number.isFinite(n)) ||
+    // Older saved calculations predate these fields and have no commission.
+    (["total_commission_usd", "rounding_adjustment_usd"] as const).some(
+      (key) => key in totals && (totals[key] == null || !Number.isFinite(totals[key])),
+    );
   if (
     result.status === "error" ||
     result.items.some((i) => i.status === "error") ||
@@ -221,7 +230,7 @@ function round(n: number, rule: QuoteInput["rounding_rule"]): number {
 export function calculateQuote(input: QuoteInput): QuoteResult {
   if (count(input.pax_paying, "pax") < 1) throw new Error("Paying pax must be positive");
   count(input.tc_count, "TC");
-  nonnegative(input.margin_pct, "margin");
+  const policy = resolvePricingPolicy(input);
   validDate(input.start_date);
   const ids = new Set<string>(),
     dayNumbers = new Set<number>(),
@@ -330,7 +339,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         unit_cost_original: native,
         unit_cost_usd: usd,
         total_cost_usd: cost,
-        total_margin_usd: item.margin_applicable ? (cost * input.margin_pct) / 100 : 0,
+        total_margin_usd: item.margin_applicable
+          ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
+          : 0,
         covered: false,
       });
     }
@@ -338,19 +349,22 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
   // Known amounts are used only when every billable item and scenario is valid.
   const cost = items.reduce((n, i) => n + (i.total_cost_usd ?? 0), 0),
     margin = items.reduce((n, i) => n + (i.total_margin_usd ?? 0), 0);
+  const gross = (cost + margin) / (1 - policy.commission_pct / 100);
+  const commission = gross - (cost + margin);
   const per = input.rounding_rule.per_pax
-    ? round((cost + margin) / input.pax_paying, input.rounding_rule)
-    : cents(round(cost + margin, input.rounding_rule) / input.pax_paying);
+    ? round(gross / input.pax_paying, input.rounding_rule)
+    : cents(round(gross, input.rounding_rule) / input.pax_paying);
   const total = input.rounding_rule.per_pax
     ? cents(per * input.pax_paying)
-    : round(cost + margin, input.rounding_rule);
+    : round(gross, input.rounding_rule);
   const single = (input.single_supplements ?? []).reduce(
     (sum, s) =>
       sum +
-      ((nonnegative(s.single_cost, "single") - nonnegative(s.double_cost, "double") / 2) /
+      (((nonnegative(s.single_cost, "single") - nonnegative(s.double_cost, "double") / 2) /
         fx(input, s.currency)) *
         count(s.nights, "nights") *
-        (s.margin_applicable ? 1 + input.margin_pct / 100 : 1),
+        (s.margin_applicable ? 1 + marginAmount(1, policy.margin_pct, policy.margin_mode) : 1)) /
+        (1 - policy.commission_pct / 100),
     0,
   );
   const scenarios = (input.pax_scenarios ?? []).map((s) => {
@@ -362,6 +376,8 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       tc_count: s.tc_count,
       total_cost_usd: result.total_cost_usd,
       total_margin_usd: result.total_margin_usd,
+      total_commission_usd: result.total_commission_usd,
+      rounding_adjustment_usd: result.rounding_adjustment_usd,
       total_price_usd: result.total_price_usd,
       price_per_pax_usd: result.price_per_pax_usd,
       single_supplement_pp: result.single_supplement_pp,
@@ -371,8 +387,13 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
     items.some((i) => i.status === "error") || scenarios.some((s) => s.status === "error");
   return {
     status: failed ? "error" : "ok",
+    pricing_policy: policy,
     total_cost_usd: failed ? null : cents(cost),
     total_margin_usd: failed ? null : cents(margin),
+    total_commission_usd: failed ? null : cents(commission),
+    rounding_adjustment_usd: failed
+      ? null
+      : cents(total - cents(cost) - cents(margin) - cents(commission)) || 0,
     total_price_usd: failed ? null : total,
     price_per_pax_usd: failed ? null : per,
     single_supplement_pp: failed ? null : cents(single),

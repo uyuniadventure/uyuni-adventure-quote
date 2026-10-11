@@ -3,7 +3,10 @@ import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } f
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
 import { applyTemplateDefaults } from "./template-defaults";
 
-export interface QuoteBasics extends Omit<QuoteInput, "days"> {
+export interface QuoteBasics extends Omit<
+  QuoteInput,
+  "days" | "client_pricing" | "admin_pricing" | "commission_mode" | "commission_pct"
+> {
   client_id: string;
   client_type: Enums<"client_type">;
   language: string;
@@ -116,8 +119,16 @@ async function serviceItem(
   if (!s.pricing_unit || !s.currency)
     throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
   const rates = unwrap(await db.from("service_rates").select("*").eq("service_id", s.id));
-  const config = (row.pricing_config ?? {}) as { pricing_unit?: Enums<"pricing_unit">; description?: string };
-  if (config.pricing_unit && !["per_person", "per_group", "per_room", "per_vehicle", "per_staff", "per_unit"].includes(config.pricing_unit))
+  const config = (row.pricing_config ?? {}) as {
+    pricing_unit?: Enums<"pricing_unit">;
+    description?: string;
+  };
+  if (
+    config.pricing_unit &&
+    !["per_person", "per_group", "per_room", "per_vehicle", "per_staff", "per_unit"].includes(
+      config.pricing_unit,
+    )
+  )
     throw new Error(`Invalid template pricing unit: ${s.sku}`);
   const span = row.multi_day_span ?? s.multi_day_span;
   return {
@@ -284,6 +295,7 @@ export async function loadQuote(quoteId: string) {
 export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): QuoteInput {
   const { quote: q, days, items } = data;
   return {
+    ...(q.pricing_config as object),
     start_date: q.start_date,
     pax_paying: q.pax_paying,
     tc_count: q.tc_count,
@@ -291,10 +303,13 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
     vehicles: q.vehicles,
     staff: q.staff,
     margin_pct: q.margin_pct,
+    margin_mode: q.margin_mode,
+    client_type: q.client_type,
+    commission_mode: q.commission_mode,
+    commission_pct: q.commission_pct,
     fx_snapshot: q.fx_snapshot,
     rounding_rule: q.rounding_rule,
     pax_scenarios: q.pax_scenarios ?? [],
-    ...(q.pricing_config as object),
     days: days.map((d) => ({
       day_number: d.day_number,
       items: items
