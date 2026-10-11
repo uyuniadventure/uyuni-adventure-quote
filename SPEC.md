@@ -157,7 +157,27 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   - Totales calculados: `total_cost_usd`, `total_margin_usd`, `total_price_usd`, `price_per_pax_usd`.
   - `pax_scenarios` (json opcional para tabla B2B: lista de pax, por ejemplo [2,4,6,10], con su configuración de vehículos y habitaciones por escenario).
   - `status`, `lost_reason`, `next_followup_at`.
-- **`quote_days`**: snapshot del bloque (copia completa de textos traducidos e ítems; no referencia viva).
+- **`quote_days`**: `quote_id`, `day_number`, `date`; `source_block_id` nullable y
+  `block_snapshot` completo, con todos los idiomas, módulos y enlaces del bloque al copiarlo.
+  `overrides` contiene solo diferencias de contenido: title/description por idioma,
+  meals, accommodation_text, transport_text, schedule, start_point, end_point,
+  internal_notes y photo_ids. Resolver un día nunca consulta la biblioteca viva.
+  Restaurar un campo al valor del snapshot elimina su override.
+  `link_type`: chained por defecto, independent, o grouped con `group_id` y
+  `group_position`. Al copiar una plantilla, una compra multi-día agrupa todos
+  sus días; se cobra una vez. Mover/borrar un miembro afecta al grupo completo.
+  Desagrupar conserva la compra; se rechazan operaciones que la partan.
+  Días encadenados adyacentes con puntos conocidos incompatibles generan avisos
+  (normalización de caja, espacios y tildes); independent omite esa comparación.
+  Edición, agrupación, movimientos y borrado guardan el recálculo atómicamente.
+  Al versionar se copian snapshots/overrides y se asignan nuevos IDs de grupo.
+- **Bloques derivados:** `day_blocks.parent_block_id`, `name`, `start_point`,
+  `end_point` y `content` conservan el nombre y contenido del nuevo bloque.
+  `saveDayAsNewBlock` copia contenido efectivo de todos los idiomas y servicios
+  actuales del día, con estado pendiente y vínculo al bloque original intacto.
+- **Trazabilidad de ítems:** `quote_items.source_block_service_id` identifica el
+  enlace original de bloque o módulo; null en ítems añadidos a mano. Los servicios
+  se modifican únicamente en `quote_items`, nunca mediante overrides.
 - **`quote_items`**: quote_day_id, service_id (nullable si es ítem nuevo), sku, descripción, `type`, `pricing_unit`, `qty`, `unit_cost_original`, `currency`, `unit_cost_usd`, `applies_tc`, `margin_applicable`, `included` (bool), `day_span` (para servicios multi-día), `price_overridden` (bool), `override_note`, `promote_to_master` (bool).
   - `adjustment_pct`: fracción entre -0.5 y 1 (0.064 significa +6,4 %; límites -50 % y +100 %), no nula y por defecto 0. `adjustment_note`: nota interna opcional. Vive solo en la cotización, se copia al versionar y no se hereda al promover una plantilla. No se usa `fuel_surcharge`.
   - Campos de vuelo (si `type = vuelo`): `airline`, `flight_no`, `route`, `dep_time`, `arr_time`, `fare_notes`. Alimentan el resumen de vuelos del PDF.

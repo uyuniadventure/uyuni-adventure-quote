@@ -5,6 +5,7 @@ export { createQuoteFromTemplate, type TemplateQuoteBasics } from "./from-templa
 
 import { adjustmentPctSchema } from "../pricing/adjustment";
 import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";
+import { continuityWarnings } from "./day-content";
 export type { AdjustmentFilter } from "./adjustment-filter";
 
 export interface QuoteBasics extends Omit<
@@ -32,6 +33,7 @@ export type QuoteItemChanges = Omit<
   | "quote_day_id"
   | "service_id"
   | "supplier_id"
+  | "source_block_service_id"
   | "created_at"
   | "updated_at"
   | "total_cost_usd"
@@ -153,9 +155,15 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
     })),
   } as unknown as QuoteInput;
 }
+export function calculateSavedQuote(data: Awaited<ReturnType<typeof loadQuote>>): QuoteResult {
+  const result = calculateQuote(quotePricingInput(data));
+  const continuity = continuityWarnings(data.days);
+  result.warnings.push(...continuity.map((w) => w.mensaje));
+  return result;
+}
 export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {
   const data = await loadQuote(quoteId);
-  const result = calculateQuote(quotePricingInput(data));
+  const result = calculateSavedQuote(data);
   unwrap(
     await db.rpc("save_quote_calculation", {
       p_id: quoteId,
@@ -196,7 +204,7 @@ export async function applyAdjustmentBulk(
         : i,
     ),
   };
-  const result = calculateQuote(quotePricingInput(updated));
+  const result = calculateSavedQuote(updated);
   if (result.status !== "ok")
     throw new Error(result.warnings.join("; ") || "No se puede recalcular la cotización");
   return unwrap(

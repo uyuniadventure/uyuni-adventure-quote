@@ -220,3 +220,52 @@ de venta de referencia. Esa comparación usa el FX del fixture (CLP 925,92 por U
 Si no se proporciona FX, se usa el vigente en Admin para la fecha de inicio, que
 puede dar otro importe. Las pruebas usan aprobación local explícita de la plantilla,
 sin cambiar los seeds históricos ni los datos de Cloud.
+
+
+### Días editables con trazabilidad (2026-10-11)
+
+Aplicar las migraciones pendientes en orden de nombre. Este cambio requiere
+`20261011000800_atomic_quote_from_template.sql`, después
+`20261011000900_adjustment_fraction_and_margin.sql` y finalmente
+`20261011001000_quote_days_traceability.sql` (incluye el bucket privado `media`).
+No ejecutar nuevamente migraciones ya registradas ni los seeds históricos.
+No se aplicó nada contra Lovable Cloud desde Codex.
+
+- Se amplían `quote_days`, `quote_items` y `day_blocks`; no hay tablas paralelas.
+  Los días nuevos conservan bloque, todos sus idiomas, módulos y enlaces de servicios
+  en `block_snapshot`. Los datos históricos solo recuperan el contenido que ya estaba
+  guardado: no se sustituyen por textos actuales de la biblioteca.
+- `src/lib/quotes/days.ts`: `updateDayContent`, `validateContinuity`, `setDayLinkType`,
+  `groupDays`, `ungroup`, `moveDay`, `deleteDay`, `saveDayAsNewBlock`, `addBlockDay`.
+  `resolveDay` y el esquema Zod se exportan desde el mismo módulo.
+  `title`, `description`, `accommodation_text`, `transport_text` son mapas idioma → texto;
+  `meals`, `schedule`, `photo_ids` son listas de cadenas; puntos y notas son texto o null.
+- La RPC `edit_quote_days` prepara un resultado sin escrituras cuando no recibe
+  `p_result`. TypeScript calcula sobre ese resultado. La segunda llamada comprueba
+  `updated_at`, vuelve a construir el plan y guarda días, servicios y cálculo en una
+  transacción. Un fallo revierte todo. Las cotizaciones enviadas requieren versionar;
+  la nueva versión conserva contenido y servicios, con nuevos identificadores de grupo.
+- Continuidad: compara puntos efectivos, sin espacios, tildes ni diferencias de caja.
+  Un enlace `independent` evita la comparación con sus vecinos. Si falta un punto no
+  se inventa una desconexión. Los avisos se incorporan a los del cálculo existente.
+- `moveDay(quoteId, dayId, targetDay)` mueve antes de un destino anterior o después de
+  uno posterior, respetando ambos grupos completos. Mover o borrar un miembro actúa
+  sobre todo el grupo. Los servicios multi-día conservan la identidad de compra;
+  desagrupar no multiplica el cobro y no permite dividir esa compra por movimiento/borrado.
+- Guardar como bloque crea un registro `pendiente` con `parent_block_id`, nombre,
+  código técnico único `DER-<uuid>`, todos los idiomas efectivos y los servicios del día.
+  No modifica el bloque original. Las tarifas manuales/congeladas quedan en el enlace.
+  Los ajustes de cotización y sus notas se eliminan de los servicios del nuevo bloque.
+  Un bloque que contiene una compra multi-día debe reutilizarse dentro de una plantilla
+  que contenga el tramo completo, no como un único día suelto.
+- `source_block_service_id` conserva el UUID del enlace original de bloque o módulo;
+  el tipo y la copia del enlace viven en `pricing_snapshot._source_link`. No lleva FK
+  porque hay dos tablas de origen y la trazabilidad debe sobrevivir a borrar un enlace.
+- Storage `media`: lectura autenticada; escritura Admin/Operación; bucket privado,
+  formatos JPEG/PNG/WebP/GIF. Ninguna carga ni borrado remoto realizado.
+
+Verificación local: `bun run test -- src/lib/quotes/days.test.ts src/lib/quotes/day-migration.test.ts src/lib/quotes/creation.test.ts --maxWorkers=1`,
+`bun run test:db`, `bun run typecheck`, `bun run build`.
+La plantilla de aceptación es SPAUYU-3D2N-MP, 2 pagantes: costo USD 1.939.
+Las discrepancias anteriores de los casos reales Bolivia/WE ROAD se mantienen
+separadas de este cambio; no se ajustó el motor para ocultarlas.

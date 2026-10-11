@@ -1,8 +1,14 @@
 import { db, json, unwrap } from "../db";
-import { calculateQuote, assertCompleteCalculation, resolvePricingPolicy } from "../pricing";
+import { assertCompleteCalculation, resolvePricingPolicy } from "../pricing";
 import { parsePricingConfig } from "../pricing/config";
 import type { Tables, Enums, Json } from "../../types/db";
-import { quotePricingInput, type QuoteBasics, type QuoteItemInput, type loadQuote } from "./index";
+import {
+  calculateSavedQuote,
+  type QuoteBasics,
+  type QuoteItemInput,
+  type loadQuote,
+} from "./index";
+import { snapshotBlock, groupCoveredDays } from "./day-content";
 import { applyTemplateDefaults } from "./template-defaults";
 import { loadTemplateSource, type TemplateSource } from "./template-source";
 
@@ -12,7 +18,7 @@ export type TemplateQuoteBasics = Pick<
 > &
   Partial<Omit<QuoteBasics, "client_id" | "language" | "start_date" | "pax_paying">>;
 
-function serviceItem(
+export function serviceItem(
   row: {
     service_id: string | null;
     qty: number;
@@ -28,7 +34,7 @@ function serviceItem(
     source_kind?: "hotel";
   },
   day: number,
-  source: TemplateSource,
+  source: Pick<TemplateSource, "services" | "rates">,
 ): QuoteItemInput {
   if (row.item_snapshot) {
     const {
@@ -63,6 +69,8 @@ function serviceItem(
             ),
           ),
         ),
+        coverage_key: row.coverage_key ?? frozen["coverage_key"],
+        coverage_start_day: row.coverage_start_day ?? day,
         _source_link: row,
         _source_pricing_config: row.pricing_config ?? {},
       }),
@@ -230,6 +238,9 @@ export async function createQuoteFromTemplate(
     if (!items.length) throw new Error(`Día ${td.day_number}: sin servicios`);
     return {
       day_number: td.day_number,
+      source_block_id: block.id,
+      block_snapshot: json(snapshotBlock(block, source)),
+      overrides: json({}),
       title: text.title,
       description: [text.description, ...moduleTexts].join("\n\n"),
       includes: text.includes,
@@ -274,7 +285,7 @@ export async function createQuoteFromTemplate(
   }
   // Temporary identifiers are mapped to database-generated item IDs inside the RPC.
   let creationOrder = 0;
-  const prepared = days.map((d) => ({
+  const prepared = groupCoveredDays(days).map((d) => ({
     ...d,
     id: crypto.randomUUID(),
     items: d.items.map((i) => {
@@ -297,7 +308,7 @@ export async function createQuoteFromTemplate(
     days: prepared,
     items: prepared.flatMap((d) => d.items.map((i) => ({ ...i, quote_day_id: d.id }))),
   } as unknown as Awaited<ReturnType<typeof loadQuote>>;
-  const result = calculateQuote(quotePricingInput(data));
+  const result = calculateSavedQuote(data);
   assertCompleteCalculation(result);
   return unwrap(
     await db.rpc("create_quote_from_template", {

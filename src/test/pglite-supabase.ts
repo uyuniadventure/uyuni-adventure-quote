@@ -88,6 +88,14 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        snapshot_day_block: [["p_id", "uuid"]],
+        edit_quote_days: [
+          ["p_id", "uuid"],
+          ["p_operation", "text"],
+          ["p_payload", "jsonb"],
+          ["p_updated_at", "timestamptz"],
+          ["p_result", "jsonb"],
+        ],
         create_quote_from_template: [
           ["p_template", "uuid"],
           ["p_quote", "jsonb"],
@@ -121,7 +129,7 @@ export function pgliteSupabase(pg: PGlite) {
       if (!signature) throw new Error(`Unsupported RPC: ${name}`);
       try {
         const values = signature.map(([key, type]) =>
-          type === "jsonb" ? JSON.stringify(args[key]) : args[key],
+          args[key] == null ? null : type === "jsonb" ? JSON.stringify(args[key]) : args[key],
         );
         const placeholders = signature.map(([, type], i) => `$${i + 1}::${type}`);
         const { rows } = await pg.query<{ data: unknown }>(

@@ -50,14 +50,20 @@ export function useQuoteActions(quoteId: string) {
       setBusy((b) => b + 1);
       const p = chain.current.then(async () => {
         let success = true;
+        let calculated = false;
         try {
-          await fn();
+          const changed = await fn();
+          if (changed && typeof changed === "object" && "calculation" in changed) {
+            setResult(changed.calculation as QuoteResult);
+            setCalcError(null);
+            calculated = true;
+          }
           if (ok) toast.success(ok);
         } catch (e) {
           success = false;
           toast.error((e as Error).message);
         }
-        await recalc();
+        if (!calculated) await recalc();
         await qc.invalidateQueries({ queryKey: ["quote-full", quoteId] });
         await qc.invalidateQueries({ queryKey: ["quotes"] });
         return success;
@@ -123,10 +129,12 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
     <div className="space-y-3">
       {days.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">Cotización vacía. Agrega bloques diarios para armar el itinerario.</p>}
       {days.map((d, i) => (
-        <DayCard key={d.id} day={d} index={i} count={days.length} items={items.filter((it) => it.quote_day_id === d.id)}
+        <DayCard key={d.id} day={d} index={i} count={days.length}
+          canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
+          canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
           editable={editable} actions={actions}
           onMove={(to) => act(() => moveDay(quote, days, i, to))}
-          onRemove={() => confirm(`¿Quitar el día ${d.day_number} y sus servicios?`) && act(() => removeDay(quote, days, d.id), "Día eliminado.")} />
+          onRemove={() => confirm(d.group_id ? `¿Quitar el grupo completo (días ${days.filter(day => day.group_id === d.group_id).map(day => day.day_number).join(", ")}) y sus servicios?` : `¿Quitar el día ${d.day_number} y sus servicios?`) && act(() => removeDay(quote, days, d.id), "Día eliminado.")} />
       ))}
       {editable && (
         <Card className="flex flex-wrap items-center gap-2 p-3">
@@ -139,8 +147,8 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   );
 }
 
-function DayCard({ day, index, count, items, editable, actions, onMove, onRemove }: {
-  day: Tables<"quote_days">; index: number; count: number; items: Item[]; editable: boolean; actions: Actions;
+function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, onMove, onRemove }: {
+  day: Tables<"quote_days">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
   onMove: (to: number) => void; onRemove: () => void;
 }) {
   const { act, result } = actions;
@@ -162,8 +170,8 @@ function DayCard({ day, index, count, items, editable, actions, onMove, onRemove
         {dayTotal && <span className="text-xs text-muted-foreground">Costo {money(dayTotal.total_cost_usd, "USD")}</span>}
         {editable && (
           <div className="flex">
-            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={index === 0} onClick={() => onMove(index - 1)} aria-label="Subir"><ArrowUp className="h-4 w-4" /></Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={index === count - 1} onClick={() => onMove(index + 1)} aria-label="Bajar"><ArrowDown className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!canMoveUp} onClick={() => onMove(index - 1)} aria-label="Subir"><ArrowUp className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!canMoveDown} onClick={() => onMove(index + 1)} aria-label="Bajar"><ArrowDown className="h-4 w-4" /></Button>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onRemove} aria-label="Quitar día"><Trash2 className="h-4 w-4" /></Button>
           </div>
         )}
