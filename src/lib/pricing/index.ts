@@ -89,8 +89,11 @@ export interface ItemResult {
   unit_cost_original?: number;
   unit_cost_usd: number | null;
   base_cost_usd: number | null;
+  costo_base: number | null;
   adjustment_pct: number;
   adjustment_amount_usd: number | null;
+  adjustment_usd: number | null;
+  costo_ajustado: number | null;
   total_cost_usd: number | null;
   total_margin_usd: number | null;
   covered: boolean;
@@ -104,6 +107,7 @@ export interface ItemResult {
   }[];
 }
 export interface QuoteTotals {
+  total_adjustments_usd: number;
   total_cost_usd: number;
   total_margin_usd: number;
   total_commission_usd: number;
@@ -144,7 +148,7 @@ export function assertCompleteCalculation(
       totals.single_supplement_pp,
     ].some((n) => n == null || !Number.isFinite(n)) ||
     // Older saved calculations predate these fields and have no commission.
-    (["total_commission_usd", "rounding_adjustment_usd"] as const).some(
+    (["total_commission_usd", "rounding_adjustment_usd", "total_adjustments_usd"] as const).some(
       (key) => key in totals && (totals[key] == null || !Number.isFinite(totals[key])),
     );
   if (
@@ -350,8 +354,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           unit_cost_original: 0,
           unit_cost_usd: 0,
           base_cost_usd: 0,
+          costo_base: 0,
           adjustment_pct: item.adjustment_pct,
           adjustment_amount_usd: 0,
+          adjustment_usd: 0,
+          costo_ajustado: 0,
           total_cost_usd: 0,
           total_margin_usd: 0,
           covered,
@@ -438,8 +445,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           unit_cost_original: 0,
           unit_cost_usd: 0,
           base_cost_usd: 0,
+          costo_base: 0,
           adjustment_pct: item.adjustment_pct,
           adjustment_amount_usd: 0,
+          adjustment_usd: 0,
+          costo_ajustado: 0,
           total_cost_usd: 0,
           total_margin_usd: 0,
           covered: false,
@@ -495,8 +505,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             quantity: qty,
             unit_cost_usd: null,
             base_cost_usd: null,
+            costo_base: null,
             adjustment_pct: item.adjustment_pct,
             adjustment_amount_usd: null,
+            adjustment_usd: null,
+            costo_ajustado: null,
             total_cost_usd: null,
             total_margin_usd: null,
             covered: false,
@@ -518,12 +531,15 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         unit_cost_original: native,
         unit_cost_usd: usd,
         base_cost_usd: baseCost,
+        costo_base: baseCost,
         adjustment_pct: item.adjustment_pct,
         adjustment_amount_usd: cost - baseCost,
+        adjustment_usd: cost - baseCost,
+        costo_ajustado: cost,
         total_cost_usd: cost,
-        // Andrea: the adjustment is passed through without margin (2026-10-11).
+        // Andrea's revised rule: margin applies to adjusted cost (2026-10-11).
         total_margin_usd: item.margin_applicable
-          ? marginAmount(baseCost, policy.margin_pct, policy.margin_mode)
+          ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
           : 0,
         covered: false,
         ...(item.pricing_unit === "per_room" || item.pricing_unit === "per_vehicle"
@@ -563,6 +579,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       pax_paying: s.pax_paying,
       tc_count: s.tc_count,
       total_cost_usd: result.total_cost_usd,
+      total_adjustments_usd: result.total_adjustments_usd,
       total_margin_usd: result.total_margin_usd,
       total_commission_usd: result.total_commission_usd,
       rounding_adjustment_usd: result.rounding_adjustment_usd,
@@ -578,6 +595,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
     pricing_policy: policy,
     ...(rooms ? { effective_rooming: rooms.rooming } : {}),
     total_cost_usd: failed ? null : cents(cost),
+    total_adjustments_usd: failed
+      ? null
+      : cents(items.reduce((n, i) => n + (i.adjustment_usd ?? 0), 0)),
     total_margin_usd: failed ? null : cents(margin),
     total_commission_usd: failed ? null : cents(commission),
     rounding_adjustment_usd: failed

@@ -159,7 +159,7 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   - `status`, `lost_reason`, `next_followup_at`.
 - **`quote_days`**: snapshot del bloque (copia completa de textos traducidos e ítems; no referencia viva).
 - **`quote_items`**: quote_day_id, service_id (nullable si es ítem nuevo), sku, descripción, `type`, `pricing_unit`, `qty`, `unit_cost_original`, `currency`, `unit_cost_usd`, `applies_tc`, `margin_applicable`, `included` (bool), `day_span` (para servicios multi-día), `price_overridden` (bool), `override_note`, `promote_to_master` (bool).
-  - `adjustment_pct`: porcentaje en puntos (6,4 significa 6,4 %), por defecto 0; admite descuentos hasta -100 %. `adjustment_note`: nota interna opcional. Vive solo en la cotización, se copia al versionar y no se hereda al promover una plantilla.
+  - `adjustment_pct`: fracción entre -0.5 y 1 (0.064 significa +6,4 %; límites -50 % y +100 %), no nula y por defecto 0. `adjustment_note`: nota interna opcional. Vive solo en la cotización, se copia al versionar y no se hereda al promover una plantilla. No se usa `fuel_surcharge`.
   - Campos de vuelo (si `type = vuelo`): `airline`, `flight_no`, `route`, `dep_time`, `arr_time`, `fare_notes`. Alimentan el resumen de vuelos del PDF.
   - Campos de alojamiento: `check_in`, `check_out`, `room_distribution`, `meal_plan`. Alimentan el resumen de alojamientos.
 - **`quote_status_history`**: estado anterior y nuevo, usuario, fecha, nota.
@@ -239,18 +239,18 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
    - `per_staff`: número de choferes o guías según `staff` (ej. "cena chofer", "habitación compartida chofer").
    - `per_unit`: `qty` libre.
    - **Servicios multi-día** (`multi_day_span > 1`): se cobran una sola vez, en el primer día que cubren; en los días siguientes aparecen con costo 0 y el texto "incluido" (como hoy el transporte 3D2N).
-5. **Costo base por línea** = cantidad × tarifa original ÷ FX congelado. **Costo ajustado** = costo base × (1 + `adjustment_pct` / 100). **Costo total** = suma de costos ajustados. El desglose interno conserva costo base, porcentaje, importe del ajuste y costo ajustado; el PDF solo muestra precios finales y nunca notas ni porcentajes de ajuste.
+5. **Costo base por línea** = cantidad × tarifa original ÷ FX congelado. **Costo ajustado** = costo base × (1 + `adjustment_pct`). **Costo total** = suma de costos ajustados. El resultado devuelve `costo_base`, `adjustment_pct`, `adjustment_usd` y `costo_ajustado` por línea (conserva también los nombres anteriores `base_cost_usd`, `adjustment_amount_usd` y `total_cost_usd`). `total_adjustments_usd` suma los ajustes, sin duplicar compras multi-día, y queda null si hay errores; también se devuelve por escenario. El PDF solo muestra precios finales y nunca notas ni porcentajes de ajuste.
 6. **Margen:** porcentaje de la cotización; si falta, el del cliente; si falta, el global de Admin. Un cero explícito no se reemplaza. Se aplica **solo sobre ítems con `margin_applicable = true`**. Con `p = margin_pct / 100`: `markup` da venta = costo × (1 + p); `margin_on_price` da venta = costo ÷ (1 − p), con p menor que 1. El margen es venta menos costo. Los ítems no elegibles conservan su costo sin margen.
    **Comisión B2B:** `none` no añade comisión. Con `gross` y `c = commission_pct / 100`, la venta a la agencia = (costo + margen) ÷ (1 − c), con c menor que 1. La comisión es la diferencia respecto a costo + margen; se aplica al precio completo a la agencia, incluidos los ítems sin margen. B2C no tiene comisión.
    `calculateQuote` devuelve costo, margen, comisión, total USD y precio por pax pagante. El redondeo existente se aplica después; su diferencia se informa como `rounding_adjustment_usd`. Los escenarios y suplementos single usan la misma política.
-   **Ajustes sin margen adicional (Andrea, 2026-10-11):** en las fórmulas de margen anteriores, «costo» es el **costo base**. El ajuste se suma aparte: base 100 + ajuste 4 + markup 25 = venta 129 USD. No se aplica margen sobre los 4 USD. La comisión B2B, si corresponde, conserva su aplicación sobre el precio completo.
+   **Regla revisada por Andrea (2026-10-11):** en las fórmulas de margen anteriores, «costo» es el **costo ajustado**. Base 100 × (1 + 0.04) × 1.25 = venta 130 USD. Sustituye la regla anterior que dejaba el ajuste fuera del margen. La comisión B2B, si corresponde, conserva su aplicación sobre el precio completo.
 7. **Precio por pasajero** = `precio_total / pax_paying` (el TC nunca divide).
 8. **Redondeo** configurable (por ejemplo, al dólar o a 5 USD superiores).
 9. **Suplemento single** (por persona) = (costo SGL − costo de media habitación doble) × noches, con margen aplicado. Se muestra cuando la base es twin.
 10. **Escenarios B2B por pax** (como hoy en `RESUMEN COSTOS` y en las columnas 2-4-6-10… de los presupuestos grupales): para cada escenario de `pax_scenarios` se recalcula todo con su propia configuración de vehículos y habitaciones, y se devuelve una tabla pax → precio total → precio por pax.
 11. El historial guarda siempre **costo, margen y precio**, para poder analizar la rentabilidad de lo vendido.
 12. Si una tarifa que debe cobrarse no tiene neto ni rack, el ítem devuelve `status: error` y un aviso. Los totales de la cotización quedan sin calcular (`null`), nunca cero ni un subtotal parcial; el borrador conserva el error al reabrirse. Se debe resolver antes de revisar o emitir la cotización. Un precio cero informado sí es válido.
-13. `applyAdjustmentBulk(quoteId, filtro, pct, nota)` reemplaza el ajuste de los ítems filtrados por tipo, proveedor, número de día o lista de IDs; si se combinan filtros se exige cumplirlos todos. Una compra multi-día seleccionada actualiza sus copias de visualización y sigue cobrándose una vez. Una RPC guarda los ajustes y el recálculo en una única transacción comprobando `updated_at`; cualquier error revierte todo. Cotizaciones enviadas requieren crear una versión antes de aplicar el lote. El tarifario permanece intacto.
+13. `applyAdjustmentBulk(quoteId, { filtro, pct, nota })` reemplaza el ajuste de los ítems filtrados por tipo, proveedor, número de día o lista de IDs; si se combinan filtros se exige cumplirlos todos. `pct` usa la misma fracción que `adjustment_pct`. Una compra multi-día seleccionada actualiza sus copias de visualización y sigue cobrándose una vez. Una RPC guarda los ajustes y el recálculo en una única transacción comprobando `updated_at`; devuelve los ítems guardados y sus IDs afectados. Cualquier error revierte todo. Cotizaciones enviadas requieren crear una versión antes de aplicar el lote. El tarifario permanece intacto.
 
 ---
 
@@ -261,6 +261,20 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 2. La app sugiere plantillas que coinciden. El vendedor elige una o parte desde cero.
 3. **Editor por días:** reordenar, quitar o agregar bloques; cambiar hotel (al seleccionar un hotel se muestran sus tipos de habitación y tarifas disponibles); agregar o quitar servicios; cambiar comidas; sobrescribir un precio solo en esta cotización; crear un ítem nuevo (con opción "agregar al tarifario" → queda `pendiente` si lo crea un vendedor).
 4. Panel lateral con el cálculo en vivo: costo, margen, total, precio por pax y (si es B2B) la tabla por escenarios.
+
+**Creación desde plantilla:** `src/lib/quotes/createQuoteFromTemplate` requiere una
+plantilla activa y días consecutivos con servicios. Recibe cliente, idioma, fecha,
+pagantes, TC, staff y rooming opcional; SKU/categoría proceden de la plantilla y la
+política de precios del cliente/Admin. La preparación lee y calcula sin escrituras
+ni traducciones automáticas. Una sola RPC `create_quote_from_template` bloquea y
+comprueba el origen, copia los días y los servicios con cantidades y configuración,
+asigna código/fechas y guarda el cálculo en la misma transacción. Un fallo revierte
+también historial y correlativo. Si cambió el origen, hay que repetir la creación.
+Cada día elige su tarifa por fecha real, temporada configurada y tramo de pasajeros.
+La cotización conserva los textos, los datos de los servicios, las tarifas y la
+configuración copiados: editar el catálogo después no la modifica. Falta de aprobación,
+días vacíos o traducción ausente devuelven un motivo sin crear un borrador parcial.
+El vendedor puede leer los tipos de cambio, pero solo Admin puede administrarlos.
 
 **Estados:**
 ```
