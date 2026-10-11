@@ -152,14 +152,17 @@ def generate():
         for row in group:
             if not row['sku'].startswith('IMPORT_REVIEW_'):
                 aliases.append(insert('service_sku_aliases', dict(id=uid('alias', row['sku']), sku=row['sku'], service_id=sid)))
-            missing_net = not row['price_net'] and bool(row['price_rack'])
+            rack_as_net = not row['price_net'] and bool(row['price_rack'])
+            missing_net = not row['price_net'] and not row['price_rack']
             notes = [row['notes']]
             if row['vehicle_max_pax'] == 'PER_PERSON':
                 notes.append('vehicle_max_pax original inválido: PER_PERSON')
             if row['multi_day_span'] and Decimal(row['multi_day_span']) != day_span(row['multi_day_span']):
                 notes.append('duración original en días: ' + row['multi_day_span'])
             if missing_net:
-                notes.append('sin costo neto')
+                notes.append('sin costo neto ni rack')
+            elif rack_as_net:
+                notes.append('rack adoptado como costo neto (Andrea, 2026-10-11)')
             if row['issues']:
                 notes.append('issues: ' + row['issues'])
                 review.append({'row': row['_row'], 'sku': row['sku'], 'issues': row['issues']})

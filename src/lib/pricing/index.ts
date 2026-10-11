@@ -9,6 +9,7 @@ export interface Rate {
   pax_max: number | null;
   price_net: number | null;
   price_rack?: number | null;
+  // Historical import flag; current availability is determined by the prices.
   net_cost_missing?: boolean;
   room_type?: string | null;
 }
@@ -251,7 +252,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         });
         continue;
       }
-      let native: number, warning: string | undefined;
+      let native: number;
       if (item.price_overridden) {
         if (!item.override_note?.trim() || item.unit_cost_original === undefined)
           throw new Error("Override requires price and note");
@@ -264,10 +265,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           input.seasons,
         );
         const price = rate.price_net ?? rate.price_rack;
-        if (price === undefined || price === null) throw new Error(`No price: ${item.id}`);
+        if (price === undefined || price === null)
+          throw new Error(`${item.id}: sin costo neto ni rack`);
         native = nonnegative(price, "price");
-        if (rate.net_cost_missing || rate.price_net === null)
-          warning = `${item.id}: sin costo neto`;
       }
       const usd = native / fx(input, item.currency),
         cost = qty * usd;
@@ -281,7 +281,6 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         total_cost_usd: cost,
         total_margin_usd: item.margin_applicable ? (cost * input.margin_pct) / 100 : 0,
         covered: false,
-        ...(warning ? { warning } : {}),
       });
     }
   }

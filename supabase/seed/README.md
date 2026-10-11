@@ -12,6 +12,10 @@ Se conservan los SQL y sus reportes originales como historial y para pruebas en 
 
 El seed agrega tres bloques exclusivos y configura únicamente `UYUUYU-3D2N-LTd` para 2 pagantes, 0 TC y costo de referencia USD 1.475. No modifica tarifas maestras, cotizaciones previas ni otros programas. No aprueba automáticamente los textos o productos. Repetirlo no sobrescribe cambios posteriores en esa configuración.
 
+## Pendiente de aplicar: rack a neto
+
+Andrea confirmó **243** tarifas con neto vacío y rack informado en Cloud (2026-10-11). Ejecutar primero `04_rack_to_net_preflight.sql` (solo lectura) y luego `04_rack_to_net.sql` únicamente si el preflight confirma y lista esas **243** candidatas. La copia conserva rack y rechaza cualquier otro recuento sin modificar datos. El histórico local da **0** candidatas, 238 rack ya copiados y 5 tarifas sin ningún precio; es distinto del estado actual de Cloud. Véase [RACK_COMO_NETO.md](../../docs/RACK_COMO_NETO.md).
+
 ## Historial aplicado
 
 Orden histórico: `00_base.sql`, `01_tarifario_001.sql` a `01_tarifario_011.sql`, luego `02_bloques_001.sql` a `02_bloques_004.sql`. Los reportes JSON documentan los datos importados y las omisiones; no son archivos ejecutables.

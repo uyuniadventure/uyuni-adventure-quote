@@ -151,7 +151,7 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
                       <TableCell>{paxRange(r)}</TableCell>
                       <TableCell className="text-right">
                         {money(r.price_net, s.currency)}
-                        {r.net_cost_missing && <p className="text-[11px] text-brand-orange-deep">sin costo neto</p>}
+                        {r.price_net == null && r.price_rack == null && <p className="text-[11px] text-brand-orange-deep">sin costo neto ni rack</p>}
                       </TableCell>
                       <TableCell className="text-right">{money(r.price_rack, s.currency)}</TableCell>
                       <TableCell className="whitespace-nowrap text-right">

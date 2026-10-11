@@ -80,7 +80,7 @@ Implementar con tabla `profiles.role` y políticas RLS en Supabase. Un producto 
   - `status`: `activo | pendiente | inactivo`; `created_by`; `source` (de dónde viene la tarifa: PDF del proveedor, correo…).
 - **`service_rates`**: service_id, `season` (`ALL | DRY | RAIN | BAJA | MEDIA | ALTA | FESTIVO`), `valid_from`, `valid_to`, `pax_min`, `pax_max`, `price_net` (costo), `price_rack` (referencia pública).
   - **Tramos por pax:** hoy un mismo servicio aparece en varias filas por rango de pax (ej. transfer 1-2 / 3-6 / 7-9 pax). En la app es **un servicio con varias tarifas** según `pax_min`–`pax_max`, y el motor elige el tramo automáticamente.
-  - Si solo existe `price_rack`, la tarifa queda marcada "sin costo neto" y la app avisa al cotizar.
+  - Si solo existe `price_rack`, ese valor se adopta como costo neto y se conserva el rack (decisión de Andrea, 2026-10-11). El aviso de falta de costo corresponde solo a tarifas sin neto y sin rack; no se asume un costo cero.
 - **`hotel_codes`**: letra o sigla de cada hotel según la hoja `INDEX HOTELS` actual (P = Palacio de Sal, Td = Tayka del Desierto, M = Mallku Cueva, L = Luna Salada, F = Los Flamencos, K = Kachi, J = Jardines de Uyuni, Ñ = Coscaña, S = Sky Dream…). Se usan para componer el SKU de plantilla (§5).
 - **`service_change_requests`**: service_id o rate_id, valores propuestos, motivo, solicitante, estado (`pendiente | aprobado | rechazado`), aprobador.
 
@@ -335,7 +335,7 @@ UI en español. Interfaz rápida, con pocos clics para el caso típico.
 - Las fotos se almacenan en Supabase Storage, organizadas por lugar y hotel (se migran desde la carpeta actual).
 - Los productos y bloques creados por vendedores quedan `pendiente` hasta aprobación de admin u operación.
 - Remitente de email: dirección de `uyuniadventure.com` (por definir).
-- Para servicios con solo precio rack, se debe decidir si el rack es el costo real.
+- Si una tarifa solo trae rack, ese valor es el costo neto (decisión de Andrea, 2026-10-11).
 
 ---
 
@@ -360,7 +360,7 @@ UI en español. Interfaz rápida, con pocos clics para el caso típico.
 
 | Problema detectado | Filas | Acción |
 |---|---|---|
-| Solo precio rack, sin costo neto | 248 | Confirmar si el rack es el costo o pedir tarifa neta |
+| Solo precio rack, sin costo neto | 248 en la fuente histórica | Copiar rack a neto conservando rack (decisión de Andrea, 2026-10-11); contar las candidatas actuales antes de ejecutar |
 | Etiqueta duplicada | 185 | Fusionar o renombrar (muchas son tramos de pax del mismo servicio: pasan a ser tarifas de un solo servicio) |
 | SKU duplicado | 24 | Dejar uno y redirigir |
 | Mismo servicio en dos monedas (`_CLP` y `_USD`) | 11 | Dejar solo la moneda nativa del proveedor |

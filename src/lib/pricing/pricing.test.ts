@@ -161,7 +161,7 @@ describe("pricing", () => {
     expect(result.total_cost_usd).toBe(300);
     expect(result.items.map((x) => x.covered)).toEqual([false, true, true]);
   });
-  it("uses override only with a note and reports rack-only prices", () => {
+  it("uses override only with a note", () => {
     expect(() =>
       calculateQuote({
         ...base,
@@ -188,17 +188,38 @@ describe("pricing", () => {
         ],
       }).total_cost_usd,
     ).toBe(150);
-    expect(
+  });
+  it.each([
+    { price_net: null, price_rack: 90, net_cost_missing: true, expected: 90 },
+    { price_net: 90, price_rack: 90, net_cost_missing: true, expected: 90 },
+    { price_net: 80, price_rack: 90, net_cost_missing: true, expected: 80 },
+    { price_net: 0, price_rack: 90, net_cost_missing: true, expected: 0 },
+    { price_net: null, price_rack: 0, net_cost_missing: true, expected: 0 },
+  ])(
+    "uses net=$price_net / rack=$price_rack without a missing-cost warning",
+    ({ expected, ...prices }) => {
+      const input = {
+        ...base,
+        days: [{ day_number: 1, items: [{ ...item, rates: [{ ...rate, ...prices }] }] }],
+      };
+      const before = structuredClone(input);
+      const result = calculateQuote(input);
+      expect(result.total_cost_usd).toBe(expected * 3);
+      expect(result.warnings).toEqual([]);
+      expect(result.items[0]?.warning).toBeUndefined();
+      expect(input).toEqual(before);
+    },
+  );
+  it.each([
+    { ...rate, price_net: null, price_rack: null },
+    { ...rate, price_net: null },
+  ])("blocks a calculation when net and rack are missing (%j)", (missingRate) => {
+    expect(() =>
       calculateQuote({
         ...base,
-        days: [
-          {
-            day_number: 1,
-            items: [{ ...item, rates: [{ ...rate, price_net: null, price_rack: 90 }] }],
-          },
-        ],
-      }).warnings,
-    ).toHaveLength(1);
+        days: [{ day_number: 1, items: [{ ...item, rates: [missingRate] }] }],
+      }),
+    ).toThrow("a: sin costo neto ni rack");
   });
   it("rounds and recomputes independent scenarios including vehicles", () => {
     const result = calculateQuote({
