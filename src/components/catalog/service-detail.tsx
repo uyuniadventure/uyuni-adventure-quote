@@ -30,6 +30,17 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
   const manager = canManageCatalog(role);
   const qc = useQueryClient();
   const [mode, setMode] = useState<Mode | null>(null);
+  const [editingService, setEditingService] = useState(false);
+
+  const suppliersQ = useQuery({
+    queryKey: ["suppliers", "pick"],
+    enabled: !!serviceId && manager,
+    queryFn: async () => {
+      const { data, error } = await db.from("suppliers").select("id, name").order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const q = useQuery({
     queryKey: ["service", serviceId],
@@ -86,6 +97,27 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
     },
     onSuccess: () => { toast.success("Tarifa eliminada."); refresh(); },
     onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeService = useMutation({
+    mutationFn: async () => {
+      if (!serviceId) return;
+      const { error: rErr } = await db.from("service_rates").delete().eq("service_id", serviceId);
+      if (rErr) throw rErr;
+      const { error } = await db.from("services").delete().eq("id", serviceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Servicio eliminado.");
+      qc.invalidateQueries({ queryKey: ["services"] });
+      onClose();
+    },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("foreign key") || e.message.includes("violates")
+          ? "No se puede eliminar: el servicio está usado en bloques, cotizaciones u operación."
+          : e.message,
+      ),
   });
 
   const s = q.data;
