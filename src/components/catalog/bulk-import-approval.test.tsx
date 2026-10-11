@@ -1,0 +1,98 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { reviewImport, type ImportApprovalResult } from "@/lib/import-review";
+import { BulkImportApproval } from "./bulk-import-approval";
+
+const auth = vi.hoisted(() => ({ role: "admin" }));
+vi.mock("@/hooks/use-auth", () => ({ useCurrentUser: () => auth }));
+vi.mock("@/lib/import-review", () => ({ reviewImport: vi.fn() }));
+const review = vi.mocked(reviewImport);
+const preview: ImportApprovalResult = {
+  dry_run: true,
+  review_date: "2026-10-11",
+  fingerprint: "catalog-snapshot",
+  services: {
+    pending: 2,
+    eligible: 1,
+    remaining: 1,
+    items: [
+      { id: "20000000-0000-0000-0000-000000000001", code: "VALID", name: "Válido", reasons: [] },
+      {
+        id: "20000000-0000-0000-0000-000000000002",
+        code: "PENDING",
+        name: "Pendiente",
+        reasons: ["Sin unidad de cobro."],
+      },
+    ],
+  },
+  templates: {
+    pending: 1,
+    eligible: 1,
+    remaining: 0,
+    items: [
+      { id: "20000000-0000-0000-0000-000000000003", code: "TOUR", name: "Tour", reasons: [] },
+    ],
+  },
+};
+function show() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const invalidate = vi.spyOn(client, "invalidateQueries");
+  render(
+    <QueryClientProvider client={client}>
+      <BulkImportApproval />
+    </QueryClientProvider>,
+  );
+  return invalidate;
+}
+beforeEach(() => {
+  auth.role = "admin";
+  review.mockReset();
+});
+afterEach(cleanup);
+
+describe("Aprobación masiva", () => {
+  it("simulates first and only applies the reviewed fingerprint after confirmation", async () => {
+    review.mockResolvedValueOnce(preview).mockResolvedValueOnce({ ...preview, dry_run: false });
+    const invalidate = show();
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    expect(await screen.findByText("Se aprobarían")).toBeInTheDocument();
+    expect(screen.getByText("Sin unidad de cobro.")).toBeInTheDocument();
+    expect(review.mock.calls).toEqual([[undefined]]);
+    expect(invalidate).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar aprobación" }));
+    expect(await screen.findByText("Resultado de la aprobación")).toBeInTheDocument();
+    expect(review.mock.calls).toEqual([[undefined], [preview.fingerprint]]);
+    expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).not.toBeInTheDocument();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["services"] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["itinerary_templates"] });
+  });
+  it("cancel does not approve anything and reopening makes a fresh simulation", async () => {
+    review.mockResolvedValue(preview);
+    show();
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    await screen.findByText("Se aprobarían");
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    await waitFor(() => expect(review.mock.calls).toEqual([[undefined], [undefined]]));
+  });
+  it("clears a rejected preview and requires another simulation", async () => {
+    review
+      .mockResolvedValueOnce(preview)
+      .mockRejectedValueOnce(new Error("El catálogo cambió. Vuelve a simular."));
+    show();
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar aprobación" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("El catálogo cambió");
+    expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Volver a simular" })).toBeInTheDocument();
+  });
+  it.each(["vendedor", "operacion"])("does not offer bulk approval to %s", (role) => {
+    auth.role = role;
+    show();
+    expect(
+      screen.queryByRole("button", { name: "Aprobar todo lo válido" }),
+    ).not.toBeInTheDocument();
+    expect(review).not.toHaveBeenCalled();
+  });
+});

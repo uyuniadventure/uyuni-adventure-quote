@@ -76,3 +76,43 @@ indicados en sus fixtures. No usan `skip`, `test.fails`, costos inventados ni po
 obtenidos despejando el total esperado. El informe completo queda en
 `docs/pendientes/comparacion_presupuestos.txt`; `N/D` significa que no hay un dato
 verificable, no que el costo sea cero. Estos dos fallos también hacen fallar `bun run test`.
+
+## Aprobación masiva de importación
+
+1. En Lovable, aplicar las migraciones pendientes en orden hasta
+   `supabase/migrations/20261011000500_bulk_catalog_approval.sql` (después de
+   `20261011000400_margin_and_agency_commission.sql`). La nueva migración instala
+   la RPC, columnas de motivos y permisos de lectura; **no aprueba registros**.
+2. Desplegar el frontend de esta rama después de la migración. Como Admin, abrir
+   `/revision-importacion` y pulsar **Aprobar todo lo válido**. Esto llama a
+   `approve_valid_imports()` en simulación: muestra todos los pendientes y sus
+   motivos, sin el límite de 500 filas de las listas. No guarda cambios.
+3. Revisar los conteos reales de Cloud y **esperar el OK de Andrea**. Solo entonces
+   pulsar **Confirmar aprobación**. La RPC recibe `p_dry_run: false` y la huella
+   devuelta por esa simulación. Si el catálogo cambió o pasó el día, rechaza la
+   aplicación y exige otra simulación. No se permite aplicar sin una huella vigente.
+4. Abrir Tarifario y Plantillas con un vendedor distinto del autor: los registros
+   aprobados y el contenido de sus días deben ser visibles. Los que no cumplen
+   siguen pendientes con `approval_issues` guardado. Los bloques/módulos no cambian
+   de estado; solo se permite leer los relacionados con plantillas activas.
+
+La RPC valida unidad, moneda y alguna tarifa vigente con neto o rack (incluido costo
+cero explícito). Para plantillas comprueba días completos, servicios directos,
+hoteles y servicios de módulos, sin aprobar vacíos ni dependencias inactivas. Puede
+usar servicios aprobados en el mismo lote. Tarifas, traducciones y cotizaciones no
+se modifican. La operación se revierte entera si falla cualquier escritura.
+
+Pruebas y simulación **local**, sin conexión con Cloud:
+
+```sh
+node scripts/db/test-import-approval.mjs
+bunx vitest run src/components/catalog/bulk-import-approval.test.tsx
+bun run simulate:import-approval --report
+```
+
+El informe `docs/pendientes/aprobacion_importacion_simulacion.json` reconstruye los
+seeds archivados y las migraciones: el 2026-10-11 daría 792/857 servicios y 26/42
+plantillas aprobables; quedan 65 servicios y 16 plantillas pendientes. No incluye
+el seed piloto SPA-UYU ni acredita los conteos de Cloud. **No se han aplicado
+aprobaciones de catálogo**; las aplicaciones de prueba usan una BD aislada y datos
+sintéticos que se descartan al terminar.
