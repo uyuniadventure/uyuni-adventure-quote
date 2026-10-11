@@ -147,6 +147,8 @@ describe("importador de presupuesto SPAUYU · lectura, diff y seed", () => {
       )
     ).rows[0]!;
     const { days: _days, ...basics } = plan.fixture.input!;
+    // Explicit approval in the isolated acceptance fixture, not in the import seed.
+    await pg.query("update itinerary_templates set status='activo' where id=$1", [template.id]);
     const quote = await createQuoteFromTemplate(template.id, {
       ...basics,
       rooming: { paying: {}, tc: {} },

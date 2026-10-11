@@ -1,10 +1,11 @@
 import { db, json, unwrap } from "../db";
 import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } from "../pricing";
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
-import { applyTemplateDefaults } from "./template-defaults";
-import { parsePricingConfig } from "../pricing/config";
+export { createQuoteFromTemplate, type TemplateQuoteBasics } from "./from-template";
+
 import { adjustmentPctSchema } from "../pricing/adjustment";
 import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";
+import { continuityWarnings } from "./day-content";
 export type { AdjustmentFilter } from "./adjustment-filter";
 
 export interface QuoteBasics extends Omit<
@@ -32,253 +33,35 @@ export type QuoteItemChanges = Omit<
   | "quote_day_id"
   | "service_id"
   | "supplier_id"
+  | "source_block_service_id"
   | "created_at"
   | "updated_at"
   | "total_cost_usd"
   | "total_cost_local"
   | "promote_to_master"
 >;
-type DayInput = Omit<TablesInsert<"quote_days">, "quote_id"> & { items: QuoteItemInput[] };
-function basicsPayload(b: QuoteBasics) {
-  return {
-    ...b,
-    pricing_config: { seasons: b.seasons ?? [], single_supplements: b.single_supplements ?? [] },
-  };
-}
-async function create(b: QuoteBasics, days: DayInput[], template?: Tables<"itinerary_templates">) {
-  const payload = {
-    ...basicsPayload(b),
-    ...(template
-      ? {
-          template_id: template.id,
-          tour_sku: template.sku,
-          pricing_config: {
-            ...basicsPayload(b).pricing_config,
-            unresolved: template.import_warnings,
-          },
-        }
-      : {}),
-  };
-  const q = unwrap(
-    await db.rpc("create_quote_snapshot", { p_quote: json(payload), p_days: json(days) }),
-  );
-  return q;
-}
 export async function createEmptyQuote(basics: QuoteBasics): Promise<Tables<"quotes">> {
-  return create(basics, []);
+  return unwrap(
+    await db.rpc("create_quote_snapshot", {
+      p_quote: json({
+        ...basics,
+        pricing_config: {
+          seasons: basics.seasons ?? [],
+          single_supplements: basics.single_supplements ?? [],
+        },
+      }),
+      p_days: [],
+    }),
+  );
 }
 
-async function translatedBlock(blockId: string, language: string) {
-  let result = unwrap(
-    await db
-      .from("day_block_translations")
-      .select("*")
-      .eq("block_id", blockId)
-      .eq("lang", language),
-  );
-  if (!result.length) {
-    const translated = await db.functions.invoke("translate-block", {
-      body: { kind: "day_block", id: blockId, language },
-    });
-    if (translated.error) throw new Error(translated.error.message);
-    result = unwrap(
-      await db
-        .from("day_block_translations")
-        .select("*")
-        .eq("block_id", blockId)
-        .eq("lang", language),
-    );
-  }
-  if (!result[0]) throw new Error(`Missing ${language} translation: ${blockId}`);
-  return result[0];
-}
-async function serviceItem(
-  row: {
-    service_id: string | null;
-    qty: number;
-    applies_tc: boolean | null;
-    margin_applicable: boolean | null;
-    included?: boolean;
-    is_optional?: boolean;
-    multi_day_span?: number;
-    coverage_key?: string | null;
-    coverage_start_day?: number | null;
-    pricing_config?: Json;
-    item_snapshot?: Json | null;
-  },
-  day: number,
-): Promise<QuoteItemInput> {
-  if (row.item_snapshot) {
-    const {
-      id: _id,
-      quote_day_id: _day,
-      created_at: _created,
-      updated_at: _updated,
-      ...saved
-    } = row.item_snapshot as unknown as Tables<"quote_items">;
-    return { ...saved, adjustment_pct: 0, adjustment_note: null };
-  }
-  if (!row.service_id) throw new Error("Service or frozen snapshot required");
-  const s = unwrap(await db.from("services").select("*").eq("id", row.service_id).single());
-  if (!s.pricing_unit || !s.currency)
-    throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
-  const rates = unwrap(await db.from("service_rates").select("*").eq("service_id", s.id));
-  const config = (row.pricing_config ?? {}) as {
-    pricing_unit?: Enums<"pricing_unit">;
-    description?: string;
-  };
-  if (
-    config.pricing_unit &&
-    !["per_person", "per_group", "per_room", "per_vehicle", "per_staff", "per_unit"].includes(
-      config.pricing_unit,
-    )
-  )
-    throw new Error(`Invalid template pricing unit: ${s.sku}`);
-  const unit = config.pricing_unit ?? s.pricing_unit;
-  // Older link JSON also holds import provenance/description/unit overrides.
-  // Validate only the calculation fields, preserving that metadata separately.
-  const raw = row.pricing_config as Record<string, unknown> | null;
-  const calculationConfig = parsePricingConfig(
-    unit,
-    Object.fromEntries(
-      Object.entries(raw ?? {}).filter(([key]) =>
-        ["room_type", "nights", "vehicle_segment", "rate_band", "staff_type"].includes(key),
-      ),
-    ),
-  );
-  const span = row.multi_day_span ?? s.multi_day_span;
-  return {
-    service_id: s.id,
-    sku: s.sku,
-    description: config.description ?? s.name,
-    type: s.type,
-    pricing_unit: unit,
-    qty: row.qty,
-    unit_cost_original: 0,
-    unit_cost_usd: 0,
-    currency: s.currency,
-    supplier_id: s.supplier_id,
-    applies_tc: row.applies_tc ?? s.applies_tc_default,
-    margin_applicable: row.margin_applicable ?? s.margin_applicable_default,
-    included: row.included ?? true,
-    day_span: span,
-    meal_plan: s.meal_plan,
-    pricing_snapshot: json({
-      is_optional: row.is_optional ?? false,
-      rates,
-      room_type: s.room_type,
-      lodging_key:
-        unit === "per_room"
-          ? `${s.supplier_id ?? s.id}:${s.source ?? ""}:${s.location ?? ""}`
-          : undefined,
-      // A day→hotel link covers that day's night unless explicitly configured.
-      nights: unit === "per_room" ? 1 : undefined,
-      vehicle_segment: s.vehicle_type,
-      vehicle_max_pax: s.vehicle_max_pax,
-      coverage_key: row.coverage_key ?? (span > 1 ? `${s.id}:${day}` : undefined),
-      coverage_start_day: row.coverage_start_day ?? day,
-      ...(typeof row.pricing_config === "object" ? row.pricing_config : {}),
-      pricing_config: calculationConfig,
-      service: s,
-    }),
-  };
-}
-export async function createQuoteFromTemplate(
-  templateId: string,
-  basics: QuoteBasics,
-): Promise<Tables<"quotes">> {
-  const template = unwrap(
-    await db.from("itinerary_templates").select("*").eq("id", templateId).single(),
-  );
-  basics = applyTemplateDefaults(basics, template.quote_defaults);
-  const templateDays = unwrap(
-    await db.from("template_days").select("*").eq("template_id", templateId).order("day_number"),
-  );
-  const days: DayInput[] = [];
-  for (const td of templateDays) {
-    const block = unwrap(await db.from("day_blocks").select("*").eq("id", td.block_id).single());
-    const translated = await translatedBlock(block.id, basics.language);
-    const rows = unwrap(await db.from("day_block_items").select("*").eq("block_id", block.id));
-    const items = await Promise.all(rows.map((r) => serviceItem(r, td.day_number)));
-    const links = unwrap(
-      await db.from("day_block_modules").select("*").eq("block_id", block.id).order("order"),
-    );
-    const moduleTexts: string[] = [];
-    let reviewed = translated.reviewed;
-    for (const link of links) {
-      let texts = unwrap(
-        await db
-          .from("activity_module_translations")
-          .select("*")
-          .eq("module_id", link.module_id)
-          .eq("lang", basics.language),
-      );
-      if (!texts.length) {
-        const result = await db.functions.invoke("translate-block", {
-          body: { kind: "activity_module", id: link.module_id, language: basics.language },
-        });
-        if (result.error) throw result.error;
-        texts = unwrap(
-          await db
-            .from("activity_module_translations")
-            .select("*")
-            .eq("module_id", link.module_id)
-            .eq("lang", basics.language),
-        );
-      }
-      if (!texts[0]) throw new Error("Module translation missing");
-      reviewed = reviewed && texts[0].reviewed;
-      moduleTexts.push(`${texts[0].title}\n${texts[0].description}`);
-      const moduleItems = unwrap(
-        await db.from("activity_module_items").select("*").eq("module_id", link.module_id),
-      );
-      items.push(...(await Promise.all(moduleItems.map((r) => serviceItem(r, td.day_number)))));
-    }
-    days.push({
-      day_number: td.day_number,
-      title: translated.title,
-      description: [translated.description, ...moduleTexts].join("\n\n"),
-      includes: translated.includes,
-      excludes: translated.excludes,
-      route_from: block.route_from,
-      route_to: block.route_to,
-      snapshot: json({
-        reviewed,
-        language: basics.language,
-        places: block.places,
-        hotel_service_id: block.hotel_service_id,
-      }),
-      items,
-    });
-  }
-  // A module may introduce a multi-day purchase outside the imported budget links.
-  for (const day of days) {
-    for (const item of [...day.items]) {
-      if ((item.day_span ?? 1) <= 1) continue;
-      const pricing = item.pricing_snapshot as { coverage_key: string; coverage_start_day: number };
-      if (day.day_number !== pricing.coverage_start_day) continue;
-      for (let n = day.day_number + 1; n < day.day_number + (item.day_span ?? 1); n++) {
-        const target = days.find((d) => d.day_number === n);
-        if (!target) throw new Error(`Multi-day service extends beyond itinerary: ${item.sku}`);
-        if (
-          !target.items.some(
-            (i) =>
-              (i.pricing_snapshot as { coverage_key?: string })?.coverage_key ===
-              pricing.coverage_key,
-          )
-        )
-          target.items.push(structuredClone(item));
-      }
-    }
-  }
-  return create(basics, days, template);
-}
 export async function updateQuoteItem(
   itemId: string,
   changes: QuoteItemChanges,
 ): Promise<{ quote_id: string; item: Tables<"quote_items"> }> {
   if (changes.price_overridden && !changes.override_note?.trim())
     throw new Error("Price override requires a note");
+  if (changes.adjustment_pct !== undefined) adjustmentPctSchema.parse(changes.adjustment_pct);
   return unwrap(
     await db.rpc("edit_quote_item", { p_id: itemId, p_changes: json(changes) }),
   ) as unknown as { quote_id: string; item: Tables<"quote_items"> };
@@ -314,6 +97,13 @@ export async function loadQuote(quoteId: string) {
           .order("created_at"),
       )
     : [];
+  items.sort(
+    (a, b) =>
+      a.created_at.localeCompare(b.created_at) ||
+      ((a.pricing_snapshot as { _creation_order?: number })._creation_order ?? 0) -
+        ((b.pricing_snapshot as { _creation_order?: number })._creation_order ?? 0) ||
+      a.id.localeCompare(b.id),
+  );
   return { quote, days, items };
 }
 export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): QuoteInput {
@@ -365,9 +155,15 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
     })),
   } as unknown as QuoteInput;
 }
+export function calculateSavedQuote(data: Awaited<ReturnType<typeof loadQuote>>): QuoteResult {
+  const result = calculateQuote(quotePricingInput(data));
+  const continuity = continuityWarnings(data.days);
+  result.warnings.push(...continuity.map((w) => w.mensaje));
+  return result;
+}
 export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {
   const data = await loadQuote(quoteId);
-  const result = calculateQuote(quotePricingInput(data));
+  const result = calculateSavedQuote(data);
   unwrap(
     await db.rpc("save_quote_calculation", {
       p_id: quoteId,
@@ -378,17 +174,27 @@ export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {
   return result;
 }
 /** Replace (never compound) adjustments and save the recalculation in one RPC. */
+export interface BulkAdjustmentInput {
+  filtro: AdjustmentFilter;
+  pct: number;
+  nota?: string | null;
+}
+export interface BulkAdjustmentResult {
+  quote_id: string;
+  matched_item_ids: string[];
+  affected_item_ids: string[];
+  items: Tables<"quote_items">[];
+  calculation: QuoteResult;
+}
 export async function applyAdjustmentBulk(
   quoteId: string,
-  filter: AdjustmentFilter,
-  pct: number,
-  note?: string | null,
-) {
+  { filtro: filter, pct, nota: note }: BulkAdjustmentInput,
+): Promise<BulkAdjustmentResult> {
   adjustmentPctSchema.parse(pct);
   const data = await loadQuote(quoteId);
   if (data.quote.archived_at || !["borrador", "revisada"].includes(data.quote.status))
     throw new Error("Crea una nueva versión antes de ajustar una cotización enviada");
-  const { matchedIds, affectedIds } = adjustmentTargets(data.days, data.items, filter);
+  const { affectedIds } = adjustmentTargets(data.days, data.items, filter);
   const adjustmentNote = note?.trim() || null;
   const updated = {
     ...data,
@@ -398,10 +204,10 @@ export async function applyAdjustmentBulk(
         : i,
     ),
   };
-  const result = calculateQuote(quotePricingInput(updated));
+  const result = calculateSavedQuote(updated);
   if (result.status !== "ok")
     throw new Error(result.warnings.join("; ") || "No se puede recalcular la cotización");
-  unwrap(
+  return unwrap(
     await db.rpc("apply_quote_adjustment_bulk", {
       p_id: quoteId,
       p_filter: json(filter),
@@ -410,13 +216,7 @@ export async function applyAdjustmentBulk(
       p_updated_at: data.quote.updated_at,
       p_result: json(result),
     }),
-  );
-  return {
-    quote_id: quoteId,
-    matched_item_ids: matchedIds,
-    affected_item_ids: affectedIds,
-    calculation: result,
-  };
+  ) as unknown as BulkAdjustmentResult;
 }
 export async function generateQuoteCode(quote: {
   tour_sku: string;

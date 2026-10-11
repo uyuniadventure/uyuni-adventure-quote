@@ -132,7 +132,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
     queryFn: async () => {
       let query = db.from("itinerary_templates")
         .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, quote_defaults, template_days(count)")
-        .in("status", ["activo", "pendiente"]).order("days").limit(60);
+        .eq("status", "activo").order("days").limit(60);
       if (b.route_from) query = query.eq("route_from", b.route_from);
       if (b.route_to) query = query.eq("route_to", b.route_to);
       const wanted = Number(b.days);
@@ -153,7 +153,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
         client_id: b.client!.id, client_type: b.client_type, language: b.language, category: b.category,
         tour_sku: `${b.route_from || "XXX"}${b.route_to || "XXX"}-${days}D${Math.max(0, days - 1)}N`,
         start_date: b.start_date, pax_paying: Number(b.pax_paying), tc_count: Number(b.tc_count),
-        rooming: { paying: {}, tc: {} }, vehicles: {}, staff: { drivers: 0, guides: 0 },
+        rooming: { paying: {}, tc: {} }, vehicles: {},
         fx_snapshot: fx, rounding_rule: { increment: 1, mode: "none" },
         pax_scenarios: [],
         document_snapshot: { modality: b.modality, route_from: b.route_from || null, route_to: b.route_to || null, days_available: Number(b.days) || null },

@@ -468,6 +468,11 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          parent_block_id: string | null;
+          start_point: string | null;
+          end_point: string | null;
+          name: string | null;
+          content: Json;
         };
         Insert: {
           id?: string;
@@ -482,6 +487,11 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          parent_block_id?: string | null;
+          start_point?: string | null;
+          end_point?: string | null;
+          name?: string | null;
+          content?: Json;
         };
         Update: {
           id?: string;
@@ -496,6 +506,11 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          parent_block_id?: string | null;
+          start_point?: string | null;
+          end_point?: string | null;
+          name?: string | null;
+          content?: Json;
         };
         Relationships: [
           {
@@ -510,6 +525,13 @@ export type Database = {
             columns: ["hotel_service_id"];
             isOneToOne: false;
             referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "day_blocks_parent_block_id_fkey";
+            columns: ["parent_block_id"];
+            isOneToOne: false;
+            referencedRelation: "day_blocks";
             referencedColumns: ["id"];
           },
           {
@@ -1319,6 +1341,12 @@ export type Database = {
           snapshot: Json;
           created_at: string;
           updated_at: string;
+          source_block_id: string | null;
+          block_snapshot: Json;
+          overrides: Json;
+          link_type: string;
+          group_id: string | null;
+          group_position: number | null;
         };
         Insert: {
           id?: string;
@@ -1334,6 +1362,12 @@ export type Database = {
           snapshot?: Json;
           created_at?: string;
           updated_at?: string;
+          source_block_id?: string | null;
+          block_snapshot?: Json;
+          overrides?: Json;
+          link_type?: string;
+          group_id?: string | null;
+          group_position?: number | null;
         };
         Update: {
           id?: string;
@@ -1349,6 +1383,12 @@ export type Database = {
           snapshot?: Json;
           created_at?: string;
           updated_at?: string;
+          source_block_id?: string | null;
+          block_snapshot?: Json;
+          overrides?: Json;
+          link_type?: string;
+          group_id?: string | null;
+          group_position?: number | null;
         };
         Relationships: [
           {
@@ -1356,6 +1396,13 @@ export type Database = {
             columns: ["quote_id"];
             isOneToOne: false;
             referencedRelation: "quotes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quote_days_source_block_id_fkey";
+            columns: ["source_block_id"];
+            isOneToOne: false;
+            referencedRelation: "day_blocks";
             referencedColumns: ["id"];
           },
         ];
@@ -1515,6 +1562,7 @@ export type Database = {
           total_cost_local: number | null;
           adjustment_pct: number;
           adjustment_note: string | null;
+          source_block_service_id: string | null;
         };
         Insert: {
           id?: string;
@@ -1553,6 +1601,7 @@ export type Database = {
           total_cost_local?: number | null;
           adjustment_pct?: number;
           adjustment_note?: string | null;
+          source_block_service_id?: string | null;
         };
         Update: {
           id?: string;
@@ -1591,6 +1640,7 @@ export type Database = {
           total_cost_local?: number | null;
           adjustment_pct?: number;
           adjustment_note?: string | null;
+          source_block_service_id?: string | null;
         };
         Relationships: [
           {
@@ -2392,7 +2442,7 @@ export type Database = {
           p_updated_at: string;
           p_result: Json;
         };
-        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+        Returns: Json;
       };
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };
@@ -2411,6 +2461,10 @@ export type Database = {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
       };
+      create_quote_from_template: {
+        Args: { p_template: string; p_quote: Json; p_days: Json; p_source: Json; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
       create_quote_snapshot: {
         Args: { p_quote: Json; p_days: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
@@ -2418,6 +2472,16 @@ export type Database = {
       current_role: {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["app_role"];
+      };
+      edit_quote_days: {
+        Args: {
+          p_id: string;
+          p_operation: string;
+          p_payload: Json;
+          p_updated_at?: string;
+          p_result?: Json;
+        };
+        Returns: Json;
       };
       edit_quote_item: {
         Args: { p_id: string; p_changes: Json; p_add?: boolean; p_promote?: boolean };
@@ -2432,8 +2496,13 @@ export type Database = {
         Returns: Database["public"]["Tables"]["quote_items"]["Row"];
       };
       next_quote_code: { Args: { p_sku: string; p_language: string }; Returns: string };
+      patch_day_overrides: {
+        Args: { snap: Json; old_overrides: Json; patch: Json };
+        Returns: Json;
+      };
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
+      resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       save_quote_calculation: {
         Args: { p_id: string; p_updated_at: string; p_result: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
@@ -2442,10 +2511,12 @@ export type Database = {
         Args: { p_id: string; p_updated_at: string; p_path: string; p_url: string };
         Returns: undefined;
       };
+      snapshot_day_block: { Args: { p_id: string }; Returns: Json };
       transition_quote: {
         Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
       };
+      validate_day_content: { Args: { p: Json }; Returns: boolean };
       version_quote: { Args: { p_id: string }; Returns: string };
     };
     Enums: {
