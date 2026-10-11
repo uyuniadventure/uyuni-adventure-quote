@@ -1,5 +1,5 @@
 import { Document, Image, Link, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { QuoteResult } from "../pricing";
+import type { CompleteQuoteResult } from "../pricing";
 import type { Tables } from "../../types/db";
 
 export interface DocumentContent {
@@ -32,7 +32,7 @@ export interface QuotePdfData {
   days: Tables<"quote_days">[];
   items: Tables<"quote_items">[];
   content: DocumentContent;
-  calculation: QuoteResult;
+  calculation: CompleteQuoteResult;
   optional_prices: Record<string, number>;
 }
 const labels = {

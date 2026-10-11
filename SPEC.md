@@ -80,7 +80,7 @@ Implementar con tabla `profiles.role` y políticas RLS en Supabase. Un producto 
   - `status`: `activo | pendiente | inactivo`; `created_by`; `source` (de dónde viene la tarifa: PDF del proveedor, correo…).
 - **`service_rates`**: service_id, `season` (`ALL | DRY | RAIN | BAJA | MEDIA | ALTA | FESTIVO`), `valid_from`, `valid_to`, `pax_min`, `pax_max`, `price_net` (costo), `price_rack` (referencia pública).
   - **Tramos por pax:** hoy un mismo servicio aparece en varias filas por rango de pax (ej. transfer 1-2 / 3-6 / 7-9 pax). En la app es **un servicio con varias tarifas** según `pax_min`–`pax_max`, y el motor elige el tramo automáticamente.
-  - Si solo existe `price_rack`, la tarifa queda marcada "sin costo neto" y la app avisa al cotizar.
+  - Si solo existe `price_rack`, ese valor se adopta como costo neto y se conserva el rack (decisión de Andrea, 2026-10-11). El aviso de falta de costo corresponde solo a tarifas sin neto y sin rack; no se asume un costo cero.
 - **`hotel_codes`**: letra o sigla de cada hotel según la hoja `INDEX HOTELS` actual (P = Palacio de Sal, Td = Tayka del Desierto, M = Mallku Cueva, L = Luna Salada, F = Los Flamencos, K = Kachi, J = Jardines de Uyuni, Ñ = Coscaña, S = Sky Dream…). Se usan para componer el SKU de plantilla (§5).
 - **`service_change_requests`**: service_id o rate_id, valores propuestos, motivo, solicitante, estado (`pendiente | aprobado | rechazado`), aprobador.
 
@@ -225,6 +225,7 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 9. **Suplemento single** (por persona) = (costo SGL − costo de media habitación doble) × noches, con margen aplicado. Se muestra cuando la base es twin.
 10. **Escenarios B2B por pax** (como hoy en `RESUMEN COSTOS` y en las columnas 2-4-6-10… de los presupuestos grupales): para cada escenario de `pax_scenarios` se recalcula todo con su propia configuración de vehículos y habitaciones, y se devuelve una tabla pax → precio total → precio por pax.
 11. El historial guarda siempre **costo, margen y precio**, para poder analizar la rentabilidad de lo vendido.
+12. Si una tarifa que debe cobrarse no tiene neto ni rack, el ítem devuelve `status: error` y un aviso. Los totales de la cotización quedan sin calcular (`null`), nunca cero ni un subtotal parcial; el borrador conserva el error al reabrirse. Se debe resolver antes de revisar o emitir la cotización. Un precio cero informado sí es válido.
 
 ---
 
@@ -335,7 +336,7 @@ UI en español. Interfaz rápida, con pocos clics para el caso típico.
 - Las fotos se almacenan en Supabase Storage, organizadas por lugar y hotel (se migran desde la carpeta actual).
 - Los productos y bloques creados por vendedores quedan `pendiente` hasta aprobación de admin u operación.
 - Remitente de email: dirección de `uyuniadventure.com` (por definir).
-- Para servicios con solo precio rack, se debe decidir si el rack es el costo real.
+- Tarifa solo con rack: ese valor es el costo neto (Andrea, 2026-10-11).
 
 ---
 
@@ -360,7 +361,7 @@ UI en español. Interfaz rápida, con pocos clics para el caso típico.
 
 | Problema detectado | Filas | Acción |
 |---|---|---|
-| Solo precio rack, sin costo neto | 248 | Confirmar si el rack es el costo o pedir tarifa neta |
+| Solo precio rack, sin costo neto | 248 en la fuente histórica | Copiar rack a neto conservando rack (decisión de Andrea, 2026-10-11); contar las candidatas actuales antes de ejecutar |
 | Etiqueta duplicada | 185 | Fusionar o renombrar (muchas son tramos de pax del mismo servicio: pasan a ser tarifas de un solo servicio) |
 | SKU duplicado | 24 | Dejar uno y redirigir |
 | Mismo servicio en dos monedas (`_CLP` y `_USD`) | 11 | Dejar solo la moneda nativa del proveedor |

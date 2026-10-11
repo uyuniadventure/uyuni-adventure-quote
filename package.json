@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "test:db": "node scripts/db/test.mjs && node scripts/db/test-blocks.mjs && node scripts/db/test-workflows.mjs && node scripts/db/test-delivery.mjs",
+    "test:db": "node scripts/db/test.mjs && node scripts/db/test-blocks.mjs && node scripts/db/test-workflows.mjs && node scripts/db/test-delivery.mjs && node scripts/db/test-rack.mjs",
     "typecheck": "tsc --noEmit",
     "test:edge": "deno test --allow-env supabase/functions/_shared/runtime_test.ts",
     "check:edge": "deno check supabase/functions/send-quote-email/index.ts supabase/functions/translate-block/index.ts supabase/functions/followup-reminders/index.ts",
