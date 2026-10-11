@@ -17,8 +17,6 @@ import {
 import { cap } from "@/components/catalog/shared";
 import { latestFx } from "./quote-ops";
 
-export const DEFAULT_MARGIN = 25;
-
 interface Basics {
   client: PickOption | null;
   client_type: Enums<"client_type">;
@@ -156,7 +154,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
         tour_sku: `${b.route_from || "XXX"}${b.route_to || "XXX"}-${days}D${Math.max(0, days - 1)}N`,
         start_date: b.start_date, pax_paying: Number(b.pax_paying), tc_count: Number(b.tc_count),
         rooming: { paying: {}, tc: {} }, vehicles: {}, staff: { drivers: 0, guides: 0 },
-        fx_snapshot: fx, margin_pct: DEFAULT_MARGIN, rounding_rule: { increment: 1, mode: "none" },
+        fx_snapshot: fx, rounding_rule: { increment: 1, mode: "none" },
         pax_scenarios: [],
         document_snapshot: { modality: b.modality, route_from: b.route_from || null, route_to: b.route_to || null, days_available: Number(b.days) || null },
       };

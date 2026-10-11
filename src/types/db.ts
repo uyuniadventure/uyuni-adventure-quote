@@ -216,6 +216,9 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          margin_pct: number | null;
+          commission_pct: number;
+          commission_mode: Database["public"]["Enums"]["commission_mode"];
         };
         Insert: {
           id?: string;
@@ -229,6 +232,9 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          margin_pct?: number | null;
+          commission_pct?: number;
+          commission_mode?: Database["public"]["Enums"]["commission_mode"];
         };
         Update: {
           id?: string;
@@ -242,6 +248,9 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          margin_pct?: number | null;
+          commission_pct?: number;
+          commission_mode?: Database["public"]["Enums"]["commission_mode"];
         };
         Relationships: [
           {
@@ -1236,6 +1245,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      pricing_settings: {
+        Row: {
+          id: string;
+          margin_pct: number;
+          margin_mode: Database["public"]["Enums"]["margin_mode"];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          margin_pct?: number;
+          margin_mode?: Database["public"]["Enums"]["margin_mode"];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          margin_pct?: number;
+          margin_mode?: Database["public"]["Enums"]["margin_mode"];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;
@@ -1763,6 +1796,9 @@ export type Database = {
           calculation: Json | null;
           document_snapshot: Json;
           pdf_path: string | null;
+          margin_mode: Database["public"]["Enums"]["margin_mode"];
+          commission_mode: Database["public"]["Enums"]["commission_mode"];
+          commission_pct: number;
         };
         Insert: {
           id?: string;
@@ -1787,7 +1823,7 @@ export type Database = {
           payment_schedule?: Json | null;
           single_supplement_pp?: number | null;
           fx_snapshot?: Json;
-          margin_pct?: number;
+          margin_pct: number;
           rounding_rule?: Json;
           total_cost_usd?: number | null;
           total_margin_usd?: number | null;
@@ -1806,6 +1842,9 @@ export type Database = {
           calculation?: Json | null;
           document_snapshot?: Json;
           pdf_path?: string | null;
+          margin_mode: Database["public"]["Enums"]["margin_mode"];
+          commission_mode: Database["public"]["Enums"]["commission_mode"];
+          commission_pct: number;
         };
         Update: {
           id?: string;
@@ -1849,6 +1888,9 @@ export type Database = {
           calculation?: Json | null;
           document_snapshot?: Json;
           pdf_path?: string | null;
+          margin_mode?: Database["public"]["Enums"]["margin_mode"];
+          commission_mode?: Database["public"]["Enums"]["commission_mode"];
+          commission_pct?: number;
         };
         Relationships: [
           {
@@ -2387,10 +2429,12 @@ export type Database = {
         "pendiente" | "cotizacion_solicitada" | "reservado" | "confirmado" | "cancelado";
       catalog_status: "activo" | "pendiente" | "inactivo";
       client_type: "B2B" | "B2C";
+      commission_mode: "none" | "gross";
       communication_channel: "whatsapp" | "email";
       communication_status: "pendiente" | "enviado";
       email_status: "pendiente" | "enviado" | "fallido";
       itinerary_modality: "privado" | "compartido" | "grupo";
+      margin_mode: "markup" | "margin_on_price";
       meal_plan: "NONE" | "BB" | "HB" | "FB";
       media_type: "highlight" | "alojamiento";
       ops_client_type: "PRIVADO" | "GRUPO";
