@@ -1,0 +1,591 @@
+{
+  "name": "SPA-UYU 3D2N MP · 2 pax",
+  "source": {
+    "file": "data/import/presupuestos.xlsx",
+    "sha256": "dd7375d297bfc4629ed31bb4deeac97f0055b4fbd971350b0be9c002f43fc5e0",
+    "sheet": "SPA UYU - 3D2N - MP ",
+    "range": "A32:G60",
+    "total_cell": "D33",
+    "read_on": "2026-10-11"
+  },
+  "pax_paying": 2,
+  "tc_count": 0,
+  "expected": {
+    "cost_usd": 1939.000864,
+    "cost_per_pax_usd": 969.500432,
+    "price_usd": null
+  },
+  "input": {
+    "pax_paying": 2,
+    "tc_count": 0,
+    "start_date": "2026-10-14",
+    "rooming": {
+      "paying": {
+        "DBL": 1
+      },
+      "tc": {}
+    },
+    "staff": {
+      "drivers": 0,
+      "guides": 0
+    },
+    "vehicles": {
+      "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026": 1
+    },
+    "fx_snapshot": {
+      "USD": 1,
+      "CLP": 925.92
+    },
+    "margin_pct": 25,
+    "margin_mode": "markup",
+    "client_type": "B2C",
+    "commission_mode": "none",
+    "rounding_rule": {
+      "mode": "none",
+      "increment": 1
+    },
+    "days": [
+      {
+        "day_number": 1,
+        "items": [
+          {
+            "id": "F46",
+            "label": "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+            "pricing_unit": "per_vehicle",
+            "currency": "CLP",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "a5a31444-6f45-50ba-9a7a-cefdf4bdce6e",
+                "season": "ALL",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": 5,
+                "pax_max": 9,
+                "price_net": 130000,
+                "price_rack": null
+              },
+              {
+                "id": "ce736e9d-f827-511b-9b51-9b71115ab71f",
+                "season": "ALL",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": 10,
+                "pax_max": 16,
+                "price_net": 150000,
+                "price_rack": null
+              },
+              {
+                "id": "e69c2fd9-3bd8-5d83-b366-a445d77a264b",
+                "season": "ALL",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": 2,
+                "pax_max": 4,
+                "price_net": 125000,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {
+              "vehicle_segment": "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+              "rate_band": {
+                "pax_min": 2,
+                "pax_max": 4
+              }
+            },
+            "day_span": 1
+          },
+          {
+            "id": "F47",
+            "label": "TOUR_UYU_LEO_3D2N_LOOP",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "01003b50-6389-5893-b8b8-8971b03978b7",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 690,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 3,
+            "coverage_key": "SPAUYU-3D2N-MP:F47",
+            "coverage_start_day": 1
+          },
+          {
+            "id": "F48",
+            "label": "FNB_UYU_LEO_BUFFET_APTHAPI",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "03a844c9-4544-5bdc-ad99-c87b827dd347",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 20,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F49",
+            "label": "TICKETS_LEO_UYU",
+            "pricing_unit": "per_person",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "7a5ac53b-e591-5791-a2ae-dfb2baa6f5e7",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": null,
+                "pax_max": null,
+                "price_net": 30,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F50",
+            "label": "MEAL_MALLKU_DINNER_2026",
+            "pricing_unit": "per_person",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "bd0b6f70-c26a-5a1b-ad25-c06fd9372af3",
+                "season": "DRY",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": null,
+                "pax_max": null,
+                "price_net": 44,
+                "price_rack": 44
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F51",
+            "label": "HTL_MALLKU_VILLAMAR_DBL_2026",
+            "pricing_unit": "per_room",
+            "currency": "USD",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "37c92522-da96-58f1-bc8e-33325b2dcb79",
+                "season": "DRY",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": null,
+                "pax_max": null,
+                "price_net": 312,
+                "price_rack": 374
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {
+              "room_type": "DBL",
+              "nights": 1
+            },
+            "day_span": 1
+          }
+        ]
+      },
+      {
+        "day_number": 2,
+        "items": [
+          {
+            "id": "F53",
+            "label": "TOUR_UYU_LEO_3D2N_LOOP",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "01003b50-6389-5893-b8b8-8971b03978b7",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 690,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 3,
+            "coverage_key": "SPAUYU-3D2N-MP:F47",
+            "coverage_start_day": 1
+          },
+          {
+            "id": "F54",
+            "label": "FNB_UYU_LEO_LUNCH",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "0c7f094a-9d0e-527a-90ff-6dd777eea532",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 15,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F55",
+            "label": "FNB_UYU_LEO_COCKTAIL",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "c849b6b2-3705-5c2d-a06c-08521fcd9031",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 10,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F56",
+            "label": "MEAL_PDS_DINNER_2026",
+            "pricing_unit": "per_person",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "93dbc3db-fab6-5457-b2bc-09e6b2ecda34",
+                "season": "ALL",
+                "valid_from": "2026-01-01",
+                "valid_to": "2026-12-31",
+                "pax_min": null,
+                "pax_max": null,
+                "price_net": 44,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          },
+          {
+            "id": "F57",
+            "label": "HTL_PDS_COLCHANI_STANDARD_DRY_2026",
+            "pricing_unit": "per_room",
+            "currency": "USD",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "b23cb614-4fb1-568e-a298-de3516205537",
+                "season": "DRY",
+                "valid_from": "2026-05-01",
+                "valid_to": "2026-12-31",
+                "pax_min": null,
+                "pax_max": null,
+                "price_net": 446,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {
+              "room_type": "DBL",
+              "nights": 1
+            },
+            "day_span": 1
+          }
+        ]
+      },
+      {
+        "day_number": 3,
+        "items": [
+          {
+            "id": "F59",
+            "label": "TOUR_UYU_LEO_3D2N_LOOP",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 1,
+            "rates": [
+              {
+                "id": "01003b50-6389-5893-b8b8-8971b03978b7",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 690,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": false,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 3,
+            "coverage_key": "SPAUYU-3D2N-MP:F47",
+            "coverage_start_day": 1
+          },
+          {
+            "id": "F60",
+            "label": "FNB_UYU_LEO_LUNCH",
+            "pricing_unit": "per_group",
+            "currency": "USD",
+            "qty": 2,
+            "rates": [
+              {
+                "id": "0c7f094a-9d0e-527a-90ff-6dd777eea532",
+                "season": "ALL",
+                "valid_from": null,
+                "valid_to": null,
+                "pax_min": 1,
+                "pax_max": 6,
+                "price_net": 15,
+                "price_rack": null
+              }
+            ],
+            "applies_tc": true,
+            "margin_applicable": true,
+            "included": true,
+            "pricing_config": {},
+            "day_span": 1
+          }
+        ]
+      }
+    ]
+  },
+  "lines": [
+    {
+      "cell": "F46",
+      "day": 1,
+      "row_day": 3,
+      "description": "SAN PEDRO - HITO CAJON (IN/OUT) sin guia 1-4PAX",
+      "supplier": "DIEGO COLQUE",
+      "sku": "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+      "quantity": 1,
+      "unit_cost_usd": 135.000864,
+      "cost_usd": 135.000864,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026\",TARIFARIO_MAESTRO!$Y:$Y,0))",
+      "vehicle": {
+        "quantity": 1,
+        "pax_min": 2,
+        "pax_max": 4
+      }
+    },
+    {
+      "cell": "F47",
+      "day": 1,
+      "row_day": 1,
+      "description": "3D2N UYUNI – UYUNI",
+      "supplier": "LEO - UYUNI",
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "quantity": 1,
+      "unit_cost_usd": 690,
+      "cost_usd": 690,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"TOUR_UYU_LEO_3D2N_LOOP\",TARIFARIO_MAESTRO!$Y:$Y,0))"
+    },
+    {
+      "cell": "F48",
+      "day": 1,
+      "row_day": 1,
+      "description": "ALMUERZO APTHAPI BUFFET SALAR",
+      "supplier": "LEO - UYUNI",
+      "sku": "FNB_UYU_LEO_BUFFET_APTHAPI",
+      "quantity": 2,
+      "unit_cost_usd": 20,
+      "cost_usd": 40,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"FNB_UYU_LEO_BUFFET_APTHAPI\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F49",
+      "day": 1,
+      "row_day": 1,
+      "description": "ENTRADAS A PARQUES",
+      "supplier": "LEO - UYUNI",
+      "sku": "TICKETS_LEO_UYU",
+      "quantity": 2,
+      "unit_cost_usd": 30,
+      "cost_usd": 60,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"TICKETS_LEO_UYU\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F50",
+      "day": 1,
+      "row_day": 1,
+      "description": "CENA",
+      "supplier": "Mallku Cueva",
+      "sku": "MEAL_MALLKU_DINNER_2026",
+      "quantity": 2,
+      "unit_cost_usd": 44,
+      "cost_usd": 88,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"MEAL_MALLKU_DINNER_2026\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F51",
+      "day": 1,
+      "row_day": 1,
+      "description": "HAB DOBLE",
+      "supplier": "Mallku Cueva",
+      "sku": "HTL_MALLKU_VILLAMAR_DBL_2026",
+      "quantity": 1,
+      "unit_cost_usd": 312,
+      "cost_usd": 312,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"HTL_MALLKU_VILLAMAR_DBL_2026\",TARIFARIO_MAESTRO!$Y:$Y,0))",
+      "room_type": "DBL"
+    },
+    {
+      "cell": "F53",
+      "day": 2,
+      "row_day": 2,
+      "description": "3D2N UYUNI – UYUNI",
+      "supplier": "LEO - UYUNI",
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "quantity": 0,
+      "unit_cost_usd": 0,
+      "cost_usd": 0,
+      "formula": null,
+      "covered_by": "F47"
+    },
+    {
+      "cell": "F54",
+      "day": 2,
+      "row_day": 2,
+      "description": "ALMUERZO PLATO SERVIDO",
+      "supplier": "LEO - UYUNI",
+      "sku": "FNB_UYU_LEO_LUNCH",
+      "quantity": 2,
+      "unit_cost_usd": 15,
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"FNB_UYU_LEO_LUNCH\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F55",
+      "day": 2,
+      "row_day": 3,
+      "description": "Cóctel Salar",
+      "supplier": "LEO - UYUNI",
+      "sku": "FNB_UYU_LEO_COCKTAIL",
+      "quantity": 2,
+      "unit_cost_usd": 10,
+      "cost_usd": 20,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"FNB_UYU_LEO_COCKTAIL\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F56",
+      "day": 2,
+      "row_day": 2,
+      "description": "CENA",
+      "supplier": "PALACIO DE SAL",
+      "sku": "MEAL_PDS_DINNER_2026",
+      "quantity": 2,
+      "unit_cost_usd": 44,
+      "cost_usd": 88,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"MEAL_PDS_DINNER_2026\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    },
+    {
+      "cell": "F57",
+      "day": 2,
+      "row_day": 2,
+      "description": "HAB STANDAR DBL",
+      "supplier": "PALACIO DE SAL",
+      "sku": "HTL_PDS_COLCHANI_STANDARD_DRY_2026",
+      "quantity": 1,
+      "unit_cost_usd": 446,
+      "cost_usd": 446,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"HTL_PDS_COLCHANI_STANDARD_DRY_2026\",TARIFARIO_MAESTRO!$Y:$Y,0))",
+      "room_type": "DBL"
+    },
+    {
+      "cell": "F59",
+      "day": 3,
+      "row_day": 3,
+      "description": "3D2N UYUNI – UYUNI",
+      "supplier": "LEO - UYUNI",
+      "sku": "TOUR_UYU_LEO_3D2N_LOOP",
+      "quantity": 0,
+      "unit_cost_usd": 0,
+      "cost_usd": 0,
+      "formula": null,
+      "covered_by": "F47"
+    },
+    {
+      "cell": "F60",
+      "day": 3,
+      "row_day": 3,
+      "description": "ALMUERZO PLATO SERVIDO",
+      "supplier": "LEO - UYUNI",
+      "sku": "FNB_UYU_LEO_LUNCH",
+      "quantity": 2,
+      "unit_cost_usd": 15,
+      "cost_usd": 30,
+      "formula": "=INDEX(TARIFARIO_MAESTRO!$H:$H,MATCH(\"FNB_UYU_LEO_LUNCH\",TARIFARIO_MAESTRO!$Y:$Y,0))*2"
+    }
+  ],
+  "blockers": [],
+  "notes": [
+    "F46: fila dice día 3, se usa encabezado día 1 (Andrea, 2026-10-11).",
+    "F55: fila dice día 3, se usa encabezado día 2 (Andrea, 2026-10-11).",
+    "Se compara costo: PRECIO VENTA está vacío. El markup 25 % procede de Andrea, no de Sheets.",
+    "Fecha de prueba 2026-10-14: la fuente no tiene fecha. Staff 0 para este cálculo; la fuente no desglosa staff.",
+    "El escenario y las cantidades solo certifican 2 pagantes + 0 TC; habitación DBL en cada una de las dos noches.",
+    "Tarifas tomadas del catálogo local migrado; FX de las fórmulas del Excel. No certifica el estado de Cloud."
+  ]
+}

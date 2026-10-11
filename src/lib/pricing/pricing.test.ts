@@ -7,9 +7,6 @@ import {
   type QuoteInput,
   type Rate,
 } from ".";
-import { spaUyuni } from "./__fixtures__/spa-uyuni";
-import { bolivia, expectedBolivia } from "./__fixtures__/bolivia";
-import { sivola, expectedSivola } from "./__fixtures__/sivola";
 
 const rate: Rate = {
   season: "ALL",
@@ -357,16 +354,5 @@ describe("pricing", () => {
         ],
       }).total_cost_usd,
     ).toBe(0);
-  });
-});
-describe("historical acceptance fixtures — awaiting exact source costs", () => {
-  it.skip("SPA UYU 3D2N MP, 2 pax — TODO costs", () => {
-    expect(calculateQuote(spaUyuni as QuoteInput).total_price_usd).toBeGreaterThan(0);
-  });
-  it.skip("Bolivia 5D4N 9+1 — TODO costs", () => {
-    expect(calculateQuote(bolivia as QuoteInput)).toMatchObject(expectedBolivia);
-  });
-  it.skip("SIVOLA 10D 14+1 — TODO costs", () => {
-    expect(calculateQuote(sivola as QuoteInput)).toMatchObject(expectedSivola);
   });
 });
