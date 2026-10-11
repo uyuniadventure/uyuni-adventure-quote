@@ -17,6 +17,7 @@ import { ServiceDetail } from "@/components/catalog/service-detail";
 import { ModuleEditor } from "@/components/catalog/module-editor";
 import { BlockEditor } from "@/components/catalog/block-editor";
 import { TemplateEditor } from "@/components/catalog/template-editor";
+import { BulkImportApproval } from "@/components/catalog/bulk-import-approval";
 
 const s = SECTIONS["revision-importacion"];
 
@@ -42,10 +43,10 @@ function usePending() {
     queryKey: ["import-review"],
     queryFn: async (): Promise<Record<Kind, Item[]>> => {
       const [sv, md, bl, tp] = await Promise.all([
-        db.from("services").select("id, sku, name, type, country, currency, pricing_unit, source, import_issues, suppliers(name), service_rates(count)").eq("status", "pendiente").order("sku").limit(500),
+        db.from("services").select("id, sku, name, type, country, currency, pricing_unit, source, import_issues, approval_issues, suppliers(name), service_rates(count)").eq("status", "pendiente").order("sku").limit(500),
         db.from("activity_modules").select("id, code, name, duration, places(name), activity_module_items(count), activity_module_translations(lang)").eq("status", "pendiente").order("code").limit(500),
         db.from("day_blocks").select("id, code, route_from, route_to, places, services(name), day_block_translations(lang, title), day_block_modules(count), day_block_items(count)").eq("status", "pendiente").order("code").limit(500),
-        db.from("itinerary_templates").select("id, sku, name, days, nights, category, route_from, route_to, import_warnings, template_days(count)").eq("status", "pendiente").order("sku").limit(500),
+        db.from("itinerary_templates").select("id, sku, name, days, nights, category, route_from, route_to, import_warnings, approval_issues, template_days(count)").eq("status", "pendiente").order("sku").limit(500),
       ]);
       for (const r of [sv, md, bl, tp]) if (r.error) throw r.error;
       const c = (v: unknown) => (v as { count: number }[])[0]?.count ?? 0;
@@ -54,6 +55,7 @@ function usePending() {
           id: x.id, code: x.sku, title: x.name,
           facts: [cap(x.type), x.suppliers?.name ?? "Sin proveedor", x.country ?? "Sin país", x.currency ?? "Sin moneda", x.pricing_unit ?? "Sin unidad", `${c(x.service_rates)} tarifas`, ...(x.source ? [`Origen: ${x.source}`] : [])],
           issues: [
+            ...x.approval_issues,
             ...(x.import_issues ? [x.import_issues] : []),
             ...(!x.currency || !x.pricing_unit ? ["Falta moneda o unidad de precio: no se puede activar."] : []),
           ],
@@ -71,7 +73,7 @@ function usePending() {
         itinerary_templates: (tp.data ?? []).map((x) => ({
           id: x.id, code: x.sku, title: x.name,
           facts: [`${x.route_from ?? "—"} → ${x.route_to ?? "—"}`, `${x.days}D${x.nights}N`, x.category, `${c(x.template_days)}/${x.days} días armados`],
-          issues: [...warningsList(x.import_warnings), ...(c(x.template_days) !== x.days ? ["Los días armados no coinciden con la duración."] : [])],
+          issues: [...x.approval_issues, ...warningsList(x.import_warnings), ...(c(x.template_days) !== x.days ? ["Los días armados no coinciden con la duración."] : [])],
         })),
       };
     },
@@ -134,6 +136,7 @@ function ReviewPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader title={s.title} subtitle="Elementos en estado pendiente (importados o sugeridos por vendedores) a la espera de revisión." />
+      <BulkImportApproval />
       {!manager && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">Solo Admin y Operación pueden aprobar o rechazar. Aquí ves tus elementos pendientes.</p>}
       {q.isError && <p className="text-sm text-destructive">No se pudo cargar la revisión.</p>}
       <Tabs defaultValue="services">
@@ -152,7 +155,7 @@ function ReviewPage() {
           <TabsContent key={k} value={k} className="mt-4 space-y-3">
             {q.isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
             {items.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
-            {isAdmin && items.length > 0 && (
+            {isAdmin && k !== "services" && k !== "itinerary_templates" && items.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2">
                 <Button
                   size="sm" variant="ghost" disabled={bulkApprove.isPending}
@@ -177,7 +180,7 @@ function ReviewPage() {
             )}
             {items.map((it) => (
               <Card key={it.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
-                {isAdmin && (
+                {isAdmin && k !== "services" && k !== "itinerary_templates" && (
                   <button
                     type="button" aria-label={sel.has(it.id) ? "Quitar de la selección" : "Seleccionar"}
                     className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"

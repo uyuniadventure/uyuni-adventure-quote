@@ -57,6 +57,11 @@ Proyecto nuevo e independiente: no comparte base de datos con otros sistemas exi
 
 Implementar con tabla `profiles.role` y políticas RLS en Supabase. Un producto `pendiente` creado por un vendedor **se puede usar en su cotización** de inmediato, pero no aparece como activo para los demás hasta que se apruebe.
 
+La aprobación masiva de importación es exclusiva de **Admin** mediante `approve_valid_imports`.
+Primero simula sin escrituras, devuelve conteos y motivos, y requiere confirmación explícita
+con la misma revisión del catálogo antes de aplicar. Servicios y plantillas se actualizan
+en una sola transacción; si el catálogo cambia hay que repetir la simulación.
+
 ---
 
 ## 4. Modelo de datos
@@ -117,6 +122,16 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
   - `sku` (componible, ver §5), `name`, `route_from`, `route_to`, `route_type` (`ROUNDTRIP | ONEWAY`), `days`, `nights`, `modality`, `category` (`BUDGET | COMFORT | VIP | MIXTO`), `hotel_combo` (ej. `MP`), `countries[]`, `main_places[]`, `meals_summary` (ej. `2B,3L,2D`), `includes_guide`, `guide_language`, `includes_staff_lodging_meals`.
   - `status`, `source_quote_id` (si se promovió desde una cotización).
 - **`template_days`**: template_id, `day_number`, block_id.
+
+**Aprobación masiva de pendientes:** un servicio necesita unidad, moneda y al menos
+una tarifa vigente en la fecha de Santiago con costo neto o rack; cero explícito es válido.
+Una plantilla necesita todos sus días numerados del 1 a su duración, con servicios
+aprobados (incluidos hoteles y servicios dentro de módulos, también los aprobables en
+la misma operación). Días vacíos, módulos vacíos y bloques/módulos inactivos impiden
+aprobarla. Los motivos se guardan en `approval_issues` al aplicar, sin sustituir las
+advertencias de importación. Los registros activos o inactivos no se modifican.
+El vendedor puede leer los bloques y módulos de una plantilla activa sin cambiar
+el estado propio de esos bloques/módulos ni ganar permisos de edición.
 
 ### 4.5 Clientes y condiciones
 - **`clients`**: `type` (`B2B | B2C`), nombre o agencia, contacto, email, país, `language` (es, it, en, …), `terms_id`.

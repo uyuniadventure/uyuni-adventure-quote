@@ -1,0 +1,5611 @@
+{
+  "basis": "SIMULACIÓN LOCAL: migraciones actuales + seeds archivados en supabase/seed/applied. No consulta ni cambia Lovable Cloud. No incluye el seed piloto 04_spauyu_mp_2pax.sql.",
+  "dry_run": true,
+  "services": {
+    "items": [
+      {
+        "id": "4c2527fa-d695-5fd5-8441-436088879435",
+        "code": "ALM_LH_BUF_1",
+        "name": "BUFFET EN EL SALAR 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "508298a7-f0dd-5d37-8018-42928668f7a9",
+        "code": "ALM_LH_BUF_2",
+        "name": "BUFFET EN EL SALAR 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "82495945-bab6-5da1-aca2-3ab15d4021d3",
+        "code": "ALM_LH_BUF_3",
+        "name": "BUFFET EN EL SALAR 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "62ff43bd-d7c0-5687-a4d2-4a46fae174c1",
+        "code": "ALM_LH_BUF_4",
+        "name": "BUFFET EN EL SALAR 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "1d09f471-f66c-5587-a3c1-932348ab80dd",
+        "code": "ALM_LH_BUF_5",
+        "name": "BUFFET EN EL SALAR 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "e0a62aac-a7b7-52c2-ad07-59f33bf4d3bb",
+        "code": "ALM_LH_BUF_6",
+        "name": "BUFFET EN EL SALAR 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "d76344ee-4c70-5491-af75-89935b74b5dd",
+        "code": "ALM_LH_STD_1",
+        "name": "ALMUERZO NORMAL 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "c0ede7bc-78ac-5dc1-ad3d-11a5f6e8acc2",
+        "code": "ALM_LH_STD_2",
+        "name": "ALMUERZO NORMAL 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "1c85d9be-800d-59c9-9586-dce8729066d0",
+        "code": "ALM_LH_STD_3",
+        "name": "ALMUERZO NORMAL 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "5bf1a223-937a-537b-85d5-333e9b17091a",
+        "code": "ALM_LH_STD_4",
+        "name": "ALMUERZO NORMAL 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "7810e359-1b32-5151-b02a-7481dbbeecc5",
+        "code": "ALM_LH_STD_5",
+        "name": "ALMUERZO NORMAL 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "d0202dfd-c161-5751-9bb8-3318a66bd9b1",
+        "code": "ALM_LH_STD_6",
+        "name": "ALMUERZO NORMAL 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "d51d06ea-246b-5c7d-b094-d0b2c2da0b6c",
+        "code": "ALM_LH_UTU_1",
+        "name": "ALMUERZO UYUNI TUNUPA 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "327bbd67-c3e6-578a-800b-037e6eecf494",
+        "code": "ALM_LH_UTU_2",
+        "name": "ALMUERZO UYUNI TUNUPA 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "4b199981-18fa-5934-8c4b-3f90d7816623",
+        "code": "ALM_LH_UTU_3",
+        "name": "ALMUERZO UYUNI TUNUPA 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "3ae927b1-b071-532f-a099-9ff73d6ba543",
+        "code": "ALM_LH_UTU_4",
+        "name": "ALMUERZO UYUNI TUNUPA 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "5d8be905-5263-5239-826f-0f9ad7b7f25d",
+        "code": "ALM_LH_UTU_5",
+        "name": "ALMUERZO UYUNI TUNUPA 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "71e276a9-ff92-55c1-9588-706bfd3f9472",
+        "code": "ALM_LH_UTU_6",
+        "name": "ALMUERZO UYUNI TUNUPA 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "a477a95d-148b-52e3-b236-ca5c8384c197",
+        "code": "AMB_ENT",
+        "name": "ENTRADA AMBORO",
+        "reasons": []
+      },
+      {
+        "id": "3e82c473-e5e5-50a0-bea0-f34862262873",
+        "code": "AMB_FD_TKT",
+        "name": "FULL DAY AMBORO NP",
+        "reasons": []
+      },
+      {
+        "id": "11b3dedb-955c-5055-96bb-e7ffb6d10ce8",
+        "code": "ATIX_LPZ_DBL",
+        "name": "HAB DOUBLE",
+        "reasons": []
+      },
+      {
+        "id": "b5a49928-4498-5518-be3d-505fb807dc98",
+        "code": "ATIX_LPZ_SGL",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "8dff96ed-1324-5dae-aad6-622bb363eae6",
+        "code": "ATIX_LPZ_SUP_NR",
+        "name": "HAB SUPERIOR DOUBLE NO REFUND",
+        "reasons": []
+      },
+      {
+        "id": "f1b4bdc4-9397-5ef7-98db-eaba1aa07e70",
+        "code": "ATIX_LPZ_SUP_REF",
+        "name": "HAB MATRIMONIAL SUPERIOR REFUND",
+        "reasons": []
+      },
+      {
+        "id": "9c6e29cd-575b-5cec-ac0b-ed35dc5112a6",
+        "code": "ATIX_LPZ_SUP_REF_DBL",
+        "name": "HAB SUPERIOR DOUBLE REFUND",
+        "reasons": []
+      },
+      {
+        "id": "62534897-5697-5d7e-8bd1-e2e1cf474d8b",
+        "code": "BIKE_LH_1",
+        "name": "BIKE SALAR 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "1bad4ae7-8704-5c7e-9500-a272eafb2778",
+        "code": "BIKE_LH_2",
+        "name": "BIKE SALAR 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "95d31839-6995-5d8d-921a-c9fcb3b95de1",
+        "code": "BUS_TODOTURISMO_UYUNI_LAPAZ_NIGHT_2026",
+        "name": "BUS NOCTURNO UYUNI - LA PAZ",
+        "reasons": []
+      },
+      {
+        "id": "41d7296c-f921-5d31-a1df-979f9b09d1c9",
+        "code": "BUS_UYU_CBB",
+        "name": "BUS COCHABAMBA – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "53275f04-8260-552e-926d-7f9b5439b3bc",
+        "code": "BUS_UYU_LPZ",
+        "name": "BUS LA PAZ – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "d1c3b25a-37c7-5cc9-ab7c-b50bf260597a",
+        "code": "BUS_UYU_POT",
+        "name": "BUS POTOSI – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "19918f41-f95d-5281-8eaa-ed0035f998e5",
+        "code": "BUS_UYU_SCZ",
+        "name": "BUS SANTA CRUZ – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "48a02cd2-595c-5a69-b006-36df42dd5986",
+        "code": "BUS_UYU_SUCRE",
+        "name": "BUS SUCRE – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "d12b48ce-5e8b-56fd-96a3-c5434fe11a6c",
+        "code": "CH_CBB_DBL",
+        "name": "HAB DOUBLE",
+        "reasons": []
+      },
+      {
+        "id": "9b32c507-1ca1-505a-9320-09d8482a4ae0",
+        "code": "CH_CBB_EJS",
+        "name": "HAB EJECUTIVA SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "c7e14b69-b15d-5114-9878-7a9db37bbe5f",
+        "code": "CH_CBB_FAM",
+        "name": "HAB FAMILIAR",
+        "reasons": []
+      },
+      {
+        "id": "ccc12bb5-9a27-5812-a48b-f4f0d3a492c6",
+        "code": "CH_CBB_GST",
+        "name": "HAB GRAN SUITE",
+        "reasons": []
+      },
+      {
+        "id": "8d499969-555a-5ddf-be90-a6dc9ad630b9",
+        "code": "CH_CBB_MAT",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "f86e3f44-01cc-5ee2-a3a6-ea6eb359e4fb",
+        "code": "CH_CBB_TPL",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "44a89a3f-f1e5-5b1f-8c3d-f3beb896a5d0",
+        "code": "CITY_TOUR_SIGHTSEEING_11-15PAX",
+        "name": "CITY TOUR LA PAZ + VALLE DE LA LUNA 11-15PAX (INCL. TRANSPORTE, GUÍA BILINGÜE, TICKETS TELEFERICO, EXCL TICKETS VALLE DE LA LUNA",
+        "reasons": []
+      },
+      {
+        "id": "66149d88-5a4a-5259-a9d6-24f6ec7814ad",
+        "code": "CITY_TOUR_SIGHTSEEING_16-20PAX",
+        "name": "CITY TOUR LA PAZ + VALLE DE LA LUNA 16-20PAX (INCL. TRANSPORTE, GUÍA BILINGÜE, TICKETS TELEFERICO, EXCL TICKETS VALLE DE LA LUNA",
+        "reasons": []
+      },
+      {
+        "id": "48ec76d0-cb45-5c23-ac5d-29bee743baf9",
+        "code": "CITY_TOUR_SIGHTSEEING_4-10PAX",
+        "name": "CITY TOUR LA PAZ + VALLE DE LA LUNA 4-10PAX (INCL. TRANSPORTE, GUÍA BILINGÜE, TICKETS TELEFERICO, EXCL TICKETS VALLE DE LA LUNA",
+        "reasons": []
+      },
+      {
+        "id": "eac51453-7cdf-54d6-919f-1b477748569f",
+        "code": "COC_LH_BASIC_1",
+        "name": "COCTEL BASICO MIX 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "92c5f197-2b5c-5750-9a40-ec3d2192e7aa",
+        "code": "COC_LH_BASIC_2",
+        "name": "COCTEL BASICO MIX 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "361555ba-1026-5138-b889-ed1ceb449840",
+        "code": "COC_LH_VIP_1",
+        "name": "COCTEL VIP 1 PAX",
+        "reasons": []
+      },
+      {
+        "id": "f3620496-02fa-5f46-8b31-44f4a6d37c6e",
+        "code": "COC_LH_VIP_2",
+        "name": "COCTEL VIP 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "8eef9b18-3cca-5a98-941e-b4039444e937",
+        "code": "CT9_TRF_APT",
+        "name": "SERVICIO HOTEL - AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "1a10f783-c6d6-5f24-a394-87dcc953feb5",
+        "code": "DAYUSE_JDU_UYUNI_DBLMAT_2026",
+        "name": "DAYUSE - HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "fa76a764-3e6e-50a6-b300-6c6b53a8bea7",
+        "code": "DAYUSE_JDU_UYUNI_SGL_2026",
+        "name": "DAYUSE - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "2d031b6b-911e-55f9-847c-9c68661de4b6",
+        "code": "DAYUSE_JDU_UYUNI_TRP_2026",
+        "name": "DAYUSE - HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "b216828c-b076-5515-9940-b25960b7ce07",
+        "code": "DAYUSE_KACHI_TRP_2026",
+        "name": "DAYUSE HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "d9974ccb-66eb-5615-b0b8-96a804027777",
+        "code": "DRON_CM_1",
+        "name": "SERVICIO DRON 1 VUELO (5-7 TOMAS) CON MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "68e13780-e02d-527b-af2f-c4b5051d06d2",
+        "code": "DRON_CM_2",
+        "name": "SERVICIO DRON 2 VUELOS (8-10 TOMAS) CON MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "eed07695-1d84-5800-8db3-a1ac5457763a",
+        "code": "DRON_SM_1",
+        "name": "SERVICIO DRON 1 VUELO (5-7 TOMAS) SIN MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "f6cb0595-82ab-57c3-a994-017248f8edad",
+        "code": "DRON_SM_2",
+        "name": "SERVICIO DRON 2 VUELOS (8-10 TOMAS) SIN MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "6bbbd163-7fae-5ae2-acfa-2bac9d3f3bdd",
+        "code": "EARLY_CP_SCZ_SGL_STD_2026",
+        "name": "EARLY CH-IN HAB SINGLE STANDAR",
+        "reasons": []
+      },
+      {
+        "id": "b99e23c3-e357-51e6-af26-bffc9edfbb6a",
+        "code": "EARLY_CP_SCZ_TRP_2026",
+        "name": "EARLY CH-IN HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "32179d31-1658-598e-82c5-1da6e8d0bfb6",
+        "code": "EARLY_JDU_UYUNI_DBLMAT_2026",
+        "name": "EARLY CHIN - HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "8e3723f9-3158-5da1-badf-81409d264d3a",
+        "code": "EARLY_JDU_UYUNI_SGL_2026",
+        "name": "EARLY CHIN - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "0d1dddac-d6ad-551d-beb4-7cd477c84f68",
+        "code": "EARLY_JDU_UYUNI_TRP_2026",
+        "name": "EARLY CHIN - HABTRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "676dd50f-73f8-5020-b5a4-b293652662e8",
+        "code": "ET10_TRF_BIO",
+        "name": "SERVICIO HOTEL - BIOCENTRO",
+        "reasons": []
+      },
+      {
+        "id": "f5857484-f10d-5c47-99ef-2bc1fad65a2f",
+        "code": "ET11_BIO_ENT",
+        "name": "ENTRADA BIOCENTRO GUEMBE",
+        "reasons": []
+      },
+      {
+        "id": "1a6c7ad6-26e0-58a8-9485-e6c2c37262a4",
+        "code": "ET12_FLIGHT",
+        "name": "VUELO SANTA CRUZ - SUCRE (08:00)",
+        "reasons": []
+      },
+      {
+        "id": "cdddf2ce-cbc8-5629-9bbc-233145cc7255",
+        "code": "EXP_UYU_LEO_BIKE",
+        "name": "ALQUILER BICICLETA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "b94c8b59-e1e3-5ed5-afc8-c85c8ac52e25",
+        "code": "EXP_UYU_LEO_STARGAZING",
+        "name": "STARGAZING DESDE EL HOTEL (1-4 pax)",
+        "reasons": []
+      },
+      {
+        "id": "0e0c4772-d78c-5948-a73b-d551d2ebcf6b",
+        "code": "EXP_UYU_LEO_STARS",
+        "name": "NOCHE DE ESTRELLAS SALAR",
+        "reasons": []
+      },
+      {
+        "id": "89c79741-04c5-5867-94a7-b921680cd591",
+        "code": "EXP_UYU_LEO_SUNSET",
+        "name": "ATARDECER HOTEL DE SAL",
+        "reasons": []
+      },
+      {
+        "id": "5eddb086-a92a-5db2-a290-a997d4b2ea16",
+        "code": "EXT_ENTRADA_MUSEO",
+        "name": "ENTRADAS A MUSEO",
+        "reasons": []
+      },
+      {
+        "id": "fa89d059-9881-5dcf-840c-6c84accdb2df",
+        "code": "FEE_TAYKA_COMMUNITY_PP_2026",
+        "name": "APORTE A LA COMUNIDAD",
+        "reasons": []
+      },
+      {
+        "id": "0a351f68-6e23-52fd-97eb-439019cc57b0",
+        "code": "FLIGHT_BOA_LPB_SCZ_0725_2026",
+        "name": "VUELO BOA LA PAZ-SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "ac914bb1-20b0-5f9c-96ee-3eb6f98d03f8",
+        "code": "FLIGHT_BOA_UYUNI_LAPAZ_0915_2026",
+        "name": "VUELO BOA UYUNI - LA PAZ",
+        "reasons": []
+      },
+      {
+        "id": "f68c4214-af38-5dc2-acf9-5df03c059344",
+        "code": "FLIGHT_CBB_SUCRE_0920_2026",
+        "name": "VUELO BOA COCHABAMBA - SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "910ceab8-a98f-5343-af21-1c8ec4b77a75",
+        "code": "FLIGHT__CBB_SUCRE_0800_2026",
+        "name": "VUELO COCHABAMBA - SUCRE (1PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f92c69db-f5a7-5845-aefd-99c87056e677",
+        "code": "FNB_ARICA_ALEJANDRO_LUNCH",
+        "name": "ALMUERZO PLATO SERVIDO",
+        "reasons": []
+      },
+      {
+        "id": "4f9563ae-7c73-59a9-b179-3ab60fd4c272",
+        "code": "FNB_SAM_BOX_LUNCH_2026",
+        "name": "BOX LUNCH",
+        "reasons": []
+      },
+      {
+        "id": "0e7f315c-225e-55c2-9716-6920ad29e099",
+        "code": "FNB_SAM_COOLER_BREAKFAST_2026",
+        "name": "COOLER DESAYUNO",
+        "reasons": []
+      },
+      {
+        "id": "d7cde094-c5d3-5bbb-8fe7-d778236f0cba",
+        "code": "FNB_SAM_COOLER_COCKTAIL_2026",
+        "name": "COOLER COCTEL",
+        "reasons": []
+      },
+      {
+        "id": "3b904c46-669b-54a7-af96-693474a2f2b4",
+        "code": "FNB_SPA_LASCAR_AGUA_1_2_2026",
+        "name": "AGUA MINERAL 500CC (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "737ba065-3005-5e0c-ad76-1a9d623b15c0",
+        "code": "FNB_SPA_LASCAR_ALMBAS_1_2_2026",
+        "name": "ALMUERZO BÁSICO PICNIC 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "872cee8f-b3c7-54d2-839c-d9530cd07358",
+        "code": "FNB_SPA_LASCAR_ALMVIP_1_2_2026",
+        "name": "ALMUERZO VIP PICNIC 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "c70e33a5-2e81-52a7-af99-b1ddc0cfd6f2",
+        "code": "FNB_SPA_LASCAR_COCKB_1_2_2026",
+        "name": "COCKTAILS BÁSICO (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4dc36cf9-f062-5f7f-98b1-30d874dc30b7",
+        "code": "FNB_SPA_LASCAR_COCKS_1_2_2026",
+        "name": "COCKTAILS SUPERIOR (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f97c66ed-780e-5970-b75a-b94856df1820",
+        "code": "FNB_SPA_LASCAR_DEGUST_1_2_2026",
+        "name": "DEGUSTACIÓN PREMIUM LOCAL (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "9d6b59c3-27e6-5a00-9e4d-5932e7bb3abf",
+        "code": "FNB_SPA_LASCAR_DESBAS_1_2_2026",
+        "name": "DESAYUNO BÁSICO 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "215f2917-0950-59a8-a7d2-aaec78060db2",
+        "code": "FNB_SPA_LASCAR_DESPREM_1_2_2026",
+        "name": "DESAYUNO PREMIUM 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "1fe6c94f-bb50-5f17-b200-e88a29166e87",
+        "code": "FNB_SPA_LASCAR_DESVIP_1_2_2026",
+        "name": "DESAYUNO VIP 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "26ec408f-20ee-5dea-b874-ee0abd2081f7",
+        "code": "FNB_SPA_LASCAR_FINE_1_2_2026",
+        "name": "FINE DINING EXPERIENCE (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ab0fe02a-5862-5022-aa26-756cb8f28466",
+        "code": "FNB_SPA_LASCAR_OP1_1_2_2026",
+        "name": "ALMUERZO O CENA OPCIÓN 1 (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1b4ca3ae-29af-55ca-91e7-ee8dc03e821e",
+        "code": "FNB_SPA_LASCAR_WRAPFAJ_1_2_2026",
+        "name": "ALMUERZO WRAPS / FAJITAS PICNIC 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "60a36b41-9c7c-52a5-9f86-0f377a1ded24",
+        "code": "FNB_UYU_LEO_BUFFET",
+        "name": "ALMUERZO APTHAPI BUFFET SALAR",
+        "reasons": []
+      },
+      {
+        "id": "c1a0c70d-d40c-5eb2-b844-db8cb194ba4b",
+        "code": "FNB_UYU_LEO_BUFFET_APTHAPI",
+        "name": "ALMUERZO APTHAPI BUFFET SALAR",
+        "reasons": []
+      },
+      {
+        "id": "fd01d0d5-04f6-57cf-8538-f1ce8daf05fc",
+        "code": "FNB_UYU_LEO_COCKTAIL",
+        "name": "COCKTAIL SALAR (HASTA X3)",
+        "reasons": []
+      },
+      {
+        "id": "f7e84c94-e708-5606-bee7-861d569cd595",
+        "code": "FNB_UYU_LEO_LUNCH",
+        "name": "ALMUERZO PLATO SERVIDO",
+        "reasons": []
+      },
+      {
+        "id": "ce759df3-6b96-5293-8a3a-21e285d4af0c",
+        "code": "FOTO_CM_FD",
+        "name": "SERVICIO FOTOGRAFICO FD CON MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "4ac66995-4d86-5f36-99dc-03f32751f4aa",
+        "code": "FOTO_CM_HD",
+        "name": "SERVICIO FOTOGRAFICO HALF DAY CON MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "39e8bee2-658a-564c-8a82-35378abf5c23",
+        "code": "FOTO_SM_FD",
+        "name": "SERVICIO FOTOGRAFICO FD SIN MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "9b9d7815-81de-5777-94d9-a7bace132718",
+        "code": "FOTO_SM_HD",
+        "name": "SERVICIO FOTOGRAFICO HALF DAY SIN MOVILIDAD",
+        "reasons": []
+      },
+      {
+        "id": "8dcdf3ac-2099-5945-bd8c-1653e8dd8969",
+        "code": "GUIA_MELVA_DE",
+        "name": "GUIA ALEMAN Y OTROS IDIOMAS",
+        "reasons": []
+      },
+      {
+        "id": "34112dd0-ac42-57cc-bc6e-2f01cc27d4dc",
+        "code": "GUIA_MELVA_INT",
+        "name": "GUIA INGLES / FRANCES / ITALIANO",
+        "reasons": []
+      },
+      {
+        "id": "c38213d8-9889-5ea1-adcf-f99478672437",
+        "code": "GUIA_TRANSFERTURISMO_LEONARDO_CASABLANCA_VALPARAISO_PP_2026",
+        "name": "GUIA - CASABLANCA - VALPO",
+        "reasons": []
+      },
+      {
+        "id": "0dac90f8-555c-5d24-bbee-1f48f56468ac",
+        "code": "GUIA_TRANSFERTURISMO_LEONARDO_CITY_TOUR_SANTIAGO_PP_2026",
+        "name": "GUIA - CITY TOUR SANTIAGO ",
+        "reasons": []
+      },
+      {
+        "id": "9afde8ee-43c3-53b6-b61f-f7dd96ba8bf9",
+        "code": "GUIDE_LAGUNACEJAR_HD",
+        "name": "GUIA LAGUNA CEJAR OJOS DEL SALAR Y TEBENQUICHE HD",
+        "reasons": []
+      },
+      {
+        "id": "a1ad2c9f-4c09-51e8-9099-7920ddf4c9c7",
+        "code": "GUIDE_LEO_2D1N_SALAR_TOMAVE_EN_2026",
+        "name": "GUIA INGLES SALAR-TOMAVE 2D1N",
+        "reasons": []
+      },
+      {
+        "id": "18763dd4-4caf-5958-a8c1-bdd489c2171a",
+        "code": "GUIDE_LEO_3D2N_HITO_HITO_EN_2026",
+        "name": "GUIA INGLES HITO - HITO 3D2N",
+        "reasons": []
+      },
+      {
+        "id": "31bb146f-af9c-5a0c-bfeb-efc58d09fb35",
+        "code": "GUIDE_LEO_3D2N_UTURUNKU_UYUNI_HITO_EN_2026",
+        "name": "GUIA INGLES UTURUNKU-UYUNI-HITO 3D2N",
+        "reasons": []
+      },
+      {
+        "id": "9b94d0cc-946f-5342-a9d5-f52ca3bdb2fd",
+        "code": "GUIDE_LEO_3D2N_UYUNI_HITO_EN_2026",
+        "name": "GUIA INGLES UYUNI-HITO 3D2N",
+        "reasons": []
+      },
+      {
+        "id": "6f37699a-049c-55a2-aaf9-1d251ac049e0",
+        "code": "GUIDE_LEO_3D2N_UYUNI_UYUNI_EN_2026",
+        "name": "GUIA INGLES UYUNI-UYUNI 3D2N",
+        "reasons": []
+      },
+      {
+        "id": "8508f036-349b-5be2-964e-8cc3e2442cba",
+        "code": "GUIDE_LEO_4D3N_HITO_HITO_CHIGUANA_EXTRA_EN_2026",
+        "name": "GUIA INGLES HITO-HITO- EXTRA CHIGUANA 4D3N",
+        "reasons": []
+      },
+      {
+        "id": "1a87b6ae-7581-5601-b871-a17909c19d3b",
+        "code": "GUIDE_LEO_4D3N_HITO_HITO_EN_2026",
+        "name": "GUIA INGLES HITO-HITO 4D3N",
+        "reasons": []
+      },
+      {
+        "id": "55dae71b-3447-553f-8868-dbcbf140421d",
+        "code": "GUIDE_LEO_4D3N_HITO_SALAR_LAGUNA_HITO_EN_2026",
+        "name": "GUIA INGLES HITO-SALAR-LAGUNA-HITO 4D3N",
+        "reasons": []
+      },
+      {
+        "id": "f620dd4b-004f-56c3-9dd6-e55000540933",
+        "code": "GUIDE_LEO_4D3N_UTURUNKU_HITO_HITO_EN_2026",
+        "name": "GUIA INGLES UTURUNKU-HITO-HITO 4D3N",
+        "reasons": []
+      },
+      {
+        "id": "a9c1f255-8ba5-5981-8987-9df763663778",
+        "code": "GUIDE_LEO_FULLDAY_SALAR_EN_2026",
+        "name": "GUIA INGLES SALAR FULL DAY",
+        "reasons": []
+      },
+      {
+        "id": "8a9cdd77-bcaf-5073-bbdc-5c0d2ec8c14e",
+        "code": "GUIDE_LEO_FULLDAY_TOMAVE_PULACAYO_EN_2026",
+        "name": "GUIA INGLES FULL DAY TOMAVE PULACAYO",
+        "reasons": []
+      },
+      {
+        "id": "e0ffc56c-aadc-5054-931c-d18d29aeb6cc",
+        "code": "GUIDE_LEO_SUCRE_EN_2026",
+        "name": "GUIA INGLÉS - SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "9b694424-b0cf-5116-9a96-bf95179b0f76",
+        "code": "GUIDE_LEO_SUCRE_IT_2026",
+        "name": "GUIA ITALIANO - SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "0aaa35e6-2aba-5adc-9595-6fc0599c952e",
+        "code": "GUIDE_MAS_ALTI_FD",
+        "name": "GUIA ALTIPLANICAS Y SALAR DE ATACAMA FD",
+        "reasons": []
+      },
+      {
+        "id": "d1d66be5-f9cc-5054-bb2d-af678490886e",
+        "code": "GUIDE_MAS_GUATIN_HD",
+        "name": "GUIA GUATIN HD",
+        "reasons": []
+      },
+      {
+        "id": "86746d90-e23c-5f87-8639-f526039de1e2",
+        "code": "GUIDE_MAS_PRMMC_FD",
+        "name": "GUIA PIEDRAS ROJAS MISCANTI MIÑIQUES Y LAGUNA CHAXA FD",
+        "reasons": []
+      },
+      {
+        "id": "2472cd2f-2b71-544c-844e-5167d90bf738",
+        "code": "GUIDE_MAS_PRMM_FD",
+        "name": "GUIA PIEDRAS ROJAS LAGUNA MISCANTI Y MIÑIQUES FD",
+        "reasons": []
+      },
+      {
+        "id": "ea3b7fd9-f11b-5a55-ad0f-cdc6c9017eb9",
+        "code": "GUIDE_MAS_PUEBLOS_FD",
+        "name": "GUIA PUEBLOS ALTIPLANICOS FD",
+        "reasons": []
+      },
+      {
+        "id": "14e3b2f1-0e25-5092-8019-9827a638d5dd",
+        "code": "GUIDE_MAS_PURITAMA_HD",
+        "name": "GUIA PURITAMA HD",
+        "reasons": []
+      },
+      {
+        "id": "f370a4d0-ffef-5a49-94c2-5b2205679bbb",
+        "code": "GUIDE_MAS_SALARES_FD",
+        "name": "GUIA RUTA DE LOS SALARES FD",
+        "reasons": []
+      },
+      {
+        "id": "5b0d3b1a-e644-5366-888b-13dc640674ed",
+        "code": "GUIDE_MAS_TATIO_FD",
+        "name": "GUIA TATIO FD",
+        "reasons": []
+      },
+      {
+        "id": "9148fd5d-ad03-51c1-a9c0-db666235bb52",
+        "code": "GUIDE_MAS_VALLECITO_HD",
+        "name": "GUIA VALLECITO HD",
+        "reasons": []
+      },
+      {
+        "id": "6770fa6d-0a7f-526c-adbb-99f24664bcc1",
+        "code": "GUIDE_MAS_VDLL_HD",
+        "name": "GUIA VALLE DE LA LUNA HD",
+        "reasons": []
+      },
+      {
+        "id": "d85e5260-993c-5a28-8edd-4a6538cda184",
+        "code": "GUIDE_MAS_VILAMA_HD",
+        "name": "GUIA CASCADA DE VILAMA HD",
+        "reasons": []
+      },
+      {
+        "id": "699b7356-4c24-5e06-a8f9-57c74b948c96",
+        "code": "GUIDE_MOUNTAIN_TUNUPA_GRP_1_6_2026",
+        "name": "GUIA DE MONTAÑA TUNUPA GRUPO 1-6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "652ca550-034b-5dce-b471-37a5d141d77b",
+        "code": "GUIDE_MOUNTAIN_UTURUNKU_GRP_1_6_2026",
+        "name": "GUIA DE MONTAÑA UTURUNKU GRUPO 1-6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "8e419a7a-9149-58a8-8d28-f7662ad4f949",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX11_15_2026",
+        "name": "GUIA TITIKAKA (11-15 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8234fdb4-a6f2-50f4-92e9-7bd9a52f6dc0",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX16_20_2026",
+        "name": "GUIA TITIKAKA (16-20 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "df0cd8ae-4871-5580-9a51-4e73fc2df70a",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX1_3_2026",
+        "name": "GUIA TITIKAKA (1-3 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f9b4e983-8daa-5fc1-b889-1d0f43191c79",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX21_35_2026",
+        "name": "GUIA TITIKAKA (21-35 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ab50884d-62f9-58ad-aa0f-c42f696efc76",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX4_5_2026",
+        "name": "GUIA TITIKAKA (4-5 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d8c1a785-d89b-5af4-9f3b-ffc11e55763f",
+        "code": "GUIDE_PP_TITIKAKA_GROUP_PAX6_10_2026",
+        "name": "GUIA TITIKAKA (6-10 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a23b0f0e-b774-5741-b9ce-64a9bccd2085",
+        "code": "GUIDE_SPA_LASKAR_ADD_ESEN_12",
+        "name": "ATENCIÓN ADICIONAL ESP/ENG (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b741c9e3-3c3a-51c2-aa7e-213ff932f392",
+        "code": "GUIDE_SPA_LASKAR_FDP_ESEN_12",
+        "name": "FULL DAY PLUS ESP/ENG (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a914dc3a-3997-5877-a9cf-d84d45cbbd2d",
+        "code": "GUIDE_SPA_LASKAR_FD_ESEN_12",
+        "name": "FULL DAY ESP/ENG (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1c1609bc-48cc-54b5-9ea4-27d847c43281",
+        "code": "GUIDE_SPA_LASKAR_HD_ESEN_12",
+        "name": "HALF DAY ESP/ENG (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "91bce704-ecfc-510d-ae87-c0c261b19caa",
+        "code": "GUIDE_SPA_LASKAR_TR_ESEN_12",
+        "name": "TRANSFER ESP/ENG (1-2 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d34db9f3-1f8e-5356-be0a-04b533fc3d26",
+        "code": "HC_POT_DBL",
+        "name": "HAB DOUBLE",
+        "reasons": []
+      },
+      {
+        "id": "f4f6e412-6fcd-507c-bc5f-846a5692e117",
+        "code": "HC_POT_QDP",
+        "name": "HAB CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "aad6b3bd-aacd-5452-a34e-ef4ab367ce50",
+        "code": "HC_POT_SDB",
+        "name": "HABSUITE DOUBLE",
+        "reasons": []
+      },
+      {
+        "id": "4ca7a561-2ab2-5a5b-a212-c96db642128f",
+        "code": "HC_POT_SGL",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "558a7de3-5bf1-5e67-9b68-835316fd0dc6",
+        "code": "HC_POT_SQP",
+        "name": "HAB SUITE CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "eb47e1e1-8060-5ef7-849c-c490d0086f88",
+        "code": "HC_POT_SSL",
+        "name": "HAB SUITE SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "ea971b61-2d2c-50e8-a5c7-4aac66796090",
+        "code": "HC_POT_STP",
+        "name": "HAB SUITE TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "32921638-97e7-5c83-b233-aa94ad7ae6c8",
+        "code": "HC_POT_TPL",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "9a0e521d-b51c-56c7-ab3e-fa5cb69de7d0",
+        "code": "HDR_DOUBLE_2026",
+        "name": "HAB DOBLE 2026",
+        "reasons": []
+      },
+      {
+        "id": "c0d1d7ec-9d47-53f0-a578-a925eb2e7867",
+        "code": "HDR_DOUBLE_BOB_2026",
+        "name": "HAB DOBLE BOB 2026",
+        "reasons": []
+      },
+      {
+        "id": "dc038e04-974b-54a6-bbad-3e1815d7726a",
+        "code": "HDR_MEAL_BF_DINNER_2026",
+        "name": "DESAYUNO Y CENA 2026",
+        "reasons": []
+      },
+      {
+        "id": "416b8945-8cfe-5a0c-8a91-156d761e5ac1",
+        "code": "HDR_MEAL_BOB_2026",
+        "name": "DESAYUNO Y CENA BOB 2026",
+        "reasons": []
+      },
+      {
+        "id": "40a39e32-8e56-5d79-8014-ae4338777b58",
+        "code": "HDR_TRIPLE_2026",
+        "name": "HAB TRIPLE 2026",
+        "reasons": []
+      },
+      {
+        "id": "192e2b34-997a-5da3-8062-1d0c06bfb209",
+        "code": "HDR_TRIPLE_BOB_2026",
+        "name": "HAB TRIPLE BOB 2026",
+        "reasons": []
+      },
+      {
+        "id": "30a0b483-78a8-58df-9d64-a81a01f1fdbf",
+        "code": "HS_SCR_DBL",
+        "name": "HAB DOUBLE",
+        "reasons": []
+      },
+      {
+        "id": "1412394c-d59c-512d-beb3-3e7a89c8972b",
+        "code": "HS_SCR_DBL_NT_USD",
+        "name": "HAB DOUBLE NETO USD",
+        "reasons": []
+      },
+      {
+        "id": "025ac978-6d75-5b8f-8826-998e6000202c",
+        "code": "HS_SCR_SGL",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "d7c47aef-558a-5543-a583-c3792750d35a",
+        "code": "HS_SCR_SGL2",
+        "name": "HAB SINGLE 2PAX",
+        "reasons": []
+      },
+      {
+        "id": "cceda7ad-b853-5687-ae49-ade691a1ea37",
+        "code": "HS_SCR_SGL2_NT_USD",
+        "name": "HAB SINGLE 2PAX NETO USD",
+        "reasons": []
+      },
+      {
+        "id": "c5d8b92a-b703-506e-bb45-e166323a1216",
+        "code": "HS_SCR_SGL_NT_USD",
+        "name": "HAB SINGLE NETO USD",
+        "reasons": []
+      },
+      {
+        "id": "bf45e96b-7538-5c01-9447-f9c570658e63",
+        "code": "HS_SCR_TPL",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "622f8c40-e101-5e4d-9a1c-d03c3b1dd72d",
+        "code": "HS_SCR_TPL_NT_USD",
+        "name": "HAB TRIPLE NETO USD",
+        "reasons": []
+      },
+      {
+        "id": "0a0b129e-7167-5da2-afa8-1e88cbbbb473",
+        "code": "HTL_BA_UYUNI_DBL_2026",
+        "name": "HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "664d3186-e1e9-5b20-ac79-5734a252de1b",
+        "code": "HTL_BA_UYUNI_SGL_2026",
+        "name": "HAB SINGLE O SIMPLE",
+        "reasons": []
+      },
+      {
+        "id": "8b3a1b85-2a1d-57bc-a484-c4835f81a271",
+        "code": "HTL_BA_UYUNI_SUITE_MAT_2026",
+        "name": "HAB SUITE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "36a44a8b-6faa-5f5a-8d7a-8cc8dc8c917d",
+        "code": "HTL_BA_UYUNI_SUITE_PRES_2026",
+        "name": "HAB SUITE PRESIDENCIAL",
+        "reasons": []
+      },
+      {
+        "id": "f21084fb-0645-52fb-a94e-827c42b47a8a",
+        "code": "HTL_BA_UYUNI_TWN_2026",
+        "name": "HAB DOBLE TWIN",
+        "reasons": []
+      },
+      {
+        "id": "c2f9b7ed-8467-50c7-b8ce-59ea4e66e40c",
+        "code": "HTL_COSC_UYUNI_DBL_2026",
+        "name": "HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "fda36488-da49-5dab-902b-a4e0721d7ad2",
+        "code": "HTL_COSC_UYUNI_FAM4_2026",
+        "name": "HAB FAMILIAR",
+        "reasons": []
+      },
+      {
+        "id": "fe8f8a8e-f51b-5460-9be0-ea2934436a65",
+        "code": "HTL_COSC_UYUNI_MAT_2026",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "4f92cc8a-a8c4-517f-987e-eb7142359327",
+        "code": "HTL_COSC_UYUNI_SGL_STD_2026",
+        "name": "HAB SINGLE ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "fa33cfd5-f099-5049-934f-ac1376653382",
+        "code": "HTL_COSC_UYUNI_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "d530e0db-a91d-569f-97e4-ee0edd658665",
+        "code": "HTL_CP_DBL_TWN",
+        "name": "HAB DOBLE TWIN",
+        "reasons": []
+      },
+      {
+        "id": "8c97d46e-4299-5731-82b4-a90cd4b9e4be",
+        "code": "HTL_CP_ECI_SGL",
+        "name": "EARLY CHECK IN SIMPLE",
+        "reasons": []
+      },
+      {
+        "id": "c8384e08-3f99-55a4-a762-8be7b490dc27",
+        "code": "HTL_CP_ECI_TPL",
+        "name": "EARLY CHECK IN TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "37685772-1317-5d62-bbb8-23b229d029e5",
+        "code": "HTL_CP_SCZ_SGL_STD_2026",
+        "name": "HAB SINGLE STANDAR",
+        "reasons": []
+      },
+      {
+        "id": "5602810b-61d4-5003-9fa9-0f145c0d252d",
+        "code": "HTL_CP_SCZ_TRP_STD_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "89f73f01-e9a1-5e17-b362-4dc6a9184984",
+        "code": "HTL_CP_SCZ_TWN_BOOKING_2026",
+        "name": "HAB TWIN PRICE BOOKING",
+        "reasons": []
+      },
+      {
+        "id": "1edeb197-a9f0-5bbc-bac0-891d7ef7ae9c",
+        "code": "HTL_CP_SCZ_TWN_EST_2026",
+        "name": "HAB TWIN STANDAR",
+        "reasons": []
+      },
+      {
+        "id": "482994f1-f73c-5583-bcb0-8b293b4da12d",
+        "code": "HTL_CP_SGL_STD",
+        "name": "HABSIMPLE ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "24e7cbab-40e3-54a4-a75d-206226e49bee",
+        "code": "HTL_CP_TPL_STD",
+        "name": "HAB TRIPLE ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "c3962d62-8c0e-5c4a-84a2-d476d1613ac3",
+        "code": "HTL_DT_DBL_REF_EXT_2027",
+        "name": "DBL REFUGIO EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "4634fa71-b3ea-55d3-ad45-f7ed6063275d",
+        "code": "HTL_DT_DBL_REF_NAC_2027",
+        "name": "DBL REFUGIO NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "672cc1ac-1925-5c7a-9d8f-51788cf5655a",
+        "code": "HTL_DT_DBL_STD_EXT_2027",
+        "name": "DBL STD EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "340587c0-f3b1-5517-8b98-3038bc4f2435",
+        "code": "HTL_DT_DBL_STD_NAC_2027",
+        "name": "DBL STD NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "a35f2c2a-bd63-523f-8e48-bf62cd6b280a",
+        "code": "HTL_DT_DBL_SUP_EXT_2027",
+        "name": "DBL SUP EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "c2864ee3-e82d-5859-9f57-83398eb6e464",
+        "code": "HTL_DT_DBL_SUP_NAC_2027",
+        "name": "DBL SUP NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "ac202e70-d811-5557-8354-d59d6a0cd01e",
+        "code": "HTL_DT_SGL_REF_EXT_2027",
+        "name": "SGL REFUGIO EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "acfbcb29-ff11-5921-9d31-7535d016ddbb",
+        "code": "HTL_DT_SGL_REF_NAC_2027",
+        "name": "SGL REFUGIO NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "cb01fc69-5270-5320-957d-30b03a2597ab",
+        "code": "HTL_DT_SGL_STD_EXT_2027",
+        "name": "SGL STD EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "6c94307a-bb08-5797-81e5-e782197e3085",
+        "code": "HTL_DT_SGL_STD_NAC_2027",
+        "name": "SGL STD NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "111a5aa8-5bb4-5752-81f7-65c5d819dd5a",
+        "code": "HTL_DT_SGL_SUP_EXT_2027",
+        "name": "SGL SUP EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "bff0ddb9-915c-5159-a5cf-baffe6666e2f",
+        "code": "HTL_DT_SGL_SUP_NAC_2027",
+        "name": "SGL SUP NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "3d4a054b-e27c-53f1-87af-f3e3cd888f4c",
+        "code": "HTL_DT_TRP_STD_EXT_2027",
+        "name": "TRP STD EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "e1ce33c1-cb08-51d4-a798-6ab3d26a0f14",
+        "code": "HTL_DT_TRP_STD_NAC_2027",
+        "name": "TRP STD NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "c5e65f43-ae73-5e86-887e-dc7e6996765e",
+        "code": "HTL_DT_TRP_SUP_EXT_2027",
+        "name": "TRP SUP EXTRANJERO",
+        "reasons": []
+      },
+      {
+        "id": "649782b9-ae95-5a09-a336-c42a46dc4b47",
+        "code": "HTL_DT_TRP_SUP_NAC_2027",
+        "name": "TRP SUP NACIONAL",
+        "reasons": []
+      },
+      {
+        "id": "a5d666f0-1623-5927-b6a9-4a0b2cf0ce25",
+        "code": "HTL_EXP_ATAUYU_STAL_DBL_HIGHSEASON",
+        "name": "STAND ALONE DOBLE HIGH SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "6917feac-a570-59cf-beec-9e35f02907ea",
+        "code": "HTL_EXP_ATAUYU_STAL_DBL_QUITSEASON",
+        "name": "STAND ALONE DOBLE QUIET SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "2897fccd-f6f5-51b2-95c1-7ca33fb49c6c",
+        "code": "HTL_EXP_ATAUYU_STAL_SGL_HIGHSEASON",
+        "name": "STAND ALONE SINGLE HIGH SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "dd4b026c-a27f-5a08-b0e6-594421563763",
+        "code": "HTL_EXP_ATAUYU_STAL_SGL_QUITSEASON",
+        "name": "STAND ALONE SINGLE QUIET SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "044238da-58b6-54ac-96ab-69617816c6d6",
+        "code": "HTL_EXP_ATAUYU_TRAV_DBL_HIGHSEASON",
+        "name": "TRAVESIA DOBLE HIGH SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "7937cf4d-1f98-5b8d-976f-931a397a3085",
+        "code": "HTL_EXP_ATAUYU_TRAV_DBL_HOLIDAYSSEASON",
+        "name": "TRAVESIA DOBLE HOLIDAYS SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "53f4092e-d18b-56e2-8f92-8e0ef2664691",
+        "code": "HTL_EXP_ATAUYU_TRAV_DBL_QUITSEASON",
+        "name": "TRAVESIA DOBLE QUIET SS",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "4aa60452-886e-5369-baa0-c3c19f517278",
+        "code": "HTL_EXP_ATAUYU_TRAV_SGL_HIGHSEASON",
+        "name": "TRAVESIA SINGLE HIGH SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "e3f196b5-30e4-5b9d-968a-2eaccf9b83d8",
+        "code": "HTL_EXP_ATAUYU_TRAV_SGL_HOLIDAYSSEASON",
+        "name": "TRAVESIA SINGLE HOLIDAYS SSN",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "de2b6aef-c2ed-573a-a721-d1684cc7a0a7",
+        "code": "HTL_EXP_ATAUYU_TRAV_SGL_QUITSEASON",
+        "name": "TRAVESIA SINGLE QUIET SS",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "d7df2c24-c977-53b7-bbec-172a681eae8d",
+        "code": "HTL_HARDROAD_SPA_SNG_DBL_CLP_2026",
+        "name": "Single (1 pax) or Doble o Matrimonial",
+        "reasons": []
+      },
+      {
+        "id": "c1aaacb0-4e59-5fc3-9409-4f1c0fca922f",
+        "code": "HTL_HQ_QUETENA_DBL_BATH_2026",
+        "name": "HAB DOBLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "7a87bd63-6e98-5e48-b896-893a755b5361",
+        "code": "HTL_HQ_QUETENA_DBL_NOBATH_2026",
+        "name": "HAB DOBLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "59b636e2-fe66-5337-938e-344368aaf2f7",
+        "code": "HTL_HQ_QUETENA_SGL_BATH_2026",
+        "name": "HAB SINGLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "56d3f282-c3b6-5b58-93f8-14dcaae4e86f",
+        "code": "HTL_HQ_QUETENA_SGL_NOBATH_2026",
+        "name": "HAB SINGLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "3b0d2c4d-7eba-5ef5-89da-f2897e9fdf4c",
+        "code": "HTL_HQ_QUETENA_TRP_BATH_2026",
+        "name": "HAB TRIPLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "e58ea361-7ae7-531c-b102-bf899c95de2b",
+        "code": "HTL_HQ_QUETENA_TRP_NOBATH_2026",
+        "name": "HAB TRIPLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "835ede56-271b-5448-b583-0094415342c5",
+        "code": "HTL_HSUCRE_DBL_MAT_BOB_2026",
+        "name": "HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "0cc6c6c1-af73-512f-a954-ef724f5cc817",
+        "code": "HTL_HSUCRE_SGL_2PL_BOB_2026",
+        "name": "HAB SINGLE 2 PLAZAS",
+        "reasons": []
+      },
+      {
+        "id": "dcd396ed-c47b-5005-b845-1b1e18b32db1",
+        "code": "HTL_HSUCRE_SGL_BOB_2026",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "b0b770c3-dc00-5d8c-b4c7-0a2d4b665133",
+        "code": "HTL_HSUCRE_TRP_BOB_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "5b04c56b-e5d8-5d0e-84f9-3bfbbaf12ce2",
+        "code": "HTL_HV_VILLAMAR_DBL_BATH_2026",
+        "name": "HAB DOBLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "326386ac-6b5a-5a84-9357-4445c3c05147",
+        "code": "HTL_HV_VILLAMAR_DBL_NOBATH_2026",
+        "name": "HAB DOBLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "50fdc82b-3054-5adc-b447-25c92839e178",
+        "code": "HTL_HV_VILLAMAR_SGL_BATH_2026",
+        "name": "HAB SINGLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "691ccc7c-6e6d-50da-9427-ecc4fe3df3ba",
+        "code": "HTL_HV_VILLAMAR_SGL_NOBATH_2026",
+        "name": "HAB SINGLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "6bfbd175-d15c-5100-bd24-41f0604fd6cd",
+        "code": "HTL_HV_VILLAMAR_TRP_BATH_2026",
+        "name": "HAB TRIPLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "a6287b20-ed45-5c31-b651-b56a9bf53dc3",
+        "code": "HTL_HV_VILLAMAR_TRP_NOBATH_2026",
+        "name": "HAB TRIPLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "113ed8f7-8532-5bcf-85ff-c51e2c0cf91e",
+        "code": "HTL_JDU_UYUNI_DBLMAT_2026",
+        "name": "HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "03b03981-6b01-5a24-88b4-4b4bd66fcb2f",
+        "code": "HTL_JDU_UYUNI_SGL_2026",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "c42e75f2-488a-52ed-863d-a740cc5d78cf",
+        "code": "HTL_JDU_UYUNI_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "3f93d6d1-5344-5390-aade-fe9b9be74129",
+        "code": "HTL_KACHI_UYUNI_DBL_2026",
+        "name": "HAB DOBLE ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "0ba85a04-0881-5ca0-b51a-df0fed3ce28c",
+        "code": "HTL_KACHI_UYUNI_MAT_2026",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "2ae87e13-3f80-5387-b92d-56a5b36d4e54",
+        "code": "HTL_KACHI_UYUNI_QUAD_2026",
+        "name": "HAB CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "ac4f09a4-e6fb-5732-a04b-16537f6ebc07",
+        "code": "HTL_KACHI_UYUNI_SGL_STD_2026",
+        "name": "HAB SINGLE ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "97cd6332-7d14-5fd1-a1b4-258ffc8cb4f7",
+        "code": "HTL_KACHI_UYUNI_SUITE_FAM_2026",
+        "name": "HAB SUITE FAMILIAR",
+        "reasons": []
+      },
+      {
+        "id": "ca3826d8-6351-5dce-85ba-9c7e19b8bc02",
+        "code": "HTL_KACHI_UYUNI_SUITE_TRP_2026",
+        "name": "HAB SUITE TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "7542eeab-7698-5514-b7bc-d3ac470b03f4",
+        "code": "HTL_KACHI_UYUNI_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "f8bd6097-3080-58dc-ab0c-b58edf37f250",
+        "code": "HTL_LF_HEDIONDA_MAT_STD_2026",
+        "name": "Matrimonial Standard",
+        "reasons": []
+      },
+      {
+        "id": "fe4a61c4-8551-569f-a490-0e4890a472e5",
+        "code": "HTL_LF_HEDIONDA_MAT_SUP_2026",
+        "name": "Matrimonial Superior",
+        "reasons": []
+      },
+      {
+        "id": "bd24d50a-2061-5524-99ef-fe971856685d",
+        "code": "HTL_LF_HEDIONDA_SGL_SUP_2026",
+        "name": "Single (Simple) Superior",
+        "reasons": []
+      },
+      {
+        "id": "01667b30-45b3-56b5-ada7-dee9bb70ef8a",
+        "code": "HTL_LF_HEDIONDA_SUITE_FAM_TRP_2026",
+        "name": "Suite Familiar o Triple",
+        "reasons": []
+      },
+      {
+        "id": "96f1f1c1-7eef-58ae-ac10-195439c83b14",
+        "code": "HTL_LF_HEDIONDA_SUITE_MAT_2026",
+        "name": "Suite Matrimonial",
+        "reasons": []
+      },
+      {
+        "id": "aec9f8f8-05f3-507f-8d52-7c166f9ef710",
+        "code": "HTL_LF_HEDIONDA_TRP_SUP_2026",
+        "name": "Triple Superior",
+        "reasons": []
+      },
+      {
+        "id": "92d2369c-4c49-5ed1-a6b8-e8f164e175e6",
+        "code": "HTL_LF_HEDIONDA_TWN_STD_2026",
+        "name": "DBL Twin Estandar",
+        "reasons": []
+      },
+      {
+        "id": "79824348-db09-5147-a085-3733d087d28e",
+        "code": "HTL_LF_HEDIONDA_TWN_SUP_2026",
+        "name": "DBL Twin Superior",
+        "reasons": []
+      },
+      {
+        "id": "f92d93bc-655c-58ad-8845-13df28e39bf2",
+        "code": "HTL_LF_STAFF_LODGING_PP_2026",
+        "name": "Alojamiento Staff o Chofer",
+        "reasons": []
+      },
+      {
+        "id": "d6b60ccf-bd4f-5b5c-9855-899928a40825",
+        "code": "HTL_LPZ_ROSARIO_DBL_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - DOBLE 2026",
+        "reasons": []
+      },
+      {
+        "id": "83e454bc-53a9-5134-8058-7f7cb9c4f9d2",
+        "code": "HTL_LPZ_ROSARIO_MAT_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - MATRIMONIAL 2026",
+        "reasons": []
+      },
+      {
+        "id": "4f5c41de-7b1f-5f74-a5d8-c38c840fb491",
+        "code": "HTL_LPZ_ROSARIO_SIMPLE_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - SIMPLE 2026",
+        "reasons": []
+      },
+      {
+        "id": "cd240e73-ec2e-56a8-aa68-11d01f4ac9e7",
+        "code": "HTL_LPZ_ROSARIO_SUITE_JAC_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - SUITE JACUZZI 2026",
+        "reasons": []
+      },
+      {
+        "id": "6c8ef03a-b627-5c77-b5c9-404b1d4b2818",
+        "code": "HTL_LPZ_ROSARIO_SUPDBL_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - SUITE SUPERIOR DOBLE 2026",
+        "reasons": []
+      },
+      {
+        "id": "4a3c175b-1cc9-5bd5-a845-cecf56bf1665",
+        "code": "HTL_LPZ_ROSARIO_SUPMAT_2026",
+        "name": "ROSARIO COLECCIÓN LA PAZ SUR - SUITE SUPERIOR MATRIMONIAL 2026",
+        "reasons": []
+      },
+      {
+        "id": "971b0623-6174-5243-bc1d-af983b74f315",
+        "code": "HTL_LS_COLCHANI_DBL_STD_NO_VIEW_2026",
+        "name": "HAB MATRIMONIAL ESTÁNDAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "38f470a0-df33-5d7f-a9f3-3ae7ced299ee",
+        "code": "HTL_LS_COLCHANI_DBL_STD_NO_VIEW_DU_2026",
+        "name": "DAY USE - HAB MATRIMONIAL ESTÁNDAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "c22ce8a3-b2df-5a85-a766-dd85418e5e11",
+        "code": "HTL_LS_COLCHANI_DBL_STD_SALT_VIEW_2026",
+        "name": "HAB MATRIMONIAL ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "f75257d6-ef5a-5785-9b4a-01b1f76545b1",
+        "code": "HTL_LS_COLCHANI_DBL_STD_SALT_VIEW_DU_2026",
+        "name": "DAY USE - HAB MATRIMONIAL ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "8124f05c-20bd-5288-9962-c8e9c1112a2b",
+        "code": "HTL_LS_COLCHANI_EARLY_CHIN",
+        "name": "EARLY CH-IN",
+        "reasons": []
+      },
+      {
+        "id": "49ebdc04-ae9e-503a-a7ae-bcd28cf09e99",
+        "code": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SALT_VIEW_2026",
+        "name": "HAB MAT/TWIN DELUXE CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "f0f7dcda-5e57-5977-b0dd-e36f4b2bfea8",
+        "code": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SALT_VIEW_DU_2026",
+        "name": "DAY USE - HAB MAT/TWIN DELUXE VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "64572ff4-cfd5-5099-8132-a7e9758d5fe3",
+        "code": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SUNRISE_VIEW_2026",
+        "name": "HAB MAT/TWIN DELUXE CON VISTA AMANECER",
+        "reasons": []
+      },
+      {
+        "id": "a1b0f0d5-4011-502b-b5ce-f32a2b534ae5",
+        "code": "HTL_LS_COLCHANI_MAT_TWN_DELUXE_SUNRISE_VIEW_DU_2026",
+        "name": "DAY USE - HAB MAT/TWIN DELUXE VISTA AMANECER",
+        "reasons": []
+      },
+      {
+        "id": "62200151-f1ee-53e5-91cd-4c2ba079460a",
+        "code": "HTL_LS_COLCHANI_SGL_STD_NO_VIEW_DU_2026",
+        "name": "DAY USE - HAB SINGLE ESTÁNDAR SIN VISTA AL SALAR",
+        "reasons": []
+      },
+      {
+        "id": "dfa5b26a-6ae2-5edf-abd0-eb9e8fed5a82",
+        "code": "HTL_LS_COLCHANI_SGL_STD_SALT_VIEW_2026",
+        "name": "HAB SIMPLE ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "d8e9c2f8-88da-54ac-9795-1e9a7a92537b",
+        "code": "HTL_LS_COLCHANI_SGL_STD_SALT_VIEW_DU_2026",
+        "name": "DAY USE - HAB SIMPLE ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "56d7552b-879e-5c20-993b-8b1a7cbe6c60",
+        "code": "HTL_LS_COLCHANI_SUITE_FAM_STD_NO_VIEW_2026",
+        "name": "HAB SUITE FAMILIAR ESTÁNDAR SIN VISTA SALAR (4 pax)",
+        "reasons": []
+      },
+      {
+        "id": "c8b5a340-7b31-5430-b81d-216bcdfbecb7",
+        "code": "HTL_LS_COLCHANI_SUITE_FAM_STD_NO_VIEW_DU_2026",
+        "name": "DAY USE - HAB SUITE FAMILIAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "bccbb0fc-610e-5bb9-b6e5-8b03b5a48090",
+        "code": "HTL_LS_COLCHANI_SUITE_FAM_STD_SALT_VIEW_2026",
+        "name": "HAB SUITE FAMILIAR ESTÁNDAR CON VISTA SALAR (4 pax)",
+        "reasons": []
+      },
+      {
+        "id": "babe3acd-04ab-58cd-b266-e310e55d1de0",
+        "code": "HTL_LS_COLCHANI_SUITE_FAM_STD_SALT_VIEW_DU_2026",
+        "name": "DAY USE - HAB SUITE FAMILIAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "48d2ee62-f799-5736-9a5c-b6bbf1c5fffe",
+        "code": "HTL_LS_COLCHANI_TRP_STD_NO_VIEW_2026",
+        "name": "HAB TRIPLE ESTÁNDAR SIN VISTA SALAR (3 pax)",
+        "reasons": []
+      },
+      {
+        "id": "ef4f6f8b-580e-5763-a3b4-d2cb4411b209",
+        "code": "HTL_LS_COLCHANI_TRP_STD_NO_VIEW_DU_2026",
+        "name": "DAY USE - HAB TRIPLE ESTÁNDAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "f059a7d4-dfee-59ae-a880-23a5df3b7687",
+        "code": "HTL_LS_COLCHANI_TWN_STD_NO_VIEW_2026",
+        "name": "HAB TWIN ESTÁNDAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "6cc3627d-f98c-52fa-843b-8b68fb75e7ee",
+        "code": "HTL_LS_COLCHANI_TWN_STD_NO_VIEW_DU_2026",
+        "name": "DAY USE - HAB TWIN ESTÁNDAR SIN VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "375bef14-5947-5c84-b748-f9d2a9b610cf",
+        "code": "HTL_LS_COLCHANI_TWN_STD_SALT_VIEW_2026",
+        "name": "HAB TWIN ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "564d4bb6-0010-513b-979e-1fe8b14a39ed",
+        "code": "HTL_LS_COLCHANI_TWN_STD_SALT_VIEW_DU_2026",
+        "name": "DAY USE - HAB TWIN ESTÁNDAR CON VISTA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "0a378f63-304b-514e-8405-5fc4de3ba729",
+        "code": "HTL_MALLKU_VILLAMAR_DAYUSE_DBL_2026",
+        "name": "DAY USE - HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "18a56853-8647-5fa8-908d-64f77baa432b",
+        "code": "HTL_MALLKU_VILLAMAR_DAYUSE_SGL_2026",
+        "name": "DAY USE - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "14e52856-4094-58b2-ac71-3742609a3cc6",
+        "code": "HTL_MALLKU_VILLAMAR_DBL_2026",
+        "name": "HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "a8de99e0-85c2-5e76-b601-9abba7161116",
+        "code": "HTL_MALLKU_VILLAMAR_EARLY_DBL_2026",
+        "name": "EARLY CHIN - HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "a9ea5764-dd66-5d2b-8872-473b6b80276c",
+        "code": "HTL_MALLKU_VILLAMAR_EARLY_SGL_2026",
+        "name": "EARLY CHIN - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "b240a556-5dfc-5334-bb7f-f57509b7b76b",
+        "code": "HTL_MALLKU_VILLAMAR_LATE_DBL_2026",
+        "name": "LATE CHOUT - HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "5ce34e34-55b7-5278-8d61-bea081ca249a",
+        "code": "HTL_MALLKU_VILLAMAR_LATE_SGL_2026",
+        "name": "LATE CHOUT - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "f39a9af2-050b-56fd-842c-8b4147abacf3",
+        "code": "HTL_MALLKU_VILLAMAR_SGL_2026",
+        "name": "HAB SINGLE O SIMPLE",
+        "reasons": []
+      },
+      {
+        "id": "a76d3ece-73cb-56a4-b704-2ae3e9b03684",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_STD_DRY_2026",
+        "name": "DAY USE - HAB ESTANDAR - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "4def2bb4-f08b-5049-bd25-085481121a16",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_STD_RAIN_2026",
+        "name": "DAY USE - HAB ESTANDAR - RAIN SEASON",
+        "reasons": []
+      },
+      {
+        "id": "9e438275-1745-5c67-84e1-2a8a78a71c99",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_SUITE_DRY_2026",
+        "name": "DAY USE - HAB SUITE - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "1a062dfc-dcbb-581c-b225-9e914db25015",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_SUITE_RAIN_2026",
+        "name": "DAY USE - HAB SUITE - RAIN SEASON",
+        "reasons": []
+      },
+      {
+        "id": "fe0a76e6-ee8f-5d3c-adbc-37b26a39e635",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_VIP_DRY_2026",
+        "name": "DAY USE - HAB VIP- DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "51d2d599-27fc-5f9b-92d3-b3a51c1479f4",
+        "code": "HTL_PDS_COLCHANI_DAYUSE_VIP_RAIN_2026",
+        "name": "DAY USE - HAB VIP- RAIN SEASON",
+        "reasons": []
+      },
+      {
+        "id": "ce930a13-74e5-5497-8afd-c21e5769555c",
+        "code": "HTL_PDS_COLCHANI_DBL_RAIN_2026",
+        "name": "HAB DOBLE",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "258e2efa-cab0-5a4f-846d-b0888043b5fd",
+        "code": "HTL_PDS_COLCHANI_EARLY_STD_DRY_2026",
+        "name": "EARLY CHIN - HAB ESTANDAR - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "c3965194-aa79-5ef9-a9a4-f95ebccd0e3c",
+        "code": "HTL_PDS_COLCHANI_EARLY_STD_RAIN_2026",
+        "name": "EARLY CHIN - HAB ESTANDAR - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "f7b5d72f-831f-5561-802e-e58edd466cd1",
+        "code": "HTL_PDS_COLCHANI_EARLY_SUITE_DRY_2026",
+        "name": "EARLY CHIN - HAB SUITE - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "1d0d6107-71ef-54c0-8e81-170e513d310d",
+        "code": "HTL_PDS_COLCHANI_EARLY_SUITE_RAIN_2026",
+        "name": "EARLY CHIN - HAB SUITE - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "a622bbcf-725b-5258-83b0-bf7db4c67820",
+        "code": "HTL_PDS_COLCHANI_EARLY_VIP_DRY_2026",
+        "name": "EARLY CHIN - HAB VIP - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "93d4fdca-2bc0-50e0-856d-ef2affe8e97d",
+        "code": "HTL_PDS_COLCHANI_EARLY_VIP_RAIN_2026",
+        "name": "EARLY CHIN - HAB VIP - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "571c2967-5ef3-5f45-8ea8-80f1d5c44755",
+        "code": "HTL_PDS_COLCHANI_LATE_STD_DRY_2026",
+        "name": "LATE CHOUT - HAB ESTANDAR - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "3d5ffbe2-56b1-5871-947e-4c136ca48f55",
+        "code": "HTL_PDS_COLCHANI_LATE_STD_RAIN_2026",
+        "name": "LATE CHOUT - HAB ESTANDAR - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "15fc3c1d-03a5-5acc-9ef0-ec6bc858c7be",
+        "code": "HTL_PDS_COLCHANI_LATE_SUITE_DRY_2026",
+        "name": "LATE CHOUT- HAB SUITE - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "8d31dc70-d2a8-5d2b-83d0-26bcf4b139d4",
+        "code": "HTL_PDS_COLCHANI_LATE_SUITE_RAIN_2026",
+        "name": "LATE CHOUT- HAB SUITE - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "4f92ed8f-cfac-51e4-aa39-cbfdcee65639",
+        "code": "HTL_PDS_COLCHANI_LATE_VIP_DRY_2026",
+        "name": "LATE CHOUT- HAB VIP - DRY SSN",
+        "reasons": []
+      },
+      {
+        "id": "7cb5777f-4508-5e78-a6dc-c143e2de63e3",
+        "code": "HTL_PDS_COLCHANI_LATE_VIP_RAIN_2026",
+        "name": "LATE CHOUT- HAB VIP - RAIN SSN",
+        "reasons": []
+      },
+      {
+        "id": "6695d424-92d7-5de0-91d4-b950ad466be1",
+        "code": "HTL_PDS_COLCHANI_STANDARD_DRY_2026",
+        "name": "HAB STANDAR - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "7239f308-73c1-5abd-993b-0dbb6aab6ddf",
+        "code": "HTL_PDS_COLCHANI_STANDARD_RAIN_2026",
+        "name": "HAB STANDAR - RAIN SEASON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "2187c469-5fb7-5465-a726-ee96ae223972",
+        "code": "HTL_PDS_COLCHANI_SUITE_DRY_2026",
+        "name": "HAB SUITE - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "4c5af872-e6bc-5e2a-937d-f36a398cf016",
+        "code": "HTL_PDS_COLCHANI_SUITE_RAIN_2026",
+        "name": "HAB SUITE - RAIN SEASON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "fc6e0e12-b157-5e44-a96f-f34eb186466c",
+        "code": "HTL_PDS_COLCHANI_TRP_SUITE_DRY_2026",
+        "name": "HAB TRIPLE SUITE- DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "0a9325b5-64be-5666-8663-ab34be219592",
+        "code": "HTL_PDS_COLCHANI_TRP_SUITE_RAIN_2026",
+        "name": "HAB TRIPLE SUITE-RAIN SEASON",
+        "reasons": []
+      },
+      {
+        "id": "5ee76308-b296-5d44-aacb-a874b1c2b6fe",
+        "code": "HTL_PDS_COLCHANI_TRP_VIP_DRY_2026",
+        "name": "HAB TRIPLE VIP- DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "dcac3ccd-0ea5-5dae-9e8d-62c26b7df6d3",
+        "code": "HTL_PDS_COLCHANI_TRP_VIP_RAIN_2026",
+        "name": "HAB TRIPLE VIP - RAIN SEASON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "a6593ca6-3908-5e48-a172-ab75be6ce6f3",
+        "code": "HTL_PDS_COLCHANI_VIP_DRY_2026",
+        "name": "HAB VIP - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "e5d0675f-1bed-5c63-946b-ec81c039a871",
+        "code": "HTL_PDS_COLCHANI_VIP_RAIN_2026",
+        "name": "HAB VIP - RAIN SEASON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "a8e0eb1f-5c2b-58b0-b384-285a38ce19ea",
+        "code": "HTL_PDS_EXTRABED_HAB_SUITE_DRY_2026",
+        "name": "CAMA EXTRA - HAB SUITE - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "fee426a0-4fff-538d-bf7f-d3ce044a07da",
+        "code": "HTL_PDS_EXTRABED_HAB_SUITE_RAIN_2026",
+        "name": "CAMA EXTRA - HAB SUITE- RAIN SEASON",
+        "reasons": []
+      },
+      {
+        "id": "13569fea-a3b3-5f2d-b6c7-4da20b691f43",
+        "code": "HTL_PDS_EXTRABED_HAB_VIP_DRY_2026",
+        "name": "CAMA EXTRA - HAB VIP - DRY SEASON",
+        "reasons": []
+      },
+      {
+        "id": "3df8d859-d5f5-5d9a-8cc7-98b0d7958344",
+        "code": "HTL_PDS__EXTRABED_HAB_VIP__RAIN_2026",
+        "name": "CAMA EXTRA - HAB VIP- RAIN SEASON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "c24251a7-a85b-5eef-9726-722fbb6f784a",
+        "code": "HTL_PIEDRITAS_POLQUES_PP_2026",
+        "name": "LAS PIEDRITAS - HAB ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "7b2e1fad-e9a9-54ea-9c08-d5a09f784130",
+        "code": "HTL_PPECO_ISLA_DBL_TWN_2026",
+        "name": "HAB DOBLE TWIN",
+        "reasons": []
+      },
+      {
+        "id": "e7ee6c32-8ce2-5c29-be12-edec7c8aab1a",
+        "code": "HTL_PPECO_ISLA_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "bc320d40-5b19-5e84-a1f7-a4687f21ecab",
+        "code": "HTL_PPECO_ISLA_MAT_2026",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "80282050-8b0d-59e7-8342-509987b1caa9",
+        "code": "HTL_PPECO_ISLA_SGL_2026",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "5fb79d7b-2aa7-5d61-b02a-fc04d00ddb7d",
+        "code": "HTL_PPECO_ISLA_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "28e3081c-089c-5dfc-978e-f783623b38ce",
+        "code": "HTL_SAGAR_DBL_DELUX",
+        "name": "HAB DOBLE / MAT DELUX",
+        "reasons": []
+      },
+      {
+        "id": "3d0c4063-80a9-5187-89da-eaeef7d7078a",
+        "code": "HTL_SAGAR_DBL_DELUX_C_VISTA",
+        "name": "HAB DOBLE / MAT DELUX C/VISTA PREF. A CIUDAD",
+        "reasons": []
+      },
+      {
+        "id": "f313aff4-2ec7-5c5d-b0b2-e49aaba9ac3c",
+        "code": "HTL_SAGAR_JUNIOR_SUITE",
+        "name": "HAB JUNIOR SUITE",
+        "reasons": []
+      },
+      {
+        "id": "bd51dea7-357b-545c-ab6f-b08d4036051f",
+        "code": "HTL_SAGAR_SGL_DELUX",
+        "name": "HAB SIMPLE O SINGLE DELUX",
+        "reasons": []
+      },
+      {
+        "id": "ae38543d-94d2-53a1-b421-5a424d120dcf",
+        "code": "HTL_SAGAR_TPL_DELUX",
+        "name": "HAB TRIPLE DELUX",
+        "reasons": []
+      },
+      {
+        "id": "a607e6ae-84fa-5c8c-a7e7-1bc7b5d782e8",
+        "code": "HTL_SAGAR_TPL_DELUX_C_VISTA",
+        "name": "HAB TRIPLE DELUX C/VISTA PREF. A CIUDAD",
+        "reasons": []
+      },
+      {
+        "id": "27fa47aa-2676-5633-8887-ab9e8b5daff0",
+        "code": "HTL_SAMAY_VILLAMAR_DBL_BATH_2026",
+        "name": "HAB DOBLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "ecd08ae7-2289-5335-8773-b030e40828c0",
+        "code": "HTL_SAMAY_VILLAMAR_DBL_MAT_ROOM_2026_BOB",
+        "name": "HAB DOBLE O MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "d68b0266-5235-5c35-b82d-0a197f243dec",
+        "code": "HTL_SAMAY_VILLAMAR_DBL_NOBATH_2026",
+        "name": "HAB DOBLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "eb779f09-849a-54d7-bd91-e5acd3da3a27",
+        "code": "HTL_SAMAY_VILLAMAR_SGL_BATH_2026",
+        "name": "HAB SINGLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "33688d54-5ccf-56f2-9f5f-b0206cdbf98a",
+        "code": "HTL_SAMAY_VILLAMAR_SGL_NOBATH_2026",
+        "name": "HAB SINGLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "ca19fe2e-f5a5-59a7-a553-a21d40664090",
+        "code": "HTL_SAMAY_VILLAMAR_SGL_ROOM_2026_BOB",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "d93d3d98-380f-5ecd-aa37-6345865c5d44",
+        "code": "HTL_SAMAY_VILLAMAR_TRP_BATH_2026",
+        "name": "HAB TRIPLE CON BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "2b9ebf5c-18d2-57bb-8dd3-237939389965",
+        "code": "HTL_SAMAY_VILLAMAR_TRP_NOBATH_2026",
+        "name": "HAB TRIPLE SIN BAÑO",
+        "reasons": []
+      },
+      {
+        "id": "97e9f3e5-3e6a-5515-af04-118eafd8511f",
+        "code": "HTL_SC_DBL_BOB_2026",
+        "name": "DBL ROOM BOB",
+        "reasons": []
+      },
+      {
+        "id": "c6094766-4e08-5a6e-a1cf-43e8aad3b74a",
+        "code": "HTL_SC_DBL_USD_2026",
+        "name": "DBL ROOM USD",
+        "reasons": []
+      },
+      {
+        "id": "36bd47e9-e8ad-52c5-8f11-a95026312775",
+        "code": "HTL_SC_DINNER_BOB_2026",
+        "name": "CENA BOB",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "0b84e71e-13ab-5899-971e-af8e1581ea62",
+        "code": "HTL_SC_DINNER_USD_2026",
+        "name": "CENA USD",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "a4e5732f-1a14-5bbd-b91d-661c81764831",
+        "code": "HTL_SC_LUNCH_BOB_2026",
+        "name": "ALMUERZO BOB",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "ff67b35a-8462-5d10-8078-ab6c818acabc",
+        "code": "HTL_SC_LUNCH_USD_2026",
+        "name": "ALMUERZO USD",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "49f57121-ae1d-51ca-a410-b1b41faee159",
+        "code": "HTL_SC_MAT_BOB_2026",
+        "name": "MAT ROOM BOB",
+        "reasons": []
+      },
+      {
+        "id": "47100672-796f-545e-b348-d2cda8a51e49",
+        "code": "HTL_SC_MAT_USD_2026",
+        "name": "MAT ROOM USD",
+        "reasons": []
+      },
+      {
+        "id": "1323c441-0576-5d5a-9509-eed71b68fd11",
+        "code": "HTL_SC_SGL_BOB_2026",
+        "name": "SGL ROOM BOB",
+        "reasons": []
+      },
+      {
+        "id": "9fcea26f-f535-501a-9508-669b2826c68a",
+        "code": "HTL_SC_SGL_USD_2026",
+        "name": "SGL ROOM USD",
+        "reasons": []
+      },
+      {
+        "id": "ab659ba3-46d0-5798-ac53-dc1d32caa7d5",
+        "code": "HTL_SKYDREAM_POLQUES_PP_2026",
+        "name": "HAB ESTANDAR",
+        "reasons": []
+      },
+      {
+        "id": "8a5733a5-90d0-5d88-b4e3-4adc494ffbaf",
+        "code": "HTL_SPA_COPART_DBL_2026",
+        "name": "HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "0b0d81cf-b8a8-5edc-907f-63b4ea24d8ad",
+        "code": "HTL_SPA_COPART_QDP_2026",
+        "name": "HAB CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "f76e7a65-b047-5065-94d5-3de5b49d4c65",
+        "code": "HTL_SPA_COPART_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "cae2d999-e901-5c7d-9543-8ab00d720a60",
+        "code": "HTL_TAYKA_DESERT_CAMA_ADD_STAFF",
+        "name": "CAMA ADD STAFF",
+        "reasons": []
+      },
+      {
+        "id": "af2523ea-4a7c-5944-b07e-d3ce8bc4f80b",
+        "code": "HTL_TAYKA_DESERT_DBL_2026",
+        "name": "HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "f36e2c3f-b286-5781-9928-155a28b45931",
+        "code": "HTL_TAYKA_DESERT_HAB_COMP_CHOFER",
+        "name": "HAB COMPARTIDA CHOFER",
+        "reasons": []
+      },
+      {
+        "id": "cf5394ca-d3ae-5da5-a72f-bfba439af4b7",
+        "code": "HTL_TAYKA_DESERT_HAB_COMP_COCINERO(A)",
+        "name": "HAB COMPARTIDA COCINERO(A)",
+        "reasons": []
+      },
+      {
+        "id": "97dfff4b-9e50-599f-932a-7e8aa2ff70ca",
+        "code": "HTL_TAYKA_DESERT_HAB_COMP_GUIA",
+        "name": "HAB COMPARTIDA GUIA",
+        "reasons": []
+      },
+      {
+        "id": "98452d82-3bda-5752-a3e6-4e36e43038b3",
+        "code": "HTL_TAYKA_DESERT_MAT_2026",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "5ff61a18-211d-54c8-92f4-0da5bab99a96",
+        "code": "HTL_TAYKA_DESERT_QUAD_2026",
+        "name": "HAB CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "ee86e0d2-04fc-5288-9b3a-3da87e264fae",
+        "code": "HTL_TAYKA_DESERT_SGL_2026",
+        "name": "HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "81770c42-cbf6-5433-a1bd-4f75bf940632",
+        "code": "HTL_TAYKA_DESERT_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "a7c804ad-a923-596c-802d-95b58ecc3705",
+        "code": "HTL_TAYKA_SAL_HAB_DBL",
+        "name": "HAB DOBLE",
+        "reasons": []
+      },
+      {
+        "id": "69e7a55e-11b9-592d-a50c-4c87323eb411",
+        "code": "HTL_TAYKA_SAL_HAB_MAT",
+        "name": "HAB MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "54eb4bf6-6f22-5ff6-b89d-1a4a71c995bb",
+        "code": "HTL_TAYKA_SAL_HAB_QRLP",
+        "name": "HAB CUADRUPLE",
+        "reasons": []
+      },
+      {
+        "id": "8ff52b47-323b-5dd8-93f5-7023f3c4116c",
+        "code": "HTL_TAYKA_SAL_HAB_SGL",
+        "name": "HAB SIMPLE",
+        "reasons": []
+      },
+      {
+        "id": "195fd204-582f-52e1-9cd9-274a5630f387",
+        "code": "HTL_TAYKA_SAL_HAB_STAFF",
+        "name": "HAB COMPARTIDA STAFF",
+        "reasons": []
+      },
+      {
+        "id": "52d51939-8f62-524e-a15f-842fd189f20e",
+        "code": "HTL_TAYKA_SAL_HAB_TPL",
+        "name": "HAB TRILPLE",
+        "reasons": []
+      },
+      {
+        "id": "15360be8-d220-5383-b72f-5b8e173c7f4e",
+        "code": "HTL_TCL_COQUESA_DBL_2026",
+        "name": "HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "17c921df-3b8a-5323-a02d-3ea8a7e8baf0",
+        "code": "HTL_TCL_COQUESA_SGL_2026",
+        "name": "HAB SINGLE o SIMPLE",
+        "reasons": []
+      },
+      {
+        "id": "b543836d-5e39-5202-8449-4f9f59718617",
+        "code": "HTL_TCL_COQUESA_SUITE_FAM_2026",
+        "name": "HAB SUITE FAMILIAR",
+        "reasons": []
+      },
+      {
+        "id": "0c472583-01ad-5656-9b03-172dd395c0ab",
+        "code": "HTL_TCL_COQUESA_SUITE_MAT_2026",
+        "name": "HAB SUITE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "a9f6b0e8-e850-56e5-aff3-28dce83e5062",
+        "code": "HTL_TCL_COQUESA_TRP_2026",
+        "name": "HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "493e09f6-8f80-5d68-af38-d04c5f633ebf",
+        "code": "HTL_TCL_COQUESA_TWN_2026",
+        "name": "HAB DOBLE TWIN",
+        "reasons": []
+      },
+      {
+        "id": "6362073a-9ab3-5e8e-8454-681f33a9fcc2",
+        "code": "HTT_DOUBLE_API_HIGH_2027",
+        "name": "DOBLE APÍ TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "43c76d08-6a8a-5922-b22b-428a819f88f0",
+        "code": "HTT_DOUBLE_API_LOW_2027",
+        "name": "DOBLE APÍ TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "898970fd-db84-55a6-811e-818d16fa515c",
+        "code": "HTT_DOUBLE_API_MID_2027",
+        "name": "DOBLE APÍ TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "196325ea-b99a-5b8b-a916-9d41aee54b37",
+        "code": "HTT_DOUBLE_BUNG_HIGH_2026",
+        "name": "DOBLE BUNGALOW TEMP ALTA 2026",
+        "reasons": []
+      },
+      {
+        "id": "56c17d2f-2fb3-5c24-9751-0c04299618ad",
+        "code": "HTT_DOUBLE_BUNG_HIGH_2027",
+        "name": "DOBLE BUNGALOW TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "bb1516ea-8618-5e2b-bab7-2874f2999d0d",
+        "code": "HTT_DOUBLE_BUNG_LOW_2026",
+        "name": "DOBLE BUNGALOW TEMP BAJA 2026",
+        "reasons": []
+      },
+      {
+        "id": "da4f5378-a33f-51be-9b87-80b714764973",
+        "code": "HTT_DOUBLE_BUNG_LOW_2027",
+        "name": "DOBLE BUNGALOW TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "a584a9df-2c1c-5fc1-b225-1f4e6030e333",
+        "code": "HTT_DOUBLE_BUNG_MID_2026",
+        "name": "DOBLE BUNGALOW TEMP MEDIA 2026",
+        "reasons": []
+      },
+      {
+        "id": "509b922c-25fe-59af-8df3-0344475c2056",
+        "code": "HTT_DOUBLE_BUNG_MID_2027",
+        "name": "DOBLE BUNGALOW TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "2708358e-f721-542d-bfad-fcfea5c197ae",
+        "code": "HTT_DOUBLE_STD_HIGH_2026",
+        "name": "DOBLE ESTÁNDAR TEMP ALTA 2026",
+        "reasons": []
+      },
+      {
+        "id": "76568eb0-e1fc-5a21-b9b2-7b7e1f46ef17",
+        "code": "HTT_DOUBLE_STD_HIGH_2027",
+        "name": "DOBLE ESTÁNDAR TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "5e9d2926-20e7-57de-be0d-81dacfb2e072",
+        "code": "HTT_DOUBLE_STD_LOW_2026",
+        "name": "DOBLE ESTÁNDAR TEMP BAJA 2026",
+        "reasons": []
+      },
+      {
+        "id": "4744bc5d-cfeb-564b-bd9f-e0f17dafde7d",
+        "code": "HTT_DOUBLE_STD_LOW_2027",
+        "name": "DOBLE ESTÁNDAR TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "76504946-9523-5ce7-83d5-b0a6faae34c8",
+        "code": "HTT_DOUBLE_STD_MID_2026",
+        "name": "DOBLE ESTÁNDAR TEMP MEDIA 2026",
+        "reasons": []
+      },
+      {
+        "id": "f724d64f-171a-59df-8bee-70f1df432b46",
+        "code": "HTT_DOUBLE_STD_MID_2027",
+        "name": "DOBLE ESTÁNDAR TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "f1a96e3e-0a1c-5813-9195-5c551605990b",
+        "code": "HTT_DOUBLE_TOMARAPI_LODGE_2026_CHOFER_CON ALIMENTACION ",
+        "name": "ALOJAMIENTO + ALIMENTACION",
+        "reasons": []
+      },
+      {
+        "id": "d88bc612-00bb-5453-8ee5-1f7e9437fb51",
+        "code": "HTT_DOUBLE_TOMARAPI_LODGE_2026_DESAYUNO_ALMUERZO_CENA",
+        "name": "DOUBLE + DESAYUNO, ALMUERZO Y CENA",
+        "reasons": []
+      },
+      {
+        "id": "f7ef6f9d-3563-5531-adbf-316e421c6693",
+        "code": "HTT_DOUBLE_TOMARAPI_LODGE_2026_DESAYUNO_CENA",
+        "name": "DOUBLE + DESAYUNO Y CENA",
+        "reasons": []
+      },
+      {
+        "id": "16b1446f-120e-5a3f-92c6-91728b2edec8",
+        "code": "HTT_SINGLE_API_HIGH_2027",
+        "name": "SINGLE APÍ TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "ccd059bd-9d03-5475-8c8f-10e03cf5d5a6",
+        "code": "HTT_SINGLE_API_LOW_2027",
+        "name": "SINGLE APÍ TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "303a8947-0df7-504c-8db1-ead472742ecb",
+        "code": "HTT_SINGLE_API_MID_2027",
+        "name": "SINGLE APÍ TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "f0eda294-dc90-500e-9196-e35049bf7728",
+        "code": "HTT_SINGLE_BUNG_HIGH_2026",
+        "name": "SINGLE BUNGALOW TEMP ALTA 2026",
+        "reasons": []
+      },
+      {
+        "id": "da5bd11d-661a-5e85-87b1-4a818553b59e",
+        "code": "HTT_SINGLE_BUNG_HIGH_2027",
+        "name": "SINGLE BUNGALOW TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "5640276e-fa4c-5593-bc92-5d6a46ae1657",
+        "code": "HTT_SINGLE_BUNG_LOW_2026",
+        "name": "SINGLE BUNGALOW TEMP BAJA 2026",
+        "reasons": []
+      },
+      {
+        "id": "97556d9e-103b-52bd-a0a5-6e6853a46357",
+        "code": "HTT_SINGLE_BUNG_LOW_2027",
+        "name": "SINGLE BUNGALOW TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "2abbd40e-8eb7-518f-bdf7-5f56b09a340d",
+        "code": "HTT_SINGLE_BUNG_MID_2026",
+        "name": "SINGLE BUNGALOW TEMP MEDIA 2026",
+        "reasons": []
+      },
+      {
+        "id": "10afb82f-0d61-5a41-93c6-5984b130fdc8",
+        "code": "HTT_SINGLE_BUNG_MID_2027",
+        "name": "SINGLE BUNGALOW TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "4ecc4740-828c-5b20-863b-505bdb4bff7a",
+        "code": "HTT_SINGLE_STD_HIGH_2026",
+        "name": "SINGLE ESTÁNDAR TEMP ALTA 2026",
+        "reasons": []
+      },
+      {
+        "id": "f0d06feb-8218-5ab3-a1ff-d959ca6bac39",
+        "code": "HTT_SINGLE_STD_HIGH_2027",
+        "name": "SINGLE ESTÁNDAR TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "1b6058f0-8949-5928-a132-127cb3c5bd90",
+        "code": "HTT_SINGLE_STD_LOW_2026",
+        "name": "SINGLE ESTÁNDAR TEMP BAJA 2026",
+        "reasons": []
+      },
+      {
+        "id": "75bed5b6-9b1b-52ec-9eb8-3fec867852bc",
+        "code": "HTT_SINGLE_STD_LOW_2027",
+        "name": "SINGLE ESTÁNDAR TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "a19a418a-39ac-5789-b7fb-003ca33c1eac",
+        "code": "HTT_SINGLE_STD_MID_2026",
+        "name": "SINGLE ESTÁNDAR TEMP MEDIA 2026",
+        "reasons": []
+      },
+      {
+        "id": "607563a2-4b40-513b-9b95-e37edc1a56ce",
+        "code": "HTT_SINGLE_STD_MID_2027",
+        "name": "SINGLE ESTÁNDAR TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "9a79c16e-d91f-51b3-b9cb-0dbe079b7e5a",
+        "code": "HTT_SING_UTURUNKUHOTEL_2026",
+        "name": "UTURUNKU HOTEL Habitacion por persona",
+        "reasons": []
+      },
+      {
+        "id": "eadbb162-bcb1-595c-b41c-26e348c452dd",
+        "code": "HTT_TRIPLE_STD_HIGH_2026",
+        "name": "TRIPLE ESTÁNDAR TEMP ALTA 2026",
+        "reasons": []
+      },
+      {
+        "id": "49311425-0788-53f5-a806-a4bed4b1248d",
+        "code": "HTT_TRIPLE_STD_HIGH_2027",
+        "name": "TRIPLE ESTÁNDAR TEMP ALTA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "2cd4c6eb-3ee7-5f89-96b5-109411b8f4e1",
+        "code": "HTT_TRIPLE_STD_LOW_2026",
+        "name": "TRIPLE ESTÁNDAR TEMP BAJA 2026",
+        "reasons": []
+      },
+      {
+        "id": "ce7f9d86-c1bc-5599-bdf9-35c5caa8559d",
+        "code": "HTT_TRIPLE_STD_LOW_2027",
+        "name": "TRIPLE ESTÁNDAR TEMP BAJA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "ab6eae0c-6b17-5737-abd2-20febbb27a3f",
+        "code": "HTT_TRIPLE_STD_MID_2026",
+        "name": "TRIPLE ESTÁNDAR TEMP MEDIA 2026",
+        "reasons": []
+      },
+      {
+        "id": "38a177ad-692f-5fd4-8c9b-47257b05c15d",
+        "code": "HTT_TRIPLE_STD_MID_2027",
+        "name": "TRIPLE ESTÁNDAR TEMP MEDIA 2027",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "09576f5e-a98f-58df-87f5-ca9737b93efa",
+        "code": "IMPORT_REVIEW_0479",
+        "name": "FULLDAY UYUNI LAGUNAS Hedionda",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "68aaed3f-8ab6-5c85-aad1-8ebafffd0348",
+        "code": "IMPORT_REVIEW_0480",
+        "name": "FULLDAY UYUNI LAGUNAS Laguna Colorada",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "5ee080a6-f276-500f-b609-ded2d9a7fef2",
+        "code": "IMPORT_REVIEW_1090",
+        "name": "Transporte privado de Copacabana a La paz De 1 a 3 pasajeros",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "627a40f2-bfac-5df4-8d2c-9e8c3bbbc548",
+        "code": "IMPORT_REVIEW_1091",
+        "name": "Transporte privado de Copacabana a La paz De 4 a 10 pasajeros",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "1c4ecd14-926f-59db-90b4-ed5699618cda",
+        "code": "IMPORT_REVIEW_1092",
+        "name": "Transporte privado de Copacabana a La paz De 11 a a 19 pasajeros",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "4e40f9cd-d4c7-56cd-8f18-de9404ba365b",
+        "code": "IMPORT_REVIEW_1093",
+        "name": "Transporte privado de Copacabana a La paz De 21 a 25 pasajeros BUS",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "29e31e2f-3062-541b-81ea-0f315b1f2b3f",
+        "code": "IMPORT_REVIEW_1094",
+        "name": "Transporte de Copacabana a Tiwanaco y a La paz De 1 a 3 pasajeros",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "d3fe2aad-9f2d-5838-8ab9-996f668b3760",
+        "code": "IMPORT_REVIEW_1095",
+        "name": "Transporte de Copacabana a Tiwanaco y a La paz De 4 a 10 pax",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "6229efaa-3ac4-5ef4-aac8-8c70365c1088",
+        "code": "IMPORT_REVIEW_1096",
+        "name": "Transporte de Copacabana a Tiwanaco y a La paz De 11 a 19 pax (dos movilidades)",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "8c6a41dc-cbba-582f-a1af-292bea7007a8",
+        "code": "IMPORT_REVIEW_1098",
+        "name": "Day use 19$ por habitación hasta las 18h.",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "62b0dfea-9d88-53b2-89f5-42755997f234",
+        "code": "LATE_JDU_UYUNI_DBLMAT_2026",
+        "name": "LATE CHOUT - HAB DOBLE MATRIMONIAL",
+        "reasons": []
+      },
+      {
+        "id": "498c5712-dd3e-5484-8979-649ee291aeab",
+        "code": "LATE_JDU_UYUNI_SGL_2026",
+        "name": "LATE CHOUT - HAB SINGLE",
+        "reasons": []
+      },
+      {
+        "id": "07f61a63-51c9-590e-b179-2df26d6f3d87",
+        "code": "LATE_JDU_UYUNI_TRP_2026",
+        "name": "LATE CHOUT - HAB TRIPLE",
+        "reasons": []
+      },
+      {
+        "id": "33ae5afe-299a-5f17-abe2-d5640d5dc938",
+        "code": "LH_APT_1P",
+        "name": "TRANSFER AROPUERTO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "c8ee1e66-8f8a-56c1-902e-9d02113feeec",
+        "code": "LH_BUS_1P",
+        "name": "TRANSFER TERMINAL BUS (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "934f1b59-b623-5f93-95d9-5882acec16da",
+        "code": "LH_BUS_POT",
+        "name": "BUS REGULAR SUCRE - POTOSI",
+        "reasons": []
+      },
+      {
+        "id": "09bd8844-3fa8-59ef-a9aa-5190779eacd2",
+        "code": "LH_BUS_UYU",
+        "name": "BUS REGULAR SUCRE - UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "e16a28c9-6d88-5af8-8479-81f1fbc8803b",
+        "code": "LH_CTCHD_1P",
+        "name": "CITY TOUR COLONIAL HD (ENTRADA + GUÍA BILINGÜE) (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "74596b08-2475-5f93-817f-c410c8e13ae1",
+        "code": "LH_CTPFD_1P",
+        "name": "CITY TOUR POTOSÍ FD (ALMUERZO + INGRESOS + GUÍA) (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "0f58b5f1-950d-5a0b-9c1d-b0026188e96f",
+        "code": "LH_CT_FD_1P",
+        "name": "CITY TOUR COLONIAL FD + ALMUERZO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f195d3f7-d614-5fda-8102-a3673ddec8be",
+        "code": "LH_CT_HD_1P",
+        "name": "CITY TOUR HISTORICO HD (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "615d1b80-9f67-5252-9430-e583329c1290",
+        "code": "LH_KK_1P",
+        "name": "LAGUNAS DEL KARI KARI (6HRS) (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7c87ff9b-099d-5cab-9569-9c95fd35ad98",
+        "code": "LH_MINA_1P",
+        "name": "EXCURSION MINA HD (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ef669e29-7f15-5a5f-934b-c722f134b017",
+        "code": "LH_PC_HD_1P",
+        "name": "PARQUE CRETACICO HD (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "108882ec-da26-5816-9a83-73f4fcfe6a19",
+        "code": "LH_SRE_POT_1P",
+        "name": "TRANSFER SUCRE - POTOSI (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b2461afc-362d-5a31-9f0f-02cdb28bd40c",
+        "code": "LH_SRE_UYU_1P",
+        "name": "TRANSFER SUCRE - UYUNI (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1e171322-ea85-512b-b3b7-f1c019df5f79",
+        "code": "LH_TRF_PS_1P",
+        "name": "TRASLADO PRIVADO POTOSÍ - SUCRE (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "3dfd62e0-a5b7-53d4-8249-5f7e42eff8c2",
+        "code": "LH_TRF_PU_1P",
+        "name": "TRASLADO PRIVADO POTOSÍ - UYUNI (4H) (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "86c3a8a5-73fd-5449-b036-b758e2c7e967",
+        "code": "LH_TRF_TBD_1P",
+        "name": "TRF TERMINAL BUS DIURNO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "aa9fa9b1-77c7-5621-b365-8e6f6aebf580",
+        "code": "LH_UYU_TQ",
+        "name": "TOUR 2D UYUNI - TAMBO QUEMADO - TERMAS - FRONTERA",
+        "reasons": []
+      },
+      {
+        "id": "29cf1c0b-ce1e-574c-94d8-63651e445d25",
+        "code": "LH_UYU_TUP-5P",
+        "name": "TRANSFER UYUNI - TUPIZA",
+        "reasons": []
+      },
+      {
+        "id": "5f2b325f-652b-5500-a215-bc5fe0c84115",
+        "code": "LUNCH_LH_2",
+        "name": "LUNCH APTHAPI SALAR 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "4e78b66d-0113-529a-a8f6-76bb10131eee",
+        "code": "MEALS_ DINNER_EXTRA",
+        "name": "EXTRA - CENA",
+        "reasons": []
+      },
+      {
+        "id": "a5328c47-a48f-5fd2-9b9f-4387d9caea83",
+        "code": "MEAL_ APTHAPI_BUFFET_PP_2026",
+        "name": "ALMUERZO APTHAPI BUFFET POR PERSONA",
+        "reasons": []
+      },
+      {
+        "id": "18d2f627-f279-5dfd-a949-75fccfe7f0b2",
+        "code": "MEAL_BA_BREAKFAST_EXTRA_2026",
+        "name": "DESAYUNO EXTRA",
+        "reasons": []
+      },
+      {
+        "id": "f66ab741-758c-568a-b931-cba4f6d136c1",
+        "code": "MEAL_BA_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "ecd656cd-9c28-55e2-b248-36bc8f5901ab",
+        "code": "MEAL_JDU_DINNER_PP_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "a9f5afb8-374d-5c0c-8413-99aaae578359",
+        "code": "MEAL_KACHI_MEAL_PP_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "bb139c86-5361-555b-a985-14ad5399587a",
+        "code": "MEAL_LF_BREAKFAST_PP_2026",
+        "name": "DESAYUNO",
+        "reasons": []
+      },
+      {
+        "id": "015fa55a-5577-5427-9600-c6cf9b978c2d",
+        "code": "MEAL_LF_DINNER_PP_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "77da2759-35cc-565f-a14f-ce3a4b3f74f7",
+        "code": "MEAL_LF_LUNCH_PP_2026",
+        "name": "ALMUERZO",
+        "reasons": []
+      },
+      {
+        "id": "a21447d9-d242-5d3d-ba8d-a16702ea6314",
+        "code": "MEAL_LS_BOXLUNCH_2026",
+        "name": "BOX LUNCH",
+        "reasons": []
+      },
+      {
+        "id": "a2c9c861-b579-5778-8dac-c80898c1e9a6",
+        "code": "MEAL_LS_BREAKFASTADD_2026",
+        "name": "DESAYUNO ADD",
+        "reasons": []
+      },
+      {
+        "id": "7bd181fd-e8be-5c01-9c64-6a0aa92fd6af",
+        "code": "MEAL_LS_BREAKFASTADD_KIDS_2026",
+        "name": "DESAYUNO ADD NIÑOS",
+        "reasons": []
+      },
+      {
+        "id": "968f0877-b3b8-5fbb-9b46-d4f587e442af",
+        "code": "MEAL_LS_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "85467874-6d4a-54d2-92db-086db26a2c42",
+        "code": "MEAL_LS_EARLYBREAKFAST_2026",
+        "name": "EARLY DESAYUNO",
+        "reasons": []
+      },
+      {
+        "id": "e090583b-c435-5bd2-a8be-4d40a935d5ca",
+        "code": "MEAL_LS_LUNCH_2026",
+        "name": "ALMUERZO MENÚ FIJO",
+        "reasons": []
+      },
+      {
+        "id": "59512cf2-1c0a-576e-9c53-6e1ec8c1172e",
+        "code": "MEAL_MALLKU_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "34f3d743-abb0-5703-ac44-eb4a02735146",
+        "code": "MEAL_PDS_BREAKFAST EXTRA_2026",
+        "name": "DESAYUNO EXTRA",
+        "reasons": []
+      },
+      {
+        "id": "1f0c9c6b-6660-5efd-ac23-47ae5242ed9d",
+        "code": "MEAL_PDS_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "96583da8-eb31-5344-9f28-0c657a0a3458",
+        "code": "MEAL_PIEDRITAS_BREAKFAST_PP_2026",
+        "name": "LAS PIEDRITAS - DESAYUNO",
+        "reasons": []
+      },
+      {
+        "id": "8c6dcd68-84b7-5fc8-9b57-2bbdd41d0fb8",
+        "code": "MEAL_PIEDRITAS_DINNER_PP_2026",
+        "name": "LAS PIEDRITAS - CENA",
+        "reasons": []
+      },
+      {
+        "id": "0eb8153a-dc25-5ebd-8f04-bf64abc496a3",
+        "code": "MEAL_PP_COPACABANA_LUNCH_PP_2026",
+        "name": "Almuerzo",
+        "reasons": []
+      },
+      {
+        "id": "6fa07b90-866b-5828-86bd-2a8db3dd0f9d",
+        "code": "MEAL_PP_TITIKAKA_APHTAPI_PP_2026",
+        "name": "ALMUERZO APHTAPI (PP)",
+        "reasons": []
+      },
+      {
+        "id": "e3f685c9-88bd-54ef-93a6-65a40616c081",
+        "code": "MEAL_PP_TITIKAKA_LUNCH_PP_2026",
+        "name": "ALMUERZO NORMAL (PP)",
+        "reasons": []
+      },
+      {
+        "id": "d004c0ef-d0e9-58c4-96ca-5b3da6ed645c",
+        "code": "MEAL_SAMAY_VILLAMAR BREAKFAST + DINNER 2026",
+        "name": "DESAYUNO + CENA",
+        "reasons": []
+      },
+      {
+        "id": "3a3a6207-6128-5531-87da-0575e26c17a9",
+        "code": "MEAL_SAMAY_VILLAMAR_MATE_2026",
+        "name": "SERVICIO MATE",
+        "reasons": [
+          "Sin unidad de cobro."
+        ]
+      },
+      {
+        "id": "c1502f34-b8c2-5c08-af36-e0f457e35530",
+        "code": "MEAL_SKYDREAM_BREAKFAST_PP_2026",
+        "name": "DESAYUNO",
+        "reasons": []
+      },
+      {
+        "id": "81270178-5ac4-5c82-b566-4c7d3224b368",
+        "code": "MEAL_SKYDREAM_DINNER_PP_2026",
+        "name": "SKY DREAM - CENA",
+        "reasons": []
+      },
+      {
+        "id": "7fe27b11-be6c-554f-b645-4a996afda3eb",
+        "code": "MEAL_TAYKA_DESERT_BOX LUNCH",
+        "name": "BOX LUNCH",
+        "reasons": []
+      },
+      {
+        "id": "38cec67d-bf06-56af-892c-4dad10805188",
+        "code": "MEAL_TAYKA_DESERT_BREAKFAST ADD",
+        "name": "DESAYUNO ADICIONAL",
+        "reasons": []
+      },
+      {
+        "id": "4c8c52df-18b9-5a1a-b1a0-41c11e9cd9af",
+        "code": "MEAL_TAYKA_DESERT_DINNER",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "50245c11-b7c3-5032-92ae-8e4e9a491691",
+        "code": "MEAL_TAYKA_DESERT_LUNCH",
+        "name": "ALMUERZO",
+        "reasons": []
+      },
+      {
+        "id": "e036966c-b076-504d-8c35-f44211d5f29f",
+        "code": "MEAL_TAYKA_DESERT_ROUTE_LUNCH",
+        "name": "ALMUERZO EN RUTA",
+        "reasons": []
+      },
+      {
+        "id": "c466dc2a-ee28-584f-9eba-ad908f97d672",
+        "code": "MEAL_TAYKA_SAL_BOX_DINNER",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "45bc9916-61c4-52c8-8130-8fab00b3b64c",
+        "code": "MEAL_TAYKA_SAL_BOX_LUNCH",
+        "name": "BOXLUNCH",
+        "reasons": []
+      },
+      {
+        "id": "d47c363d-7ba9-54e2-88fd-2550cf35c360",
+        "code": "MEAL_TAYKA_SAL_BREAKFAST_ADD",
+        "name": "DESAYUNO ADICIONAL",
+        "reasons": []
+      },
+      {
+        "id": "e04316c4-4ff7-5536-9e79-66c256220dd6",
+        "code": "MEAL_TAYKA_SAL_LUNCH",
+        "name": "ALMUERZO EN HOTEL",
+        "reasons": []
+      },
+      {
+        "id": "525220f4-e24e-53ce-9dad-b265df3c51c8",
+        "code": "MEAL_TAYKA_SAL_LUNCH_ROUTE",
+        "name": "ALMUERZO EN RUTA",
+        "reasons": []
+      },
+      {
+        "id": "d448f053-9e7e-58b6-ae4f-86c5f1c9add9",
+        "code": "MEAL_TCL_COQUESA_BREAKFAST_EXTRA_2026",
+        "name": "DESAYUNO EXTRA",
+        "reasons": []
+      },
+      {
+        "id": "6ff91741-b255-57a7-8d73-64a73da32bd3",
+        "code": "MEAL_TCL_COQUESA_DINNER_2026",
+        "name": "CENA",
+        "reasons": []
+      },
+      {
+        "id": "1a7911f1-58b1-5ece-ba19-04985d14dde2",
+        "code": "MEAL_TCL_COQUESA_LUNCH_ROUTE_2026",
+        "name": "ALMUERZO",
+        "reasons": []
+      },
+      {
+        "id": "867c9b74-4d2a-52f3-9304-380603feec93",
+        "code": "MEAL_UTURUNKUHOTEL_2026",
+        "name": "UTURUNKU HOTEL Cena por persona",
+        "reasons": []
+      },
+      {
+        "id": "c1cbf3cc-898d-58ec-b4f3-7d6c0833760b",
+        "code": "PKG_ALVARO_LPB_SAJAMA_2D_1_2PAX_2026",
+        "name": "SAJAMA 2 DAYS (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "417f6cf7-1e35-5e40-a60d-9ac7bd5477c3",
+        "code": "PKG_ALVARO_LPB_UYUNI_RT_2WAIT_1_2PAX_2026",
+        "name": "UYUNI ROUNDTRIP + 2 DAYS WAIT (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f6f61d2a-43f3-5c38-820d-4c2c7fe5b29b",
+        "code": "PKG_EVT_CBB_TOROTORO_2D1N_PAX1_2026",
+        "name": "TORO TORO 2D1N (1PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6b4079f5-a602-55ed-9a1a-05921e7b2145",
+        "code": "PKG_EVT_CBB_TOROTORO_3D1N_PAX1_2026",
+        "name": "TORO TORO 3D1N (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "244d6216-1a47-5670-9551-18f03c8792b2",
+        "code": "PKG_LPS_DEATHROAD_SPEC_2026",
+        "name": "TOUR CAMINO DE LA MUERTE + BICICLETA SPECIALIZED + ALMUERZO + INGRESO",
+        "reasons": []
+      },
+      {
+        "id": "93dfcae5-734f-529a-a348-021cbf1fcd59",
+        "code": "PKG_LPS_DEATHROAD_STD_2026",
+        "name": "TOUR CAMINO DE LA MUERTE + BICICLETA NORMAL + ALMUERZO + INGRESO",
+        "reasons": []
+      },
+      {
+        "id": "46b5105e-a229-5d83-92db-42c903d60046",
+        "code": "PKG_PP_TITIKAKA_2D1N_PAX13_15_2026",
+        "name": "TITIKAKA 2D1N (13-15 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7aee66c1-9fd4-50f9-a736-aaef2f7b0652",
+        "code": "PKG_PP_TITIKAKA_2D1N_PAX16_18_2026",
+        "name": "TITIKAKA 2D1N (16-18 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "557cc1c4-0950-5979-bf8a-00f999cc251c",
+        "code": "PKG_PP_TITIKAKA_2D1N_PAX1_12_2026",
+        "name": "TITIKAKA 2D1N (1-12 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "fdb0045c-8697-5fb7-a18b-6701289ee90f",
+        "code": "PP_GUIA_1_3",
+        "name": "GUIA INGLES FD (1-3)",
+        "reasons": []
+      },
+      {
+        "id": "67ba312d-5db7-5448-97e5-08bd414dc23a",
+        "code": "PP_ING_LUNA",
+        "name": "INGRESO ISLA DE LA LUNA",
+        "reasons": []
+      },
+      {
+        "id": "f53c1b44-0e1b-576e-a951-68f85f93a08d",
+        "code": "PP_ING_NORTE",
+        "name": "INGRESO ISLA DEL SOL NORTE",
+        "reasons": []
+      },
+      {
+        "id": "34dd6b79-ea60-5d00-b7a4-4caf8be1e874",
+        "code": "PP_ING_SUR",
+        "name": "INGRESO ISLA DEL SOL SUR",
+        "reasons": []
+      },
+      {
+        "id": "f20985e5-947d-5d6e-a84d-3b1c457c6167",
+        "code": "PP_ISL_FULL_1_5",
+        "name": "TRANSP LACUS PRIV COPACABANA A ISLA DEL SOL SUR, NORTE Y RET A COPACABANA (1-5)",
+        "reasons": []
+      },
+      {
+        "id": "a6ffb4eb-793d-5c53-ba8d-5f356aa52006",
+        "code": "PP_ISL_LUNA_1_5",
+        "name": "TRASP LACUS PRIV ISLA DEL SOL SUR - ISLA DE LA LUNA Y RET A COPACABANA (1-5)",
+        "reasons": []
+      },
+      {
+        "id": "832e3867-6e54-5a8e-96ce-357eee654899",
+        "code": "PP_ISL_SUR_1_5",
+        "name": "TRASP LACUS PRIV ISLA DEL SOL PS Y RETORNO A COPACABANA (1-5)",
+        "reasons": []
+      },
+      {
+        "id": "d9d04ee8-9f48-5c27-84fb-f90e72781e39",
+        "code": "ROSARIO_UYU_CENA",
+        "name": "Cena",
+        "reasons": []
+      },
+      {
+        "id": "37c1b2b5-2015-50f7-87fd-f5a21b94ab98",
+        "code": "ROSARIO_UYU_DBL",
+        "name": "Doble (2 pax)",
+        "reasons": []
+      },
+      {
+        "id": "5f2c4fcc-3501-5239-9c9a-9142120e7dcc",
+        "code": "ROSARIO_UYU_JRSUITE",
+        "name": "Jr. Suite (4 pax)",
+        "reasons": []
+      },
+      {
+        "id": "d63817b9-fb84-56e2-95bc-00dae3918a23",
+        "code": "ROSARIO_UYU_MAT",
+        "name": "Matrimonial (2 pax)",
+        "reasons": []
+      },
+      {
+        "id": "4e99889a-d935-5eba-aa11-a5150d760bb9",
+        "code": "ROSARIO_UYU_SGL",
+        "name": "Single (1 pax)",
+        "reasons": []
+      },
+      {
+        "id": "5bbdc1f0-c83a-5738-ac15-290a09277691",
+        "code": "ROUL_LH_12",
+        "name": "ROULOTTE SALAR 1-2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "5654c706-876c-508e-94c8-94b92272396f",
+        "code": "SPA_OW_BC_2",
+        "name": "3D2N SPA UYU ONEWAY BAÑO COMPARTIDO 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "61889691-f33e-5bf0-9b8c-6c5f27d8d348",
+        "code": "SPA_OW_BC_3",
+        "name": "3D2N SPA UYU ONEWAY BAÑO COMPARTIDO 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "1be2a6d8-234b-5852-9e68-489d730b5722",
+        "code": "SPA_OW_BC_4",
+        "name": "3D2N SPA UYU ONEWAY BAÑO COMPARTIDO 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "8eadb0fe-87aa-52ff-8f26-921129603f55",
+        "code": "SPA_OW_BC_5",
+        "name": "3D2N SPA UYU ONEWAY BAÑO COMPARTIDO 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "8622ccca-2295-5f7a-9107-a3b57a5fd2b5",
+        "code": "SPA_OW_BC_6",
+        "name": "3D2N SPA UYU ONEWAY BAÑO COMPARTIDO 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "dd9069ea-8ed8-5b20-b8f2-6541ea050b56",
+        "code": "SPA_OW_BP_2",
+        "name": "3D2N SPA UYU ONEWAY BAÑO PRIVADO 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "16dde96e-8e4c-537c-8ff4-9e2c806669a6",
+        "code": "SPA_OW_BP_3",
+        "name": "3D2N SPA UYU ONEWAY BAÑO PRIVADO 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "d7105e15-056c-54d0-a5f7-c5ef2e87e78d",
+        "code": "SPA_OW_BP_4",
+        "name": "3D2N SPA UYU ONEWAY BAÑO PRIVADO 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "a6663621-5536-5140-9602-a597b25b2a8c",
+        "code": "SPA_OW_BP_5",
+        "name": "3D2N SPA UYU ONEWAY BAÑO PRIVADO 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "eb9a1c5e-033c-5f85-9503-9da5f9896031",
+        "code": "SPA_OW_BP_6",
+        "name": "3D2N SPA UYU ONEWAY BAÑO PRIVADO 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "c4ddc4cc-b071-5cf8-bd89-a77a05250884",
+        "code": "SPA_RT_BC_2",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO COMPARTIDO 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "693c8a3f-b2fc-5ab9-91bd-69ae9ac95e13",
+        "code": "SPA_RT_BC_3",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO COMPARTIDO 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "00fb04a7-61cc-56ae-8848-f450dd48ce42",
+        "code": "SPA_RT_BC_4",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO COMPARTIDO 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "3413d1ab-b676-5763-9043-c02a28981e6c",
+        "code": "SPA_RT_BC_5",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO COMPARTIDO 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "df3725ce-de28-5b6e-b7f6-f8a792484fb9",
+        "code": "SPA_RT_BC_6",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO COMPARTIDO 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "9397a560-221a-5ba2-9957-552ac683c6bf",
+        "code": "SPA_RT_BP_2",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO PRIVADO 2 PAX",
+        "reasons": []
+      },
+      {
+        "id": "ed459e7f-7160-58bc-b3f7-d23c143e49f7",
+        "code": "SPA_RT_BP_3",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO PRIVADO 3 PAX",
+        "reasons": []
+      },
+      {
+        "id": "aaac018d-8ac4-5d23-8f4d-fcfd7516cff7",
+        "code": "SPA_RT_BP_4",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO PRIVADO 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "3c901a34-b410-58b4-9275-6c2cb6001dae",
+        "code": "SPA_RT_BP_5",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO PRIVADO 5 PAX",
+        "reasons": []
+      },
+      {
+        "id": "85d91c49-c891-5b08-90f4-90ba7a0a1b0b",
+        "code": "SPA_RT_BP_6",
+        "name": "4D3N SPA SPA ROUNDTRIP BAÑO PRIVADO 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "0a559f87-b800-5f39-adcb-1e2155280568",
+        "code": "SRV_ALVARO_LPB_10H_RADIO_1_2PAX_2026",
+        "name": "SERVICE 10 HOURS RADIO URBANO (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "2ce29dbd-e746-5283-8a6c-e167ef4979e0",
+        "code": "SRV_ALVARO_LPB_HOUR_RADIO_1_2PAX_2026",
+        "name": "SERVICE PER HOUR RADIO URBANO MIN 5H (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ad74d0ba-55e9-577d-9b24-e6d4fb9e80ef",
+        "code": "SUP_UYU_LEO_ASSIST",
+        "name": "AUTO ASISTENCIA SALAR",
+        "reasons": []
+      },
+      {
+        "id": "02bb6245-5732-58eb-8c2a-4e1c42dddf51",
+        "code": "TICKETS_LEO_UYU",
+        "name": "ENTRADAS A PARQUES",
+        "reasons": []
+      },
+      {
+        "id": "d102dc23-41e4-507e-a245-abc4ae18f948",
+        "code": "TICKET_PP_TITIKAKA_PARKS_PP_2026",
+        "name": "TICKET PARQUES TITIKAKA",
+        "reasons": []
+      },
+      {
+        "id": "50591017-d84f-5dee-aff7-93cbd45e8c46",
+        "code": "TICKET_SCZ_AMBORO_ENTRADA_PP_2026",
+        "name": "TICKET AMBORO SUCRE PP",
+        "reasons": []
+      },
+      {
+        "id": "79779c44-d64a-5ef6-9d9f-ad9e49c40ea5",
+        "code": "TICKET_SCZ_GUEMBE_PP_2026",
+        "name": "TICKET BIOCENTRO GUEMBÉ - SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "4731a8cb-3d59-55a8-88e7-e4aa71abb649",
+        "code": "TICKET_VALLE_DE_LA_LUNA_SIGHTSEEING",
+        "name": "TICKETS INGRESO VALLE DE LA LUNA ",
+        "reasons": []
+      },
+      {
+        "id": "4dc87546-2753-5955-91f8-ab3f6d387c08",
+        "code": "TKT_SPA_ALTIPLANICAS_2026",
+        "name": "LAGUNAS ALTIPLÁNICAS",
+        "reasons": []
+      },
+      {
+        "id": "9af7050b-744c-5c1b-b6a4-54418c132e79",
+        "code": "TKT_SPA_ARCOIRIS_2026",
+        "name": "VALLE DEL ARCOIRIS",
+        "reasons": []
+      },
+      {
+        "id": "88590144-4f2e-5b4c-8d7d-5635b6b09cf8",
+        "code": "TKT_SPA_ASTRO_2026",
+        "name": "ASTRO",
+        "reasons": []
+      },
+      {
+        "id": "b2f91823-68a0-5307-bcdc-6c87e0257675",
+        "code": "TKT_SPA_BALTINACHE_2026",
+        "name": "LAGUNA BALTINACHE",
+        "reasons": []
+      },
+      {
+        "id": "fdd644a3-3246-5c4d-88fc-5525a97b81d4",
+        "code": "TKT_SPA_CASCADA_2026",
+        "name": "CASCADA",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "ebee936e-d5a4-5f68-91ff-c1bdabfbbb2b",
+        "code": "TKT_SPA_CATARPE_PUKARA_2026",
+        "name": "CATARPE - PUKARA",
+        "reasons": []
+      },
+      {
+        "id": "2e7ee4a6-a31d-5836-b637-b623f14527d1",
+        "code": "TKT_SPA_CEJAR_2026",
+        "name": "LAGUNA CEJAR",
+        "reasons": []
+      },
+      {
+        "id": "5d48eaac-d9e3-5dd0-b04f-ca5b2ab13f11",
+        "code": "TKT_SPA_CHAXA_2026",
+        "name": "ENTRADA LAGUNA CHAXA",
+        "reasons": []
+      },
+      {
+        "id": "0c90bdbd-c064-541e-8eef-dbce314436a8",
+        "code": "TKT_SPA_GUATIN_2026",
+        "name": "GUATÍN",
+        "reasons": []
+      },
+      {
+        "id": "aa82e616-f1f5-5642-8446-68cca494dedf",
+        "code": "TKT_SPA_JACUZZI_2026",
+        "name": "JACUZZI",
+        "reasons": []
+      },
+      {
+        "id": "a3fecb10-7f9f-5593-a5cc-a66af4f75d02",
+        "code": "TKT_SPA_JERE_2026",
+        "name": "VALLE DE JERE",
+        "reasons": []
+      },
+      {
+        "id": "82dc9d86-031b-5671-b84b-786fe67a158c",
+        "code": "TKT_SPA_LASANA_2026",
+        "name": "PUCARÁ DE LASANA",
+        "reasons": []
+      },
+      {
+        "id": "68dae808-fe83-5c00-ad75-9ce3d146fddc",
+        "code": "TKT_SPA_LUNA_2026",
+        "name": "VALLE DE LA LUNA",
+        "reasons": []
+      },
+      {
+        "id": "45d28366-b91e-5cf2-bc50-a3696a28550c",
+        "code": "TKT_SPA_MUERTE_2026",
+        "name": "VALLE DE LA MUERTE",
+        "reasons": []
+      },
+      {
+        "id": "6dfcef5e-7d8b-58b3-80a5-beae913ecdaf",
+        "code": "TKT_SPA_MUSEO_METEORITO_2026",
+        "name": "MUSEO DEL METEORITO",
+        "reasons": []
+      },
+      {
+        "id": "9c628633-5105-5019-b290-2a41d89fd023",
+        "code": "TKT_SPA_PAKANA_2026",
+        "name": "MONJES DE LA PAKANA",
+        "reasons": []
+      },
+      {
+        "id": "0f1a2096-6ad8-5389-a773-34a2b7c3b74a",
+        "code": "TKT_SPA_PIEDRAS_ROJAS_2026",
+        "name": "ENTRADA PIEDRAS ROJAS",
+        "reasons": []
+      },
+      {
+        "id": "aad5098b-de8b-50cb-9ef6-97a4e8420076",
+        "code": "TKT_SPA_PURITAMA_2026",
+        "name": "PURITAMA - PURILIBRE",
+        "reasons": []
+      },
+      {
+        "id": "4aa5eb0b-d612-598b-8552-6b71a3a00c90",
+        "code": "TKT_SPA_QUITOR_2026",
+        "name": "PUCARÁ DE QUITOR",
+        "reasons": []
+      },
+      {
+        "id": "044cf312-19e1-5c1a-bf20-468722006070",
+        "code": "TKT_SPA_SALARES_2026",
+        "name": "RUTA LOS SALARES",
+        "reasons": []
+      },
+      {
+        "id": "6bca37e7-026d-59b3-b9e2-0e40bdb630a4",
+        "code": "TKT_SPA_SUNSET_2026",
+        "name": "SUNSET",
+        "reasons": []
+      },
+      {
+        "id": "c0be8bc9-f292-5618-b37d-82e0122e95b5",
+        "code": "TKT_SPA_TARA_2026",
+        "name": "SALAR DE TARA",
+        "reasons": []
+      },
+      {
+        "id": "37c6c4e3-3021-5067-9c4f-a1f545770596",
+        "code": "TKT_SPA_TATIO_2026",
+        "name": "GEYSER TATIO",
+        "reasons": []
+      },
+      {
+        "id": "79d5b7ca-99a5-564c-a15d-c5cf6a9e0c88",
+        "code": "TKT_SPA_TEBENQUINCHE_2026",
+        "name": "LAGUNA TEBENQUINCHE",
+        "reasons": []
+      },
+      {
+        "id": "ce236888-ecaa-57e3-ad72-8914f07c784e",
+        "code": "TKT_SPA_TERMAS_PURITAMA_2026",
+        "name": "TERMAS DE PURITAMA",
+        "reasons": []
+      },
+      {
+        "id": "d66e5e65-ed18-5e18-9d01-9ea7b52e3e4e",
+        "code": "TKT_SPA_TRANSFER_CJC_2026",
+        "name": "TRANSFER CALAMA",
+        "reasons": []
+      },
+      {
+        "id": "21b19925-6924-528b-819f-8e18777e00ea",
+        "code": "TKT_SPA_TRANSFER_HC_2026",
+        "name": "TRANSFER HITO CAJÓN",
+        "reasons": []
+      },
+      {
+        "id": "09c93c97-1413-5dbc-ae9a-620b030aec1f",
+        "code": "TKT_SPA_TRANSFER_JAMA_2026",
+        "name": "TRANSFER JAMA",
+        "reasons": []
+      },
+      {
+        "id": "810874e1-9e65-54d2-a10f-8be1b85a4486",
+        "code": "TKT_SPA_TULOR_2026",
+        "name": "ALDEA DE TULOR",
+        "reasons": []
+      },
+      {
+        "id": "156211da-226c-54c6-829f-d4a6ab0a1fef",
+        "code": "TKT_SPA_TUYAJTO_2026",
+        "name": "LAGUNA TUYAJTO",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "21d79607-df10-5c11-afc0-ef1f305610b0",
+        "code": "TKT_SPA_YERBAS_BUENAS_2026",
+        "name": "PETROGLIFOS DE YERBAS BUENAS",
+        "reasons": []
+      },
+      {
+        "id": "0354f60b-4993-5e5f-9138-4174daf0c684",
+        "code": "TOCKE_BOXLUNCH_RUTA_1",
+        "name": "BOX LUNCH RUTA 1",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "97a81e08-f071-5056-8e68-123b35bd71bb",
+        "code": "TOCKE_BOXLUNCH_RUTA_2",
+        "name": "BOX LUNCH RUTA 2",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "595cd8bd-7691-5dfb-a6e9-43cf7e6a109e",
+        "code": "TOCKE_COCTEL_1",
+        "name": "COCTEL 1",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "3be641d7-53d5-5ed1-9480-5940a53c726c",
+        "code": "TOCKE_COCTEL_2",
+        "name": "COCTEL 2",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "6a0c4d17-441f-5439-a3cd-5704cb73466d",
+        "code": "TOCKE_COCTEL_FULL_CHAMÄLEON",
+        "name": "COCTEL",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "f70ec2d9-fdc5-5e2b-8b47-5eba6464a7b3",
+        "code": "TOCKE_DESAYUNO_1",
+        "name": "DESAYUNO 1",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "4556a12d-4c19-56f2-8de0-634ff8275324",
+        "code": "TOCKE_DESAYUNO_2",
+        "name": "DESAYUNO 2",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "caf5814d-e405-5138-b018-b395a9784c5e",
+        "code": "TOCKE_LUNCH_RUTA_3",
+        "name": "ALMUERZO EN RUTA 3",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "7010171d-360f-5021-a2de-6848f640122c",
+        "code": "TOUR_ALT_TOCONAO_4PAX_2026",
+        "name": "SALAR + LAGUNAS ALTIPLANICAS + TOCONAO + SOCAIRE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "c5c36eb1-d9cb-595d-9a0c-64edb06e2e1a",
+        "code": "TOUR_ALT_TOCONAO_5PAX_2026",
+        "name": "SALAR + LAGUNAS ALTIPLANICAS + TOCONAO + SOCAIRE (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a08b9236-b28a-5cf9-8573-19ffa3789dec",
+        "code": "TOUR_ALVARO_LPB_CITY_CENTRAL_HCENTRO_HD_1_2PAX_2026",
+        "name": "TOUR LPB CITY ZONA CENTRAL FROM HOTEL CENTRO HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6e96c3b0-d315-5f6f-b035-5a748971c35a",
+        "code": "TOUR_ALVARO_LPB_CITY_CENTRAL_HZSUR_HD_1_2PAX_2026",
+        "name": "TOUR LPB CITY ZONA CENTRAL FROM HOTEL ZONA SUR HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1eadf111-3e0e-53f5-9231-55996e150196",
+        "code": "TOUR_ALVARO_LPB_CITY_LUNA_LUNCH_TELEFERICO_FD_1PAX_2026",
+        "name": "TOUR LPB CITY FD + VALLE DE LA LUNA + LUNCH + TELEFERICO + GUIA(1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1be4a932-6fc4-5911-b295-0df4c5ea17b9",
+        "code": "TOUR_ALVARO_LPB_CITY_LUNA_TELEFERICO_HD_1_2PAX_2026",
+        "name": "TOUR LPB CITY + VALLE DE LA LUNA + TELEFERICO HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1de41efa-a2e8-5308-8bd7-71326a73a3b5",
+        "code": "TOUR_ALVARO_LPB_MUELA_DIABLO_HD_1_2PAX_2026",
+        "name": "TOUR LPB MUELA DEL DIABLO HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4940763d-be46-568a-b80c-a2593fe543e2",
+        "code": "TOUR_ALVARO_LPB_VALLE_ANIMAS_1_2PAX_2026",
+        "name": "TOUR LPB VALLE DE LAS ANIMAS (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "42d9f272-9e56-5254-ae08-9c09f1d6e655",
+        "code": "TOUR_ALVARO_LPB_VALLE_LUNA_1_2PAX_2026",
+        "name": "TOUR LPB VALLE DE LA LUNA (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "05d6230b-1ea4-5d20-8b31-084189eca172",
+        "code": "TOUR_ARCOIRIS_HB_4PAX_2026",
+        "name": "VALLE DE ARCOIRIS + HIERBAS BUENAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6d62065e-4770-5398-93fb-aba3550482e1",
+        "code": "TOUR_ARCOIRIS_HB_5PAX_2026",
+        "name": "VALLE DE ARCOIRIS + HIERBAS BUENAS (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "128ac598-fdc1-5e7a-b20b-06ada8c85461",
+        "code": "TOUR_CEJAR_TEBIN_4PAX_2026",
+        "name": "LAGUNA CEJAR + OJOS DEL SALAR + TEBINQUINCHE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "cf35c604-eb7e-58de-b2b8-43525e193c69",
+        "code": "TOUR_CEJAR_TEBIN_5PAX_2026",
+        "name": "LAGUNA CEJAR + OJOS DEL SALAR + TEBINQUINCHE (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d05f745c-9322-5ad8-bb3d-f68775f294d8",
+        "code": "TOUR_DIEGO_COLQUE_ARQUEOLOGICO_TULOR_CATARPE_2_4PAX_2026",
+        "name": "ARQUEOLÓGICO - ALDEA DE TULOR Y CATARPE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "aae99cd6-0ded-5e0b-899f-bd43102fff9b",
+        "code": "TOUR_DIEGO_COLQUE_CEJAR_OJOS_TEBENQUICHE_2_4PAX_2026",
+        "name": "LAGUNAS CEJAR - OJOS DEL SALAR Y TEBENQUICHE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "9d1c450e-686f-5605-9f2f-1d7cc40f122b",
+        "code": "TOUR_DIEGO_COLQUE_FOTOGRAFICO_DIURNO_NOCTURNO_1_9PAX_2026",
+        "name": "TOUR FOTOGRÁFICO DIURNO O NOCTURNO (1-9PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1c11b95b-0d5a-5318-bd92-645b15856926",
+        "code": "TOUR_DIEGO_COLQUE_GEISER_TATIO_MACHUCA_2_4PAX_2026",
+        "name": "GÉISER DEL TATIO - MACHUCA (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f15929b4-cc22-5f74-ae70-af7ad2483d27",
+        "code": "TOUR_DIEGO_COLQUE_RIO_GRANDE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+        "name": "RÍO GRANDE - ARCOÍRIS Y HIERBAS BUENAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8f23ee2a-bfa6-5bbe-bd15-b6b2f61cfb81",
+        "code": "TOUR_DIEGO_COLQUE_SALAR_ALTIPLANICAS_TOCONAO_SOCAIRE_2_4PAX_2026",
+        "name": "SALAR DE ATACAMA - LAGUNAS ALTIPLÁNICAS - TOCONAO - SOCAIRE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4f7e81fd-0736-53e7-a888-d8ea6cfa9ee9",
+        "code": "TOUR_DIEGO_COLQUE_SALAR_ATACAMA_TOCONAO_2_4PAX_2026",
+        "name": "SALAR DE ATACAMA Y TOCONAO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a6dce127-8f7f-5ab1-a7f1-ba4e25feb315",
+        "code": "TOUR_DIEGO_COLQUE_TATIO_PUEBLOS_ANDINOS_AIRPORT_2_8PAX_2026",
+        "name": "TATIO - PUEBLOS ANDINOS - AEROPUERTO (2-8PAX)",
+        "reasons": []
+      },
+      {
+        "id": "13581cac-9a53-526f-9007-023865a93fee",
+        "code": "TOUR_DIEGO_COLQUE_TERMAS_PURITAMA_2_4PAX_2026",
+        "name": "TERMAS DE PURITAMA (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "27f14861-a7f0-5503-996c-0dfc78e01afa",
+        "code": "TOUR_DIEGO_COLQUE_TREKKING_GUATIN_2_4PAX_2026",
+        "name": "TREKKING GUATÍN (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "067b3375-9b5a-52d9-9e2e-1bbbc0d5989d",
+        "code": "TOUR_DIEGO_COLQUE_TUJACTU_ALTIPLANICAS_SALAR_PIEDRAS_ROJAS_2_4PAX_2026",
+        "name": "TUJACTU - LAGUNAS ALTIPLÁNICAS - SALAR DE ATACAMA - PIEDRAS ROJAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "13724ff8-4390-5638-8b9f-ea1631cb4292",
+        "code": "TOUR_DIEGO_COLQUE_VALLECITO_2_4PAX_2026",
+        "name": "VALLECITO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "03711c4a-3fe7-5e85-a6d5-53c898aab990",
+        "code": "TOUR_DIEGO_COLQUE_VALLE_ARCOIRIS_HIERBAS_BUENAS_2_4PAX_2026",
+        "name": "VALLE DE ARCOÍRIS Y HIERBAS BUENAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7beb5950-d01d-54a8-8c87-7bd78339c733",
+        "code": "TOUR_DIEGO_COLQUE_VALLE_LUNA_KARI_2_4PAX_2026",
+        "name": "VALLE DE LA LUNA Y KARI (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "456bd36c-5a77-582f-970e-b529a3066d6c",
+        "code": "TOUR_FOTO_DIURNO_NOCT_4PAX_2026",
+        "name": "TOUR FOTOGRAFICO DIURNO Y NOCTURNO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f9c31c26-09ee-5b43-9e09-a7fd7e147da9",
+        "code": "TOUR_LUNA_MUERTE_4PAX_2026",
+        "name": "VALLE DE LA LUNA + VALLE DE LA MUERTE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f500ce08-98c4-5014-b17b-8ab0c2e8f19f",
+        "code": "TOUR_LUNA_MUERTE_5PAX_2026",
+        "name": "VALLE DE LA LUNA + VALLE DE LA MUERTE (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "5da2c715-3b69-5ee0-9fd3-79f44cf44d60",
+        "code": "TOUR_MAS_ALTI_H1_1_6",
+        "name": "ALTIPLANICAS Y SALAR DE ATACAMA FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "4278fb5d-9896-5a74-a0bb-a7369529503d",
+        "code": "TOUR_MAS_ALTI_SPR_7_13",
+        "name": "ALTIPLANICAS Y SALAR DE ATACAMA FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "4f0dde80-32ae-5d60-8e1b-7fb0f222b927",
+        "code": "TOUR_MAS_ALTI_SUBURBAN",
+        "name": "LAGUNAS ALTIPLANICAS Y SALAR DE ATACAMA FD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "f0903054-0534-5d88-9e2e-69dd64c889f7",
+        "code": "TOUR_MAS_ARCOIRIS_SUBURBAN",
+        "name": "ARCOIRIS HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "cb846bd1-0c19-53ce-9865-acd693eab2eb",
+        "code": "TOUR_MAS_ARQ_SUBURBAN",
+        "name": "ARQUEOLOGICO HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "8c075818-34aa-51c5-b450-86379282f1c9",
+        "code": "TOUR_MAS_CEJAR_H1_1_6",
+        "name": "LAGUNA CEJAR OJOS DEL SALAR Y TEBENQUICHE HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "7966b197-8036-5a7e-8873-a591258f551f",
+        "code": "TOUR_MAS_CEJAR_SPR_7_13",
+        "name": "LAGUNA CEJAR OJOS DEL SALAR Y TEBENQUICHE HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "7bb193db-e254-5d8e-805a-7ede25b1e4e5",
+        "code": "TOUR_MAS_CEJAR_SUBURBAN",
+        "name": "LAGUNA CEJAR OJOS DEL SALAR Y TEBENQUICHE HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "07965abe-6698-5b7e-81f6-759623be10b9",
+        "code": "TOUR_MAS_GUATIN_H1_1_6",
+        "name": "GUATIN HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "d360d92f-65df-55a1-a4ff-09e1722ad13e",
+        "code": "TOUR_MAS_GUATIN_SPR_7_13",
+        "name": "GUATIN HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "a69c38f7-289a-5a60-96e4-357f45269468",
+        "code": "TOUR_MAS_GUATIN_SUBURBAN",
+        "name": "GUATIN HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "b75271fc-9d80-5a6c-850b-05450047b414",
+        "code": "TOUR_MAS_PRCHAXA_SUBURBAN",
+        "name": "PIEDRAS ROJAS Y LAGUNA CHAXA FD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "3b81c5d1-4d4d-5c8d-a413-ab25405ae1dd",
+        "code": "TOUR_MAS_PRMMC_H1_1_6",
+        "name": "PIEDRAS ROJAS MISCANTI MIÑIQUES Y LAGUNA CHAXA FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "e1837544-c7f3-5320-bb06-b82c91a06fda",
+        "code": "TOUR_MAS_PRMMC_SPR_7_13",
+        "name": "PIEDRAS ROJAS MISCANTI MIÑIQUES Y LAGUNA CHAXA FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "ceb7c2b5-b2a6-5a76-bfdb-83fdeaf12c34",
+        "code": "TOUR_MAS_PRMM_H1_1_6",
+        "name": "PIEDRAS ROJAS LAGUNA MISCANTI Y MIÑIQUES FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "b18e399f-da0c-5bb7-b4df-1a03436e4d45",
+        "code": "TOUR_MAS_PRMM_SPR_7_13",
+        "name": "PIEDRAS ROJAS LAGUNA MISCANTI Y MIÑIQUES FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "2f8eedde-c025-569d-894f-0db6ca3e7b9a",
+        "code": "TOUR_MAS_PR_SUBURBAN",
+        "name": "PIEDRAS ROJAS FD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "6f5be3fe-8069-5dab-998a-bffceb952b87",
+        "code": "TOUR_MAS_PUEBLOS_H1_1_6",
+        "name": "PUEBLOS ALTIPLANICOS FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "75329539-eeb4-535e-8555-06ffcf62889f",
+        "code": "TOUR_MAS_PUEBLOS_SPR_7_13",
+        "name": "PUEBLOS ALTIPLANICOS FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "efc0d27b-c259-535c-818a-02f9935e8bce",
+        "code": "TOUR_MAS_PURITAMA_H1_1_6",
+        "name": "PURITAMA HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "92e5525f-250c-5b87-9fb7-589a7425e307",
+        "code": "TOUR_MAS_PURITAMA_SPR_7_13",
+        "name": "PURITAMA HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "ab7bbdd9-9f6f-5c44-a325-9294f5684158",
+        "code": "TOUR_MAS_PURITAMA_SUBURBAN",
+        "name": "PURITAMA HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "9d7d5d6f-f530-530a-ac67-acd75f5899f4",
+        "code": "TOUR_MAS_SALARES_H1_1_6",
+        "name": "RUTA DE LOS SALARES FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "bd86a843-69d5-51cc-a6b8-1abd42315848",
+        "code": "TOUR_MAS_SALARES_SPR_7_13",
+        "name": "RUTA DE LOS SALARES FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "99304230-c200-518a-bc18-a3c0db06cc39",
+        "code": "TOUR_MAS_SALARES_SUBURBAN",
+        "name": "RUTA DE LOS SALARES FD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "a693e3cd-969a-5fa2-9265-5d7285998691",
+        "code": "TOUR_MAS_TATIO_H1_1_6",
+        "name": "TATIO FD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "7ab16a1c-ac02-5d39-b1aa-fc9401095d5b",
+        "code": "TOUR_MAS_TATIO_SPR_7_13",
+        "name": "TATIO FD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "3ab04a02-fad1-52f5-b1d9-a9688a83d1f6",
+        "code": "TOUR_MAS_TATIO_SUBURBAN",
+        "name": "TATIO FD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "96002977-d920-5e6b-b636-fbc73174aa0f",
+        "code": "TOUR_MAS_VALLECITO_H1_1_6",
+        "name": "VALLECITO HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "5324d5ba-2d7b-5396-bb73-ae8ae14f6b1a",
+        "code": "TOUR_MAS_VALLECITO_SPR_7_13",
+        "name": "VALLECITO HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "80014a36-46dd-513d-9bb0-0fab97ac6ea3",
+        "code": "TOUR_MAS_VALLECITO_SUBURBAN",
+        "name": "VALLECITO HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "765ddfc7-2353-5694-b7e1-14482fff5abf",
+        "code": "TOUR_MAS_VDLL_H1_1_6",
+        "name": "VALLE DE LA LUNA HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "0e63edf8-2612-5e7e-bdcd-a2d0a98c6d7d",
+        "code": "TOUR_MAS_VDLL_SPR_7_13",
+        "name": "VALLE DE LA LUNA HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "37dfbc49-752e-5859-86b3-146ded7268d9",
+        "code": "TOUR_MAS_VDLL_SUBURBAN",
+        "name": "VALLE DE LA LUNA HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "5b0df869-851a-58f0-85f4-2b34e0cf785d",
+        "code": "TOUR_MAS_VILAMA_H1_1_6",
+        "name": "CASCADA DE VILAMA HD - H1/VITO 1 A 6 PAX",
+        "reasons": []
+      },
+      {
+        "id": "fcc9d8e7-23b6-5e9b-8cae-0acbd93b1a01",
+        "code": "TOUR_MAS_VILAMA_SPR_7_13",
+        "name": "CASCADA DE VILAMA HD - SPRINTER 7 A 13 PAX",
+        "reasons": []
+      },
+      {
+        "id": "5417be16-eeed-5b1f-9914-c7f31c8c1289",
+        "code": "TOUR_MAS_VILAMA_SUBURBAN",
+        "name": "CASCADA DE VILAMA HD - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "13ac894a-f5f7-5f07-95cb-47082057f6dc",
+        "code": "TOUR_PIEDRAS_ROJAS_4PAX_2026",
+        "name": "SALAR + LAGUNAS ALTIPLANICAS + PIEDRAS ROJAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "617e3558-28aa-5a6e-9523-8798ad0d5db2",
+        "code": "TOUR_RG_ARCOIRIS_4PAX_2026",
+        "name": "RIO GRANDE + ARCOIRIS + HIERBAS BUENAS (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "34f9e7dc-9762-51cf-9a26-58d3ca847f6b",
+        "code": "TOUR_RG_ARCOIRIS_5PAX_2026",
+        "name": "RIO GRANDE + ARCOIRIS + HIERBAS BUENAS (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f649be7b-3b6a-54a0-b3bc-9e2d8149ac02",
+        "code": "TOUR_SALAR_TOCONAO_4PAX_2026",
+        "name": "SALAR DE ATACAMA + TOCONAO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "9019f25e-ea19-5b10-a47b-e95786c7cbd5",
+        "code": "TOUR_SALAR_TOCONAO_5PAX_2026",
+        "name": "SALAR DE ATACAMA + TOCONAO (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "2fe27076-903a-5aac-8b8b-4fe23d531b4d",
+        "code": "TOUR_SCZ_FULLDAY_AMBORO_TICKET_2026",
+        "name": "TICKET PARQUE NACIONAL AMBORÓ",
+        "reasons": []
+      },
+      {
+        "id": "4930c817-443f-5240-8615-5ed397941f26",
+        "code": "TOUR_SPA_ALTIPLANICAS_2026",
+        "name": "LAGUNAS ALTIPLANICAS",
+        "reasons": []
+      },
+      {
+        "id": "331b7b7b-afa0-516a-961f-6f1eb1dc992b",
+        "code": "TOUR_SPA_ALTIPLANICAS_LASKAR_H1_2026",
+        "name": "LAGUNAS ALTIPLANICAS (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "fabb8672-9b85-58d0-977d-7393456b6a85",
+        "code": "TOUR_SPA_ARCOIRIS_2026",
+        "name": "VALLE DEL ARCOIRIS",
+        "reasons": []
+      },
+      {
+        "id": "1f8dc4df-2cc0-5f44-a55e-93290dde1f39",
+        "code": "TOUR_SPA_ARCOIRIS_LASKAR_H1_2026",
+        "name": "VALLE DEL ARCOIRIS & PETROGLIFOS (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "aa4f11cc-0aa0-5d98-aa46-68ff672c5662",
+        "code": "TOUR_SPA_ASTRO_2026",
+        "name": "ASTRO",
+        "reasons": []
+      },
+      {
+        "id": "70882544-e470-57d4-a75b-519234f641a8",
+        "code": "TOUR_SPA_ASTRO_METEORITO_14PAX_2026",
+        "name": "ASTRO TOUR METEORITO (10-14 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "5f1cff5b-973b-5b78-8ac8-178bfa7155b9",
+        "code": "TOUR_SPA_ASTRO_METEORITO_4PAX_2026",
+        "name": "ASTRO TOUR METEORITO (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "5bff6461-3c24-53b6-a4c9-83a908ee1d29",
+        "code": "TOUR_SPA_ASTRO_METEORITO_9PAX_2026",
+        "name": "ASTRO TOUR METEORITO (5-9 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "e90c43da-d855-599d-aa0a-40ef9ac9a26f",
+        "code": "TOUR_SPA_ASTRO_METEORITO_SHARED_2026",
+        "name": "ASTRO TOUR METEORITO COMPARTIDO",
+        "reasons": []
+      },
+      {
+        "id": "08b7e464-2243-5414-b43b-56bd5ddba4c4",
+        "code": "TOUR_SPA_BALTINACHE_LASKAR_H1_2026",
+        "name": "LAGUNA BALTINACHE (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "58776fca-ba4f-5b8b-b4ed-225c1f5ae653",
+        "code": "TOUR_SPA_CANYONING_15PAX_2026",
+        "name": "CANYONING RAPEL (6-15 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b78a2a71-5cfa-5e26-842c-34047f6c2b64",
+        "code": "TOUR_SPA_CANYONING_1PAX_2026",
+        "name": "CANYONING RAPEL (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "14538651-21f7-5fab-bc7d-a1afaafa711e",
+        "code": "TOUR_SPA_CANYONING_5PAX_2026",
+        "name": "CANYONING RAPEL (3-5 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8cd68e26-9223-5c42-97f2-ed411272ddd9",
+        "code": "TOUR_SPA_CASCADA_2026",
+        "name": "CASCADA",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "3ec070d5-8b85-5417-9743-27391be4554b",
+        "code": "TOUR_SPA_CATARPE_MTB_1PAX_2026",
+        "name": "VALLE DE CATARPE MTB (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1770c438-3089-5c65-946c-dfc4a0707e9f",
+        "code": "TOUR_SPA_CATARPE_MTB_5PAX_2026",
+        "name": "VALLE DE CATARPE MTB (3-5 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b9c11320-0a0a-525f-b1c9-8547f7804053",
+        "code": "TOUR_SPA_CEJAR_LASKAR_H1_2026",
+        "name": "LAGUNA CEJAR Y TEBENQUICHE (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4a5a13e1-999d-5b08-b51a-b1c8d34e6e30",
+        "code": "TOUR_SPA_CERRO_TOCO_1PAX_2026",
+        "name": "CERRO TOCO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "c6b622ab-7c04-5f0f-b779-7573270666ae",
+        "code": "TOUR_SPA_CERRO_TOCO_6PAX_2026",
+        "name": "CERRO TOCO (3-6 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7ba95a2d-e6ce-5844-a5c8-23aa29008afb",
+        "code": "TOUR_SPA_CITY_LASKAR_H1_2026",
+        "name": "CITY TOUR (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4ccef6a7-dbd6-549f-9636-f7a5b8b3b70a",
+        "code": "TOUR_SPA_CITY_LASKAR_SPR15_2026",
+        "name": "CITY TOUR (5-8 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "55aa8138-a3f3-5073-911a-a465018b3316",
+        "code": "TOUR_SPA_CITY_LASKAR_SPR19_2026",
+        "name": "CITY TOUR (9-14 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4a5c05c3-511f-5189-b142-ad0115731507",
+        "code": "TOUR_SPA_CITY_LASKAR_VOL27_2026",
+        "name": "CITY TOUR (15-20 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "2d66b215-bc58-5041-a161-7463d72e7e82",
+        "code": "TOUR_SPA_CITY_LASKAR_VOL32_2026",
+        "name": "CITY TOUR (21-25 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "22fe7259-c8ba-5c3f-925d-9344f9043050",
+        "code": "TOUR_SPA_CITY_LASKAR_VOL35_2026",
+        "name": "CITY TOUR (25-30 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "cf745b8d-c6dc-596c-9fd8-5c3bc4ca75b7",
+        "code": "TOUR_SPA_GUATIN_2026",
+        "name": "GUATIN",
+        "reasons": []
+      },
+      {
+        "id": "28cb4aa8-3314-56b3-bd41-346773c5a80b",
+        "code": "TOUR_SPA_JACUZZI_2026",
+        "name": "JACUZZI",
+        "reasons": []
+      },
+      {
+        "id": "5d40b450-10e2-517f-9331-7f5eb87601b2",
+        "code": "TOUR_SPA_LAGUNA_CHAXA_2026",
+        "name": "LAGUNA CHAXA",
+        "reasons": []
+      },
+      {
+        "id": "9a7501f1-5959-5fb2-afa7-b0e53f7028a5",
+        "code": "TOUR_SPA_LASCAR_1PAX_2026",
+        "name": "LASCAR (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "50b6021f-b155-565e-bfc9-a20514e19cbd",
+        "code": "TOUR_SPA_LASCAR_6PAX_2026",
+        "name": "LASCAR (3-6 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4c230664-628f-5209-bd27-0ffacbf3295a",
+        "code": "TOUR_SPA_LICANCABUR_1PAX_2026",
+        "name": "LICANCABUR (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "05975e21-465b-5801-a085-b936cf74e0b6",
+        "code": "TOUR_SPA_LICANCABUR_4PAX_2026",
+        "name": "LICANCABUR (3-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "defa5441-0301-559c-946c-0d8dd5ab0dee",
+        "code": "TOUR_SPA_LUNA_LASKAR_H1_2026",
+        "name": "VALLE DE LA LUNA Y DE LA MUERTE (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4f4b7fde-ff2a-516d-8c08-7f352cc4d716",
+        "code": "TOUR_SPA_LUNA_LASKAR_SPR15_2026",
+        "name": "VALLE DE LA LUNA Y DE LA MUERTE (5-8 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6701099a-6aad-54cd-b9be-06a3f5e11db3",
+        "code": "TOUR_SPA_PACANA_LASKAR_H1_2026",
+        "name": "MONJES DE LA PACANA (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "809e1f83-dbe9-5a3b-82a2-7f81891b96cf",
+        "code": "TOUR_SPA_PIEDRAS_LASKAR_H1_2026",
+        "name": "PIEDRAS ROJAS & SALAR (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "51f88acc-6940-5602-add6-fd6768854547",
+        "code": "TOUR_SPA_PIEDRAS_ROJAS_2026",
+        "name": "PIEDRAS ROJAS",
+        "reasons": []
+      },
+      {
+        "id": "8b4bc794-3b88-5f06-9475-b500a2caa188",
+        "code": "TOUR_SPA_PUEBLITOS_2026",
+        "name": "PUEBLITOS",
+        "reasons": []
+      },
+      {
+        "id": "3f811826-204d-5aa3-8a2e-5be8a6a84509",
+        "code": "TOUR_SPA_PURITAMA_2026",
+        "name": "PURITAMA - PURILIBRE",
+        "reasons": []
+      },
+      {
+        "id": "3e017083-1111-5837-bdeb-7024c7d69cec",
+        "code": "TOUR_SPA_PURITAMA_LASKAR_H1_2026",
+        "name": "TERMAS DE PURITAMA (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4f2dba20-316f-50c3-afc4-75dd6495e379",
+        "code": "TOUR_SPA_SALARES_2026",
+        "name": "RUTA LOS SALARES",
+        "reasons": []
+      },
+      {
+        "id": "126225ff-c8fe-5fa2-966f-6fc8e8acd899",
+        "code": "TOUR_SPA_SAUCE_1PAX_2026",
+        "name": "CERRO SAUCE (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "322381ab-53d8-528f-8960-768a4e5c4ab7",
+        "code": "TOUR_SPA_SAUCE_6PAX_2026",
+        "name": "CERRO SAUCE (3-6 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6c6b50b2-04d1-5f12-a729-45a47fd0bc06",
+        "code": "TOUR_SPA_SIRECABUR_1PAX_2026",
+        "name": "SIRECABUR (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "501e01ac-f0b6-56b1-b329-9b80bcc646ae",
+        "code": "TOUR_SPA_SIRECABUR_6PAX_2026",
+        "name": "SIRECABUR (3-6 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7d9fbd06-19f0-524f-9d03-acfd75a3a45e",
+        "code": "TOUR_SPA_SUNSET_2026",
+        "name": "SUNSET",
+        "reasons": []
+      },
+      {
+        "id": "a9328ca6-a555-5dda-b37b-b4dbdefc0bb1",
+        "code": "TOUR_SPA_TATIO_2026",
+        "name": "GEYSER TATIO",
+        "reasons": []
+      },
+      {
+        "id": "334ffc96-b133-598f-8cf3-78f7eada1d56",
+        "code": "TOUR_SPA_TATIO_LASKAR_H1_2026",
+        "name": "TATIO & MACHUCA (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ad2dffbc-276e-5621-beb9-82ca983452d7",
+        "code": "TOUR_SPA_TATIO_PURITAMA_2026",
+        "name": "GEYSERS DEL TATIO + TERMAS PURITAMA",
+        "reasons": []
+      },
+      {
+        "id": "637da9b5-c5bf-52f2-8fdd-9357b18c9910",
+        "code": "TOUR_SPA_TATIO_PURITAMA_LASKAR_H1_2026",
+        "name": "TATIO & PURITAMA (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f7860093-bc5d-56e5-8c11-b2c38f763095",
+        "code": "TOUR_SPA_TATIO_VILLAGES_LASKAR_H1_2026",
+        "name": "TATIO & VILLAGES (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "55dadfb5-c979-5a5d-8c49-031afeb8102b",
+        "code": "TOUR_SPA_TOCONAO_LASKAR_H1_2026",
+        "name": "SALAR DE ATACAMA & TOCONAO (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6658b745-cd82-59ed-b121-684da5c9d35c",
+        "code": "TOUR_SPA_TOCO_DH_1PAX_2026",
+        "name": "CERRO TOCO DOWNHILL (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "fc0b99e1-1974-5a42-9a10-a8fb341634e7",
+        "code": "TOUR_SPA_TOCO_DH_5PAX_2026",
+        "name": "CERRO TOCO DOWNHILL (3-5 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b2dcf73a-31a0-50b5-a4e9-5f08c982aad4",
+        "code": "TOUR_SPA_TULOR_LASKAR_H1_2026",
+        "name": "ARQUEOLOGICO Y TULOR (1-4 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f13fbd37-33d3-5376-9a87-1306efa4d098",
+        "code": "TOUR_SPA_TULOR_LASKAR_SPR15_2026",
+        "name": "ARQUEOLOGICO Y TULOR (5-8 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "73195b4a-21a1-5274-9c4d-a19cb2d040a1",
+        "code": "TOUR_TATIO_AIRPORT_4PAX_2026",
+        "name": "TATIO + PUEBLOS ANDINOS + AEROPUERTO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "3ff481be-1f1f-5896-8b49-a1d6d2d9036d",
+        "code": "TOUR_TATIO_CHIUCHIU_4PAX_2026",
+        "name": "TATIO + CHIU CHIU + SAN PEDRO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "554311ee-b066-59cc-afae-c9877d8de481",
+        "code": "TOUR_TATIO_MACHUCA_4PAX_2026",
+        "name": "TATIO + MACHUCA (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f828082c-9e97-5a1d-8a2b-e12cbbe3ed13",
+        "code": "TOUR_TATIO_MACHUCA_5PAX_2026",
+        "name": "TATIO + MACHUCA (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "61c77824-f533-5c2e-8eae-daf03c2c4160",
+        "code": "TOUR_TRANSFERTURISMO_LEONARDO_CITY_TOUR_SANTIAGO_PP_2026_TRANSPORTE",
+        "name": "CITY TOUR SANTIAGO (POR PERSONA) solo transporte",
+        "reasons": []
+      },
+      {
+        "id": "a8df89a8-7d1f-57d7-aa20-125f8b323cb7",
+        "code": "TOUR_TREK_GUATIN_4PAX_2026",
+        "name": "TREKKING GUATIN (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a533a252-befe-5201-be8c-4e4513859f10",
+        "code": "TOUR_TREK_GUATIN_5PAX_2026",
+        "name": "TREKKING GUATIN (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "2ba3197d-02f6-5133-ad0e-18e9a7946665",
+        "code": "TOUR_TULOR_CATARPE_4PAX_2026",
+        "name": "ALDEA TULOR + CATARPE (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "940f9ca1-ca25-5e1d-9ca6-098c226624f9",
+        "code": "TOUR_TULOR_CATARPE_5PAX_2026",
+        "name": "ALDEA TULOR + CATARPE (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "3e0d6973-6d6d-5a0c-a702-436765014d13",
+        "code": "TOUR_TUYAJTO_4PAX_2026",
+        "name": "TUYAJTO + LAGUNAS ALTIPLANICAS + SALAR (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7a69bc52-d3fc-5b93-ba55-eeb5282b4e5e",
+        "code": "TOUR_TUYAJTO_5PAX_2026",
+        "name": "TUYAJTO + LAGUNAS ALTIPLANICAS + SALAR (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "08a8cda6-6a9d-57f7-bf1a-efee2d1650e7",
+        "code": "TOUR_UYU_LEO_2D1N_SALAR",
+        "name": "2D1N FULL DAY SALAR + TOMAVE",
+        "reasons": []
+      },
+      {
+        "id": "eb605952-fd44-5d40-a9c9-dfcd11c2ea68",
+        "code": "TOUR_UYU_LEO_3D2N_HITO",
+        "name": "3D2N HITO – HITO",
+        "reasons": []
+      },
+      {
+        "id": "dfdec903-cf0e-5add-853d-055cfae40c63",
+        "code": "TOUR_UYU_LEO_3D2N_LOOP",
+        "name": "3D2N UYUNI – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "c03735ac-0d18-5be7-8bc3-00b0c8079906",
+        "code": "TOUR_UYU_LEO_3D2N_UTU",
+        "name": "3D2N UTURUNKU – UYUNI / HITO",
+        "reasons": []
+      },
+      {
+        "id": "d5338bf2-05e0-5992-85a9-b7a1c380d76b",
+        "code": "TOUR_UYU_LEO_3D2N_UYU_HITO",
+        "name": "3D2N UYUNI – HITO",
+        "reasons": []
+      },
+      {
+        "id": "23d7bc3d-e760-55f3-9188-2395cd5e2f48",
+        "code": "TOUR_UYU_LEO_4D3N_CHIG",
+        "name": "4D3N HITO + CHIGUANA SALT FLAT / JIRIRA",
+        "reasons": []
+      },
+      {
+        "id": "d8f8d0be-6630-5995-b346-0f6e19bf805a",
+        "code": "TOUR_UYU_LEO_4D3N_LAG",
+        "name": "4D3N HITO - SALAR – LAGUNA – HITO",
+        "reasons": []
+      },
+      {
+        "id": "3af57365-ae41-5d20-8cea-d3b4f6f257ba",
+        "code": "TOUR_UYU_LEO_4D3N_LOOP",
+        "name": "4D3N UYUNI – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "e57f2052-6273-5fdd-9ae1-0987236bfa38",
+        "code": "TOUR_UYU_LEO_4D3N_UTU_HITO",
+        "name": "4D3N UTURUNKU – HITO / HITO",
+        "reasons": []
+      },
+      {
+        "id": "b4054b84-0e4a-580e-8e2a-6a010c0da6d9",
+        "code": "TOUR_UYU_LEO_ROUTE1",
+        "name": "CEMENTERIO TRENES + PULACAYO + TOMAVE + KASILLA",
+        "reasons": []
+      },
+      {
+        "id": "89010f38-3b58-58e6-9989-27d3977ba8ed",
+        "code": "TOUR_UYU_LEO_SALAR",
+        "name": "FULL DAY SALAR",
+        "reasons": []
+      },
+      {
+        "id": "ed1bdd67-b480-5b5b-8a4f-158f6800d091",
+        "code": "TOUR_UYU_LEO_TOMAVE",
+        "name": "FULL DAY TOMAVE PULACAYO",
+        "reasons": []
+      },
+      {
+        "id": "f163b52e-294f-576f-98fb-21214af0a4af",
+        "code": "TOUR_UYU_LEO_TUNUPA",
+        "name": "FULL DAY TUNUPA",
+        "reasons": []
+      },
+      {
+        "id": "566f607b-a493-516e-ba35-ee86ec8376b7",
+        "code": "TOUR_UYU_MELVA_3D2N_OW_PR",
+        "name": "3D2N SPA – UYU ONEWAY BÑO PRIVADO",
+        "reasons": []
+      },
+      {
+        "id": "d45b8b15-c1ca-5008-bfe2-fe6929c3bab9",
+        "code": "TOUR_UYU_MELVA_3D2N_OW_SH",
+        "name": "3D2N SPA – UYU ONEWAY BÑO COMPARTIDO",
+        "reasons": []
+      },
+      {
+        "id": "a3845666-ebc1-56c0-9b13-c9e7eaa5e738",
+        "code": "TOUR_UYU_MELVA_4D3N_RT_PR1",
+        "name": "4D3N SPA – SPA BÑO PRIVADO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "28406a56-cd1a-509d-8965-54356bf176b6",
+        "code": "TOUR_UYU_MELVA_4D3N_RT_SH1",
+        "name": "4D3N SPA – SPA BÑO COMPARTIDO (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "f54fadde-5134-5f8f-a131-079c4b9ffbf4",
+        "code": "TOUR_UYU_MELVA_FD_SH",
+        "name": "FULL DAY SALAR SHARED",
+        "reasons": []
+      },
+      {
+        "id": "890c0843-93b3-5753-b476-249f27336d72",
+        "code": "TOUR_UYU_MELVA_NIGHT",
+        "name": "NIGHT TOUR SHARED",
+        "reasons": []
+      },
+      {
+        "id": "72e3a142-0ed7-5dca-b57c-b4081da211e8",
+        "code": "TOUR_UYU_MELVA_STARS",
+        "name": "ESTRELLAS + AMANECER",
+        "reasons": []
+      },
+      {
+        "id": "ad2dfc50-963c-5bc3-8449-d3f1b16e79b4",
+        "code": "TOUR_UYU_SAJAMA_3D2N",
+        "name": "3D2N SPA – UYU ONEWAY",
+        "reasons": []
+      },
+      {
+        "id": "8ae3c868-7eae-5ad7-b8bb-3857ad7f6a91",
+        "code": "TOUR_UYU_SAJAMA_4D3N",
+        "name": "4D3N SPA – SPA BÑO COMPARTIDO",
+        "reasons": []
+      },
+      {
+        "id": "265e94c6-a125-59cb-9c66-7da3acb69e8e",
+        "code": "TOUR_VALLECITO_4PAX_2026",
+        "name": "VALLECITO (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "34426bde-28e2-56bd-a148-fc25333e9e0a",
+        "code": "TOUR_VALLECITO_5PAX_2026",
+        "name": "VALLECITO (5+PAX)",
+        "reasons": []
+      },
+      {
+        "id": "e85bae18-4807-522a-b3e8-98eb640cf7e5",
+        "code": "TRANSFERTURISMO LEONARDO",
+        "name": "FULL DAY CASABLANCA & VALPARAÍSO (POR PERSONA) trasporte y almuerzo",
+        "reasons": []
+      },
+      {
+        "id": "72f98199-8af3-529e-be64-51d037c8145a",
+        "code": "TRANSPORTE + GUIA 2D FRONTERA  CHUNGARA - PARINACOTA - PUTRE",
+        "name": "TRANSPORTE + GUIA 2D frontera chungara - Chungara - parinacota - PUTRE",
+        "reasons": []
+      },
+      {
+        "id": "052bfc19-3c36-53f4-8295-8f0b28662b36",
+        "code": "TRF ALVARO LPB-TAMBOQUEMADO",
+        "name": "LPB - TAMBO QUEMADO Frontera",
+        "reasons": []
+      },
+      {
+        "id": "e4da0f47-8fa9-595a-bf6b-27d375057728",
+        "code": "TRF_ALVARO_LPB_AIRPORT_DAY_1_2PAX_2026",
+        "name": "LPB AIRPORT IN/OUT DAY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "9e5ec590-23a5-5911-9774-8dff6da3f1db",
+        "code": "TRF_ALVARO_LPB_AIRPORT_NIGHT_1_2PAX_2026",
+        "name": "LPB AIRPORT IN/OUT NIGHT (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8212859f-d526-508e-a37f-e8d9605f2ca9",
+        "code": "TRF_ALVARO_LPB_AIRPORT_ZSUR_DAY_1_2PAX_2026",
+        "name": "LPB AIRPORT - HOTEL ZONA SUR DAY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "63f64a7c-5eb6-5af5-983f-25730419b3de",
+        "code": "TRF_ALVARO_LPB_AIRPORT_ZSUR_NIGHT_1_2PAX_2026",
+        "name": "LPB AIRPORT - HOTEL ZONA SUR NIGHT (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "ca16e670-7602-5e9a-85e2-5789ac0cc5ff",
+        "code": "TRF_ALVARO_LPB_BUS_HCENTRO_DAY_1_2PAX_2026",
+        "name": "LPB BUS TERMINAL - HOTEL CENTRO DAY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "56cace8f-4b7c-59f3-8070-9a2ad73ef526",
+        "code": "TRF_ALVARO_LPB_BUS_HCENTRO_NIGHT_1_2PAX_2026",
+        "name": "LPB BUS TERMINAL - HOTEL CENTRO NIGHT (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4776d6f3-0a2c-502e-bb93-1c989757bbaf",
+        "code": "TRF_ALVARO_LPB_BUS_ZSUR_DAY_1_2PAX_2026",
+        "name": "LPB BUS TERMINAL - HOTEL ZONA SUR DAY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d7ef0e21-838f-5dc6-8c1f-eed041897acc",
+        "code": "TRF_ALVARO_LPB_BUS_ZSUR_NIGHT_1_2PAX_2026",
+        "name": "LPB BUS TERMINAL - HOTEL ZONA SUR NIGHT (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "4c3107d7-63df-5bdd-9251-2a27a7277ecd",
+        "code": "TRF_ALVARO_LPB_CBBA_1_2PAX_2026",
+        "name": "COCHABAMBA DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "3fffe2b3-46aa-592f-8ecc-9df93868ff74",
+        "code": "TRF_ALVARO_LPB_CHACALTAYA_1_2PAX_2026",
+        "name": "CHACALTAYA (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "802582a1-af68-5af0-95b2-d314ec0d44c2",
+        "code": "TRF_ALVARO_LPB_CHARQUINI_1_2PAX_2026",
+        "name": "CHARQUINI (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "1d0be895-84e1-5e6f-91ae-a124f1c8099d",
+        "code": "TRF_ALVARO_LPB_CHOLITA WRESTLING_DAY_12PAX_2026",
+        "name": "La Paz - Cholita Wrestling ida y vuelta sin entrada para 17pax",
+        "reasons": []
+      },
+      {
+        "id": "d32a389a-398c-5daf-abbe-e7d697c61fdb",
+        "code": "TRF_ALVARO_LPB_CHUA_HD_1_2PAX_2026",
+        "name": "CHUA HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "cf6fff87-22db-59e7-9c62-132a33f580c5",
+        "code": "TRF_ALVARO_LPB_CONDORIRI_1_2PAX_2026",
+        "name": "CONDORIRI LA RINCONADA (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "871f7772-e7dc-5b66-a348-41edcdf4a403",
+        "code": "TRF_ALVARO_LPB_COPACABANA_FD_1_2PAX_2026",
+        "name": "COPACABANA FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "db3efcdd-f99a-5713-8bd8-b505b80332f0",
+        "code": "TRF_ALVARO_LPB_COPACABANA_KASANI_1_2PAX_2026",
+        "name": "COPACABANA KASANI (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6fe6f2de-9d0d-5c81-aa03-9653ed25c0b1",
+        "code": "TRF_ALVARO_LPB_COPACABANA_YAMPUPATA_1_2PAX_2026",
+        "name": "COPACABANA YAMPUPATA (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6388ae13-8c88-5a11-978d-d03d6dcb554a",
+        "code": "TRF_ALVARO_LPB_COROICO_FD_1_2PAX_2026",
+        "name": "COROICO FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "e4fa2f72-f6af-5a86-9530-243fbfa38cee",
+        "code": "TRF_ALVARO_LPB_CUMBRE_1_2PAX_2026",
+        "name": "CUMBRE (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "56e08721-c291-5122-bd18-01ecdf3bb6aa",
+        "code": "TRF_ALVARO_LPB_DESAGUADERO_1_2PAX_2026",
+        "name": "DESAGUADERO LA PAZ DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "6645f563-3aa3-50c6-906c-c074e07cbfb3",
+        "code": "TRF_ALVARO_LPB_DESAGUADERO_TIWANAKU_FD_1_2PAX_2026",
+        "name": "DESAGUADERO + TIWANAKU + LA PAZ FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "c9e76db9-17ce-533c-9259-5bd1ceee755d",
+        "code": "TRF_ALVARO_LPB_HCENTRO_RCENTRO_MEAL_1_2PAX_2026",
+        "name": "LPB HOTEL CENTRO - REST CENTRO LUNCH/DINNER (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "bef05cd2-4961-57e6-91d6-5d5d14c5dbdf",
+        "code": "TRF_ALVARO_LPB_HCENTRO_RCENTRO_PENA_1_2PAX_2026",
+        "name": "LPB HOTEL CENTRO - REST CENTRO PEÑA SHOW (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "530ec53a-be13-5c6d-9b38-9b8ad6813b5e",
+        "code": "TRF_ALVARO_LPB_HCENTRO_RZSUR_MEAL_1_2PAX_2026",
+        "name": "LPB HOTEL CENTRO - REST ZONA SUR LUNCH/DINNER (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "97b4382c-9893-5033-9c7b-c2194ab1ae09",
+        "code": "TRF_ALVARO_LPB_HUATAJATA_FD_1_2PAX_2026",
+        "name": "HUATAJATA FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7e3b73b5-8beb-545e-af72-73c8e36d029a",
+        "code": "TRF_ALVARO_LPB_HUATAJATA_HD_1_2PAX_2026",
+        "name": "HUATAJATA HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "b3e5121a-206d-5606-a3f0-0ee09eb51e8b",
+        "code": "TRF_ALVARO_LPB_HUAYNA_POTOSI_1_2PAX_2026",
+        "name": "HUAYNA POTOSI (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "cd8009dc-2aab-5027-ba08-4a34442c52a7",
+        "code": "TRF_ALVARO_LPB_HZSUR_RCENTRO_MEAL_1_2PAX_2026",
+        "name": "LPB HOTEL ZONA SUR - REST CENTRO LUNCH/DINNER (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "e5c161ea-ea33-5abf-bb2d-01c9d6203c4c",
+        "code": "TRF_ALVARO_LPB_HZSUR_RCENTRO_PENA_1_2PAX_2026",
+        "name": "LPB HOTEL ZONA SUR - REST CENTRO PEÑA SHOW (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "59cec17d-b440-5c27-b4a9-3b94d46be5ea",
+        "code": "TRF_ALVARO_LPB_HZSUR_RZSUR_MEAL_1_2PAX_2026",
+        "name": "LPB HOTEL ZONA SUR - REST ZONA SUR LUNCH/DINNER (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7408502a-2e16-501e-9f9e-9f7d80bb3cb4",
+        "code": "TRF_ALVARO_LPB_OKOLA_FD_1_2PAX_2026",
+        "name": "SANTIAGO DE OKOLA FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "10fd58db-42f3-554d-9deb-62904912bcfa",
+        "code": "TRF_ALVARO_LPB_ORURO_1_2PAX_2026",
+        "name": "ORURO DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "aad10433-80a5-5aa8-8c43-f4eb8e834286",
+        "code": "TRF_ALVARO_LPB_PALCA_FD_1_2PAX_2026",
+        "name": "PALCA FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "9fec3fd6-a111-52cc-b358-cdd77da4d3ce",
+        "code": "TRF_ALVARO_LPB_POTOSI_1_2PAX_2026",
+        "name": "POTOSI DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8ee37363-1beb-5fc2-bc8c-7987a535d591",
+        "code": "TRF_ALVARO_LPB_SAJAMA_TOMARAPI_1_2PAX_2026",
+        "name": "SAJAMA / TOMARAPI DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "20d124f2-7931-5599-af8f-2eca9952edb6",
+        "code": "TRF_ALVARO_LPB_SORATA_1_2PAX_2026",
+        "name": "SORATA SIN GRUTA DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d742235c-6702-589a-9b70-4ed1ff741ed5",
+        "code": "TRF_ALVARO_LPB_TAMBO_QUEMADO_FD_1_2PAX_2026",
+        "name": "TAMBO QUEMADO FRONTERA FD DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "54cfe069-ddc0-5074-beb0-a735e25dcddb",
+        "code": "TRF_ALVARO_LPB_TIQUINA_FD_1_2PAX_2026",
+        "name": "TIQUINA FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "a10bd148-9f8c-5cd2-afc2-0d1f8ae57d5f",
+        "code": "TRF_ALVARO_LPB_TIQUINA_HD_1_2PAX_2026",
+        "name": "TIQUINA HD DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "eec2051b-7137-54a9-b622-877bd388a7de",
+        "code": "TRF_ALVARO_LPB_TIWANAKU_FD_1_2PAX_2026",
+        "name": "TIWANAKU FD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "0e5b7c47-e3b2-536d-97f4-f54dfac57ec0",
+        "code": "TRF_ALVARO_LPB_TIWANAKU_HD_1_2PAX_2026",
+        "name": "TIWANAKU HD (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "3d3b0278-c5e7-52bf-9ac9-0758a3522af9",
+        "code": "TRF_ALVARO_LPB_TIWANAKU_HUATAJATA_1_2PAX_2026",
+        "name": "TIWANAKU + HUATAJATA (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "e976de62-91a5-5b26-bc8c-ffe8f6249dbe",
+        "code": "TRF_ALVARO_LPB_UYUNI_1_2PAX_2026",
+        "name": "UYUNI DROP/PICKUP ONLY (1-2PAX)",
+        "reasons": []
+      },
+      {
+        "id": "8d657d6d-8ec1-5d1a-bce2-1a2b92c3bbac",
+        "code": "TRF_DIEGO_COLQUE_CALAMA_HITO_CAJON_2_4PAX_2026",
+        "name": "CALAMA - HITO CAJÓN",
+        "reasons": []
+      },
+      {
+        "id": "031e47bf-35cb-511d-8412-678c88da76d6",
+        "code": "TRF_DIEGO_COLQUE_SPA_AIRPORT_2_4PAX_2026",
+        "name": "SPA - AEROPUERTO / SPA (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "5cd3a841-1815-5bd9-8eac-70635d3bd89f",
+        "code": "TRF_DIEGO_COLQUE_SPA_ANTOFAGASTA_1_9PAX_2026",
+        "name": "SPA - ANTOFAGASTA / SPA (1-9PAX)",
+        "reasons": []
+      },
+      {
+        "id": "d68d0735-4b95-5b8a-b363-77d36646a285",
+        "code": "TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026",
+        "name": "SPA - HITO CAJÓN / SPA (2-4PAX)",
+        "reasons": []
+      },
+      {
+        "id": "bef5b2cc-9e0d-5139-a05e-a165ceb95161",
+        "code": "TRF_DIEGO_COLQUE_SPA_OLLAGUE_1_9PAX_2026",
+        "name": "SPA - OLLAGÜE / SPA (1-9PAX)",
+        "reasons": []
+      },
+      {
+        "id": "54f3a85b-35d2-5fff-b47d-322158e4820c",
+        "code": "TRF_HC_CJC_H1_2026",
+        "name": "HITO CAJON - CJC H1 (Max 9 pax)",
+        "reasons": []
+      },
+      {
+        "id": "8d421cb1-0a75-59fe-a43b-3484d4cd90ed",
+        "code": "TRF_MAS_AIRPORT_H1_1_4",
+        "name": "TRASLADO AEROPUERTO CALAMA - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "ed8ae301-a037-5e01-9ea5-a2e31c82885f",
+        "code": "TRF_MAS_AIRPORT_SPR_5_9",
+        "name": "TRASLADO AEROPUERTO CALAMA - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "cfa1bef1-b7ff-5455-8400-59dad1e932d3",
+        "code": "TRF_MAS_AIRPORT_SUBURBAN",
+        "name": "TRASLADO AEROPUERTO CALAMA - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "41277972-1f75-5126-9f22-5dc4a0b6b9c8",
+        "code": "TRF_MAS_ANTO_H1_1_4",
+        "name": "TRASLADO ANTOFAGASTA - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "8c83066e-8b75-5288-b6bd-51638462fbf5",
+        "code": "TRF_MAS_ANTO_SPR_5_9",
+        "name": "TRASLADO ANTOFAGASTA - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "ab9e0f7f-0dc0-5b84-8905-04ed4683156c",
+        "code": "TRF_MAS_HITO_H1_1_4",
+        "name": "TRASLADO HITO CAJON - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "2dbfe917-c3a1-5834-8bf0-0a7c5c1fa0de",
+        "code": "TRF_MAS_HITO_SPR_5_9",
+        "name": "TRASLADO HITO CAJON - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "6d017035-c79c-5ef6-91db-ebf78489dad3",
+        "code": "TRF_MAS_HITO_SUBURBAN",
+        "name": "TRASLADO HITO CAJON - CHEVROLET SUBURBAN",
+        "reasons": []
+      },
+      {
+        "id": "509705d0-ea2c-52e5-928c-0f6e08ff5704",
+        "code": "TRF_MAS_IQQ_H1_1_4",
+        "name": "TRASLADO IQUIQUE - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "51261f1e-cb6c-5f35-b85c-d99b6e09b059",
+        "code": "TRF_MAS_IQQ_SPR_5_9",
+        "name": "TRASLADO IQUIQUE - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "033ae321-c949-5d93-8b9f-2b49c38488d9",
+        "code": "TRF_MAS_JAMA_H1_1_4",
+        "name": "TRASLADO PASO JAMA - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "feab5c62-827d-5adb-8a8b-20482a366340",
+        "code": "TRF_MAS_JAMA_SPR_5_9",
+        "name": "TRASLADO PASO JAMA - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "747b5d74-0ad5-509a-9898-6ebef3832eae",
+        "code": "TRF_MAS_OLL_H1_1_4",
+        "name": "TRASLADO OLLAGÜE - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "227142d1-4072-52af-9e79-2e25de4a5e3e",
+        "code": "TRF_MAS_OLL_SPR_5_9",
+        "name": "TRASLADO OLLAGÜE - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "aca04abb-6de7-5082-baf2-bc144ee64cae",
+        "code": "TRF_MAS_PURMA_H1_1_4",
+        "name": "TRASLADO PURMAMARCA - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "785583c0-2019-5cbd-aa39-1c762992ac25",
+        "code": "TRF_MAS_PURMA_SPR_5_9",
+        "name": "TRASLADO PURMAMARCA - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "2c4e3a06-bf9b-5ea0-8c28-f3e457465f08",
+        "code": "TRF_MAS_SALTA_H1_1_4",
+        "name": "TRASLADO SALTA - H1/VITO 1 A 4 PAX",
+        "reasons": []
+      },
+      {
+        "id": "7c1982d6-9f78-58f3-a97c-2ebe334077f3",
+        "code": "TRF_MAS_SALTA_SPR_5_9",
+        "name": "TRASLADO SALTA - SPRINTER 5 A 9 PAX",
+        "reasons": []
+      },
+      {
+        "id": "62e14c8b-94c8-594e-b833-cbf33f783105",
+        "code": "TRF_SPA_CJC_4RUNNER_2026",
+        "name": "SAN PEDRO - CJC (IN/OUT) 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "e2785a99-9bfd-5d5a-a16f-d867803607a1",
+        "code": "TRF_SPA_CJC_GUIA_4RUNNER_2026",
+        "name": "SAN PEDRO - CJC (IN/OUT) C. GUIA 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "a40b67af-0fc4-5faa-9856-d87736da2bb9",
+        "code": "TRF_SPA_CJC_GUIA_H1_2026",
+        "name": "SAN PEDRO - CJC (IN/OUT) C. GUIA H1 (Max 9 pax)",
+        "reasons": []
+      },
+      {
+        "id": "3809cbd9-3b20-5c62-828d-e683519f81a6",
+        "code": "TRF_SPA_CJC_NOPSG_4PAX_2026",
+        "name": "SAN PEDRO - CJC (IN/OUT) sin guia 1-4PAX",
+        "reasons": []
+      },
+      {
+        "id": "32f4e6a3-9c26-5cba-885e-59ccb6214032",
+        "code": "TRF_SPA_CJC_NOPSG_9PAX_2026",
+        "name": "SAN PEDRO - CJC (IN/OUT) sin guia 5-9PAX",
+        "reasons": []
+      },
+      {
+        "id": "13f0f974-29b5-5dbf-a93d-d3d96057467f",
+        "code": "TRF_SPA_HC_4RUNNER_2026",
+        "name": "SAN PEDRO - HITO CAJON (IN/OUT) 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "39fe3c1c-654e-5488-b388-e025c0c8752c",
+        "code": "TRF_SPA_HC_GUIA_4RUNNER_2026",
+        "name": "SAN PEDRO - HITO CAJON (IN/OUT) C. GUIA 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "3b6d63c5-744e-5da6-a848-57072f5b4b51",
+        "code": "TRF_SPA_HC_GUIA_H1_2026",
+        "name": "SAN PEDRO - HITO CAJON (IN/OUT) C. GUIA H1 (Max 9 pax)",
+        "reasons": []
+      },
+      {
+        "id": "f05de501-6717-5568-9e06-068eff928617",
+        "code": "TRF_SPA_HITO_CAJON_CLP",
+        "name": "TRANSFER SPA-HITO CAJON",
+        "reasons": []
+      },
+      {
+        "id": "a9ee58a5-fae3-5002-b502-130415d13467",
+        "code": "TRF_SPA_JAMA_H1_2026",
+        "name": "TRANSFER JAMA",
+        "reasons": []
+      },
+      {
+        "id": "632ee7de-f926-5741-a09c-3294a2d0edda",
+        "code": "TRF_SPA_PJ_4RUNNER_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "578db2b7-6e29-5d50-af3c-e4df12aa462d",
+        "code": "TRF_SPA_PJ_GUIA_4RUNNER_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) C. GUIA 4RUNNER (Max 5 Pax)",
+        "reasons": []
+      },
+      {
+        "id": "dac6f84b-bdb9-53f5-84a0-ce35386561a2",
+        "code": "TRF_SPA_PJ_GUIA_H1_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) C. GUIA H1 (Max 9 pax)",
+        "reasons": []
+      },
+      {
+        "id": "be8de228-c822-5cfa-a832-4f2edad772e1",
+        "code": "TRF_SPA_PJ_H1_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) H1 (Max 9 pax)",
+        "reasons": []
+      },
+      {
+        "id": "c9596190-a779-5fc8-8881-9d649daf0438",
+        "code": "TRF_SPA_PJ_NOPSG_4PAX_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) sin guia 1-4PAX",
+        "reasons": []
+      },
+      {
+        "id": "821ec671-2e1c-575f-95b6-9130d8db4316",
+        "code": "TRF_SPA_PJ_NOPSG_9PAX_2026",
+        "name": "SAN PEDRO - PASO JAMA (IN/OUT) sin guia 5-9PAX",
+        "reasons": []
+      },
+      {
+        "id": "0a9f39f3-f967-516d-8e69-d8a3739fc769",
+        "code": "TRF_SPA_UYU_MELVA",
+        "name": "TRANSFER COMPARTIDO SPA - UYU ONEWAY (10H) PICK UP HOTEL",
+        "reasons": []
+      },
+      {
+        "id": "07ef73a3-9f8a-51fb-966c-71c63b25fb02",
+        "code": "TRF_SUCRE_AEROPUERTO",
+        "name": "TRANSFER SUCRE - AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "bc4da8c3-cf8c-5997-a008-f745f55ba551",
+        "code": "TRF_SUCRE_TARAMBUCO_SUCRE",
+        "name": "TRASLADO IDA y VUELTA  SUCRE - TARAMBUCO",
+        "reasons": []
+      },
+      {
+        "id": "66d60804-2695-54f0-bf2b-1cf54d428f46",
+        "code": "TRF_TRANSFERTURISMO_LEONARDO_HOTEL_SCL_AIRPORT_10_12PAX_2026",
+        "name": "HOTEL - AEROPUERTO SANTIAGO (10-12PAX)",
+        "reasons": []
+      },
+      {
+        "id": "99875b28-06fc-5df6-a2a9-0dbc8ac392d9",
+        "code": "TRF_UYU_LEO_CAY_UYU",
+        "name": "CAYARA – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "8bdd9d1f-4816-5aad-ac36-1ea784595b3c",
+        "code": "TRF_UYU_LEO_CEN_APT",
+        "name": "TRANSFER CENTRO UYUNI – AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "fa5afb7e-ef59-5f9a-b3c8-d366a400e0a9",
+        "code": "TRF_UYU_LEO_COLCH_VILL",
+        "name": "UYUNI – COLCHANI – VILLAMAR",
+        "reasons": []
+      },
+      {
+        "id": "ebf021e7-4c09-59f3-a835-7a0837639c0c",
+        "code": "TRF_UYU_LEO_COL_APT",
+        "name": "TRANSFER COLCHANI – AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "38478b22-550c-5610-a3af-a7dd8ceef45e",
+        "code": "TRF_UYU_LEO_EMPTY_LEGS",
+        "name": "TRAMOS VACÍOS A HITO / VILLAZÓN / SUCRE / LA PAZ",
+        "reasons": []
+      },
+      {
+        "id": "c084d51c-2e35-52a1-80d6-5273c2d018db",
+        "code": "TRF_UYU_LEO_FULLDAY_UYU_HITO",
+        "name": "TRANSFER UYUNI - HITO o viceversa 1D",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "c585f5d8-2c06-5618-89ce-8a2f3fffd817",
+        "code": "TRF_UYU_LEO_HITO_TAYKA",
+        "name": "HITO CAJONES – TAYKA DESIERTO (1-6 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "2470a64e-3297-539c-96a7-77f2b244db6e",
+        "code": "TRF_UYU_LEO_HITO_TAYKA_G",
+        "name": "HITO CAJONES – TAYKA DESIERTO + GUIDE ENG",
+        "reasons": []
+      },
+      {
+        "id": "ddfe0fb0-30e1-56e8-b2b3-c22923f59375",
+        "code": "TRF_UYU_LEO_KACHI_TER",
+        "name": "TRANSFER KACHI – TERMINAL",
+        "reasons": []
+      },
+      {
+        "id": "0e2f386b-2ad9-50be-998d-979d8ee4f30e",
+        "code": "TRF_UYU_LEO_OLL_UYU",
+        "name": "OLLAGUE – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "33634d2a-ad91-5539-9c41-e8260ea0769b",
+        "code": "TRF_UYU_LEO_PHOTO",
+        "name": "TRANSPORTE FOTOGRAFOS",
+        "reasons": []
+      },
+      {
+        "id": "4722fce1-793e-53dc-9eb6-a7579bf92633",
+        "code": "TRF_UYU_LEO_POT_SUCRE",
+        "name": "POTOSI – SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "8c7500a9-52c2-59be-9508-c427fba18b3e",
+        "code": "TRF_UYU_LEO_SALAR_FD",
+        "name": "HOTELES SAL COLCHANI – FULL DAY SALAR",
+        "reasons": []
+      },
+      {
+        "id": "97757611-1d49-5218-a99f-bd1f8a9e9cba",
+        "code": "TRF_UYU_LEO_SUCRE_CAY",
+        "name": "SUCRE – CAYARA",
+        "reasons": []
+      },
+      {
+        "id": "fe068a19-0378-5307-857f-693289abe326",
+        "code": "TRF_UYU_LEO_TAYKA_FLAM",
+        "name": "TAYKA DESIERTO – FLAMENCOS – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "53a201aa-1b8a-5f3b-8a31-3f03dddfba44",
+        "code": "TRF_UYU_LEO_TAYKA_SALAR",
+        "name": "TAYKA PIEDRA – SALAR – UYUNI",
+        "reasons": []
+      },
+      {
+        "id": "fd5129ec-1403-55a8-8f6e-e0a0dbe66c62",
+        "code": "TRF_UYU_LEO_UYUVILLAZON",
+        "name": "TRANSFER UYUNI - VILLAZON",
+        "reasons": [
+          "Sin tarifa vigente con costo neto o rack."
+        ]
+      },
+      {
+        "id": "916f17a6-3327-54c9-b5c9-1e7be2ccd986",
+        "code": "TRF_UYU_LEO_UYU_AVAROA",
+        "name": "UYUNI – AVAROA",
+        "reasons": []
+      },
+      {
+        "id": "18ffdb32-64b9-5736-ae3a-b935bf37bd22",
+        "code": "TRF_UYU_LEO_UYU_HITO",
+        "name": "UYUNI – HITO CAJONES",
+        "reasons": []
+      },
+      {
+        "id": "6c368a8b-a1cc-5e94-b2b6-cf8e0f8bb8e2",
+        "code": "TRF_UYU_LEO_UYU_LPZ",
+        "name": "UYUNI – LA PAZ",
+        "reasons": []
+      },
+      {
+        "id": "ffd3a670-f9b6-5ff4-87e1-ee9a641bcf06",
+        "code": "TRF_UYU_LEO_UYU_ORURO",
+        "name": "UYUNI – ORURO",
+        "reasons": []
+      },
+      {
+        "id": "a380e83a-7cad-5c52-bbc9-dfada3a849a0",
+        "code": "TRF_UYU_LEO_UYU_POT",
+        "name": "UYUNI – POTOSI",
+        "reasons": []
+      },
+      {
+        "id": "ba298c1f-e163-59f6-8cf1-effae755a576",
+        "code": "TRF_UYU_LEO_UYU_SUCRE",
+        "name": "UYUNI – SUCRE",
+        "reasons": []
+      },
+      {
+        "id": "cca08e29-3870-5581-be29-25cfa1da6c87",
+        "code": "TRF_UYU_LEO_UYU_TUPIZA",
+        "name": "UYUNI – TUPIZA",
+        "reasons": []
+      },
+      {
+        "id": "7b1684da-002d-5e96-bf62-12a1a73bbf02",
+        "code": "TRF_UYU_LEO_UYU_VILLZ",
+        "name": "UYUNI – VILLAZON",
+        "reasons": []
+      },
+      {
+        "id": "f34ef05c-f856-5f07-b50a-884832165453",
+        "code": "TRF_UYU_LEO_VILL_HITO",
+        "name": "VILLAMAR – HITO CAJONES",
+        "reasons": []
+      },
+      {
+        "id": "fd9a1e58-eecf-51d9-ba16-a447868f354f",
+        "code": "TRF_UYU_MELVA_COL_APT",
+        "name": "TRANSFER COLCHANI – AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "20f05ebe-0801-571b-918c-b34e20c9d084",
+        "code": "TRN_LEO_HALFDAY_SALAR_4X4_2026",
+        "name": "TRANSPORTE 4X4 SALAR HALF DAY",
+        "reasons": []
+      },
+      {
+        "id": "07285461-20d3-5a0d-9984-45e2af98a2ae",
+        "code": "TRN_SCZ_HOTEL_APT_CONTINENTAL_2026",
+        "name": "TRANSFER HOTEL - AEROPUERTO",
+        "reasons": []
+      },
+      {
+        "id": "d2a92c19-b839-57d9-bb87-8a9f7a804dfc",
+        "code": "TRN_SCZ_HOTEL_BIOCENTRO_ECOTAXI_2026",
+        "name": "TRN_SCZ_HOTEL_BIOCENTRO_ECOTAXI_2026",
+        "reasons": []
+      },
+      {
+        "id": "69b36292-f863-556b-9ab6-ca6fd41384e7",
+        "code": "TT_CBB_2D1N_1P",
+        "name": "TORO TORO 2D1N (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "c66d23b6-8b95-550c-b5ac-61d926759d50",
+        "code": "TT_CBB_3D1N_1P",
+        "name": "TORO TORO 3D1N (1 PAX)",
+        "reasons": []
+      },
+      {
+        "id": "7f33b0f4-283c-5eeb-8c2f-6401466b16bd",
+        "code": "TUNUPA_GUIA_1_6",
+        "name": "Guía de Montaña",
+        "reasons": []
+      },
+      {
+        "id": "bad24c65-7b2a-582a-905a-5453e35e062f",
+        "code": "UTURUNKU_GUIA_1_6",
+        "name": "Guía de Montaña",
+        "reasons": []
+      },
+      {
+        "id": "db700232-658a-5c4d-8f67-f15dd24930e5",
+        "code": "VEH_SUPPORT_ APTHAPI_GROUP_2026",
+        "name": "VEHICULO SOPORTE ALMUERZO APTHAPI POR GRUPO",
+        "reasons": []
+      }
+    ],
+    "pending": 857,
+    "eligible": 792,
+    "remaining": 65
+  },
+  "templates": {
+    "items": [
+      {
+        "id": "c1afa26e-8cc2-5067-a9d7-d4f0bca59ba7",
+        "code": "SPASPA-4D3N-FJJ",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "44f067c9-d3a2-59ee-b4f8-70708a54ed66",
+        "code": "SPASPA-4D3N-FJM",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "6a448cc0-21b6-582e-8c4e-3205637a836d",
+        "code": "SPASPA-4D3N-LLTd",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "f4a0ee78-4e36-59db-9bda-5b94d3f48edf",
+        "code": "SPASPA-4D3N-MJF",
+        "name": "- VIP",
+        "reasons": []
+      },
+      {
+        "id": "8b65bf70-0fc6-5d02-ab76-6ca41a8db7df",
+        "code": "SPASPA-4D3N-MLF",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "404dde3a-1709-511b-ae95-53bf62a55c77",
+        "code": "SPASPA-4D3N-MLTd",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "c91a565d-7596-56d9-99dd-057b212826da",
+        "code": "SPASPA-4D3N-MPF",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "a5b84943-3684-5aa2-9ef4-fb6ffe12f538",
+        "code": "SPASPA-4D3N-MPTd",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "2eaf385e-d58c-5a23-9b3c-ad3089529692",
+        "code": "SPASPA-4D3N-MRF",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI - SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "3fa5db59-25c2-50f6-a157-95689e6169b8",
+        "code": "SPASPA-4D3N-MÑF",
+        "name": "- COMFORT",
+        "reasons": []
+      },
+      {
+        "id": "a190b5d3-6018-57a5-854f-3d1bdfb4fd2c",
+        "code": "SPASPA-4D3N-PPTd",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "c477b3db-8f69-55be-8feb-99acfe1442ae",
+        "code": "SPASPA-4D3N-ScJF",
+        "name": "San Pedro de Atacama → Uyuni → San Pedro de Atacama",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "3c12f644-8b4f-5008-aeff-19ba0095bf22",
+        "code": "SPASPA-4D3N-ScJTd",
+        "name": "San Pedro de Atacama → Uyuni → San Pedro de Atacama",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "c3223fde-2544-572e-a5dc-2d6c3639cfc9",
+        "code": "SPASPA-4D3N-ScKS",
+        "name": "BUDGET",
+        "reasons": [
+          "Día 1: servicio no aprobado (HTL_SC_DINNER_BOB_2026)."
+        ]
+      },
+      {
+        "id": "bbed5c37-b4e3-5f6a-9b52-0c1e5d1deff0",
+        "code": "SPASPA-4D3N-ScLM",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "e0fb57c1-9600-5ef5-9d1d-6d7b7620ebfb",
+        "code": "SPASPA-4D3N-ScRF",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI - SAN PEDRO DE ATACAMA",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "78c82f20-4e2e-550b-b407-03adee23fa74",
+        "code": "SPASPA-4D3N-ÑLTd",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "5261a32b-19a9-5728-86fc-7a50ef522145",
+        "code": "SPASPA-4D3N-ÑÑF",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": []
+      },
+      {
+        "id": "8e048b4b-7857-560c-896d-60c0087b23c9",
+        "code": "SPAUYU-3D2N-FJ",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "bef32a75-cc11-5c89-9b99-ef373754da67",
+        "code": "SPAUYU-3D2N-FL",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "e8a098a4-b630-51aa-8b1c-f4b28ac40045",
+        "code": "SPAUYU-3D2N-FP",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "b4bc1d22-229c-5f15-9e16-7a12686ff003",
+        "code": "SPAUYU-3D2N-HK",
+        "name": "ITINERARIO DETALLADO SAN PEDRO DE ATACAMA → SALAR DE  UYUNI (SOLO IDA)",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios."
+        ]
+      },
+      {
+        "id": "6c556df1-4f97-5415-8304-ccd6d7d949ad",
+        "code": "SPAUYU-3D2N-ML",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "c56f1951-5c6d-532b-9af7-ca0b742985e9",
+        "code": "SPAUYU-3D2N-MP",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "18ca2699-00d3-5406-a14e-9ee82ebe69f6",
+        "code": "SPAUYU-3D2N-ScK",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI (SOLO IDA)",
+        "reasons": [
+          "Día 1: servicio no aprobado (HTL_SC_DINNER_USD_2026)."
+        ]
+      },
+      {
+        "id": "aeac7542-707b-5b98-a5a6-f511a578454f",
+        "code": "SPAUYU-4D3N-FTL",
+        "name": "Itinerario Detallado",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios.",
+          "Día 4: sin servicios."
+        ]
+      },
+      {
+        "id": "7d37719c-7fcb-5622-b0f8-f7d3101441e7",
+        "code": "UYUSPA-3D2N-JTd",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "ede37172-1e3b-5f87-8a34-14e3c81133e3",
+        "code": "UYUSPA-3D2N-KDr",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA   (SOLO IDA)",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios."
+        ]
+      },
+      {
+        "id": "8ced6997-e743-57da-8679-b8202f48256e",
+        "code": "UYUSPA-3D2N-KS",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "1f6782ea-17d1-54b6-8ba8-95d3c6c89e7e",
+        "code": "UYUSPA-3D2N-LM",
+        "name": "ITINERARIO DETALLADO – SAN PEDRO DE ATACAMA → UYUNI →SAN PEDRO DE ATACAMA",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 4: sin servicios.",
+          "Los días deben cubrir del 1 al 3 sin huecos ni días extra."
+        ]
+      },
+      {
+        "id": "287413e0-49b4-5708-9871-ffd236128363",
+        "code": "UYUSPA-3D2N-LTd",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "8eaaf135-cdba-5122-be08-66d9e825672d",
+        "code": "UYUSPA-3D2N-PTd",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA   (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "242291b9-7094-5c71-a396-87da68e5b217",
+        "code": "UYUSPA-3D2N-ÑTd",
+        "name": "ITINERARIO DETALLADO – UYUNI A SAN PEDRO DE ATACAMA  (SOLO IDA)",
+        "reasons": []
+      },
+      {
+        "id": "6e7ee944-785a-54b9-b329-6be204344a67",
+        "code": "UYUUYU-2D1N-L",
+        "name": "Servicio: 2 Días y 1 Noche: Full Day Salar de Uyuni + extensión Valle de las Rocas y Lagunas Altiplánicas",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios."
+        ]
+      },
+      {
+        "id": "74fd942d-44d1-52a5-af3b-9a10027cb6d9",
+        "code": "UYUUYU-3D2N-CkHj",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios."
+        ]
+      },
+      {
+        "id": "c34c51d8-82f0-5f7d-9c94-dc9390b8738e",
+        "code": "UYUUYU-3D2N-JTd",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": []
+      },
+      {
+        "id": "49e92237-b6d4-514b-93bb-3272dfd1efd9",
+        "code": "UYUUYU-3D2N-KS",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": []
+      },
+      {
+        "id": "ba0bb734-2f73-5040-8aae-217705d47e23",
+        "code": "UYUUYU-3D2N-LTd",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": []
+      },
+      {
+        "id": "1ed64259-6796-539d-9889-291da5798c6a",
+        "code": "UYUUYU-3D2N-PF",
+        "name": "ITINERARIO DETALLADO – UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios."
+        ]
+      },
+      {
+        "id": "95df3a85-6bf2-520b-9145-7ef43b183663",
+        "code": "UYUUYU-3D2N-PTd",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": []
+      },
+      {
+        "id": "4ed1aa02-2ffb-5077-86b5-78b3903ffa6c",
+        "code": "UYUUYU-3D2N-ÑF",
+        "name": "ITINERARIO DETALLADO – UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": [
+          "Día 1: sin servicios.",
+          "Día 2: sin servicios.",
+          "Día 3: sin servicios."
+        ]
+      },
+      {
+        "id": "23ebc69c-20e6-53f5-a6c6-9da288431864",
+        "code": "UYUUYU-3D2N-ÑTd",
+        "name": "ITINERARIO DETALLADO UYUNI Y ALTIPLANO BOLIVIANO",
+        "reasons": []
+      }
+    ],
+    "pending": 42,
+    "eligible": 26,
+    "remaining": 16
+  },
+  "fingerprint": "3e4ef950d91bedc06e7e4506553135c7",
+  "review_date": "2026-10-11"
+}

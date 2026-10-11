@@ -704,6 +704,7 @@ export type Database = {
           updated_at: string;
           import_warnings: Json;
           quote_defaults: Json;
+          approval_issues: string[];
         };
         Insert: {
           id?: string;
@@ -730,6 +731,7 @@ export type Database = {
           updated_at?: string;
           import_warnings?: Json;
           quote_defaults?: Json;
+          approval_issues?: string[];
         };
         Update: {
           id?: string;
@@ -756,6 +758,7 @@ export type Database = {
           updated_at?: string;
           import_warnings?: Json;
           quote_defaults?: Json;
+          approval_issues?: string[];
         };
         Relationships: [
           {
@@ -2111,6 +2114,7 @@ export type Database = {
           import_issues: string | null;
           created_at: string;
           updated_at: string;
+          approval_issues: string[];
         };
         Insert: {
           id?: string;
@@ -2137,6 +2141,7 @@ export type Database = {
           import_issues?: string | null;
           created_at?: string;
           updated_at?: string;
+          approval_issues?: string[];
         };
         Update: {
           id?: string;
@@ -2163,6 +2168,7 @@ export type Database = {
           import_issues?: string | null;
           created_at?: string;
           updated_at?: string;
+          approval_issues?: string[];
         };
         Relationships: [
           {
@@ -2371,6 +2377,10 @@ export type Database = {
       };
     };
     Functions: {
+      approve_valid_imports: {
+        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };
+        Returns: Json;
+      };
       build_supplier_payables: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
