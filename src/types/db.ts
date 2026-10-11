@@ -694,6 +694,7 @@ export type Database = {
           created_at: string;
           updated_at: string;
           import_warnings: Json;
+          quote_defaults: Json;
         };
         Insert: {
           id?: string;
@@ -719,6 +720,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           import_warnings?: Json;
+          quote_defaults?: Json;
         };
         Update: {
           id?: string;
@@ -744,6 +746,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           import_warnings?: Json;
+          quote_defaults?: Json;
         };
         Relationships: [
           {
@@ -2330,6 +2333,7 @@ export type Database = {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
       };
+      calculation_has_errors: { Args: { result: Json }; Returns: boolean };
       claim_quote_email: {
         Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
         Returns: Database["public"]["Tables"]["quote_emails"]["Row"];

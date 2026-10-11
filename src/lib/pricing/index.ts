@@ -9,6 +9,7 @@ export interface Rate {
   pax_max: number | null;
   price_net: number | null;
   price_rack?: number | null;
+  // Historical import flag; current availability is determined by the prices.
   net_cost_missing?: boolean;
   room_type?: string | null;
 }
@@ -62,14 +63,15 @@ export interface QuoteInput extends PaxScenario {
   pax_scenarios?: PaxScenario[];
 }
 export interface ItemResult {
+  status: "ok" | "error";
   id: string;
   day_number: number;
   date: string;
   quantity: number;
-  unit_cost_original: number;
-  unit_cost_usd: number;
-  total_cost_usd: number;
-  total_margin_usd: number;
+  unit_cost_original?: number;
+  unit_cost_usd: number | null;
+  total_cost_usd: number | null;
+  total_margin_usd: number | null;
   covered: boolean;
   warning?: string;
 }
@@ -80,11 +82,45 @@ export interface QuoteTotals {
   price_per_pax_usd: number;
   single_supplement_pp: number;
 }
-export interface QuoteResult extends QuoteTotals {
+type NullableTotals = { [K in keyof QuoteTotals]: number | null };
+export interface QuoteResult extends NullableTotals {
+  status: "ok" | "error";
   items: ItemResult[];
-  days: { day_number: number; total_cost_usd: number; total_margin_usd: number }[];
+  days: { day_number: number; total_cost_usd: number | null; total_margin_usd: number | null }[];
   warnings: string[];
-  scenarios: (QuoteTotals & { pax_paying: number; tc_count: number })[];
+  scenarios: (NullableTotals & {
+    status: "ok" | "error";
+    warnings: string[];
+    pax_paying: number;
+    tc_count: number;
+  })[];
+}
+
+export type CompleteQuoteResult = Omit<QuoteResult, "scenarios"> &
+  QuoteTotals & {
+    scenarios: (QuoteResult["scenarios"][number] & QuoteTotals)[];
+  };
+export function assertCompleteCalculation(
+  result: QuoteResult,
+): asserts result is CompleteQuoteResult {
+  const hasMissingTotal = (totals: NullableTotals) =>
+    [
+      totals.total_cost_usd,
+      totals.total_margin_usd,
+      totals.total_price_usd,
+      totals.price_per_pax_usd,
+      totals.single_supplement_pp,
+    ].some((n) => n == null || !Number.isFinite(n));
+  if (
+    result.status === "error" ||
+    result.items.some((i) => i.status === "error") ||
+    result.scenarios.some((s) => s.status === "error" || hasMissingTotal(s)) ||
+    hasMissingTotal(result)
+  ) {
+    throw new Error(
+      "Cotización con errores de cálculo: corrige las tarifas sin costo neto ni rack antes de continuar",
+    );
+  }
 }
 
 function nonnegative(value: number, label: string): number {
@@ -223,6 +259,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       }
       if (!item.included || covered) {
         items.push({
+          status: "ok",
           id: item.id,
           day_number: day.day_number,
           date,
@@ -239,6 +276,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       // An unused room variant has no cost and requires no matching rate.
       if (qty === 0) {
         items.push({
+          status: "ok",
           id: item.id,
           day_number: day.day_number,
           date,
@@ -251,7 +289,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         });
         continue;
       }
-      let native: number, warning: string | undefined;
+      let native: number;
       if (item.price_overridden) {
         if (!item.override_note?.trim() || item.unit_cost_original === undefined)
           throw new Error("Override requires price and note");
@@ -264,14 +302,27 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           input.seasons,
         );
         const price = rate.price_net ?? rate.price_rack;
-        if (price === undefined || price === null) throw new Error(`No price: ${item.id}`);
+        if (price === undefined || price === null) {
+          items.push({
+            status: "error",
+            id: item.id,
+            day_number: day.day_number,
+            date,
+            quantity: qty,
+            unit_cost_usd: null,
+            total_cost_usd: null,
+            total_margin_usd: null,
+            covered: false,
+            warning: `${item.id}: sin costo neto ni rack`,
+          });
+          continue;
+        }
         native = nonnegative(price, "price");
-        if (rate.net_cost_missing || rate.price_net === null)
-          warning = `${item.id}: sin costo neto`;
       }
       const usd = native / fx(input, item.currency),
         cost = qty * usd;
       items.push({
+        status: "ok",
         id: item.id,
         day_number: day.day_number,
         date,
@@ -281,12 +332,12 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         total_cost_usd: cost,
         total_margin_usd: item.margin_applicable ? (cost * input.margin_pct) / 100 : 0,
         covered: false,
-        ...(warning ? { warning } : {}),
       });
     }
   }
-  const cost = items.reduce((n, i) => n + i.total_cost_usd, 0),
-    margin = items.reduce((n, i) => n + i.total_margin_usd, 0);
+  // Known amounts are used only when every billable item and scenario is valid.
+  const cost = items.reduce((n, i) => n + (i.total_cost_usd ?? 0), 0),
+    margin = items.reduce((n, i) => n + (i.total_margin_usd ?? 0), 0);
   const per = input.rounding_rule.per_pax
     ? round((cost + margin) / input.pax_paying, input.rounding_rule)
     : cents(round(cost + margin, input.rounding_rule) / input.pax_paying);
@@ -302,36 +353,49 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         (s.margin_applicable ? 1 + input.margin_pct / 100 : 1),
     0,
   );
+  const scenarios = (input.pax_scenarios ?? []).map((s) => {
+    const result = calculateQuote({ ...input, ...s, pax_scenarios: [] });
+    return {
+      status: result.status,
+      warnings: result.warnings,
+      pax_paying: s.pax_paying,
+      tc_count: s.tc_count,
+      total_cost_usd: result.total_cost_usd,
+      total_margin_usd: result.total_margin_usd,
+      total_price_usd: result.total_price_usd,
+      price_per_pax_usd: result.price_per_pax_usd,
+      single_supplement_pp: result.single_supplement_pp,
+    };
+  });
+  const failed =
+    items.some((i) => i.status === "error") || scenarios.some((s) => s.status === "error");
   return {
-    total_cost_usd: cents(cost),
-    total_margin_usd: cents(margin),
-    total_price_usd: total,
-    price_per_pax_usd: per,
-    single_supplement_pp: cents(single),
+    status: failed ? "error" : "ok",
+    total_cost_usd: failed ? null : cents(cost),
+    total_margin_usd: failed ? null : cents(margin),
+    total_price_usd: failed ? null : total,
+    price_per_pax_usd: failed ? null : per,
+    single_supplement_pp: failed ? null : cents(single),
     items,
-    days: [...dayNumbers].map((day_number) => ({
-      day_number,
-      total_cost_usd: cents(
-        items.filter((i) => i.day_number === day_number).reduce((n, i) => n + i.total_cost_usd, 0),
-      ),
-      total_margin_usd: cents(
-        items
-          .filter((i) => i.day_number === day_number)
-          .reduce((n, i) => n + i.total_margin_usd, 0),
-      ),
-    })),
-    warnings: items.flatMap((i) => (i.warning ? [i.warning] : [])),
-    scenarios: (input.pax_scenarios ?? []).map((s) => {
-      const result = calculateQuote({ ...input, ...s, pax_scenarios: [] });
+    days: [...dayNumbers].map((day_number) => {
+      const dayItems = items.filter((i) => i.day_number === day_number);
+      const failedDay = dayItems.some((i) => i.status === "error");
       return {
-        pax_paying: s.pax_paying,
-        tc_count: s.tc_count,
-        total_cost_usd: result.total_cost_usd,
-        total_margin_usd: result.total_margin_usd,
-        total_price_usd: result.total_price_usd,
-        price_per_pax_usd: result.price_per_pax_usd,
-        single_supplement_pp: result.single_supplement_pp,
+        day_number,
+        total_cost_usd: failedDay
+          ? null
+          : cents(dayItems.reduce((n, i) => n + (i.total_cost_usd ?? 0), 0)),
+        total_margin_usd: failedDay
+          ? null
+          : cents(dayItems.reduce((n, i) => n + (i.total_margin_usd ?? 0), 0)),
       };
     }),
+    warnings: [
+      ...items.flatMap((i) => (i.warning ? [i.warning] : [])),
+      ...scenarios.flatMap((s) =>
+        s.warnings.map((w) => `Escenario ${s.pax_paying}+${s.tc_count} TC: ${w}`),
+      ),
+    ],
+    scenarios,
   };
 }

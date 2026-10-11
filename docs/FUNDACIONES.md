@@ -16,7 +16,7 @@ Se eliminaron únicamente estas cinco copias UUID, cuyo contenido coincide con l
 | `20261004213938_6758ad2c-d611-4410-aaae-dec14305ede3.sql` | `20261004000400_quote_workflows.sql` |
 | `20261004214018_b09c38cb-0a45-40fa-9201-65508122c648.sql` | `20261004000500_sales_operations.sql` |
 
-Las demás migraciones permanecen intactas, incluidos los UUID posteriores. Los archivos `20261006092542_72b5a0a6-914a-40b7-a948-015194573dd2.sql` y `20261006092618_6729399b-244b-4656-aa81-11f72c6e4b7c.sql` repiten objetos de 000600 y 000700. Por ello, el directorio completo aún no se puede reproducir secuencialmente sobre una base vacía sin reconciliar ese historial. Su modificación queda fuera de esta limpieza.
+**Actualización del 11 de octubre de 2026:** los archivos `20261006092542_72b5a0a6-914a-40b7-a948-015194573dd2.sql` y `20261006092618_6729399b-244b-4656-aa81-11f72c6e4b7c.sql` se reconciliaron como comprobaciones de los objetos creados por 000600/000700. Conservan las versiones históricas sin repetir el DDL. El directorio completo ya se reproduce sobre una base vacía y las pruebas de BD pasan. No se requiere ejecutar esos alias ni reparar el historial en Cloud. La nueva migración y el seed LTd sí están pendientes; véase el [orden de aplicación de LTd](VALIDACION_LTD.md).
 
 ## Preparación local
 
@@ -84,6 +84,6 @@ bunx tsc --noEmit
 bun run test
 ```
 
-**Limitación actual:** `test:db` queda bloqueado por la duplicación de objetos de 000600 en el UUID posterior conservado. No se ocultan ni se saltan esas migraciones en el runner. Una vez reconciliado ese historial, `test:db` ejecuta las migraciones reales en PostgreSQL con PGlite, emula Ãºnicamente el contrato mÃ­nimo de Auth de Supabase y aplica todos los seeds dos veces. Verifica permisos mediante `SET ROLE authenticated` y distintos `auth.uid()`: escalamiento de roles, servicios pendientes, tarifas, hijos de mÃ³dulos aprobados, cotizaciones ajenas, pagos, reasignaciÃ³n de Ã­tems, pasajeros, anon y correlativo. Es una prueba local; no valida configuraciÃ³n de Auth/Storage/red del proyecto remoto.
+**Actualizado el 11 de octubre de 2026:** `test:db` pasa tras reconciliar los duplicados. No se ocultan ni se saltan migraciones en el runner. Ejecuta las migraciones reales en PostgreSQL con PGlite, emula únicamente el contrato mínimo de Auth de Supabase y verifica la repetición de los seeds históricos. Comprueba permisos mediante `SET ROLE authenticated` y distintos `auth.uid()`: escalamiento de roles, servicios pendientes, tarifas, hijos de módulos aprobados, cotizaciones ajenas, pagos, reasignación de ítems, pasajeros, anon y correlativo. También prueba snapshots, estados y entrega. La referencia LTd y su seed se verifican con `npm run test`. Son pruebas locales; no validan la configuración de Auth/Storage/red del proyecto remoto.
 
 `bun run db:seed:generate` regenera SQL y reporte desde el CSV con Python 3 (biblioteca estÃ¡ndar). `bun run db:types` genera `src/types/db.ts` consultando el catÃ¡logo del esquema migrado local, incluidos nullabilidad, defaults, columnas generadas, relaciones, vistas y enums. No modifica los tipos gestionados por Lovable.
