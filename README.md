@@ -158,3 +158,49 @@ Las pruebas verifican +6,4 %, -10 %, margen sin recargo al ajuste, FX/cantidades
 transporte del piloto SPA-UYU de 2 pax, filtros, permisos, conflictos, rollback,
 versiones, conservación del tarifario y privacidad del PDF. Los dos casos reales
 incompletos de Bolivia/WE ROAD siguen siendo fallos conocidos de la suite completa.
+
+## Creación atómica desde una plantilla
+
+La implementación está en `src/lib/quotes/from-template.ts`, exportada desde
+`src/lib/quotes`. Las sugerencias muestran solo plantillas activas.
+
+```ts
+const quote = await createQuoteFromTemplate(templateId, {
+  client_id: clientId, language: "es", start_date: "2026-10-14",
+  pax_paying: 2, tc_count: 0,
+  // Opcional: staff: { drivers: 1, guides: 0 }
+  // Opcional: rooming: { paying: { DBL: 1 }, tc: {} }
+});
+// quote.calculation y sus totales ya están guardados.
+```
+
+Lee y calcula en TypeScript antes de escribir. La única RPC de escritura,
+`create_quote_from_template`, valida de nuevo la plantilla y el origen completo
+bajo bloqueos, guarda la copia y el resultado del motor en una transacción. No hay
+un borrador intermedio ni un segundo guardado de totales. Si el catálogo cambia
+durante la preparación, rechaza la operación; no aplica silenciosamente otra tarifa.
+El código usa SKU de plantilla, idioma, año de creación en Santiago y correlativo.
+Cada día usa su fecha real para la tarifa; las temporadas DRY/RAIN deben configurarse,
+no se deducen de meses arbitrarios. FX, política comercial y rooming quedan congelados.
+Si se omite staff, usa el de la plantilla; un cero explícito se respeta.
+
+Una plantilla pendiente, día vacío, enlace incompleto o traducción ausente devuelve
+un motivo sin crear filas. Las traducciones deben prepararse antes de crear: este
+flujo no invoca la IA ni modifica el catálogo. Los snapshots incluyen bloques,
+servicios, tarifas, cantidades y la configuración original de los enlaces.
+
+Orden de despliegue: aplicar las migraciones hasta
+`20261011000600_quote_item_adjustments.sql` (PR #11), después
+`20261011000800_atomic_quote_from_template.sql`, y por último este frontend.
+Si está pendiente la corrección independiente `20261011000700` del PR #12,
+aplicarla en su orden; la 008 no depende de ella. No se ha escrito en Cloud ni
+aprobado el catálogo. La 008 añade lectura de FX para vendedores sin permiso de
+edición y bloquea el uso de la RPC antigua para copiar plantillas.
+
+Prueba de aceptación: `bunx vitest run src/lib/quotes/creation.test.ts`.
+SPAUYU-3D2N-MP de 2 pax guarda costo USD 1.939 (fixture: 1.939,000864; tolerancia
+USD 1). Con markup 25 % guarda venta USD 2.423,75; la hoja no proporciona un precio
+de venta de referencia. Esa comparación usa el FX del fixture (CLP 925,92 por USD).
+Si no se proporciona FX, se usa el vigente en Admin para la fecha de inicio, que
+puede dar otro importe. Las pruebas usan aprobación local explícita de la plantilla,
+sin cambiar los seeds históricos ni los datos de Cloud.

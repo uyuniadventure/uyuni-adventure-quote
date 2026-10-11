@@ -88,6 +88,13 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        create_quote_from_template: [
+          ["p_template", "uuid"],
+          ["p_quote", "jsonb"],
+          ["p_days", "jsonb"],
+          ["p_source", "jsonb"],
+          ["p_result", "jsonb"],
+        ],
         create_quote_snapshot: [
           ["p_quote", "jsonb"],
           ["p_days", "jsonb"],

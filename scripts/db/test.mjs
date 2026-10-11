@@ -99,15 +99,20 @@ try {
         .length === 0,
       "cannot escalate role",
     );
-    for (const table of [
-      "currencies",
-      "exchange_rates",
-      "terms_conditions",
-      "bank_accounts",
-      "ops_passengers",
-    ]) {
+    for (const table of ["currencies", "terms_conditions", "bank_accounts", "ops_passengers"]) {
       check((await scalar(`select count(*)::int from public.${table}`)) === 0, `${table} private`);
     }
+    check(
+      (await scalar("select count(*)::int from public.exchange_rates")) > 0,
+      "FX visible for quoting",
+    );
+    check(
+      (await query("update public.exchange_rates set rate_to_usd=999 returning id")).length === 0,
+      "seller cannot edit FX",
+    );
+    await denied(
+      "insert into public.exchange_rates(currency,rate_to_usd,valid_from) values('USD',2,'2099-01-01')",
+    );
     await denied(
       `insert into public.services(sku,name,type,status,created_by,currency,pricing_unit) values ('BAD','Bad','extra','activo','${seller}','USD','per_unit')`,
     );

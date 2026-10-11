@@ -63,6 +63,7 @@ beforeAll(async () => {
     )
   ).id;
   transport.client = pgliteSupabase(pg);
+  await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
 }, 30000);
 beforeEach(async () => {
   await pg.exec("set role authenticated");

@@ -260,6 +260,20 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 3. **Editor por días:** reordenar, quitar o agregar bloques; cambiar hotel (al seleccionar un hotel se muestran sus tipos de habitación y tarifas disponibles); agregar o quitar servicios; cambiar comidas; sobrescribir un precio solo en esta cotización; crear un ítem nuevo (con opción "agregar al tarifario" → queda `pendiente` si lo crea un vendedor).
 4. Panel lateral con el cálculo en vivo: costo, margen, total, precio por pax y (si es B2B) la tabla por escenarios.
 
+**Creación desde plantilla:** `src/lib/quotes/createQuoteFromTemplate` requiere una
+plantilla activa y días consecutivos con servicios. Recibe cliente, idioma, fecha,
+pagantes, TC, staff y rooming opcional; SKU/categoría proceden de la plantilla y la
+política de precios del cliente/Admin. La preparación lee y calcula sin escrituras
+ni traducciones automáticas. Una sola RPC `create_quote_from_template` bloquea y
+comprueba el origen, copia los días y los servicios con cantidades y configuración,
+asigna código/fechas y guarda el cálculo en la misma transacción. Un fallo revierte
+también historial y correlativo. Si cambió el origen, hay que repetir la creación.
+Cada día elige su tarifa por fecha real, temporada configurada y tramo de pasajeros.
+La cotización conserva los textos, los datos de los servicios, las tarifas y la
+configuración copiados: editar el catálogo después no la modifica. Falta de aprobación,
+días vacíos o traducción ausente devuelven un motivo sin crear un borrador parcial.
+El vendedor puede leer los tipos de cambio, pero solo Admin puede administrarlos.
+
 **Estados:**
 ```
 borrador → revisada → enviada → vendida
