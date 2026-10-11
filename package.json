@@ -4,6 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "import:presupuesto": "bun scripts/import-presupuesto.ts",
+    "compare:presupuestos": "bun scripts/compare-presupuestos.ts",
+    "test:references": "vitest run src/lib/pricing/real-cases.test.ts",
     "test:db": "node scripts/db/test.mjs && node scripts/db/test-blocks.mjs && node scripts/db/test-workflows.mjs && node scripts/db/test-delivery.mjs && node scripts/db/test-rack.mjs && node scripts/db/test-template-recovery.mjs",
     "typecheck": "tsc --noEmit",
     "test:edge": "deno test --allow-env supabase/functions/_shared/runtime_test.ts",
@@ -96,6 +99,8 @@
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "fast-xml-parser": "^5.11.2",
+    "fflate": "^0.8.3",
     "globals": "^15.15.0",
     "jsdom": "^20.0.3",
     "nitro": "3.0.260603-beta",

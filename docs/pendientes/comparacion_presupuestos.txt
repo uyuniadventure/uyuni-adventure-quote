@@ -1,0 +1,133 @@
+COINCIDE
+SPA-UYU 3D2N MP · 2 pax
+Fuente: data/import/presupuestos.xlsx · SPA UYU - 3D2N - MP !A32:G60
+| Celda | Servicio | Cantidad Sheets / app | Tarifa USD Sheets / app | Costo app | Costo Sheets | Diferencia | Causa probable |
+|---|---|---|---|---:|---:|---:|---|
+| F46 | SAN PEDRO - HITO CAJON (IN/OUT) sin guia 1-4PAX | 1 / 1 | 135.00 / 135.00 | 135.00 | 135.00 | 0.00 | Coincide |
+| F47 | 3D2N UYUNI – UYUNI | 1 / 1 | 690.00 / 690.00 | 690.00 | 690.00 | 0.00 | Coincide |
+| F48 | ALMUERZO APTHAPI BUFFET SALAR | 2 / 2 | 20.00 / 20.00 | 40.00 | 40.00 | 0.00 | Coincide |
+| F49 | ENTRADAS A PARQUES | 2 / 2 | 30.00 / 30.00 | 60.00 | 60.00 | 0.00 | Coincide |
+| F50 | CENA | 2 / 2 | 44.00 / 44.00 | 88.00 | 88.00 | 0.00 | Coincide |
+| F51 | HAB DOBLE | 1 / 1 | 312.00 / 312.00 | 312.00 | 312.00 | 0.00 | Coincide |
+| F53 | 3D2N UYUNI – UYUNI | 0 / 0 | 0.00 / 0.00 | 0.00 | 0.00 | 0.00 | Coincide |
+| F54 | ALMUERZO PLATO SERVIDO | 2 / 2 | 15.00 / 15.00 | 30.00 | 30.00 | 0.00 | Coincide |
+| F55 | Cóctel Salar | 2 / 2 | 10.00 / 10.00 | 20.00 | 20.00 | 0.00 | Coincide |
+| F56 | CENA | 2 / 2 | 44.00 / 44.00 | 88.00 | 88.00 | 0.00 | Coincide |
+| F57 | HAB STANDAR DBL | 1 / 1 | 446.00 / 446.00 | 446.00 | 446.00 | 0.00 | Coincide |
+| F59 | 3D2N UYUNI – UYUNI | 0 / 0 | 0.00 / 0.00 | 0.00 | 0.00 | 0.00 | Coincide |
+| F60 | ALMUERZO PLATO SERVIDO | 2 / 2 | 15.00 / 15.00 | 30.00 | 30.00 | 0.00 | Coincide |
+Costo: app 1939.00 / Sheets 1939.00 / diferencia 0.00 USD.
+Venta: app 2423.75 / Sheets N/D / diferencia N/D USD.
+Nota: F46: fila dice día 3, se usa encabezado día 1 (Andrea, 2026-10-11).
+Nota: F55: fila dice día 3, se usa encabezado día 2 (Andrea, 2026-10-11).
+Nota: Se compara costo: PRECIO VENTA está vacío. El markup 25 % procede de Andrea, no de Sheets.
+Nota: Fecha de prueba 2026-10-14: la fuente no tiene fecha. Staff 0 para este cálculo; la fuente no desglosa staff.
+Nota: El escenario y las cantidades solo certifican 2 pagantes + 0 TC; habitación DBL en cada una de las dos noches.
+Nota: Tarifas tomadas del catálogo local migrado; FX de las fórmulas del Excel. No certifica el estado de Cloud.
+
+REQUIERE DECISIÓN
+Bolivia 5D4N · 9+1
+Fuente: https://docs.google.com/spreadsheets/d/1TLN4VVpfFl1_kV8b1H_bVp5jj3XDrSWt5j4ZjN4pRE8/edit?gid=417295995#gid=417295995 · 2.0 BOLIVIA 5D/4N 9+1!A5:I39
+| Celda | Servicio | Cantidad Sheets / app | Tarifa USD Sheets / app | Costo app | Costo Sheets | Diferencia | Causa probable |
+|---|---|---|---|---:|---:|---:|---|
+| I8 | Alojamiento Madero Hotel & Suits o simliar | N/D / N/D | N/D / N/D | N/D | 660.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I10 | Transfer Hotel - Aeropuerto | 3 / N/D | 33.00 / N/D | N/D | 99.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I11 | Vuelo La Paz - Uyuni OB306 07:10 - 08:10 | 10 / N/D | 220.00 / N/D | N/D | 2200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I12 | FULL DAY SALAR | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I13 | EXTRA BREAKFAST | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I14 | GUÍA EN INGLÉS | N/D / N/D | N/D / N/D | N/D | 150.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I15 | ENTRADAS PARQUES | 10 / N/D | 30.00 / N/D | N/D | 300.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I16 | Almuerzo buffet en medio del Salar | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I18 | Sunset & Cocktail en el Salar | 10 / N/D | 10.00 / N/D | N/D | 100.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I20 | Tour Stargazing (sin telescopio) | 3 / N/D | 80.00 / N/D | N/D | 240.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I21 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | N/D / N/D | N/D / N/D | N/D | 925.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I23 | Laguna Hedionda | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I24 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 80.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I25 | Almuerzo incluído | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I27 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | N/D / N/D | N/D / N/D | N/D | 925.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I29 | Transporte Uyuni - Sucre | 2 / N/D | 300.00 / N/D | N/D | 600.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I30 | CITY TOUR COLONIAL HD (ENTRADA + GUÍA BILINGÜE) | 10 / N/D | 45.00 / N/D | N/D | 450.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I33 | Alojamiento Hotel du Su Merced | N/D / N/D | N/D / N/D | N/D | 500.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I35 | City tour HD | 10 / N/D | 35.00 / N/D | N/D | 350.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I36 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 100.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| I38 | Transfer al Aeropuerto | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+Costo: app N/D / Sheets 9179.00 / diferencia N/D USD.
+Venta: app N/D / Sheets 12179.00 / diferencia N/D USD.
+Pendiente: No hay SKU por línea ni asignación confirmada al catálogo; no se crearán servicios ni tarifas ficticias.
+Pendiente: I8 suma 550+110; las demás noches usan 10/2 habitaciones. Falta distribución por hotel y tratamiento del TC para reproducirla en la app.
+Pendiente: I60 = I57 + I59 aplica USD 3000 fijos; el motor usa porcentaje. No se convierte ese fijo en un porcentaje calculado para hacer pasar el test.
+Pendiente: No hay QuoteInput verificable: faltan datos de la fuente indicados abajo.
+Nota: Fuente indicada por Andrea. Columna I: 10 personas; I58 e I61 dividen entre 9 pagantes.
+Nota: El total de venta actual de Sheets es USD 12179; el fixture histórico del PDF decía USD 12924 (diferencia -745).
+Nota: Existe otra venta en I47 con markup 17 %: USD 10739.43. Se conserva I60, el resumen específico de 9 pagantes, pendiente de decisión comercial.
+Nota: Las fechas de la hoja son 09–13 enero 2026; el PDF antiguo es 13–17 diciembre 2026.
+Nota: No se usaron totales de línea como tarifas de grupo inventadas.
+
+REQUIERE DECISIÓN
+Caso SIVOLA sustituido por WE ROAD Bolivia Highlights 10D · solicitado 14+1
+Fuente: https://docs.google.com/spreadsheets/d/1TLN4VVpfFl1_kV8b1H_bVp5jj3XDrSWt5j4ZjN4pRE8/edit?gid=1913782732#gid=1913782732 · WE ROAD BOLIVIA HIGHLIGHTS 10D !A3:K74
+| Celda | Servicio | Cantidad Sheets / app | Tarifa USD Sheets / app | Costo app | Costo Sheets | Diferencia | Causa probable |
+|---|---|---|---|---:|---:|---:|---|
+| K4 | Transfer Aeropuerto - Hotel | 2 / N/D | 37.00 / N/D | N/D | 74.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K5 | City Tour FD + Valle de la Luna + Teleférico  (incluye guía, ingresos, almuerzo) | 14 / N/D | 65.00 / N/D | N/D | 910.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K7 | Hostal Sagarnaga + Desayuno | 7 / N/D | 38.00 / N/D | N/D | 266.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K9 | Transporte Privado La Paz - Copacabana | N/D / N/D | N/D / N/D | N/D | 320.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K10 | Lancha privada Copacabana → Isla de la luna | N/D / N/D | N/D / N/D | N/D | 350.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K11 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 140.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K12 | Lancha privada  Isla de Sol → Isla de la Luna (1 h) | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K13 | Visita al Templo de las Vírgenes del Sol "Iñak Uyu" | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K14 | INGRESO PARQUES | N/D / N/D | N/D / N/D | N/D | 210.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K15 | Almuerzo Incluydo Puma Punku | N/D / N/D | N/D / N/D | N/D | 140.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K16 | Atardecer Isla de Sol | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K17 | Cena incluyda Puma Punku | N/D / N/D | N/D / N/D | N/D | 140.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K18 | Alojamiento:  Puma Punku - ISLA DEL SOL -  (habitación estándar) | N/D / N/D | N/D / N/D | N/D | 406.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K20 | 🛥️ Lancha privada Isla del Sol Sur → Isla de Sol Norte → retorno a Copacabana | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K21 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 140.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K22 | 🍽️Almuerzo Incluydo en Copacabana | N/D / N/D | N/D / N/D | N/D | 140.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K23 | Transporte Privado Copacabana -  La Paz | N/D / N/D | N/D / N/D | N/D | 320.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K25 | Hostal Sagarnaga + Desayuno | N/D / N/D | N/D / N/D | N/D | 266.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K27 | Tour Camino de la Muerte + Bicicleta | 14 / N/D | 79.00 / N/D | N/D | 1106.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K28 | Entradas e impuestos. | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K29 | Almuerzo durante el recorrido. | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K31 | Hostal Sagarnaga + Desayuno | 7 / N/D | 38.00 / N/D | N/D | 266.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K33 | Tour Distrito de Cholets HD + ticket + guia (AM) | N/D / N/D | N/D / N/D | N/D | 630.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K36 | Transfer hotel - terminal de buses | N/D / N/D | N/D / N/D | N/D | 66.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K37 | Bus nocturno La Paz - Uyuni (cena + desayuno incluído) | N/D / N/D | N/D / N/D | N/D | 700.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K39 | Traslado Terminal de buses - Kachi | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K40 | Desayuno Extra Kachi | 14 / N/D | 15.00 / N/D | N/D | 210.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K41 | Servizio 3D/2N – 4×4 | 3 / N/D | 690.00 / N/D | N/D | 2070.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K42 | GUIA 3D/2N | N/D / N/D | N/D / N/D | N/D | 360.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K44 | ingreso Parques | 14 / N/D | 30.00 / N/D | N/D | 420.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K45 | Almuerzo buffet en el Salar | 14 / N/D | 20.00 / N/D | N/D | 280.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K47 | Atardecer + cóctel en el Salar | 14 / N/D | 10.00 / N/D | N/D | 140.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K48 | Cena in hotel Kachi | 14 / N/D | 15.00 / N/D | N/D | 210.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K49 | Hotel Kachi + colazione | N/D / N/D | N/D / N/D | N/D | 553.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K51 | Servizio 3D/2N – 4×4 | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K52 | GUIA 3D/2N | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K53 | ALMUERZO PLATO SERVIDO | 14 / N/D | 15.00 / N/D | N/D | 210.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K54 | Cena en Hostal Samaywasi | 14 / N/D | 20.00 / N/D | N/D | 280.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K55 | Hostal Samaywasi | N/D / N/D | N/D / N/D | N/D | 350.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K57 | Servizio 3D/2N – 4×4 | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K58 | GUIA 3D/2N | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K59 | Almuerzo Plato Servido | 14 / N/D | 15.00 / N/D | N/D | 210.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K60 | Uso diurno Hotel Kachi* (doccia e riposo) | N/D / N/D | N/D / N/D | N/D | 270.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K61 | Transfer Hotel → terminal bus Todo Turismo | 3 / N/D | 25.00 / N/D | N/D | 75.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K62 | Bus notturno semicama (21:00 – 06:00) - UYU LPB | 14 / N/D | 50.00 / N/D | N/D | 700.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K63 | Cena + desayuno + bebidas | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K65 | Transfer Terminal Bus Todo Turismo -  Hotel (06:00h) | 2 / N/D | 33.00 / N/D | N/D | 66.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K66 | Early CH-IN Hotel Sagarnaga | N/D / N/D | N/D / N/D | N/D | 266.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K67 | Desayuno en Hotel (Early CHIN) | N/D / N/D | N/D / N/D | N/D | 0.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K69 | Cholitas Wrestling HD + ticket + guia | 14 / N/D | 45.00 / N/D | N/D | 630.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| K71 | Hostal Sagarnaga + Desayuno | N/D / N/D | N/D / N/D | N/D | 257.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
+| K73 | Tranfer Hotel - Aeropuerto La Paz | 2 / N/D | 37.00 / N/D | N/D | 74.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+Costo: app N/D / Sheets 14221.00 / diferencia N/D USD.
+Venta: app N/D / Sheets 16922.99 / diferencia N/D USD.
+Pendiente: La hoja autorizada reemplaza a SIVOLA: escenario K1=14 y K2=3 vehículos; no acredita 14+1 TC ni los 4 vehículos del PDF anterior.
+Pendiente: No hay SKU por línea ni rooming/TC confirmados. K71=38*6+29 difiere de las otras noches Sagarnaga; no se inventa una distribución.
+Pendiente: No se construye QuoteInput hasta confirmar unidades, cantidades faltantes y si el TC está dentro o fuera de los 14.
+Pendiente: No hay QuoteInput verificable: faltan datos de la fuente indicados abajo.
+Nota: Andrea indicó usar esta pestaña (gid 1913782732) en lugar del presupuesto SIVOLA inicialmente pedido.
+Nota: Se registra el escenario BACKPACKER (BUSES) de 14 pax, filas 1–85; la segunda sección CONFORT (VUELOS) empieza en fila 91 y es otro presupuesto.
+Nota: K76 costo 14221; K77 añade 5 % de imprevistos (14932.05). K81 calcula venta como K76 × 1.19 = 16922.99; el 5 % no se suma a esa venta.
+Nota: Los USD 28057 del PDF SIVOLA corresponden a otro programa; no son el objetivo de esta fuente.
+Nota: Costo por pax guardado como costo base K76 / 14; K79 usa costo con imprevistos.

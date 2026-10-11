@@ -1,0 +1,59 @@
+Catálogo de comparación: migraciones y seeds locales; Cloud no fue consultado.
+ENLACES ACTUALES
+- Día 1: FNB_UYU_LEO_BUFFET_APTHAPI · qty 1 · {}
+- Día 1: HTL_MALLKU_VILLAMAR_DBL_2026 · qty 1 · {}
+- Día 1: HTL_MALLKU_VILLAMAR_SGL_2026 · qty 1 · {}
+- Día 1: MEAL_MALLKU_DINNER_2026 · qty 1 · {}
+- Día 1: TICKETS_LEO_UYU · qty 1 · {}
+- Día 1: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {}
+- Día 1: TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026 · qty 1 · {}
+- Día 2: FNB_UYU_LEO_COCKTAIL · qty 1 · {}
+- Día 2: FNB_UYU_LEO_LUNCH · qty 1 · {}
+- Día 2: HTL_PDS_COLCHANI_STANDARD_DRY_2026 · qty 1 · {}
+- Día 2: MEAL_PDS_DINNER_2026 · qty 1 · {}
+- Día 2: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {}
+- Día 3: FNB_UYU_LEO_COCKTAIL · qty 1 · {}
+- Día 3: FNB_UYU_LEO_LUNCH · qty 1 · {}
+- Día 3: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {}
+- Día 3: TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026 · qty 1 · {}
+ENLACES PROPUESTOS (bloques propios de esta plantilla)
++ Día 1: TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026 · qty 1 · {"vehicle_segment":"TRF_DIEGO_COLQUE_SPA_HITO_CAJON_2_4PAX_2026","rate_band":{"pax_min":2,"pax_max":4}} · F46
++ Día 1: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {} · F47
++ Día 1: FNB_UYU_LEO_BUFFET_APTHAPI · qty 2 · {} · F48
++ Día 1: TICKETS_LEO_UYU · qty 2 · {} · F49
++ Día 1: MEAL_MALLKU_DINNER_2026 · qty 2 · {} · F50
++ Día 1: HTL_MALLKU_VILLAMAR_DBL_2026 · qty 1 · {"room_type":"DBL","nights":1} · F51
++ Día 2: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {} · F53 incluido por F47
++ Día 2: FNB_UYU_LEO_LUNCH · qty 2 · {} · F54
++ Día 2: FNB_UYU_LEO_COCKTAIL · qty 2 · {} · F55
++ Día 2: MEAL_PDS_DINNER_2026 · qty 2 · {} · F56
++ Día 2: HTL_PDS_COLCHANI_STANDARD_DRY_2026 · qty 1 · {"room_type":"DBL","nights":1} · F57
++ Día 3: TOUR_UYU_LEO_3D2N_LOOP · qty 1 · {} · F59 incluido por F47
++ Día 3: FNB_UYU_LEO_LUNCH · qty 2 · {} · F60
+SKU SIN CATÁLOGO
+[]
+SPA-UYU 3D2N MP · 2 pax
+Fuente: data/import/presupuestos.xlsx · SPA UYU - 3D2N - MP !A32:G60
+| Celda | Servicio | Cantidad Sheets / app | Tarifa USD Sheets / app | Costo app | Costo Sheets | Diferencia | Causa probable |
+|---|---|---|---|---:|---:|---:|---|
+| F46 | SAN PEDRO - HITO CAJON (IN/OUT) sin guia 1-4PAX | 1 / 1 | 135.00 / 135.00 | 135.00 | 135.00 | 0.00 | Coincide |
+| F47 | 3D2N UYUNI – UYUNI | 1 / 1 | 690.00 / 690.00 | 690.00 | 690.00 | 0.00 | Coincide |
+| F48 | ALMUERZO APTHAPI BUFFET SALAR | 2 / 2 | 20.00 / 20.00 | 40.00 | 40.00 | 0.00 | Coincide |
+| F49 | ENTRADAS A PARQUES | 2 / 2 | 30.00 / 30.00 | 60.00 | 60.00 | 0.00 | Coincide |
+| F50 | CENA | 2 / 2 | 44.00 / 44.00 | 88.00 | 88.00 | 0.00 | Coincide |
+| F51 | HAB DOBLE | 1 / 1 | 312.00 / 312.00 | 312.00 | 312.00 | 0.00 | Coincide |
+| F53 | 3D2N UYUNI – UYUNI | 0 / 0 | 0.00 / 0.00 | 0.00 | 0.00 | 0.00 | Coincide |
+| F54 | ALMUERZO PLATO SERVIDO | 2 / 2 | 15.00 / 15.00 | 30.00 | 30.00 | 0.00 | Coincide |
+| F55 | Cóctel Salar | 2 / 2 | 10.00 / 10.00 | 20.00 | 20.00 | 0.00 | Coincide |
+| F56 | CENA | 2 / 2 | 44.00 / 44.00 | 88.00 | 88.00 | 0.00 | Coincide |
+| F57 | HAB STANDAR DBL | 1 / 1 | 446.00 / 446.00 | 446.00 | 446.00 | 0.00 | Coincide |
+| F59 | 3D2N UYUNI – UYUNI | 0 / 0 | 0.00 / 0.00 | 0.00 | 0.00 | 0.00 | Coincide |
+| F60 | ALMUERZO PLATO SERVIDO | 2 / 2 | 15.00 / 15.00 | 30.00 | 30.00 | 0.00 | Coincide |
+Costo: app 1939.00 / Sheets 1939.00 / diferencia 0.00 USD.
+Venta: app 2423.75 / Sheets N/D / diferencia N/D USD.
+Nota: F46: fila dice día 3, se usa encabezado día 1 (Andrea, 2026-10-11).
+Nota: F55: fila dice día 3, se usa encabezado día 2 (Andrea, 2026-10-11).
+Nota: Se compara costo: PRECIO VENTA está vacío. El markup 25 % procede de Andrea, no de Sheets.
+Nota: Fecha de prueba 2026-10-14: la fuente no tiene fecha. Staff 0 para este cálculo; la fuente no desglosa staff.
+Nota: El escenario y las cantidades solo certifican 2 pagantes + 0 TC; habitación DBL en cada una de las dos noches.
+Nota: Tarifas tomadas del catálogo local migrado; FX de las fórmulas del Excel. No certifica el estado de Cloud.
