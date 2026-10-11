@@ -21,19 +21,30 @@ Las 238 más las 5 locales suman 243, pero las últimas 5 no tienen rack para co
 ## Orden de aplicación
 
 1. Ejecutar `supabase/seed/04_rack_to_net_preflight.sql` en el SQL Editor de Lovable Cloud. Es de solo lectura: devuelve `filas_a_copiar`, `confirma_243`, otros recuentos y el listado de IDs/SKU, precios originales y netos propuestos.
-2. Solo si devuelve **243**, confirmar ese recuento y listado antes de ejecutar `supabase/seed/04_rack_to_net.sql` completo. Si devuelve otra cifra, detener la copia y reconciliar la diferencia. No cambiar el número esperado ni ampliar la condición a registros con neto ya informado.
+2. Mostrar el recuento y listado. Solo si devuelve **243**, ejecutar la migración nueva `supabase/migrations/20261011000200_rack_to_net.sql` completa. Si devuelve otra cifra, detener la copia y reconciliar la diferencia. No cambiar el número esperado ni ampliar la condición a registros con neto ya informado. Esta migración sustituye al seed `04_rack_to_net.sql` de la versión anterior del PR: no ejecutar ambos.
 3. El script de copia vuelve a contar bajo bloqueo de escritura, exige exactamente 243 y copia `price_rack` a `price_net`, dejando `price_rack` intacto y desmarcando `net_cost_missing` solo en esas filas. Devuelve cuántas filas actualizó y verifica netos/racks. Un error revierte toda la transacción. No modifica notas, servicios o cotizaciones.
 4. Repetir el preflight después de la copia: deben quedar 0 candidatas. El script de copia no se vuelve a ejecutar: el control de 243 lo rechazará con 0 candidatas.
-5. Desplegar el frontend con la regla actualizada. No hay cambio de esquema en esta entrega. Esta rama parte del PR de Cotizaciones/LTd; su migración y seed mantienen su propio orden, documentado en `VALIDACION_LTD.md`.
+5. Aplicar `supabase/migrations/20261011000300_quote_pricing_errors.sql`, que adapta la persistencia de cálculos incompletos y bloquea revisión/emisión mientras tengan errores. Usa el JSON de cálculo y las columnas existentes; no agrega tablas.
+6. Desplegar el código actualizado. No hay cambios de pantallas. Esta rama parte del PR de Cotizaciones/LTd; su migración `20261011000100_template_quote_defaults.sql` y seed deben aplicarse antes, según `VALIDACION_LTD.md`.
 
 ## Cálculo e importaciones
 
-El motor usa neto y, si está vacío, rack. El importe cero es válido. No emite el aviso antiguo por un `net_cost_missing=true` histórico cuando hay un precio disponible. Si faltan ambos precios en un servicio que debe cobrarse, detiene el cálculo con «sin costo neto ni rack»; no produce un total incompleto. El detalle del tarifario aplica la misma condición al aviso.
+El motor usa neto y, si está vacío, rack. El importe cero es válido. No emite el aviso de cálculo por un `net_cost_missing=true` histórico cuando hay un precio disponible. Si faltan ambos precios en un servicio que debe cobrarse, devuelve ese ítem con `status: error` y el aviso «sin costo neto ni rack». Sus importes, los del día afectado y los totales de la cotización son `null`; los demás ítems conservan su desglose. Un escenario de pasajeros con errores también impide publicar un total parcial.
+
+El borrador guarda el error y el aviso en `calculation`, y se recuperan al reabrirlo mediante los avisos existentes. No se puede pasar a revisada ni generar/guardar un PDF con ese cálculo. Al resolver el precio con el mecanismo de sobrescritura documentada existente, recalcular recupera los totales. No se asigna cero a un precio desconocido ni se inventan unidades de cobro.
 
 El generador de futuras importaciones copia rack a neto, preserva rack, registra la decisión y marca la falta de costo solo cuando faltan ambos. No se regeneran ni reejecutan los seeds ya aplicados. Los snapshots guardados no se reescriben; al recalcular un borrador se aplica la regla nueva.
 
 ## Pruebas
 
-- `npm run test`: neto/rack, marcas históricas, importes cero, precio existente con precedencia, falta de ambos precios, y la referencia LTd del PR anterior.
+- `npm run test`: neto/rack, marcas históricas, importes cero, precio existente con precedencia, ítems y escenarios sin ambos precios, persistencia/reapertura del error y corrección, y la referencia LTd del PR anterior. Tres casos históricos distintos de LTd siguen omitidos por falta de datos fuente exactos; no se presentan como validados.
 - `npm run test:db`: incluye el preflight sobre datos históricos y pruebas aisladas que rechazan 0/242/244 candidatas sin cambios. Con **243 tarifas sintéticas**, verifica la copia, conservación del rack y notas, cero válido y que las demás tarifas quedan intactas. El caso sintético no confirma el recuento remoto.
 - `npm run typecheck` y `npm run build`.
+
+La reconstrucción de una BD vacía para tests utiliza una precondición explícita de 243 tarifas sintéticas antes de ejecutar la migración real, verifica la copia y elimina esa fixture. No debilita el control de producción ni certifica el conteo de Cloud. Las pruebas negativas parten del esquema anterior y ejecutan la misma migración con recuentos distintos.
+
+## Servicios sin unidad
+
+`docs/pendientes/servicios_sin_unidad.csv` contiene los **11 servicios sin unidad** del catálogo reconstruido con los seeds históricos: SKU, nombre, proveedor y columna `unidad` vacía. Conserva los nombres de la fuente; no asigna unidades a partir del nombre ni del precio. Es un listado local para completar por el responsable, no una extracción del estado actual de Cloud.
+
+Se puede regenerar con `node scripts/db/export-missing-units.mjs`. El exportador comprueba que sean 11 antes de escribir. El CSV histórico original contiene 13 filas sin unidad; ese recuento de origen no sustituye el de servicios importados.

@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createDatabase, seedDatabase, root } from "./local-db.mjs";
 
-const db = await createDatabase();
+const db = await createDatabase({ throughMigration: "20261011000100_template_quote_defaults.sql" });
 const preflight = await readFile(
   new URL("supabase/seed/04_rack_to_net_preflight.sql", root),
   "utf8",
 );
-const update = await readFile(new URL("supabase/seed/04_rack_to_net.sql", root), "utf8");
+const update = await readFile(
+  new URL("supabase/migrations/20261011000200_rack_to_net.sql", root),
+  "utf8",
+);
 const snapshot = async () =>
   (await db.query("select to_jsonb(r) data from service_rates r order by id")).rows;
 const rejectUnconfirmedCount = async (expected) => {
@@ -60,6 +63,7 @@ try {
     "PRECHECK synthetic fixture: 243 listed candidates; applying to the isolated test DB only",
   );
   await db.exec(update);
+  assert.equal((await db.exec(preflight))[0].rows[0].filas_a_copiar, 0);
   const {
     rows: [after],
   } = await db.query(

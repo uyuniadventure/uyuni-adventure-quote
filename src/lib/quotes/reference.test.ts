@@ -28,6 +28,8 @@ import {
   type QuoteBasics,
 } from "./index";
 import { listQuotes } from "./list";
+import { assertCompleteCalculation, type Rate } from "../pricing";
+import type { Json } from "../../types/db";
 
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 let templateId: string, clientId: string;
@@ -82,6 +84,7 @@ describe("UYUUYU-3D2N-LTd · Sheets, 2 pasajeros", () => {
   it("creates the real template snapshot, matches every Sheets line and reopens from the filtered list", async () => {
     const quote = await createQuoteFromTemplate(templateId, basics());
     const result = await recalculateQuote(quote.id);
+    assertCompleteCalculation(result);
     const saved = await loadQuote(quote.id);
     const differences = reference.rows
       .map((expected) => {
@@ -90,7 +93,7 @@ describe("UYUUYU-3D2N-LTd · Sheets, 2 pasajeros", () => {
             (i.pricing_snapshot as { _source_cell?: string })._source_cell === expected.source_cell,
         );
         const actual = result.items.find((i) => i.id === item?.id);
-        return `${expected.source_cell} | ${expected.description} | Sheets ${expected.cost_usd} | app ${actual?.total_cost_usd ?? "MISSING"} | delta ${actual ? actual.total_cost_usd - expected.cost_usd : "MISSING"}`;
+        return `${expected.source_cell} | ${expected.description} | Sheets ${expected.cost_usd} | app ${actual?.total_cost_usd ?? "MISSING"} | delta ${actual?.total_cost_usd != null ? actual.total_cost_usd - expected.cost_usd : "MISSING"}`;
       })
       .join("\n");
     expect(result.items, differences).toHaveLength(reference.rows.length);
@@ -171,6 +174,65 @@ describe("UYUUYU-3D2N-LTd · Sheets, 2 pasajeros", () => {
     } finally {
       await pg.query("select set_config('request.jwt.claim.sub',$1,false)", [seller]);
     }
+  });
+
+  it("persists missing-price errors, reopens their warnings and recovers after a documented override", async () => {
+    const quote = await createQuoteFromTemplate(templateId, basics());
+    await recalculateQuote(quote.id);
+    const saved = await loadQuote(quote.id);
+    const item = saved.items.find(
+      (i) => (i.pricing_snapshot as { _source_cell?: string })._source_cell === "F49",
+    )!;
+    const snapshot = item.pricing_snapshot as unknown as { rates: Rate[] };
+    await updateQuoteItem(item.id, {
+      pricing_snapshot: {
+        ...snapshot,
+        rates: snapshot.rates.map((r) => ({
+          ...r,
+          price_net: null,
+          price_rack: null,
+        })),
+      } as unknown as Json,
+    });
+    // Remove unrelated review blockers in this test quote, not the master template.
+    await pg.query(
+      "update quote_days set snapshot=snapshot || '{\"reviewed\":true}' where quote_id=$1",
+      [quote.id],
+    );
+    await pg.query(
+      "update quotes set pricing_config=pricing_config || '{\"unresolved\":[]}' where id=$1",
+      [quote.id],
+    );
+    const result = await recalculateQuote(quote.id);
+    expect(result.status).toBe("error");
+    const reopened = await loadQuote(quote.id);
+    expect(reopened.quote.calculation).toEqual(result);
+    expect(reopened.quote.total_cost_usd).toBeNull();
+    expect(reopened.quote.total_price_usd).toBeNull();
+    expect(reopened.items.find((i) => i.id === item.id)).toMatchObject({
+      total_cost_usd: null,
+      total_cost_local: null,
+    });
+    expect(result.warnings).toContain(`${item.id}: sin costo neto ni rack`);
+    await expect(
+      pg.query("update quotes set status='revisada' where id=$1", [quote.id]),
+    ).rejects.toThrow("errores de cálculo");
+    await expect(
+      pg.query("update quotes set pdf_path=$2 where id=$1", [quote.id, `${quote.id}/invalid.pdf`]),
+    ).rejects.toThrow("errores de cálculo");
+    // A valid override resolves the quote without filling a master price or altering the source snapshot.
+    await updateQuoteItem(item.id, {
+      price_overridden: true,
+      unit_cost_original: 20,
+      override_note: "Proveedor confirmó",
+    });
+    expect(await recalculateQuote(quote.id)).toMatchObject({
+      status: "ok",
+      total_cost_usd: 1475,
+      warnings: [],
+    });
+    await pg.query("update quotes set status='revisada' where id=$1", [quote.id]);
+    expect((await loadQuote(quote.id)).quote.status).toBe("revisada");
   });
 
   it("reapplying the reference seed preserves template edits, prior quotes and unrelated templates", async () => {

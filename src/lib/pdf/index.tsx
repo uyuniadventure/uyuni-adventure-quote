@@ -1,7 +1,7 @@
 import { pdf } from "@react-pdf/renderer";
 import { db, unwrap } from "../db";
 import { loadQuote, quotePricingInput } from "../quotes";
-import { calculateQuote, type QuoteResult } from "../pricing";
+import { calculateQuote, assertCompleteCalculation, type QuoteResult } from "../pricing";
 import { QuoteDocument, type DocumentContent } from "./document";
 
 export async function generateQuotePdf(quoteId: string): Promise<Blob> {
@@ -9,6 +9,8 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   const q = data.quote;
   if (!q.calculation || !data.days.length)
     throw new Error("Recalculate a complete itinerary before PDF generation");
+  const calculation = q.calculation as unknown as QuoteResult;
+  assertCompleteCalculation(calculation);
   if (data.days.some((d) => (d.snapshot as { reviewed?: boolean })?.reviewed !== true))
     throw new Error("Review translated texts before generating the client PDF");
   const content = q.document_snapshot as unknown as DocumentContent;
@@ -27,6 +29,7 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
         pax_scenarios: [],
         days: [{ day_number: day.day_number, items: [{ ...item, included: true, day_span: 1 }] }],
       });
+      assertCompleteCalculation(result);
       optional_prices[item.id] = result.total_price_usd;
     }
   }
@@ -35,7 +38,7 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
       data={{
         ...data,
         content,
-        calculation: q.calculation as unknown as QuoteResult,
+        calculation,
         optional_prices,
       }}
     />,

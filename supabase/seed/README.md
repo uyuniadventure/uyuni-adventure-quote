@@ -14,7 +14,7 @@ El seed agrega tres bloques exclusivos y configura únicamente `UYUUYU-3D2N-LTd`
 
 ## Pendiente de aplicar: rack a neto
 
-Andrea confirmó **243** tarifas con neto vacío y rack informado en Cloud (2026-10-11). Ejecutar primero `04_rack_to_net_preflight.sql` (solo lectura) y luego `04_rack_to_net.sql` únicamente si el preflight confirma y lista esas **243** candidatas. La copia conserva rack y rechaza cualquier otro recuento sin modificar datos. El histórico local da **0** candidatas, 238 rack ya copiados y 5 tarifas sin ningún precio; es distinto del estado actual de Cloud. Véase [RACK_COMO_NETO.md](../../docs/RACK_COMO_NETO.md).
+Andrea confirmó **243** tarifas con neto vacío y rack informado en Cloud (2026-10-11). Ejecutar primero `04_rack_to_net_preflight.sql` (solo lectura) y luego la migración `../migrations/20261011000200_rack_to_net.sql` únicamente si el preflight confirma y lista esas **243** candidatas. La copia conserva rack y rechaza cualquier otro recuento sin modificar datos. Después aplicar `../migrations/20261011000300_quote_pricing_errors.sql` y desplegar el código. No ejecutar el antiguo seed `04_rack_to_net.sql`: fue sustituido por la migración fechada. El histórico local da **0** candidatas, 238 rack ya copiados y 5 tarifas sin ningún precio; es distinto del estado actual de Cloud. Véase [RACK_COMO_NETO.md](../../docs/RACK_COMO_NETO.md).
 
 ## Historial aplicado
 

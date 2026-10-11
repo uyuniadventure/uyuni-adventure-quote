@@ -225,6 +225,7 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 9. **Suplemento single** (por persona) = (costo SGL − costo de media habitación doble) × noches, con margen aplicado. Se muestra cuando la base es twin.
 10. **Escenarios B2B por pax** (como hoy en `RESUMEN COSTOS` y en las columnas 2-4-6-10… de los presupuestos grupales): para cada escenario de `pax_scenarios` se recalcula todo con su propia configuración de vehículos y habitaciones, y se devuelve una tabla pax → precio total → precio por pax.
 11. El historial guarda siempre **costo, margen y precio**, para poder analizar la rentabilidad de lo vendido.
+12. Si una tarifa que debe cobrarse no tiene neto ni rack, el ítem devuelve `status: error` y un aviso. Los totales de la cotización quedan sin calcular (`null`), nunca cero ni un subtotal parcial; el borrador conserva el error al reabrirse. Se debe resolver antes de revisar o emitir la cotización. Un precio cero informado sí es válido.
 
 ---
 
@@ -335,7 +336,7 @@ UI en español. Interfaz rápida, con pocos clics para el caso típico.
 - Las fotos se almacenan en Supabase Storage, organizadas por lugar y hotel (se migran desde la carpeta actual).
 - Los productos y bloques creados por vendedores quedan `pendiente` hasta aprobación de admin u operación.
 - Remitente de email: dirección de `uyuniadventure.com` (por definir).
-- Si una tarifa solo trae rack, ese valor es el costo neto (decisión de Andrea, 2026-10-11).
+- Tarifa solo con rack: ese valor es el costo neto (Andrea, 2026-10-11).
 
 ---
 

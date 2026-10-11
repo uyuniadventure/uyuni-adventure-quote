@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { calculateQuote, dateForDay, type PricingItem, type QuoteInput, type Rate } from ".";
+import {
+  assertCompleteCalculation,
+  calculateQuote,
+  dateForDay,
+  type PricingItem,
+  type QuoteInput,
+  type Rate,
+} from ".";
 import { spaUyuni } from "./__fixtures__/spa-uyuni";
 import { bolivia, expectedBolivia } from "./__fixtures__/bolivia";
 import { sivola, expectedSivola } from "./__fixtures__/sivola";
@@ -204,6 +211,8 @@ describe("pricing", () => {
       };
       const before = structuredClone(input);
       const result = calculateQuote(input);
+      expect(result.status).toBe("ok");
+      expect(() => assertCompleteCalculation(result)).not.toThrow();
       expect(result.total_cost_usd).toBe(expected * 3);
       expect(result.warnings).toEqual([]);
       expect(result.items[0]?.warning).toBeUndefined();
@@ -213,13 +222,94 @@ describe("pricing", () => {
   it.each([
     { ...rate, price_net: null, price_rack: null },
     { ...rate, price_net: null },
-  ])("blocks a calculation when net and rack are missing (%j)", (missingRate) => {
-    expect(() =>
-      calculateQuote({
-        ...base,
-        days: [{ day_number: 1, items: [{ ...item, rates: [missingRate] }] }],
-      }),
-    ).toThrow("a: sin costo neto ni rack");
+  ])("returns item errors and no quote total when net and rack are missing (%j)", (missingRate) => {
+    const result = calculateQuote({
+      ...base,
+      days: [
+        {
+          day_number: 1,
+          items: [
+            { ...item, rates: [missingRate] },
+            { ...item, id: "valid" },
+          ],
+        },
+        { day_number: 2, items: [{ ...item, id: "tomorrow" }] },
+      ],
+    });
+    expect(result).toMatchObject({
+      status: "error",
+      total_cost_usd: null,
+      total_margin_usd: null,
+      total_price_usd: null,
+      price_per_pax_usd: null,
+      single_supplement_pp: null,
+      warnings: ["a: sin costo neto ni rack"],
+    });
+    expect(result.items[0]).toMatchObject({
+      id: "a",
+      status: "error",
+      quantity: 3,
+      total_cost_usd: null,
+      total_margin_usd: null,
+      unit_cost_usd: null,
+      warning: "a: sin costo neto ni rack",
+    });
+    expect(result.items[0]?.unit_cost_original).toBeUndefined();
+    expect(result.items[1]).toMatchObject({ id: "valid", status: "ok", total_cost_usd: 300 });
+    expect(result.days).toEqual([
+      { day_number: 1, total_cost_usd: null, total_margin_usd: null },
+      { day_number: 2, total_cost_usd: 300, total_margin_usd: 60 },
+    ]);
+    expect(() => assertCompleteCalculation(result)).toThrow("errores de cálculo");
+  });
+  it("reports a missing price in a passenger scenario without publishing partial totals", () => {
+    const result = calculateQuote({
+      ...base,
+      days: [
+        {
+          day_number: 1,
+          items: [
+            {
+              ...item,
+              rates: [
+                { ...rate, pax_max: 3 },
+                { ...rate, pax_min: 4, price_net: null, price_rack: null },
+              ],
+            },
+          ],
+        },
+      ],
+      pax_scenarios: [
+        { pax_paying: 4, tc_count: 0, rooming: base.rooming, vehicles: base.vehicles },
+      ],
+    });
+    expect(result.items[0]?.status).toBe("ok");
+    expect(result.status).toBe("error");
+    expect(result.total_price_usd).toBeNull();
+    expect(result.scenarios[0]).toMatchObject({ status: "error", total_price_usd: null });
+    expect(result.warnings).toEqual(["Escenario 4+0 TC: a: sin costo neto ni rack"]);
+    expect(() => assertCompleteCalculation(result)).toThrow("errores de cálculo");
+  });
+  it("allows a documented override to resolve missing net and rack", () => {
+    const result = calculateQuote({
+      ...base,
+      days: [
+        {
+          day_number: 1,
+          items: [
+            {
+              ...item,
+              rates: [{ ...rate, price_net: null, price_rack: null }],
+              price_overridden: true,
+              unit_cost_original: 20,
+              override_note: "Proveedor confirmó",
+            },
+          ],
+        },
+      ],
+    });
+    expect(result).toMatchObject({ status: "ok", total_cost_usd: 60, warnings: [] });
+    expect(() => assertCompleteCalculation(result)).not.toThrow();
   });
   it("rounds and recomputes independent scenarios including vehicles", () => {
     const result = calculateQuote({

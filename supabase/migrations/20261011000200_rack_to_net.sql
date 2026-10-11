@@ -28,6 +28,9 @@ begin
   if updated_count <> 243 then
     raise exception 'Se actualizaron % tarifas en vez de 243; se revierte la transacción.', updated_count;
   end if;
+  if exists(select 1 from public.service_rates where price_net is null and price_rack is not null) then
+    raise exception 'Quedan tarifas con neto vacío y rack informado; se revierte la transacción.';
+  end if;
 end $$;
 
 select count(*)::integer as filas_actualizadas,

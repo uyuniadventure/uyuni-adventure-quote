@@ -1,4 +1,4 @@
--- READ ONLY. Run in Lovable Cloud SQL Editor BEFORE 04_rack_to_net.sql.
+-- READ ONLY. Run in Lovable Cloud SQL Editor BEFORE 20261011000200_rack_to_net.sql.
 -- Andrea's requested count is 243. A legacy flag is NOT an empty net price.
 select
   count(*) filter (where price_net is null and price_rack is not null)::integer as filas_a_copiar,
