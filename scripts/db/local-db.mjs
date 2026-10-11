@@ -1,9 +1,10 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readdir, readFile } from "node:fs/promises";
+import { beforeMigration, afterMigration } from "./migration-fixtures.mjs";
 
 export const root = new URL("../../", import.meta.url);
 
-export async function createDatabase({ migrationFiles } = {}) {
+export async function createDatabase({ migrationFiles, throughMigration } = {}) {
   const db = new PGlite();
   // Minimal Supabase Auth contract; this is an isolated, in-memory Postgres.
   await db.exec(`
@@ -28,8 +29,13 @@ export async function createDatabase({ migrationFiles } = {}) {
     migrationFiles ??
     (await readdir(new URL("supabase/migrations/", root))).filter((x) => x.endsWith(".sql")).sort();
   for (const file of files) {
+    // A historical checkpoint is used only to test a later data migration with
+    // alternate counts. By default every real migration runs with test fixtures.
+    if (throughMigration && file > throughMigration) continue;
     try {
+      await beforeMigration(db, file);
       await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), "utf8"));
+      await afterMigration(db, file);
     } catch (error) {
       throw new Error(`${file}: ${error.message}`, { cause: error });
     }

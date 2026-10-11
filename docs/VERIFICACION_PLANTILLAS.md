@@ -144,6 +144,8 @@ node scripts/db/test-template-recovery.mjs
 node scripts/db/test-template-recovery.mjs --report
 ```
 
-La prueba reconstruye explícitamente el esquema canónico 000100–000700 y los seeds aplicados, comprueba la diferencia de SKU, todos los enlaces, estado pendiente, traducciones sin revisar, conservación de las 40 plantillas, repetición sin duplicados y preservación de una edición humana. No reproduce el historial UUID duplicado de 000600/000700; el runner general conserva su comportamiento por defecto. Las migraciones históricas no se modificaron.
+La prueba reconstruye explícitamente el esquema canónico 000100–000700 y los seeds aplicados, comprueba la diferencia de SKU, todos los enlaces, estado pendiente, traducciones sin revisar, conservación de las 40 plantillas, repetición sin duplicados y preservación de una edición humana.
+
+Integración con `main` del 11 de octubre de 2026: el preparador local conserva `migrationFiles` para esta reconstrucción histórica, `throughMigration` para las pruebas de rack y las fixtures necesarias para ejecutar la migración real que exige 243 tarifas. Antes de la recuperación carga los códigos de ubicación del seed 00, que ya existen en Cloud y son necesarios para las claves foráneas. Por defecto ejecuta todas las migraciones actuales. `test:db` incluye también la prueba de recuperación y comprueba 42 plantillas, 149 bloques, 149 traducciones, 144 enlaces de día y los mismos 562 ítems tras reproducir los seeds. Los reportes históricos mantienen sus cifras originales; la resolución del conflicto no reescribe migraciones ni seeds.
 
 `scripts/db/recover_templates.py` documenta y genera la nueva migración desde la guía. No ejecutar para reescribirla después de aplicada; futuras correcciones necesitan una migración nueva.

@@ -1,6 +1,7 @@
 import { db, json, unwrap } from "../db";
 import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } from "../pricing";
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
+import { applyTemplateDefaults } from "./template-defaults";
 
 export interface QuoteBasics extends Omit<QuoteInput, "days"> {
   client_id: string;
@@ -115,13 +116,16 @@ async function serviceItem(
   if (!s.pricing_unit || !s.currency)
     throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
   const rates = unwrap(await db.from("service_rates").select("*").eq("service_id", s.id));
+  const config = (row.pricing_config ?? {}) as { pricing_unit?: Enums<"pricing_unit">; description?: string };
+  if (config.pricing_unit && !["per_person", "per_group", "per_room", "per_vehicle", "per_staff", "per_unit"].includes(config.pricing_unit))
+    throw new Error(`Invalid template pricing unit: ${s.sku}`);
   const span = row.multi_day_span ?? s.multi_day_span;
   return {
     service_id: s.id,
     sku: s.sku,
-    description: s.name,
+    description: config.description ?? s.name,
     type: s.type,
-    pricing_unit: s.pricing_unit,
+    pricing_unit: config.pricing_unit ?? s.pricing_unit,
     qty: row.qty,
     unit_cost_original: 0,
     unit_cost_usd: 0,
@@ -151,6 +155,7 @@ export async function createQuoteFromTemplate(
   const template = unwrap(
     await db.from("itinerary_templates").select("*").eq("id", templateId).single(),
   );
+  basics = applyTemplateDefaults(basics, template.quote_defaults);
   const templateDays = unwrap(
     await db.from("template_days").select("*").eq("template_id", templateId).order("day_number"),
   );

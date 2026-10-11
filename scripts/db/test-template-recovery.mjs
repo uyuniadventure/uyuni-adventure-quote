@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { createDatabase, seedDatabase, root } from "./local-db.mjs";
 
-// Explicit historical schema snapshot: the full migration directory still contains
-// UUID copies of 006/007. This focused data test does not claim to validate that replay.
+// Explicit historical schema snapshot to verify the recovery's 40 -> 42 delta.
+// The general test:db suite separately replays the full current migration directory.
 const migrationFiles = [
   "20261004000100_foundation_schema.sql",
   "20261004000200_security.sql",

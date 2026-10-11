@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, BedDouble, FilePlus2, Loader2, PencilLine, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
@@ -58,6 +59,7 @@ export function useQuoteActions(quoteId: string) {
         }
         await recalc();
         await qc.invalidateQueries({ queryKey: ["quote-full", quoteId] });
+        await qc.invalidateQueries({ queryKey: ["quotes"] });
         return success;
       });
       chain.current = p.then(() => undefined).finally(() => setBusy((b) => b - 1));
@@ -73,7 +75,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
   const actions = useQuoteActions(quoteId);
   const started = useRef(false);
   useEffect(() => {
-    if (q.data && !started.current && ["borrador", "revisada"].includes(q.data.quote.status)) {
+    if (q.data && !started.current && !q.data.quote.archived_at && ["borrador", "revisada"].includes(q.data.quote.status)) {
       started.current = true;
       void actions.act(async () => {});
     }
@@ -83,6 +85,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
   if (!q.data) return <p className="text-sm text-muted-foreground">Cargando cotización…</p>;
   const data = q.data;
   const editable = ["borrador", "revisada"].includes(data.quote.status) && !data.quote.archived_at;
+  const displayedActions = { ...actions, result: actions.result ?? (data.quote.calculation as unknown as QuoteResult | null) };
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-4">
@@ -95,13 +98,16 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
           </div>
           <p className="mt-1 font-mono text-xs text-muted-foreground">{data.quote.code} · inicio {data.quote.start_date} · {data.quote.language.toUpperCase()} · {data.quote.client_type}</p>
         </div>
-        <Button variant="outline" onClick={onReset}><FilePlus2 className="mr-1 h-4 w-4" />Otra cotización</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild><Link to="/cotizaciones">Cotizaciones</Link></Button>
+          <Button variant="outline" onClick={onReset}><FilePlus2 className="mr-1 h-4 w-4" />Otra cotización</Button>
+        </div>
       </div>
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">Esta cotización ya no es un borrador; editarla requiere crear una nueva versión.</p>}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <DaysEditor data={data} editable={editable} actions={actions} />
+        <DaysEditor data={data} editable={editable} actions={displayedActions} />
         <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
-          <QuotePanel data={data} editable={editable} actions={actions} />
+          <QuotePanel data={data} editable={editable} actions={displayedActions} />
         </div>
       </div>
     </div>
@@ -140,7 +146,7 @@ function DayCard({ day, index, count, items, editable, actions, onMove, onRemove
   const { act, result } = actions;
   const [hotelOpen, setHotelOpen] = useState(false);
   const [newItem, setNewItem] = useState(false);
-  const hotels = items.filter((i) => i.type === "alojamiento");
+  const hotels = items.filter((i) => i.type === "alojamiento" && i.pricing_unit !== "per_staff");
   const reviewed = (day.snapshot as { reviewed?: boolean })?.reviewed;
   const dayTotal = result?.days.find((x) => x.day_number === day.day_number);
 
@@ -218,8 +224,11 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
         {r?.warning && <div className="text-xs text-destructive">{r.warning}</div>}
       </TableCell>
       <TableCell>
-        <Input type="number" min={0} step="any" defaultValue={item.qty} className="h-8" disabled={!editable}
-          onBlur={(e) => Number(e.target.value) !== item.qty && upd({ qty: Math.max(0, Number(e.target.value) || 0) })} />
+        {["per_group", "per_unit", "per_staff"].includes(item.pricing_unit) ? (
+          <Input type="number" min={0} step="any" defaultValue={item.qty} className="h-8" disabled={!editable}
+            title={item.pricing_unit === "per_staff" ? "Unidades por miembro del staff" : "Cantidad"}
+            onBlur={(e) => Number(e.target.value) !== item.qty && upd({ qty: Math.max(0, Number(e.target.value) || 0) })} />
+        ) : <span title="Cantidad calculada con los pasajeros, habitaciones o staff del panel">{r?.quantity ?? "—"}</span>}
       </TableCell>
       <TableCell className="text-center"><Switch checked={item.included} disabled={!editable} onCheckedChange={(v) => upd({ included: v })} /></TableCell>
       <TableCell className="text-center"><Switch checked={item.applies_tc} disabled={!editable} onCheckedChange={(v) => upd({ applies_tc: v })} /></TableCell>
