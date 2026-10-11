@@ -179,10 +179,10 @@ function DayCard({ day, index, count, items, editable, actions, onMove, onRemove
           <Table>
             <TableHeader><TableRow>
               <TableHead>Servicio</TableHead><TableHead className="w-20">Cant.</TableHead><TableHead className="text-center">Incluido</TableHead>
-              <TableHead className="text-center">TC</TableHead><TableHead className="text-center">Margen</TableHead><TableHead className="text-right">Costo USD</TableHead><TableHead />
+              <TableHead className="text-center">TC</TableHead><TableHead className="text-center">Margen</TableHead><TableHead className="text-right">Costo base USD</TableHead><TableHead className="text-right">Ajuste %</TableHead><TableHead className="text-right">Costo ajustado USD</TableHead><TableHead />
             </TableRow></TableHeader>
             <TableBody>
-              {items.length === 0 && <TableRow><TableCell colSpan={7} className="py-4 text-center text-sm text-muted-foreground">Sin servicios.</TableCell></TableRow>}
+              {items.length === 0 && <TableRow><TableCell colSpan={9} className="py-4 text-center text-sm text-muted-foreground">Sin servicios.</TableCell></TableRow>}
               {items.map((it) => <ItemRow key={it.id} item={it} editable={editable} actions={actions} />)}
             </TableBody>
           </Table>
@@ -233,6 +233,8 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
       <TableCell className="text-center"><Switch checked={item.included} disabled={!editable} onCheckedChange={(v) => upd({ included: v })} /></TableCell>
       <TableCell className="text-center"><Switch checked={item.applies_tc} disabled={!editable} onCheckedChange={(v) => upd({ applies_tc: v })} /></TableCell>
       <TableCell className="text-center"><Switch checked={item.margin_applicable} disabled={!editable} onCheckedChange={(v) => upd({ margin_applicable: v })} /></TableCell>
+      <TableCell className="whitespace-nowrap text-right text-sm">{r ? money(r.base_cost_usd === undefined ? r.total_cost_usd : r.base_cost_usd) : "—"}</TableCell>
+      <TableCell className="text-right text-sm" title={item.adjustment_note ?? undefined}>{item.adjustment_pct ?? 0} %{item.adjustment_note && <div className="max-w-40 text-xs text-muted-foreground">{item.adjustment_note}</div>}</TableCell>
       <TableCell className="whitespace-nowrap text-right text-sm">
         {r ? <>{money(r.total_cost_usd)}<div className="text-xs text-muted-foreground">{money(r.unit_cost_original, item.currency)} × {r.quantity}</div></> : "—"}
       </TableCell>
