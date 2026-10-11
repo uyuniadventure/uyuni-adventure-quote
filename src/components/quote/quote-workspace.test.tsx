@@ -105,6 +105,9 @@ it.each([
     );
 
     expect(await screen.findByText("Buffet guardado")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Costo base USD" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Ajuste %" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Costo ajustado USD" })).toBeInTheDocument();
     expect(screen.getByText(`Costo ${money(40, "USD")}`)).toBeInTheDocument();
     expect(screen.getByText(`${money(20, "USD")} × 2`)).toBeInTheDocument();
     expect(screen.getByText(money(50, "USD"))).toBeInTheDocument();

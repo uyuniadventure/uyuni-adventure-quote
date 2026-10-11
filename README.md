@@ -116,3 +116,45 @@ plantillas aprobables; quedan 65 servicios y 16 plantillas pendientes. No incluy
 el seed piloto SPA-UYU ni acredita los conteos de Cloud. **No se han aplicado
 aprobaciones de catálogo**; las aplicaciones de prueba usan una BD aislada y datos
 sintéticos que se descartan al terminar.
+
+## Ajustes de costo por cotización
+
+Aplicar `supabase/migrations/20261011000600_quote_item_adjustments.sql` después de
+`20261011000500_bulk_catalog_approval.sql`, antes de desplegar el frontend. Añade
+porcentaje/nota en `quote_items`, adapta creación/edición/cálculo y añade la RPC
+atómica. Las cotizaciones anteriores parten de ajuste 0; el tarifario no cambia.
+No se ha ejecutado esta migración contra Cloud.
+
+```ts
+import { applyAdjustmentBulk } from "@/lib/quotes";
+await applyAdjustmentBulk(quoteId, { type: "transporte" }, 6.4, "combustible 2027");
+await applyAdjustmentBulk(quoteId, { supplier_id: supplierId, day_number: 2 }, -10);
+await applyAdjustmentBulk(quoteId, { item_ids: [itemId] }, 0); // quitar ajuste
+```
+
+`pct` usa puntos porcentuales, admite negativos hasta -100 y **reemplaza** el ajuste
+anterior; repetir +6,4 % no lo acumula. Los filtros se combinan con AND; un filtro
+vacío, una lista vacía o IDs ajenos a la cotización se rechazan. La respuesta indica
+IDs coincidentes, IDs afectados y cálculo. Seleccionar una copia multi-día alcanza
+la compra completa, que solo se cobra una vez. El método calcula sin escrituras y
+la RPC valida la revisión/filtros y guarda todos los cambios con sus totales en una
+transacción. Si el cálculo falla o hubo otra edición, no se guarda ningún ajuste.
+Se usan las tarifas congeladas de la cotización; no se leen ni actualizan precios
+del catálogo. Las cotizaciones enviadas se deben versionar antes del ajuste masivo.
+
+Decisión confirmada por Andrea: **el margen se aplica al costo base, sin margen
+sobre el ajuste**. Base USD 100, ajuste 4 % y markup 25 % → costo ajustado USD 104,
+margen USD 25, venta USD 129 (sustituye los USD 162,50 del ejemplo inicial). La
+comisión de agencia sigue su política existente. Desglose interno: costo base,
+ajuste y costo ajustado. PDF: solo precios finales, sin nota ni costo internos.
+Las versiones conservan el ajuste; las plantillas promovidas lo reinician en cero.
+
+```sh
+bunx vitest run src/lib/pricing/adjustment.test.ts src/lib/quotes/adjustments.test.ts
+bun run test:db
+```
+
+Las pruebas verifican +6,4 %, -10 %, margen sin recargo al ajuste, FX/cantidades,
+transporte del piloto SPA-UYU de 2 pax, filtros, permisos, conflictos, rollback,
+versiones, conservación del tarifario y privacidad del PDF. Los dos casos reales
+incompletos de Bolivia/WE ROAD siguen siendo fallos conocidos de la suite completa.

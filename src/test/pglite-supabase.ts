@@ -97,6 +97,14 @@ export function pgliteSupabase(pg: PGlite) {
           ["p_updated_at", "timestamptz"],
           ["p_result", "jsonb"],
         ],
+        apply_quote_adjustment_bulk: [
+          ["p_id", "uuid"],
+          ["p_filter", "jsonb"],
+          ["p_pct", "numeric"],
+          ["p_note", "text"],
+          ["p_updated_at", "timestamptz"],
+          ["p_result", "jsonb"],
+        ],
         edit_quote_item: [
           ["p_id", "uuid"],
           ["p_changes", "jsonb"],

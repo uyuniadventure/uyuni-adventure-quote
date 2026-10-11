@@ -3,6 +3,9 @@ import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } f
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
 import { applyTemplateDefaults } from "./template-defaults";
 import { parsePricingConfig } from "../pricing/config";
+import { adjustmentPctSchema } from "../pricing/adjustment";
+import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";
+export type { AdjustmentFilter } from "./adjustment-filter";
 
 export interface QuoteBasics extends Omit<
   QuoteInput,
@@ -113,7 +116,7 @@ async function serviceItem(
       updated_at: _updated,
       ...saved
     } = row.item_snapshot as unknown as Tables<"quote_items">;
-    return saved;
+    return { ...saved, adjustment_pct: 0, adjustment_note: null };
   }
   if (!row.service_id) throw new Error("Service or frozen snapshot required");
   const s = unwrap(await db.from("services").select("*").eq("id", row.service_id).single());
@@ -355,6 +358,8 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
               price_overridden: i.price_overridden,
               override_note: i.override_note ?? undefined,
               unit_cost_original: i.unit_cost_original,
+              adjustment_pct: i.adjustment_pct ?? 0,
+              adjustment_note: i.adjustment_note ?? null,
             }) as PricingItem,
         ),
     })),
@@ -371,6 +376,47 @@ export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {
     }),
   );
   return result;
+}
+/** Replace (never compound) adjustments and save the recalculation in one RPC. */
+export async function applyAdjustmentBulk(
+  quoteId: string,
+  filter: AdjustmentFilter,
+  pct: number,
+  note?: string | null,
+) {
+  adjustmentPctSchema.parse(pct);
+  const data = await loadQuote(quoteId);
+  if (data.quote.archived_at || !["borrador", "revisada"].includes(data.quote.status))
+    throw new Error("Crea una nueva versión antes de ajustar una cotización enviada");
+  const { matchedIds, affectedIds } = adjustmentTargets(data.days, data.items, filter);
+  const adjustmentNote = note?.trim() || null;
+  const updated = {
+    ...data,
+    items: data.items.map((i) =>
+      affectedIds.includes(i.id)
+        ? { ...i, adjustment_pct: pct, adjustment_note: adjustmentNote }
+        : i,
+    ),
+  };
+  const result = calculateQuote(quotePricingInput(updated));
+  if (result.status !== "ok")
+    throw new Error(result.warnings.join("; ") || "No se puede recalcular la cotización");
+  unwrap(
+    await db.rpc("apply_quote_adjustment_bulk", {
+      p_id: quoteId,
+      p_filter: json(filter),
+      p_pct: pct,
+      p_note: adjustmentNote ?? "",
+      p_updated_at: data.quote.updated_at,
+      p_result: json(result),
+    }),
+  );
+  return {
+    quote_id: quoteId,
+    matched_item_ids: matchedIds,
+    affected_item_ids: affectedIds,
+    calculation: result,
+  };
 }
 export async function generateQuoteCode(quote: {
   tour_sku: string;

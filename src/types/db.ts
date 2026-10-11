@@ -1513,6 +1513,8 @@ export type Database = {
           supplier_id: string | null;
           total_cost_usd: number | null;
           total_cost_local: number | null;
+          adjustment_pct: number;
+          adjustment_note: string | null;
         };
         Insert: {
           id?: string;
@@ -1549,6 +1551,8 @@ export type Database = {
           supplier_id?: string | null;
           total_cost_usd?: number | null;
           total_cost_local?: number | null;
+          adjustment_pct?: number;
+          adjustment_note?: string | null;
         };
         Update: {
           id?: string;
@@ -1585,6 +1589,8 @@ export type Database = {
           supplier_id?: string | null;
           total_cost_usd?: number | null;
           total_cost_local?: number | null;
+          adjustment_pct?: number;
+          adjustment_note?: string | null;
         };
         Relationships: [
           {
@@ -2377,6 +2383,17 @@ export type Database = {
       };
     };
     Functions: {
+      apply_quote_adjustment_bulk: {
+        Args: {
+          p_id: string;
+          p_filter: Json;
+          p_pct: number;
+          p_note: string;
+          p_updated_at: string;
+          p_result: Json;
+        };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };
         Returns: Json;

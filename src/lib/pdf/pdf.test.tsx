@@ -3,6 +3,18 @@ import { describe, it, expect } from "vitest";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { mkdir, writeFile } from "node:fs/promises";
 import { QuoteDocument, type QuotePdfData } from "./document";
+import { Children, isValidElement, type ReactNode } from "react";
+
+function visibleText(node: ReactNode): string {
+  return Children.toArray(node)
+    .map((child): string => {
+      if (typeof child === "string" || typeof child === "number") return String(child);
+      return isValidElement<{ children?: ReactNode }>(child)
+        ? visibleText(child.props.children)
+        : "";
+    })
+    .join(" ");
+}
 
 describe("PDF rendering", () => {
   it.each(["B2B", "B2C"] as const)(
@@ -43,6 +55,10 @@ describe("PDF rendering", () => {
           sku: "TRANSFER",
           type: "transporte",
           included: true,
+          adjustment_pct: 6.4,
+          adjustment_note: "INTERNO_COMBUSTIBLE_2027",
+          unit_cost_original: 876.54,
+          total_cost_usd: 932.63856,
         })),
         content: {
           client_name: "Cliente de demostración",
@@ -70,11 +86,27 @@ describe("PDF rendering", () => {
           total_price_usd: 1200,
           price_per_pax_usd: 600,
           single_supplement_pp: 100,
-          items: [],
+          items: [1, 2, 3].map((n) => ({
+            id: "item" + n,
+            quantity: 1,
+            base_cost_usd: 876.54,
+            adjustment_pct: 6.4,
+            adjustment_amount_usd: 56.09856,
+            total_cost_usd: 932.63856,
+          })),
           scenarios: [],
         },
         optional_prices: {},
       } as unknown as QuotePdfData;
+      const text = visibleText(QuoteDocument({ data }));
+      expect(text).not.toMatch(/INTERNO_COMBUSTIBLE|6[.,]4\s*%|876[.,]54|932[.,]6|56[.,]09/);
+      expect(text).toContain(
+        new Intl.NumberFormat("es", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 2,
+        }).format(1200),
+      );
       const buffer = await renderToBuffer(<QuoteDocument data={data} />);
       expect(buffer.subarray(0, 4).toString()).toBe("%PDF");
       expect(buffer.byteLength).toBeGreaterThan(2000);

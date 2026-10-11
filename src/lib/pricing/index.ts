@@ -1,5 +1,6 @@
 import type { Enums } from "../../types/db";
 import { marginAmount, resolvePricingPolicy, type PricingPolicyInput } from "./policy";
+import { adjustedCost, adjustmentPctSchema } from "./adjustment";
 import {
   normalizeRooms,
   occupancyType,
@@ -53,6 +54,8 @@ export interface PricingItem {
   price_overridden?: boolean;
   override_note?: string;
   unit_cost_original?: number;
+  adjustment_pct?: number;
+  adjustment_note?: string | null;
 }
 export interface PaxScenario {
   pax_paying: number;
@@ -85,6 +88,9 @@ export interface ItemResult {
   quantity: number;
   unit_cost_original?: number;
   unit_cost_usd: number | null;
+  base_cost_usd: number | null;
+  adjustment_pct: number;
+  adjustment_amount_usd: number | null;
   total_cost_usd: number | null;
   total_margin_usd: number | null;
   covered: boolean;
@@ -304,7 +310,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           );
     }
     for (const original of day.items) {
-      const item = { ...original };
+      const item = {
+        ...original,
+        adjustment_pct: adjustmentPctSchema.parse(original.adjustment_pct ?? 0),
+        adjustment_note: original.adjustment_note ?? null,
+      };
       if (ids.has(item.id)) throw new Error("Duplicate item ID");
       ids.add(item.id);
       const span = item.day_span ?? 1;
@@ -339,6 +349,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           quantity: 0,
           unit_cost_original: 0,
           unit_cost_usd: 0,
+          base_cost_usd: 0,
+          adjustment_pct: item.adjustment_pct,
+          adjustment_amount_usd: 0,
           total_cost_usd: 0,
           total_margin_usd: 0,
           covered,
@@ -424,6 +437,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           quantity: 0,
           unit_cost_original: 0,
           unit_cost_usd: 0,
+          base_cost_usd: 0,
+          adjustment_pct: item.adjustment_pct,
+          adjustment_amount_usd: 0,
           total_cost_usd: 0,
           total_margin_usd: 0,
           covered: false,
@@ -464,7 +480,10 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
               room_type: part.type,
               quantity: part.quantity,
               unit_cost_original: price,
-              total_cost_usd: (price * part.quantity) / fx(input, item.currency),
+              total_cost_usd: adjustedCost(
+                (price * part.quantity) / fx(input, item.currency),
+                item.adjustment_pct,
+              ),
             });
         }
         if (missingPrice) {
@@ -475,6 +494,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             date,
             quantity: qty,
             unit_cost_usd: null,
+            base_cost_usd: null,
+            adjustment_pct: item.adjustment_pct,
+            adjustment_amount_usd: null,
             total_cost_usd: null,
             total_margin_usd: null,
             covered: false,
@@ -485,7 +507,8 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         native = totalNative / qty;
       }
       const usd = native / fx(input, item.currency),
-        cost = qty * usd;
+        baseCost = qty * usd,
+        cost = adjustedCost(baseCost, item.adjustment_pct);
       items.push({
         status: "ok",
         id: item.id,
@@ -494,9 +517,13 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         quantity: qty,
         unit_cost_original: native,
         unit_cost_usd: usd,
+        base_cost_usd: baseCost,
+        adjustment_pct: item.adjustment_pct,
+        adjustment_amount_usd: cost - baseCost,
         total_cost_usd: cost,
+        // Andrea: the adjustment is passed through without margin (2026-10-11).
         total_margin_usd: item.margin_applicable
-          ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
+          ? marginAmount(baseCost, policy.margin_pct, policy.margin_mode)
           : 0,
         covered: false,
         ...(item.pricing_unit === "per_room" || item.pricing_unit === "per_vehicle"
