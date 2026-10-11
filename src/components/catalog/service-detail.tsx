@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2, MessageSquarePlus } from "lucide-react";
 import { toast } from "sonner";
 import { db, json } from "@/lib/db";
-import type { Tables } from "@/types/db";
+import type { Tables, TablesUpdate } from "@/types/db";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RateForm } from "./rate-form";
 import {
-  PRICING_UNIT_LABELS, StatusBadge, cap, money, paxRange, rateValuesFrom, validity, type RateValues,
+  CURRENCIES, MODALITIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES,
+  StatusBadge, cap, money, paxRange, rateValuesFrom, validity, type RateValues,
 } from "./shared";
 
 type Rate = Tables<"service_rates">;
