@@ -114,27 +114,54 @@ describe("ajustes de cotización atómicos", () => {
       true,
     );
     const beforeResult = calculateQuote(quotePricingInput(before));
-    const applied = await applyAdjustmentBulk(id, { type: "transporte" }, 6.4, "combustible 2027");
+    const applied = await applyAdjustmentBulk(id, {
+      filtro: { type: "transporte" },
+      pct: 0.064,
+      nota: "combustible 2027",
+    });
     const after = await loadQuote(id);
     expect(applied.affected_item_ids.length).toBeGreaterThan(0);
+    expect(applied.items.map((i) => i.id).sort()).toEqual([...applied.affected_item_ids].sort());
+    expect(applied.items).toEqual(
+      after.items
+        .filter((i) => applied.affected_item_ids.includes(i.id))
+        .sort((a, b) => a.id.localeCompare(b.id)),
+    );
+    expect(applied.calculation.total_adjustments_usd).toBeCloseTo(
+      applied.calculation.total_cost_usd! - beforeResult.total_cost_usd!,
+      2,
+    );
     for (const item of after.items) {
       const prior = before.items.find((i) => i.id === item.id)!;
       const oldCost = beforeResult.items.find((i) => i.id === item.id)!;
       const newCost = applied.calculation.items.find((i) => i.id === item.id)!;
-      expect(item.adjustment_pct).toBe(item.type === "transporte" ? 6.4 : 0);
+      expect(item.adjustment_pct).toBe(item.type === "transporte" ? 0.064 : 0);
       expect(item.adjustment_note).toBe(item.type === "transporte" ? "combustible 2027" : null);
       expect(item.pricing_snapshot).toEqual(prior.pricing_snapshot);
       expect(item.unit_cost_original).toBe(prior.unit_cost_original);
+      expect(item.total_cost_local).toBeCloseTo(
+        newCost.quantity * (newCost.unit_cost_original ?? 0) * (1 + item.adjustment_pct),
+        8,
+      );
       expect(newCost.total_cost_usd).toBeCloseTo(
         oldCost.total_cost_usd! * (item.type === "transporte" ? 1.064 : 1),
         8,
       );
-      expect(newCost.total_margin_usd).toBe(oldCost.total_margin_usd);
+      expect(newCost.total_margin_usd).toBeCloseTo(
+        oldCost.total_margin_usd! * (item.type === "transporte" ? 1.064 : 1),
+        8,
+      );
     }
     expect(after.quote.calculation).toEqual(applied.calculation);
     expect(await recalculateQuote(id)).toEqual(applied.calculation);
     expect(
-      (await applyAdjustmentBulk(id, { type: "transporte" }, 6.4, "combustible 2027")).calculation,
+      (
+        await applyAdjustmentBulk(id, {
+          filtro: { type: "transporte" },
+          pct: 0.064,
+          nota: "combustible 2027",
+        })
+      ).calculation,
     ).toEqual(applied.calculation);
     await actAs(admin);
     expect(await catalog()).toEqual(master);
@@ -143,18 +170,20 @@ describe("ajustes de cotización atómicos", () => {
     const id = await pilot();
     let data = await loadQuote(id);
     const meal = data.items.find((i) => i.type === "comida" && i.supplier_id)!;
-    const supplier = await applyAdjustmentBulk(
-      id,
-      { supplier_id: meal.supplier_id!, type: "comida" },
-      -10,
-    );
+    const supplier = await applyAdjustmentBulk(id, {
+      filtro: { supplier_id: meal.supplier_id!, type: "comida" },
+      pct: -0.1,
+    });
     expect(supplier.affected_item_ids.sort()).toEqual(
       data.items
         .filter((i) => i.supplier_id === meal.supplier_id && i.type === "comida")
         .map((i) => i.id)
         .sort(),
     );
-    const byDay = await applyAdjustmentBulk(id, { day_number: 1, type: "alojamiento" }, 4);
+    const byDay = await applyAdjustmentBulk(id, {
+      filtro: { day_number: 1, type: "alojamiento" },
+      pct: 0.04,
+    });
     const first = data.days.find((d) => d.day_number === 1)!;
     expect(byDay.affected_item_ids.sort()).toEqual(
       data.items
@@ -164,12 +193,11 @@ describe("ajustes de cotización atómicos", () => {
     );
     const covered = data.items.find((i) => i.day_span > 1 && i.quote_day_id !== first.id)!;
     const purchase = (covered.pricing_snapshot as { coverage_key: string }).coverage_key;
-    const explicit = await applyAdjustmentBulk(
-      id,
-      { item_ids: [covered.id] },
-      3,
-      "Compra completa",
-    );
+    const explicit = await applyAdjustmentBulk(id, {
+      filtro: { item_ids: [covered.id] },
+      pct: 0.03,
+      nota: "Compra completa",
+    });
     data = await loadQuote(id);
     const copies = data.items.filter(
       (i) => (i.pricing_snapshot as { coverage_key?: string }).coverage_key === purchase,
@@ -177,53 +205,66 @@ describe("ajustes de cotización atómicos", () => {
     expect(copies.length).toBe(3);
     expect(explicit.matched_item_ids).toEqual([covered.id]);
     expect(explicit.affected_item_ids.sort()).toEqual(copies.map((i) => i.id).sort());
-    expect(copies.every((i) => i.adjustment_pct === 3)).toBe(true);
+    expect(copies.every((i) => i.adjustment_pct === 0.03)).toBe(true);
     expect(
       explicit.calculation.items.filter(
         (i) => copies.some((c) => c.id === i.id) && i.total_cost_usd! > 0,
       ),
     ).toHaveLength(1);
-    await expect(applyAdjustmentBulk(id, {}, 4)).rejects.toThrow("filtro");
-    await expect(applyAdjustmentBulk(id, { item_ids: [] }, 4)).rejects.toThrow();
-    await expect(applyAdjustmentBulk(id, { type: "vuelo" }, 4)).rejects.toThrow("ningún");
+    await expect(applyAdjustmentBulk(id, { filtro: {}, pct: 0.04 })).rejects.toThrow("filtro");
+    await expect(
+      applyAdjustmentBulk(id, { filtro: { item_ids: [] }, pct: 0.04 }),
+    ).rejects.toThrow();
+    await expect(applyAdjustmentBulk(id, { filtro: { type: "vuelo" }, pct: 0.04 })).rejects.toThrow(
+      "ningún",
+    );
   });
   it("rejects stale revisions, foreign selections, unauthorized users and partial calculations without partial updates", async () => {
     const id = await pilot();
     const before = await loadQuote(id);
     const targets = adjustmentTargets(before.days, before.items, { type: "transporte" });
     const draft = structuredClone(before);
-    for (const i of draft.items) if (targets.affectedIds.includes(i.id)) i.adjustment_pct = 6.4;
+    for (const i of draft.items) if (targets.affectedIds.includes(i.id)) i.adjustment_pct = 0.064;
     const result = calculateQuote(quotePricingInput(draft));
     const partial = structuredClone(result);
     partial.items.pop();
-    await expect(rpc(before, { type: "transporte" }, 6.4, partial)).rejects.toThrow("Incomplete");
+    await expect(rpc(before, { type: "transporte" }, 0.064, partial)).rejects.toThrow("Incomplete");
     expect(await loadQuote(id)).toEqual(before);
     const foreignId = "30000000-0000-0000-0000-000000000099";
     await expect(
-      rpc(before, { item_ids: [before.items[0]!.id, foreignId] }, 6.4, result),
+      rpc(before, { item_ids: [before.items[0]!.id, foreignId] }, 0.064, result),
     ).rejects.toThrow("ajenos");
     await actAs(other);
-    await expect(rpc(before, { type: "transporte" }, 6.4, result)).rejects.toThrow();
-    await expect(applyAdjustmentBulk(id, { type: "transporte" }, 6.4)).rejects.toThrow();
+    await expect(rpc(before, { type: "transporte" }, 0.064, result)).rejects.toThrow();
+    await expect(
+      applyAdjustmentBulk(id, { filtro: { type: "transporte" }, pct: 0.064 }),
+    ).rejects.toThrow();
     await actAs(seller);
     expect(await loadQuote(id)).toEqual(before);
     await pg.query("update quote_items set description=description || ' edit' where id=$1", [
       before.items[0]!.id,
     ]);
     const edited = await loadQuote(id);
-    await expect(rpc(before, { type: "transporte" }, 6.4, result)).rejects.toThrow("cambió");
+    await expect(rpc(before, { type: "transporte" }, 0.064, result)).rejects.toThrow("cambió");
     expect(await loadQuote(id)).toEqual(edited);
   });
   it("item edits and sent versions preserve adjustments; promoted templates do not inherit them", async () => {
     const id = await pilot();
-    await applyAdjustmentBulk(id, { type: "transporte" }, 6.4, "combustible 2027");
+    await applyAdjustmentBulk(id, {
+      filtro: { type: "transporte" },
+      pct: 0.064,
+      nota: "combustible 2027",
+    });
     let data = await loadQuote(id);
     const selected = data.items.find((i) => i.type === "transporte")!;
-    await updateQuoteItem(selected.id, { adjustment_pct: -10, adjustment_note: "Acuerdo privado" });
+    await updateQuoteItem(selected.id, {
+      adjustment_pct: -0.1,
+      adjustment_note: "Acuerdo privado",
+    });
     await recalculateQuote(id);
     data = await loadQuote(id);
     expect(data.items.find((i) => i.id === selected.id)).toMatchObject({
-      adjustment_pct: -10,
+      adjustment_pct: -0.1,
       adjustment_note: "Acuerdo privado",
     });
     await pg.query(
@@ -238,9 +279,9 @@ describe("ajustes de cotización atómicos", () => {
     await pg.query("select public.transition_quote($1,'revisada')", [id]);
     await pg.query("select public.transition_quote($1,'enviada')", [id]);
     const sent = await loadQuote(id);
-    await expect(applyAdjustmentBulk(id, { type: "transporte" }, 5)).rejects.toThrow(
-      "nueva versión",
-    );
+    await expect(
+      applyAdjustmentBulk(id, { filtro: { type: "transporte" }, pct: 0.05 }),
+    ).rejects.toThrow("nueva versión");
     expect(await loadQuote(id)).toEqual(sent);
     const next = (await one<{ id: string }>("select public.version_quote($1) id", [id])).id;
     const version = await loadQuote(next);
@@ -271,5 +312,34 @@ describe("ajustes de cotización atómicos", () => {
         (r) => r.snapshot.adjustment_pct === 0 && r.snapshot.adjustment_note === null,
       ),
     ).toBe(true);
+  });
+  it("enforces both fraction limits in edits and bulk RPCs without partial changes", async () => {
+    const id = await pilot();
+    const before = await loadQuote(id);
+    const selected = before.items.find((i) => i.type === "comida")!;
+    for (const pct of [-0.500001, 1.000001, 6.4, NaN, Infinity]) {
+      await expect(updateQuoteItem(selected.id, { adjustment_pct: pct })).rejects.toThrow();
+      await expect(
+        applyAdjustmentBulk(id, { filtro: { item_ids: [selected.id] }, pct }),
+      ).rejects.toThrow();
+      await expect(
+        rpc(
+          before,
+          { item_ids: [selected.id] },
+          String(pct) as unknown as number,
+          before.quote.calculation,
+        ),
+      ).rejects.toThrow();
+    }
+    expect(await loadQuote(id)).toEqual(before);
+    for (const pct of [-0.5, 1]) {
+      const applied = await applyAdjustmentBulk(id, {
+        filtro: { item_ids: [selected.id] },
+        pct,
+        nota: "Límite",
+      });
+      expect(applied.items).toHaveLength(1);
+      expect(applied.items[0]).toMatchObject({ adjustment_pct: pct, adjustment_note: "Límite" });
+    }
   });
 });
