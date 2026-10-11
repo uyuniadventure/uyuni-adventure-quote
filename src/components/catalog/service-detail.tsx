@@ -136,6 +136,18 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
               <div className="flex items-center gap-2"><StatusBadge status={s.status} /><Badge variant="secondary">{cap(s.type)}</Badge></div>
               <SheetTitle className="text-left">{s.name}</SheetTitle>
               <SheetDescription className="text-left font-mono text-xs">{s.sku}</SheetDescription>
+              {manager && (
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" variant="outline" onClick={() => setEditingService(true)}>
+                    <Pencil className="mr-1 h-4 w-4" />Editar servicio
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-destructive"
+                    onClick={() => confirm(`¿Eliminar el servicio "${s.name}" y todas sus tarifas? Esta acción no se puede deshacer.`) && removeService.mutate()}
+                    disabled={removeService.isPending}>
+                    <Trash2 className="mr-1 h-4 w-4" />Eliminar servicio
+                  </Button>
+                </div>
+              )}
             </SheetHeader>
 
             <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
