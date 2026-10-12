@@ -151,7 +151,7 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" disabled={disabled} className={`justify-between font-normal ${className ?? "w-full"}`}>
+          <Button variant="outline" role="combobox" aria-label={placeholder} aria-expanded={open} disabled={disabled} className={`justify-between font-normal ${className ?? "w-full"}`}>
           <span className="truncate">{value ? value.label : <span className="text-muted-foreground">{placeholder}</span>}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
