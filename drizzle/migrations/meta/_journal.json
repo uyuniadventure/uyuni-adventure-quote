@@ -15,6 +15,13 @@
       "when": 1791804763059,
       "tag": "0001_quote_pricing_errors",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791804805591,
+      "tag": "0002_margin_and_agency_commission",
+      "breakpoints": true
     }
   ]
 }

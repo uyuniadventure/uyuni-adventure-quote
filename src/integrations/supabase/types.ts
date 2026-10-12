@@ -215,6 +215,8 @@ export type Database = {
       }
       clients: {
         Row: {
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           contact: string | null
           country: string | null
           created_at: string
@@ -222,12 +224,15 @@ export type Database = {
           email: string | null
           id: string
           language: string
+          margin_pct: number | null
           name: string
           terms_id: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at: string
         }
         Insert: {
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           contact?: string | null
           country?: string | null
           created_at?: string
@@ -235,12 +240,15 @@ export type Database = {
           email?: string | null
           id?: string
           language?: string
+          margin_pct?: number | null
           name: string
           terms_id?: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at?: string
         }
         Update: {
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           contact?: string | null
           country?: string | null
           created_at?: string
@@ -248,6 +256,7 @@ export type Database = {
           email?: string | null
           id?: string
           language?: string
+          margin_pct?: number | null
           name?: string
           terms_id?: string | null
           type?: Database["public"]["Enums"]["client_type"]
@@ -1274,6 +1283,30 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_settings: {
+        Row: {
+          created_at: string
+          id: string
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
+          margin_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
+          margin_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1760,6 +1793,8 @@ export type Database = {
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -1767,6 +1802,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -1803,6 +1839,8 @@ export type Database = {
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at?: string
           deposit_pct?: number
           document_snapshot?: Json
@@ -1810,7 +1848,8 @@ export type Database = {
           id?: string
           language?: string
           lost_reason?: string | null
-          margin_pct?: number
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
           next_followup_at?: string | null
           parent_quote_id?: string | null
           pax_paying: number
@@ -1846,6 +1885,8 @@ export type Database = {
           client_id?: string
           client_type?: Database["public"]["Enums"]["client_type"]
           code?: string
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           created_at?: string
           deposit_pct?: number
           document_snapshot?: Json
@@ -1853,6 +1894,7 @@ export type Database = {
           id?: string
           language?: string
           lost_reason?: string | null
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
           margin_pct?: number
           next_followup_at?: string | null
           parent_quote_id?: string | null
@@ -2524,6 +2566,8 @@ export type Database = {
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2531,6 +2575,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2665,6 +2710,8 @@ export type Database = {
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2672,6 +2719,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2730,6 +2778,8 @@ export type Database = {
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2737,6 +2787,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2785,10 +2836,12 @@ export type Database = {
         | "cancelado"
       catalog_status: "activo" | "pendiente" | "inactivo"
       client_type: "B2B" | "B2C"
+      commission_mode: "none" | "gross"
       communication_channel: "whatsapp" | "email"
       communication_status: "pendiente" | "enviado"
       email_status: "pendiente" | "enviado" | "fallido"
       itinerary_modality: "privado" | "compartido" | "grupo"
+      margin_mode: "markup" | "margin_on_price"
       meal_plan: "NONE" | "BB" | "HB" | "FB"
       media_type: "highlight" | "alojamiento"
       ops_client_type: "PRIVADO" | "GRUPO"
@@ -2957,10 +3010,12 @@ export const Constants = {
       ],
       catalog_status: ["activo", "pendiente", "inactivo"],
       client_type: ["B2B", "B2C"],
+      commission_mode: ["none", "gross"],
       communication_channel: ["whatsapp", "email"],
       communication_status: ["pendiente", "enviado"],
       email_status: ["pendiente", "enviado", "fallido"],
       itinerary_modality: ["privado", "compartido", "grupo"],
+      margin_mode: ["markup", "margin_on_price"],
       meal_plan: ["NONE", "BB", "HB", "FB"],
       media_type: ["highlight", "alojamiento"],
       ops_client_type: ["PRIVADO", "GRUPO"],
