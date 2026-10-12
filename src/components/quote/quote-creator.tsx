@@ -91,10 +91,10 @@ export function QuoteCreator({ onCreated }: { onCreated: (id: string) => void })
                 <SelectContent>{LANGS.map(([l, n]) => <SelectItem key={l} value={l}>{n}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="Fecha de inicio"><Input type="date" value={b.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Fecha de inicio"><Input aria-label="Fecha de inicio" type="date" value={b.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
             <div className="grid grid-cols-2 gap-2">
-              <Field label="Pax pagantes"><Input type="number" min={1} value={b.pax_paying} onChange={(e) => set("pax_paying", e.target.value)} /></Field>
-              <Field label="TC (liberados)"><Input type="number" min={0} value={b.tc_count} onChange={(e) => set("tc_count", e.target.value)} /></Field>
+              <Field label="Pax pagantes"><Input aria-label="Pax pagantes" type="number" min={1} value={b.pax_paying} onChange={(e) => set("pax_paying", e.target.value)} /></Field>
+              <Field label="TC (liberados)"><Input aria-label="TC (liberados)" type="number" min={0} value={b.tc_count} onChange={(e) => set("tc_count", e.target.value)} /></Field>
             </div>
             <Field label="Modalidad">
               <Select value={b.modality} onValueChange={(v) => set("modality", v as Enums<"itinerary_modality">)}>
@@ -180,7 +180,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
           const defaults = t.quote_defaults as { pax_paying?: number; tc_count?: number };
           const incompatible = defaults.pax_paying != null && (Number(b.pax_paying) !== defaults.pax_paying || Number(b.tc_count) !== defaults.tc_count);
           return (
-            <Card key={t.id} className="flex flex-col gap-2 p-4">
+            <Card key={t.id} role="group" aria-label={`Plantilla ${t.sku}`} className="flex flex-col gap-2 p-4">
               <div className="font-mono text-xs text-muted-foreground">{t.sku}</div>
               <div className="font-medium text-foreground">{t.name}</div>
               <div className="flex flex-wrap gap-1.5">
