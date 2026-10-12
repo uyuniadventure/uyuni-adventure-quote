@@ -92,6 +92,13 @@
       "when": 1791805370487,
       "tag": "0012_quote_add_block_sequence",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791805383738,
+      "tag": "0013_role_permissions",
+      "breakpoints": true
     }
   ]
 }

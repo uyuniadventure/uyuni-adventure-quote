@@ -2555,6 +2555,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_list_users: { Args: never; Returns: Json }
       apply_quote_adjustment_bulk: {
         Args: {
           p_filter: Json
