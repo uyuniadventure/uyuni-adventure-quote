@@ -697,6 +697,7 @@ export type Database = {
           modality: Database["public"]["Enums"]["itinerary_modality"]
           name: string
           nights: number
+          quote_defaults: Json
           route_from: string | null
           route_to: string | null
           route_type: Database["public"]["Enums"]["route_type"]
@@ -722,6 +723,7 @@ export type Database = {
           modality?: Database["public"]["Enums"]["itinerary_modality"]
           name: string
           nights: number
+          quote_defaults?: Json
           route_from?: string | null
           route_to?: string | null
           route_type: Database["public"]["Enums"]["route_type"]
@@ -747,6 +749,7 @@ export type Database = {
           modality?: Database["public"]["Enums"]["itinerary_modality"]
           name?: string
           nights?: number
+          quote_defaults?: Json
           route_from?: string | null
           route_to?: string | null
           route_type?: Database["public"]["Enums"]["route_type"]
