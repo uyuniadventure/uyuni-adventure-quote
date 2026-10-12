@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowUp, BedDouble, FilePlus2, Loader2, PencilLine, Plus, Trash2 } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowDown, ArrowUp, BedDouble, FilePlus2, LayoutTemplate, Loader2, PencilLine, Plus, RefreshCw, Replace, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
-import { addQuoteItem, loadQuote, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
+import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
+import { addBlockDay, deleteDay, moveDay, validateContinuity } from "@/lib/quotes/days";
+import { transitionQuote } from "@/lib/states";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QuoteResult } from "@/lib/pricing";
 import type { Enums, Tables } from "@/types/db";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
@@ -20,8 +23,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Field, SearchPicker, fetchBlocks, fetchServices, type PickOption } from "@/components/catalog/kit";
 import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, money, paxRange, validity } from "@/components/catalog/shared";
-import { addBlockDay, deleteItem, moveDay, removeDay, replaceDayHotel, serviceToItem } from "./quote-ops";
-import { QuotePanel } from "./quote-panel";
+import { deleteItem, replaceDayHotel, serviceToItem } from "./quote-ops";
+import { QuotePanel, type Alert } from "./quote-panel";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -87,36 +90,144 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
     }
   }, [q.data, actions]);
 
+  const continuity = useQuery({ queryKey: ["quote-continuity", quoteId, q.data?.quote.updated_at], enabled: !!q.data, queryFn: () => validateContinuity(quoteId) });
   if (q.isError) return <p className="text-sm text-destructive">No se pudo cargar la cotización: {(q.error as Error).message}</p>;
   if (!q.data) return <p className="text-sm text-muted-foreground">Cargando cotización…</p>;
   const data = q.data;
   const editable = ["borrador", "revisada"].includes(data.quote.status) && !data.quote.archived_at;
-  const displayedActions = { ...actions, result: actions.result ?? (data.quote.calculation as unknown as QuoteResult | null) };
+  const result = actions.result ?? (data.quote.calculation as unknown as QuoteResult | null);
+  const displayedActions = { ...actions, result };
+
+  const alerts: Alert[] = [];
+  if (actions.calcError) alerts.push({ level: "red", text: `No se pudo calcular: ${actions.calcError}` });
+  if (result?.status === "error") alerts.push({ level: "red", text: "El cálculo tiene ítems sin precio; no se puede enviar." });
+  for (const r of result?.items ?? []) {
+    if (!r.warning) continue;
+    const it = data.items.find((i) => i.id === r.id);
+    alerts.push({ level: r.total_cost_usd == null ? "red" : "yellow", text: `${it?.description ?? r.id}: ${r.warning}`, target: `item-${r.id}` });
+  }
+  for (const w of result?.warnings ?? []) alerts.push({ level: "yellow", text: w });
+  for (const c of continuity.data ?? []) alerts.push({ level: "yellow", text: c.mensaje, target: `day-${c.día}` });
+  const blocked = alerts.some((a) => a.level === "red");
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Nueva cotización</h1>
-            <Badge variant="outline">{cap(data.quote.status)}</Badge>
-            {actions.busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      <TopBar data={data} blocked={blocked} actions={actions} onReset={onReset} />
+      {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
+      <Tabs defaultValue="editor">
+        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
+        <TabsContent value="editor">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <DaysEditor data={data} editable={editable} actions={displayedActions} />
+            <div className="space-y-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
+              {editable && (
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" title="Recalcula con las tarifas guardadas en la cotización" onClick={() => actions.act(async () => {}, "Tarifas recalculadas.")}><RefreshCw className="mr-1 h-4 w-4" />Actualizar tarifas</Button>
+                  {!data.quote.template_id && (
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => actions.act(() => promoteQuoteToTemplate(data.quote.id), "Plantilla creada (pendiente de revisión).")}><LayoutTemplate className="mr-1 h-4 w-4" />Guardar como plantilla</Button>
+                  )}
+                </div>
+              )}
+              <QuotePanel data={data} editable={editable} actions={displayedActions} alerts={alerts} />
+            </div>
           </div>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">{data.quote.code} · inicio {data.quote.start_date} · {data.quote.language.toUpperCase()} · {data.quote.client_type}</p>
+        </TabsContent>
+        <TabsContent value="historial"><History quoteId={data.quote.id} /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+const NEXT: Record<string, { to: Enums<"quote_status">; label: string; guarded?: boolean }[]> = {
+  borrador: [{ to: "revisada", label: "Marcar revisada", guarded: true }],
+  revisada: [{ to: "enviada", label: "Marcar enviada", guarded: true }],
+  enviada: [{ to: "vendida", label: "Marcar vendida" }, { to: "perdida", label: "Marcar perdida" }],
+  vendida: [], perdida: [],
+};
+
+function TopBar({ data, blocked, actions, onReset }: { data: Data; blocked: boolean; actions: ReturnType<typeof useQuoteActions>; onReset: () => void }) {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { quote } = data;
+  const root = quote.code.replace(/-v\d+$/, "");
+  const versions = useQuery({
+    queryKey: ["quote-versions", root],
+    queryFn: async () => {
+      const { data: rows, error } = await db.from("quotes").select("id, code, version, status, archived_at").or(`code.eq.${root},code.like.${root}-v%`).order("version");
+      if (error) throw error;
+      return rows;
+    },
+  });
+  const [pending, setPending] = useState(false);
+  const go = async (to: Enums<"quote_status">) => {
+    let note: string | undefined;
+    if (to === "perdida") { note = prompt("Motivo de la pérdida (obligatorio):")?.trim(); if (!note) return; }
+    setPending(true);
+    try {
+      await transitionQuote(quote.id, to, note);
+      toast.success(`Estado: ${cap(to)}.`);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["quote-full", quote.id] }), qc.invalidateQueries({ queryKey: ["quote-history", quote.id] }), qc.invalidateQueries({ queryKey: ["quote-versions"] }), qc.invalidateQueries({ queryKey: ["quotes"] })]);
+    } catch (e) { toast.error((e as Error).message); } finally { setPending(false); }
+  };
+  const open = !quote.archived_at;
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Cotización</h1>
+          <Badge variant="outline">{cap(quote.status)}</Badge>
+          {(actions.busy || pending) && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild><Link to="/cotizaciones">Cotizaciones</Link></Button>
-          <Button variant="outline" onClick={onReset}><FilePlus2 className="mr-1 h-4 w-4" />Otra cotización</Button>
-        </div>
+        <p className="mt-1 font-mono text-xs text-muted-foreground">{quote.code} · inicio {quote.start_date} · {quote.language.toUpperCase()} · {quote.client_type}</p>
       </div>
-      {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">Esta cotización ya no es un borrador; editarla requiere crear una nueva versión.</p>}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <DaysEditor data={data} editable={editable} actions={displayedActions} />
-        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
-          <QuotePanel data={data} editable={editable} actions={displayedActions} />
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {(versions.data?.length ?? 0) > 1 && (
+          <Select value={quote.id} onValueChange={(id) => navigate({ to: "/nueva-cotizacion", search: { quote: id } })}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>{versions.data!.map((v) => <SelectItem key={v.id} value={v.id}>v{v.version} · {cap(v.status)}{v.archived_at ? " (archivada)" : ""}</SelectItem>)}</SelectContent>
+          </Select>
+        )}
+        {open && NEXT[quote.status]?.map((t) => (
+          <Button key={t.to} variant={t.to === "perdida" ? "outline" : "default"} disabled={pending || actions.busy || (t.guarded && blocked)}
+            title={t.guarded && blocked ? "Resuelve los avisos rojos primero" : undefined} onClick={() => void go(t.to)}>{t.label}</Button>
+        ))}
+        <Button variant="outline" asChild><Link to="/cotizaciones">Cotizaciones</Link></Button>
+        <Button variant="outline" onClick={onReset}><FilePlus2 className="mr-1 h-4 w-4" />Otra cotización</Button>
       </div>
     </div>
+  );
+}
+
+function History({ quoteId }: { quoteId: string }) {
+  const h = useQuery({
+    queryKey: ["quote-history", quoteId],
+    queryFn: async () => {
+      const { data, error } = await db.from("quote_status_history").select("id, old_status, new_status, changed_at, note, changed_by").eq("quote_id", quoteId).order("changed_at", { ascending: false });
+      if (error) throw error;
+      const ids = [...new Set(data.map((r) => r.changed_by))];
+      const { data: people } = ids.length ? await db.from("profiles").select("id, full_name").in("id", ids) : { data: [] };
+      return data.map((r) => ({ ...r, who: people?.find((p) => p.id === r.changed_by)?.full_name ?? "—" }));
+    },
+  });
+  if (h.isLoading) return <p className="text-sm text-muted-foreground">Cargando historial…</p>;
+  if (h.isError) return <p className="text-sm text-destructive">{(h.error as Error).message}</p>;
+  return (
+    <Card className="overflow-x-auto">
+      <Table>
+        <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Cambio</TableHead><TableHead>Usuario</TableHead><TableHead>Nota</TableHead></TableRow></TableHeader>
+        <TableBody>
+          {h.data!.length === 0 && <TableRow><TableCell colSpan={4} className="py-4 text-center text-sm text-muted-foreground">Sin cambios de estado.</TableCell></TableRow>}
+          {h.data!.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell className="whitespace-nowrap text-sm">{new Date(r.changed_at).toLocaleString("es-CL")}</TableCell>
+              <TableCell className="text-sm">{r.old_status ? cap(r.old_status) : "—"} → <strong>{cap(r.new_status)}</strong></TableCell>
+              <TableCell className="text-sm">{r.who}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">{r.note ?? ""}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
   );
 }
 
@@ -133,24 +244,32 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
           canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
           canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
           editable={editable} actions={actions}
-          onMove={(to) => act(() => moveDay(quote, days, i, to))}
-          onRemove={() => confirm(d.group_id ? `¿Quitar el grupo completo (días ${days.filter(day => day.group_id === d.group_id).map(day => day.day_number).join(", ")}) y sus servicios?` : `¿Quitar el día ${d.day_number} y sus servicios?`) && act(() => removeDay(quote, days, d.id), "Día eliminado.")} />
+          onMove={(to) => { const target = days[to]; if (target) void act(() => moveDay(quote.id, d.id, target.day_number)); }}
+          onReplace={(blockId) => act(async () => {
+            await addBlockDay(quote.id, blockId);
+            const fresh = await loadQuote(quote.id);
+            const added = fresh.days.at(-1)!;
+            await moveDay(quote.id, added.id, d.day_number);
+            return deleteDay(quote.id, d.id);
+          }, "Bloque reemplazado.")}
+          onRemove={() => confirm(d.group_id ? `¿Quitar el grupo completo (días ${days.filter(day => day.group_id === d.group_id).map(day => day.day_number).join(", ")}) y sus servicios?` : `¿Quitar el día ${d.day_number} y sus servicios?`) && act(() => deleteDay(quote.id, d.id), "Día eliminado.")} />
       ))}
       {editable && (
         <Card className="flex flex-wrap items-center gap-2 p-3">
           <span className="text-sm text-muted-foreground">Agregar día {days.length + 1}:</span>
           <SearchPicker className="w-full sm:w-[420px]" placeholder="Buscar bloque diario…" queryKey="blocks" fetcher={fetchBlocks}
-            onPick={(o) => o && act(() => addBlockDay(quote, days, o.id), "Bloque agregado.")} />
+            onPick={(o) => o && act(() => addBlockDay(quote.id, o.id), "Bloque agregado.")} />
         </Card>
       )}
     </div>
   );
 }
 
-function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, onMove, onRemove }: {
+function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, onMove, onRemove, onReplace }: {
   day: Tables<"quote_days">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
-  onMove: (to: number) => void; onRemove: () => void;
+  onMove: (to: number) => void; onRemove: () => void; onReplace: (blockId: string) => void;
 }) {
+  const [replacing, setReplacing] = useState(false);
   const { act, result } = actions;
   const [hotelOpen, setHotelOpen] = useState(false);
   const [newItem, setNewItem] = useState(false);
@@ -159,7 +278,7 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
   const dayTotal = result?.days.find((x) => x.day_number === day.day_number);
 
   return (
-    <Card className="overflow-hidden">
+    <Card id={`day-${day.day_number}`} className="overflow-hidden scroll-mt-4 transition-shadow">
       <div className="flex flex-wrap items-center gap-3 border-b bg-muted/30 px-4 py-2.5">
         <span className="rounded bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">Día {day.day_number}</span>
         <div className="min-w-0 flex-1">
@@ -172,11 +291,16 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
           <div className="flex">
             <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!canMoveUp} onClick={() => onMove(index - 1)} aria-label="Subir"><ArrowUp className="h-4 w-4" /></Button>
             <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!canMoveDown} onClick={() => onMove(index + 1)} aria-label="Bajar"><ArrowDown className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setReplacing((v) => !v)} aria-label="Reemplazar bloque" title="Reemplazar bloque"><Replace className="h-4 w-4" /></Button>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onRemove} aria-label="Quitar día"><Trash2 className="h-4 w-4" /></Button>
           </div>
         )}
       </div>
       <div className="space-y-3 p-4">
+        {replacing && editable && (
+          <SearchPicker className="w-full" placeholder="Bloque que reemplaza este día…" queryKey="blocks" fetcher={fetchBlocks}
+            onPick={(o) => { if (o) { setReplacing(false); onReplace(o.id); } }} />
+        )}
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <BedDouble className="h-4 w-4 text-muted-foreground" />
           <span className="text-muted-foreground">Hotel:</span>
@@ -218,7 +342,7 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
   const s = snap(item);
   const upd = (changes: Parameters<typeof updateQuoteItem>[1]) => act(() => updateQuoteItem(item.id, changes));
   return (
-    <TableRow className={item.included ? "" : "opacity-60"}>
+    <TableRow id={`item-${item.id}`} className={item.included ? "" : "opacity-60"}>
       <TableCell className="max-w-[320px]">
         <div className="truncate font-medium">{item.description}</div>
         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
