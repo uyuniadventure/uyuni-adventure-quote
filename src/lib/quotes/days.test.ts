@@ -169,6 +169,41 @@ describe("días congelados, grupos y operaciones atómicas", () => {
     await expect(addBlockDays(data.quote.id, ids)).rejects.toThrow("Incomplete calculation");
     expect(await loadQuote(data.quote.id)).toEqual(data);
   });
+  it("expands a purchase linked only to the first library block when appending after existing days", async () => {
+    await pg.exec("begin");
+    try {
+      const data = await newQuote();
+      const source = await loadTemplateSource(templateId, clientId);
+      const ids = source.templateDays
+        .sort((a, b) => a.day_number - b.day_number)
+        .map((d) => d.block_id);
+      await pg.query(
+        "delete from day_block_items where block_id=any($1::uuid[]) and multi_day_span>1",
+        [ids.slice(1)],
+      );
+      await pg.query(
+        "update day_block_items set coverage_key=null,coverage_start_day=null where block_id=$1 and multi_day_span>1",
+        [ids[0]],
+      );
+      const result = await addBlockDays(data.quote.id, ids);
+      expect(result.calculation.total_cost_usd).toBe(3878);
+      const saved = await loadQuote(data.quote.id);
+      const addedDays = saved.days.slice(3);
+      const purchases = saved.items.filter(
+        (i) => i.day_span === 3 && addedDays.some((d) => d.id === i.quote_day_id),
+      );
+      expect(purchases).toHaveLength(3);
+      expect(new Set(purchases.map((i) => i.source_block_service_id)).size).toBe(1);
+      expect(
+        purchases.every(
+          (i) => (i.pricing_snapshot as { coverage_start_day: number }).coverage_start_day === 4,
+        ),
+      ).toBe(true);
+      expect(new Set(addedDays.map((d) => d.group_id)).size).toBe(1);
+    } finally {
+      await pg.exec("rollback");
+    }
+  });
   it("copies all languages and original service links; multi-day purchase creates one group and charges once", async () => {
     const source = await loadTemplateSource(templateId, clientId);
     const block = source.blocks[0]!;
