@@ -642,7 +642,7 @@ function ReviewDayDialog({ day, language, disabled, onOpenChange, onConfirm }: {
   );
 }
 
-function ReviewField({ label, value }: { label: string; value?: string | null }) {
+function ReviewField({ label, value }: { label: string; value?: string | null | undefined }) {
   if (!value?.trim()) return null;
   return (
     <div>
