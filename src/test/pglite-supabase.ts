@@ -91,6 +91,7 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        admin_list_users: [],
         quote_payment_summary: [["p_id", "uuid"]],
         register_quote_payment: [
           ["p_quote_id", "uuid"],
