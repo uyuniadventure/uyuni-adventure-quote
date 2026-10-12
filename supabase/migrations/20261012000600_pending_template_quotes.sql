@@ -34,6 +34,8 @@ declare
     raise exception 'La plantilla no está disponible para tu usuario.' using errcode='42501';
   end if;$new$;
 begin
+  old_gate := replace(old_gate,E'\r\n',E'\n');
+  new_gate := replace(new_gate,E'\r\n',E'\n');
   if position(old_gate in definition)=0 then
     raise exception 'No se reconoce el control de plantilla: revisar create_quote_from_template antes de migrar.';
   end if;
