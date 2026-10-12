@@ -32,6 +32,8 @@ jobs:
         run: bun --no-env-file run test:roles
       - name: Perfiles de prueba y emails de Admin (PGlite)
         run: bunx vitest run src/lib/admin/users.test.ts --maxWorkers=1
+      - name: Revisión de textos, PDF y estados (PGlite)
+        run: bunx vitest run src/lib/quotes/text-review.test.ts src/lib/quotes/days.test.ts src/lib/states/states.test.ts src/lib/pdf/pdf.test.tsx --maxWorkers=1
       - run: bunx playwright install --with-deps chromium
       - run: node tests/e2e/prepare-functions.mjs
       - name: Supabase aislado (sin conexión a Cloud)

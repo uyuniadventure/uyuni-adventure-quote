@@ -2,6 +2,7 @@ import { db, json, unwrap } from "../db";
 import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } from "../pricing";
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
 export { createQuoteFromTemplate, type TemplateQuoteBasics } from "./from-template";
+export { unreviewedDays, unreviewedDaysMessage } from "./text-review";
 
 import { adjustmentPctSchema } from "../pricing/adjustment";
 import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";

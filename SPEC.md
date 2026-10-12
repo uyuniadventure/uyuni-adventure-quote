@@ -368,6 +368,17 @@ Desde cualquier estado distinto del destino: perdida o cancelada (motivo obligat
 
 El idioma de todo el PDF y del email es el **idioma del cliente**. Si un bloque no tiene traducción en ese idioma, la IA la genera, se guarda en `day_block_translations` con `reviewed = false` y se avisa al vendedor para que la revise antes de enviar.
 
+La revisión de los textos copiados se registra en `quote_days.snapshot` con
+`reviewed`, `reviewed_by` y `reviewed_at`. `review_quote_days` permite revisar uno,
+varios o todos los días solo en borrador; nunca modifica `block_snapshot`.
+`updateDayContent` deja revisado el día editado. Un día sin `reviewed: true`
+requiere revisión, también cuando no procede de un bloque. PDF y cambio de estado
+indican los números de los días pendientes y el idioma. La revisión conserva el
+cálculo vigente y descarta el PDF anterior; no recupera cálculos ya invalidados.
+Opcionalmente Admin/Operación pueden revisar también la traducción del bloque,
+en la misma transacción, si no hay overrides de texto y la traducción sigue siendo
+la copiada; los bloques omitidos se devuelven con su motivo.
+
 **PDF B2C** (modelo de referencia: el correo "TOUR PRIVADO 3 días / 2 noches" y los programas visuales en Canva):
 - Portada con marca Uyuni Adventure y foto principal.
 - Introducción breve del programa.

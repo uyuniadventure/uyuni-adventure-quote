@@ -76,7 +76,7 @@ Reglas para ese prompt:
 |---|---|---|---|---|
 | T00 | Arreglar CI (bun.lock con registro privado) | [~] | — | no |
 | T01 | Paso 2 de Nueva cotización no sugiere plantillas | [ ] | T00 | sí (migraciones) |
-| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [ ] | T00 | sí |
+| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [~] | T00 | sí |
 | T01c | Crear cotización desde /plantillas | [ ] | T01 | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
@@ -159,6 +159,24 @@ Hacer:
 5. Tests: un día sin revisar bloquea el PDF; reviewQuoteDays lo desbloquea; no funciona fuera de borrador; editar el texto marca el día revisado.
 
 Lovable: en el editor, cada día con el badge "Texto sin revisar" lleva un botón "Marcar revisado" que abre el texto para leerlo y confirmar. Arriba de la lista de días, "Revisar todos (n)". En "PDF y envío", si hay días sin revisar, mostrar la lista con enlace a cada día en lugar del error genérico.
+
+### Entrega T01b · 12-10-2026 · en revisión
+
+Implementada por pedido explícito de Andrea. Migración nueva:
+`20261012000700_quote_day_text_review.sql`; aplicar después de las anteriores y
+regenerar tipos. `reviewQuoteDays` revisa selección o todos, con auditoría y RLS,
+conserva el cálculo vigente y descarta el PDF anterior. La opción de catálogo se
+ejecuta en la misma RPC, solo para Admin/Operación; devuelve los bloques omitidos
+si hay overrides de texto o si la traducción cambió desde la copia. El snapshot
+del bloque permanece inmutable. `updateDayContent` deja revisado el día.
+`unreviewedDays` devuelve los días pendientes ordenados (con IDs para enlazarlos),
+incluidos los que no tienen `reviewed`. Los controles visuales se entregan en el
+prompt para Lovable y deben usar `useQuoteActions`.
+
+Verificación: 16/16 pruebas nuevas de revisión; Vitest 269/271, sin omitidos.
+Persisten únicamente los dos fixtures incompletos de Bolivia y WE ROAD (T03–T04).
+Instalación congelada y ambos TypeScript aprobados. No se modificaron precios,
+fixtures ni estados del resto del plan para ocultar esos fallos.
 
 ## T01c · Crear cotización desde /plantillas
 
