@@ -8,6 +8,7 @@ export const QUOTE_STATUSES: Record<Enums<"quote_status">, string> = {
   enviada: "Enviada",
   vendida: "Vendida",
   perdida: "Perdida",
+  cancelada: "Cancelada",
 };
 
 export interface QuoteFilters {

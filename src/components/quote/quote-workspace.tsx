@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
 import { addBlockDay, deleteDay, moveDay, validateContinuity } from "@/lib/quotes/days";
-import { transitionQuote } from "@/lib/states";
+import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QuoteResult } from "@/lib/pricing";
 import type { Enums, Tables } from "@/types/db";
@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Field, SearchPicker, fetchBlocks, fetchServices, type PickOption } from "@/components/catalog/kit";
 import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, money, paxRange, validity } from "@/components/catalog/shared";
-import { deleteItem, replaceDayHotel, serviceToItem } from "./quote-ops";
+import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToItem } from "./quote-ops";
 import { QuotePanel, type Alert } from "./quote-panel";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
@@ -138,16 +138,22 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
   );
 }
 
-const NEXT: Record<string, { to: Enums<"quote_status">; label: string; guarded?: boolean }[]> = {
-  borrador: [{ to: "revisada", label: "Marcar revisada", guarded: true }],
-  revisada: [{ to: "enviada", label: "Marcar enviada", guarded: true }],
-  enviada: [{ to: "vendida", label: "Marcar vendida" }, { to: "perdida", label: "Marcar perdida" }],
-  vendida: [], perdida: [],
+const CLOSE_ACTIONS: { to: Enums<"quote_status">; label: string }[] = [
+  { to: "perdida", label: "Marcar perdida" }, { to: "cancelada", label: "Cancelar cotización" },
+];
+const NEXT: Record<Enums<"quote_status">, { to: Enums<"quote_status">; label: string; guarded?: boolean; adminOnly?: boolean }[]> = {
+  borrador: [{ to: "revisada", label: "Marcar revisada", guarded: true }, ...CLOSE_ACTIONS],
+  revisada: [{ to: "enviada", label: "Marcar enviada", guarded: true }, ...CLOSE_ACTIONS],
+  enviada: [{ to: "vendida", label: "Marcar vendida", guarded: true, adminOnly: true }, ...CLOSE_ACTIONS],
+  vendida: CLOSE_ACTIONS,
+  perdida: CLOSE_ACTIONS.filter(a => a.to !== "perdida"),
+  cancelada: CLOSE_ACTIONS.filter(a => a.to !== "cancelada"),
 };
 
 function TopBar({ data, blocked, actions, onReset }: { data: Data; blocked: boolean; actions: ReturnType<typeof useQuoteActions>; onReset: () => void }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { role } = useCurrentUser();
   const { quote } = data;
   const root = quote.code.replace(/-v\d+$/, "");
   const versions = useQuery({
@@ -159,9 +165,20 @@ function TopBar({ data, blocked, actions, onReset }: { data: Data; blocked: bool
     },
   });
   const [pending, setPending] = useState(false);
+  const editSent = async () => {
+    setPending(true);
+    try {
+      const id = await beginQuoteEdit(quote.id);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["quote-full", quote.id] }), qc.invalidateQueries({ queryKey: ["quote-versions"] }), qc.invalidateQueries({ queryKey: ["quotes"] })]);
+      await navigate({ to: "/nueva-cotizacion", search: { quote: id } });
+    } catch (e) { toast.error((e as Error).message); } finally { setPending(false); }
+  };
   const go = async (to: Enums<"quote_status">) => {
     let note: string | undefined;
-    if (to === "perdida") { note = prompt("Motivo de la pérdida (obligatorio):")?.trim(); if (!note) return; }
+    if (["perdida", "cancelada", "vendida"].includes(to)) {
+      const reason = to === "perdida" ? "la pérdida" : to === "cancelada" ? "la cancelación" : "la venta sin depósito";
+      note = prompt(`Motivo de ${reason} (obligatorio):`)?.trim(); if (!note) return;
+    }
     setPending(true);
     try {
       await transitionQuote(quote.id, to, note);
@@ -187,8 +204,9 @@ function TopBar({ data, blocked, actions, onReset }: { data: Data; blocked: bool
             <SelectContent>{versions.data!.map((v) => <SelectItem key={v.id} value={v.id}>v{v.version} · {cap(v.status)}{v.archived_at ? " (archivada)" : ""}</SelectItem>)}</SelectContent>
           </Select>
         )}
-        {open && NEXT[quote.status]?.map((t) => (
-          <Button key={t.to} variant={t.to === "perdida" ? "outline" : "default"} disabled={pending || actions.busy || (t.guarded && blocked)}
+        {open && quote.status === "enviada" && <Button variant="outline" disabled={pending || actions.busy} onClick={() => void editSent()}><PencilLine className="mr-1 h-4 w-4" />Editar nueva versión</Button>}
+        {open && NEXT[quote.status].filter(t => !t.adminOnly || role === "admin").map((t) => (
+          <Button key={t.to} variant={t.to === "perdida" || t.to === "cancelada" ? "outline" : "default"} disabled={pending || actions.busy || (t.guarded && blocked)}
             title={t.guarded && blocked ? "Resuelve los avisos rojos primero" : undefined} onClick={() => void go(t.to)}>{t.label}</Button>
         ))}
         <Button variant="outline" asChild><Link to="/cotizaciones">Cotizaciones</Link></Button>
@@ -244,7 +262,7 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
           canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
           canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
           editable={editable} actions={actions}
-          onMove={(to) => { const target = days[to]; if (target) void act(() => moveDay(quote.id, d.id, target.day_number)); }}
+          onMove={(to) => act(() => moveDayByPosition(quote, days, i, to))}
           onReplace={(blockId) => act(async () => {
             await addBlockDay(quote.id, blockId);
             const fresh = await loadQuote(quote.id);
