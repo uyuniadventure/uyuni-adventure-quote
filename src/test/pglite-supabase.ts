@@ -35,7 +35,10 @@ export function pgliteSupabase(pg: PGlite) {
           return query;
         },
         in(column: string, values: unknown[]) {
-          conditions.push(`${field(column)} = any(${bind(values)})`);
+          // Bind scalar values so PostgreSQL also infers custom enum types.
+          conditions.push(
+            values.length ? `${field(column)} in (${values.map(bind).join(",")})` : "false",
+          );
           return query;
         },
         ilike(column: string, value: string) {

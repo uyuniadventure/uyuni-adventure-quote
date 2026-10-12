@@ -299,8 +299,19 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 3. **Editor por días:** reordenar, quitar o agregar bloques; cambiar hotel (al seleccionar un hotel se muestran sus tipos de habitación y tarifas disponibles); agregar o quitar servicios; cambiar comidas; sobrescribir un precio solo en esta cotización; crear un ítem nuevo (con opción "agregar al tarifario" → queda `pendiente` si lo crea un vendedor).
 4. Panel lateral con el cálculo en vivo: costo, margen, total, precio por pax y (si es B2B) la tabla por escenarios.
 
+**Sugerencias:** el paso 2 usa `src/lib/quotes/suggestTemplates` desde `suggestions.ts`.
+Incluye todas las plantillas activas o pendientes visibles para el usuario en el
+catálogo, sin excluir por ruta, duración ni límite de 60. Ordena activas antes de
+pendientes y, dentro de cada estado, por coincidencias de origen, destino, días,
+categoría y modalidad. Las pendientes y sus advertencias se muestran antes de
+crear; errores de consulta muestran un motivo y permiten reintentar.
+
 **Creación desde plantilla:** `src/lib/quotes/createQuoteFromTemplate` requiere una
-plantilla activa y días consecutivos con servicios. Recibe cliente, idioma, fecha,
+plantilla activa o pendiente accesible y días consecutivos con servicios (T01,
+Andrea, 2026-10-12). Pendiente no implica aprobación: se copian las advertencias
+de importación y la revisión de textos, manteniendo los controles de PDF y envío.
+Un vendedor solo accede a pendientes propias, según RLS del catálogo; Admin y
+Operación pueden usar las pendientes del equipo. Recibe cliente, idioma, fecha,
 pagantes, TC, staff y rooming opcional; SKU/categoría proceden de la plantilla y la
 política de precios del cliente/Admin. La preparación lee y calcula sin escrituras
 ni traducciones automáticas. Una sola RPC `create_quote_from_template` bloquea y
@@ -309,7 +320,7 @@ asigna código/fechas y guarda el cálculo en la misma transacción. Un fallo re
 también historial y correlativo. Si cambió el origen, hay que repetir la creación.
 Cada día elige su tarifa por fecha real, temporada configurada y tramo de pasajeros.
 La cotización conserva los textos, los datos de los servicios, las tarifas y la
-configuración copiados: editar el catálogo después no la modifica. Falta de aprobación,
+configuración copiados: editar el catálogo después no la modifica. Plantilla inactiva/inaccesible,
 días vacíos o traducción ausente devuelven un motivo sin crear un borrador parcial.
 El vendedor puede leer los tipos de cambio, pero solo Admin puede administrarlos.
 

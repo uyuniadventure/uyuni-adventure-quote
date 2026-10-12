@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, FilePlus2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { createEmptyQuote, createQuoteFromTemplate, type QuoteBasics } from "@/lib/quotes";
+import { suggestTemplates, templateImportWarnings } from "@/lib/quotes/suggestions";
 import type { Enums } from "@/types/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,23 +127,11 @@ export function QuoteCreator({ onCreated }: { onCreated: (id: string) => void })
   );
 }
 
-function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack: () => void; onCreated: (id: string) => void }) {
+export function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack: () => void; onCreated: (id: string) => void }) {
   const q = useQuery({
     queryKey: ["quote-suggestions", b.route_from, b.route_to, b.days, b.category, b.modality],
-    queryFn: async () => {
-      let query = db.from("itinerary_templates")
-        .select("id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, quote_defaults, template_days(count)")
-        .eq("status", "activo").order("days").limit(60);
-      if (b.route_from) query = query.eq("route_from", b.route_from);
-      if (b.route_to) query = query.eq("route_to", b.route_to);
-      const wanted = Number(b.days);
-      if (wanted > 0) query = query.gte("days", wanted - 1).lte("days", wanted + 1);
-      const { data, error } = await query;
-      if (error) throw error;
-      // Coincidencias exactas de categoría, modalidad y duración primero (ordenan, no excluyen).
-      const score = (t: (typeof data)[number]) => (t.category === b.category ? 2 : 0) + (t.modality === b.modality ? 1 : 0) + (wanted === t.days ? 1 : 0);
-      return [...data].sort((x, y) => score(y) - score(x));
-    },
+    queryFn: () => suggestTemplates(b),
+    retry: 1,
   });
 
   const create = useMutation({
@@ -173,11 +162,16 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
       </div>
       {create.isPending && <p className="text-sm text-muted-foreground">Creando borrador y copiando servicios de la plantilla…</p>}
       {q.isLoading && <p className="text-sm text-muted-foreground">Buscando plantillas…</p>}
-      {q.data?.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay plantillas activas que coincidan. Empieza desde cero.</p>}
+      {q.isError && <div role="alert" className="space-y-2 rounded-md border p-4">
+        <p className="text-sm text-destructive">{q.error.message}</p>
+        <Button variant="outline" disabled={q.isFetching} onClick={() => void q.refetch()}>Reintentar</Button>
+      </div>}
+      {!q.isError && q.data?.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay plantillas activas o pendientes disponibles para tu usuario. Empieza desde cero.</p>}
       <div className="grid gap-3 sm:grid-cols-2">
         {q.data?.map((t) => {
           const built = (t.template_days as unknown as { count: number }[])[0]?.count ?? 0;
-          const defaults = t.quote_defaults as { pax_paying?: number; tc_count?: number };
+          const defaults = (t.quote_defaults ?? {}) as { pax_paying?: number; tc_count?: number };
+          const warnings = templateImportWarnings(t.import_warnings);
           const incompatible = defaults.pax_paying != null && (Number(b.pax_paying) !== defaults.pax_paying || Number(b.tc_count) !== defaults.tc_count);
           return (
             <Card key={t.id} role="group" aria-label={`Plantilla ${t.sku}`} className="flex flex-col gap-2 p-4">
@@ -193,6 +187,9 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
                 {Number(b.days) > 0 && t.days !== Number(b.days) && <Badge variant="outline">Duración distinta</Badge>}
               </div>
               {t.hotel_combo && <p className="font-mono text-xs text-muted-foreground">Hoteles: {t.hotel_combo}</p>}
+              {warnings.length > 0 && <ul aria-label="Advertencias de importación" className="list-inside list-disc text-xs text-brand-orange-deep">
+                {warnings.map((warning, index) => <li key={index}>{warning}</li>)}
+              </ul>}
               {defaults.pax_paying != null && <p className="text-xs text-muted-foreground">Configuración de referencia: {defaults.pax_paying} pasajeros + {defaults.tc_count} TC, con habitaciones y staff cargados.</p>}
               {incompatible && <p className="text-xs text-brand-orange-deep">Vuelve a los datos básicos para usar el escenario de referencia.</p>}
               {built !== t.days && <p className="text-xs text-brand-orange-deep">Solo {built} de {t.days} días armados.</p>}

@@ -9,7 +9,8 @@ export async function loadTemplateSource(templateId: string, clientId: string) {
     db.from("exchange_rates").select("*").order("id").then(unwrap),
     db.from("template_days").select("*").eq("template_id", templateId).order("id").then(unwrap),
   ]);
-  if (template.status !== "activo") throw new Error("La plantilla no está aprobada");
+  if (!["activo", "pendiente"].includes(template.status))
+    throw new Error("La plantilla está archivada o no está disponible");
   const ids = [...new Set(templateDays.map((d) => d.block_id))];
   const [blocks, texts, items, links] = await Promise.all([
     db.from("day_blocks").select("*").in("id", ids).order("id").then(unwrap),

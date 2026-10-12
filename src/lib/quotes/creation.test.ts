@@ -176,10 +176,63 @@ describe("creación atómica desde plantilla", () => {
     ).toBe(fx[0]!.rate_to_usd);
   });
 
-  it("rejects pending templates, empty source days and missing translations before any write", async () => {
+  it("creates a visible pending template with the same total and preserves import warnings", async () => {
+    const active = await createQuoteFromTemplate(templateId, basics());
+    await pg.query("update itinerary_templates set status='pendiente',created_by=$2 where id=$1", [
+      templateId,
+      seller,
+    ]);
+    try {
+      await as(seller);
+      const q = await createQuoteFromTemplate(templateId, basics());
+      expect(q.status).toBe("borrador");
+      expect(q.total_cost_usd).toBeCloseTo(fixture.expected.cost_usd, 2);
+      expect(q.total_cost_usd).toBe(active.total_cost_usd);
+      expect(q.total_price_usd).toBe(active.total_price_usd);
+      expect(q.total_price_usd).toBe(
+        calculateQuote(fixture.input as unknown as QuoteInput).total_price_usd,
+      );
+      const source = await one<{ import_warnings: unknown }>(
+        "select import_warnings from itinerary_templates where id=$1",
+        [templateId],
+      );
+      expect(q.pricing_config).toMatchObject({ unresolved: source.import_warnings });
+      expect((await loadQuote(q.id)).days).toHaveLength(3);
+    } finally {
+      await as(admin);
+      await pg.query("update itinerary_templates set status='activo',created_by=null where id=$1", [
+        templateId,
+      ]);
+    }
+  });
+
+  it("the definer RPC rejects somebody else's pending template even with a forged source", async () => {
     const before = await persisted();
-    await pg.query("update itinerary_templates set status='pendiente' where id=$1", [templateId]);
-    await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow("no está aprobada");
+    await pg.query("update itinerary_templates set status='pendiente',created_by=$2 where id=$1", [
+      templateId,
+      admin,
+    ]);
+    try {
+      await as(seller);
+      await expect(
+        pg.query("select create_quote_from_template($1,'{}','[]','{}','{}')", [templateId]),
+      ).rejects.toThrow("no está disponible para tu usuario");
+      expect(await persisted()).toEqual(before);
+    } finally {
+      await as(admin);
+      await pg.query("update itinerary_templates set status='activo',created_by=null where id=$1", [
+        templateId,
+      ]);
+    }
+  });
+
+  it("rejects inactive templates, empty source days and missing translations before any write", async () => {
+    const before = await persisted();
+    await pg.query("update itinerary_templates set status='inactivo' where id=$1", [templateId]);
+    await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow("archivada");
+    await expect(
+      pg.query("select create_quote_from_template($1,'{}','[]','{}','{}')", [templateId]),
+    ).rejects.toThrow("archivada");
     await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
     await expect(
       createQuoteFromTemplate(templateId, { ...basics(), language: "xx" }),
