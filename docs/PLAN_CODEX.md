@@ -76,6 +76,8 @@ Reglas para ese prompt:
 |---|---|---|---|---|
 | T00 | Arreglar CI (bun.lock con registro privado) | [~] | — | no |
 | T01 | Paso 2 de Nueva cotización no sugiere plantillas | [ ] | T00 | sí (migraciones) |
+| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [ ] | T00 | sí |
+| T01c | Crear cotización desde /plantillas | [ ] | T01 | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -142,6 +144,36 @@ Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehí
 5. Tests: 0 activas + 3 pendientes → aparecen las 3; UYU→SPA 3 días encuentra un UYUSPA 4D3N; error → mensaje + "Reintentar".
 
 **Lovable.** PASO 1: pedir que aplique **todas** las migraciones de `supabase/migrations` que falten en Lovable Cloud, en orden de fecha, y liste cuáles aplicó. PASO 2 solo si el componente cambió de forma que requiera ajuste visual.
+
+---
+
+## T01b · Revisión de textos del día dentro de la cotización
+
+Problema: "Generar PDF" falla con "Review translated texts before generating the client PDF" y no se puede resolver desde la cotización. generateQuotePdf (src/lib/pdf/index.tsx) exige quote_days.snapshot.reviewed === true en todos los días, y guard_quote_state exige lo mismo para pasar a revisada. Ese valor se copia de day_block_translations.reviewed al crear el día; las traducciones importadas tienen reviewed = false (también las de español) y los días sin bloque no tienen el campo. Ninguna pantalla de la cotización permite marcar un día como revisado, y corregir el bloque después no cambia el snapshot ya copiado.
+
+Hacer:
+1. RPC atómica review_quote_days(p_quote_id, p_day_ids uuid[] null): marca snapshot.reviewed = true, reviewed_by y reviewed_at en los días indicados (null = todos). Solo en borrador. No toca block_snapshot (es inmutable). Función reviewQuoteDays(quoteId, dayIds?) en src/lib/quotes/days.ts.
+2. Opción alsoUpdateBlock: si el día tiene source_block_id y no tiene overrides de texto, marca también day_block_translations.reviewed = true para ese bloque e idioma (solo roles que pueden editar catálogo).
+3. updateDayContent deja el día como revisado.
+4. Mensajes en español y con detalle: "Faltan revisar los textos de los días 1, 3 (idioma ES)". El mismo texto en el trigger de estado.
+5. Tests: un día sin revisar bloquea el PDF; reviewQuoteDays lo desbloquea; no funciona fuera de borrador; editar el texto marca el día revisado.
+
+Lovable: en el editor, cada día con el badge "Texto sin revisar" lleva un botón "Marcar revisado" que abre el texto para leerlo y confirmar. Arriba de la lista de días, "Revisar todos (n)". En "PDF y envío", si hay días sin revisar, mostrar la lista con enlace a cada día en lugar del error genérico.
+
+## T01c · Crear cotización desde /plantillas
+
+Hoy solo se puede elegir una plantilla dentro del asistente de Nueva cotización. Andrea quiere elegirla en /plantillas y crear la cotización desde ahí.
+
+Hacer:
+1. Ruta /nueva-cotizacion?template=<id>: carga la plantilla y precarga el paso 1 con origen, destino, días, categoría y modalidad de la plantilla, y con pax y TC de quote_defaults si existen. El cliente y la fecha de inicio siguen siendo obligatorios.
+2. Con template en la URL, el botón del paso 1 dice "Crear cotización con <SKU>" y llama directo a createQuoteFromTemplate, sin pasar por el paso 2. "Cambiar plantilla" vuelve al paso 2 normal.
+3. Si la plantilla está pendiente o tiene import_warnings, muestra las advertencias antes de crear, pero deja crear igual. Archivadas no.
+4. Si los pax no coinciden con quote_defaults, aplica la misma regla actual (aviso y opción de volver al escenario de referencia), sin bloquear en silencio.
+5. La consulta de la plantilla va en src/lib/quotes (getTemplateForQuote(id)); la UI no consulta tablas directo.
+6. Tests: la URL con template precarga los datos; crear desde ahí da el mismo total que crear desde el paso 2 con la misma plantilla; una plantilla archivada muestra error.
+7. Ajusta T01: toda plantilla que se ve en /plantillas con estado activo o pendiente debe aparecer en el paso 2.
+
+Lovable: en /plantillas, botón "Crear cotización" en cada fila (icono + texto, visible al pasar el mouse y siempre en móvil) y también dentro del editor de la plantilla. Navega a /nueva-cotizacion?template=<id>.
 
 ---
 

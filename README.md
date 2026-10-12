@@ -373,3 +373,39 @@ Las instrucciones, orden de aplicación y matriz completa sí/no están en
 [docs/T18_ROLES.md](docs/T18_ROLES.md). El seed no cambia las cuentas reales ni
 los alias `info+prueba-*` solicitados anteriormente. Los accesos en Cloud todavía
 deben comprobarse allí; las pruebas locales no los acreditan.
+
+### T01 · Plantillas disponibles en Nueva cotización (2026-10-12)
+
+El paso 2 utiliza `src/lib/quotes/suggestions.ts`: todas las plantillas activas y
+pendientes accesibles por RLS aparecen, incluidas las de otra ruta o duración.
+Ordena primero activas y después pendientes; dentro de cada estado, puntúa origen
++3, destino +3, duración exacta +2 (±1 día +1), categoría +2 y modalidad +1.
+También conserva las opciones de puntaje cero. Lee páginas sucesivas, sin el
+recorte anterior de 60 resultados. El estado archivado real del esquema es
+`inactivo`; se excluye de la selección y la creación.
+
+Las tarjetas muestran las advertencias de importación y permiten crear un
+borrador pendiente. No se publica la plantilla ni se revisan sus textos por
+usarla. Se mantienen la restricción del escenario de referencia, las tarifas
+válidas, los días completos y los controles de PDF/envío. La RPC valida también
+la propiedad de las plantillas pendientes: vendedor solo las suyas; Admin y
+Operación las accesibles para esos roles. Solo se amplía la lectura de bloques
+y módulos necesarios para copiar una plantilla que el usuario ya puede ver.
+
+En Lovable, revisar **todas las migraciones pendientes** en orden de nombre/fecha
+y listar las aplicadas. La nueva es
+`20261012000600_pending_template_quotes.sql`, después de las anteriores, incluida
+`20261012000500_role_permissions.sql` si aún falta. No repetir las ya aplicadas,
+no saltar una validación SQL fallida y no ejecutar seeds como parte de este
+cambio. Regenerar tipos y desplegar el frontend. Si faltan columnas, el error de
+la pantalla identifica la migración correspondiente y permite **Reintentar**.
+
+Pruebas de T01: `bunx vitest run src/lib/quotes/suggestions.test.ts
+src/lib/quotes/creation.test.ts src/components/quote/quote-creator.test.tsx
+--maxWorkers=1` (24 tests), además de TypeScript y todas las suites de BD.
+La suite general conserva los dos fallos previos de fixtures Bolivia/WE ROAD.
+
+El plan recibe exclusivamente las dos filas y secciones T01b/T01c solicitadas;
+se conserva el resto, incluidos sus estados, por indicación de Andrea. Esta
+entrega implementa T01 por su instrucción directa de continuar con esa tarea;
+T01b (revisión de textos) y T01c (entrada desde /plantillas) no se implementan aún.
