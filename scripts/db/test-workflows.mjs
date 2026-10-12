@@ -127,7 +127,7 @@ try {
   );
   for (let n = 0; n < 2; n++)
     await db.query(
-      "insert into quote_payments(quote_id,amount,currency,date,method,type)values($1,10,'USD','2027-01-01','cash','deposito')",
+      "insert into quote_payments(quote_id,amount,currency,date,method,type)values($1,72,'USD','2027-01-01','cash','deposito')",
       [clone.id],
     );
   assert.equal(await scalar("select status from quotes where id=$1", [clone.id]), "vendida");

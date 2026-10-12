@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BOOKING_STATUS, OPS_STATUS, PAYABLE_STATUS, fmtDate, today, usd } from "./shared";
+import { OperationItinerary } from "./operation-itinerary";
 
 const invalidateOps = (qc: ReturnType<typeof useQueryClient>) => {
   for (const k of ["ops-services", "ops-lodging", "ops-payables-pending", "ops-service"]) qc.invalidateQueries({ queryKey: [k] });
@@ -78,11 +79,13 @@ export function ServiceSheet({ serviceId, onClose }: { serviceId: string; onClos
             <Tabs defaultValue="items" className="mt-6">
               <TabsList>
                 <TabsTrigger value="items">Ítems por día</TabsTrigger>
+                <TabsTrigger value="itinerary">Itinerario cotizado</TabsTrigger>
                 <TabsTrigger value="pagos">Proveedores</TabsTrigger>
                 {canEdit && <TabsTrigger value="pax">Pasajeros</TabsTrigger>}
                 <TabsTrigger value="com">Comunicación</TabsTrigger>
               </TabsList>
               <TabsContent value="items" className="mt-4"><ItemsTab serviceId={serviceId} canEdit={canEdit} /></TabsContent>
+              <TabsContent value="itinerary" className="mt-4"><OperationItinerary service={s} /></TabsContent>
               <TabsContent value="pagos" className="mt-4"><PayablesTab serviceId={serviceId} canEdit={canEdit} /></TabsContent>
               {canEdit && <TabsContent value="pax" className="mt-4"><PassengersTab serviceId={serviceId} /></TabsContent>}
               <TabsContent value="com" className="mt-4"><CommsTab serviceId={serviceId} canEdit={canEdit} /></TabsContent>

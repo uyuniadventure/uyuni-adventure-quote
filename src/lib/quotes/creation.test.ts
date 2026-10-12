@@ -4,6 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { createDatabase, seedDatabase } from "../../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "@/test/pglite-supabase";
 import fixture from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
+import { registerQuotePayment } from "./payments";
+import { transitionQuote } from "../states";
 import { calculateQuote, type QuoteInput } from "../pricing";
 
 const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSupabase> | null }));
@@ -94,6 +96,48 @@ beforeEach(async () => {
 afterAll(async () => pg?.close());
 
 describe("creación atómica desde plantilla", () => {
+  it("registers SPAUYU 2 pax deposit and exposes the copied service in Operations", async () => {
+    await as(seller);
+    const quote = await createQuoteFromTemplate(templateId, basics());
+    // Simulate the reviewer clearing import/text checks in this local acceptance
+    // fixture only. Production send guards remain intact; pricing is unchanged.
+    await pg.query(
+      "update quotes set pricing_config=jsonb_set(pricing_config,'{unresolved}','[]') where id=$1",
+      [quote.id],
+    );
+    await pg.query(
+      "update quote_days set snapshot=jsonb_set(snapshot,'{reviewed}','true') where quote_id=$1",
+      [quote.id],
+    );
+    await recalculateQuote(quote.id);
+    await transitionQuote(quote.id, "revisada");
+    await transitionQuote(quote.id, "enviada");
+    const result = await registerQuotePayment(quote.id, crypto.randomUUID(), {
+      amount: Math.round(quote.total_price_usd! * quote.deposit_pct) / 100,
+      currency: "USD",
+      date: "2026-10-12",
+      method: "transferencia",
+      type: "deposito",
+    });
+    expect(result.summary.status).toBe("vendida");
+    const service = await one<{ data: Record<string, unknown> }>(
+      "select to_jsonb(o) data from ops_services o where id=$1",
+      [result.summary.operation_id],
+    );
+    expect(service.data).toMatchObject({
+      quote_id: quote.id,
+      pax: 2,
+      quoted_cost_usd: 1939,
+      sale_price_usd: quote.total_price_usd,
+    });
+    expect(service.data["days_snapshot"]).toHaveLength(3);
+    const costs = await one<{ n: number; cost: string }>(
+      "select count(*)::int n,sum(cost_usd)::text cost from ops_items where service_id=$1",
+      [result.summary.operation_id],
+    );
+    expect(costs.n).toBeGreaterThan(0);
+    expect(Number(costs.cost)).toBeCloseTo(fixture.expected.cost_usd, 2);
+  });
   it("SPAUYU 2 pax is already calculated on return, matches the fixture, and is visible to its seller", async () => {
     await as(seller);
     const rpc = vi.spyOn(transport.client!, "rpc");

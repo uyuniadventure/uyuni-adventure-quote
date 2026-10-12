@@ -25,6 +25,7 @@ import { Field, SearchPicker, fetchBlocks, fetchServices, type PickOption } from
 import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, money, paxRange, validity } from "@/components/catalog/shared";
 import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToItem } from "./quote-ops";
 import { QuotePanel, type Alert } from "./quote-panel";
+import { QuotePayments } from "./quote-payments";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -115,7 +116,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
       <TopBar data={data} blocked={blocked} actions={actions} onReset={onReset} />
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
       <Tabs defaultValue="editor">
-        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
+        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
         <TabsContent value="editor">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <DaysEditor data={data} editable={editable} actions={displayedActions} />
@@ -132,6 +133,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
             </div>
           </div>
         </TabsContent>
+        <TabsContent value="pagos"><QuotePayments quote={data.quote} /></TabsContent>
         <TabsContent value="historial"><History quoteId={data.quote.id} /></TabsContent>
       </Tabs>
     </div>

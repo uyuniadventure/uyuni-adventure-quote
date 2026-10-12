@@ -152,6 +152,7 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
     country: client?.country ?? "",
     language: client?.language ?? "es",
     terms_id: client?.terms_id ?? "",
+    deposit_pct: client?.deposit_pct == null ? "" : String(client.deposit_pct),
   });
   const [saving, setSaving] = useState(false);
   const set = <K extends keyof typeof v>(k: K, val: (typeof v)[K]) => setV((s) => ({ ...s, [k]: val }));
@@ -164,10 +165,13 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
 
   const save = async () => {
     if (!v.name.trim()) { toast.error("El nombre es obligatorio."); return; }
+    const deposit = v.deposit_pct === "" ? null : Number(v.deposit_pct);
+    if (deposit !== null && (!Number.isFinite(deposit) || deposit < 0 || deposit > 100)) { toast.error("El depósito debe estar entre 0 y 100 %."); return; }
     setSaving(true);
     const payload = {
       type: v.type, name: v.name.trim(), contact: v.contact.trim() || null, email: v.email.trim() || null,
       country: v.country.trim() || null, language: v.language,
+      deposit_pct: deposit,
       ...(isAdmin ? { terms_id: v.terms_id || null } : {}),
     };
     const { error } = client
@@ -206,6 +210,7 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
           <Field label="Contacto"><Input value={v.contact} onChange={(e) => set("contact", e.target.value)} /></Field>
           <Field label="Email"><Input type="email" value={v.email} onChange={(e) => set("email", e.target.value)} /></Field>
           <Field label="País"><Input value={v.country} onChange={(e) => set("country", e.target.value)} /></Field>
+          <Field label="Depósito % (vacío = global de Admin)"><Input aria-label="Depósito del cliente" type="number" min="0" max="100" step="0.0001" value={v.deposit_pct} onChange={(e) => set("deposit_pct", e.target.value)} /></Field>
           <Field label="Términos y condiciones" className="sm:col-span-2">
             {isAdmin ? (
               <Select value={v.terms_id || NONE} onValueChange={(x) => set("terms_id", x === NONE ? "" : x)}>
@@ -223,11 +228,11 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
         <div className="mt-6 rounded-md border bg-muted/40 p-4">
           <h3 className="text-sm font-semibold">Condiciones de pago por defecto</h3>
           <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-muted-foreground">Depósito</dt><dd>{pay.deposit}</dd>
+            <dt className="text-muted-foreground">Depósito</dt><dd>{v.deposit_pct === "" ? "Global de Admin" : `${v.deposit_pct} %`}</dd>
             <dt className="text-muted-foreground">Saldo</dt><dd>{pay.balance}</dd>
             <dt className="text-muted-foreground">Recargo tarjeta</dt><dd>{pay.card}</dd>
           </dl>
-          <p className="mt-2 text-xs text-muted-foreground">Se aplican al crear la cotización y se ajustan en cada una.</p>
+          <p className="mt-2 text-xs text-muted-foreground">El depósito se guarda al crear la cotización; cambiarlo aquí no modifica cotizaciones existentes.</p>
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

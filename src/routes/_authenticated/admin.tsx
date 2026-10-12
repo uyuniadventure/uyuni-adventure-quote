@@ -8,6 +8,7 @@ import type { Enums } from "@/types/db";
 import { ROLE_LABELS, useCurrentUser, type AppRole } from "@/hooks/use-auth";
 import { PageHeader, LANGS } from "@/components/catalog/kit";
 import { CrudTable } from "@/components/admin/crud-table";
+import { PaymentSettings } from "@/components/admin/payment-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -43,6 +44,7 @@ function AdminPage() {
           <TabsTrigger value="hotels">Códigos de hotel</TabsTrigger>
           <TabsTrigger value="info">Textos fijos</TabsTrigger>
           <TabsTrigger value="bank">Datos bancarios</TabsTrigger>
+          <TabsTrigger value="payments">Depósito</TabsTrigger>
         </TabsList>
         <TabsContent value="usuarios" className="mt-4"><UsersPanel /></TabsContent>
         <TabsContent value="fx" className="mt-4"><FxPanel /></TabsContent>
@@ -66,6 +68,7 @@ function AdminPage() {
             ]} />
         </TabsContent>
         <TabsContent value="bank" className="mt-4"><BankPanel /></TabsContent>
+        <TabsContent value="payments" className="mt-4"><PaymentSettings /></TabsContent>
       </Tabs>
     </div>
   );
