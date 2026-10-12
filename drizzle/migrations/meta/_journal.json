@@ -43,6 +43,13 @@
       "when": 1791804896648,
       "tag": "0005_import_approval_unlinked_items",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791804949096,
+      "tag": "0006_atomic_quote_from_template",
+      "breakpoints": true
     }
   ]
 }

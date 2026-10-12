@@ -2633,6 +2633,67 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_quote_from_template: {
+        Args: {
+          p_days: Json
+          p_quote: Json
+          p_result: Json
+          p_source: Json
+          p_template: string
+        }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_quote_snapshot: {
         Args: { p_days: Json; p_quote: Json }
         Returns: {
@@ -2779,6 +2840,10 @@ export type Database = {
       }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
+      quote_template_source: {
+        Args: { p_client: string; p_template: string }
+        Returns: Json
+      }
       save_quote_calculation: {
         Args: { p_id: string; p_result: Json; p_updated_at: string }
         Returns: {
