@@ -1509,6 +1509,8 @@ export type Database = {
       }
       quote_items: {
         Row: {
+          adjustment_note: string | null
+          adjustment_pct: number
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
@@ -1545,6 +1547,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adjustment_note?: string | null
+          adjustment_pct?: number
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
@@ -1581,6 +1585,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adjustment_note?: string | null
+          adjustment_pct?: number
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
@@ -2475,6 +2481,68 @@ export type Database = {
       }
     }
     Functions: {
+      apply_quote_adjustment_bulk: {
+        Args: {
+          p_filter: Json
+          p_id: string
+          p_note: string
+          p_pct: number
+          p_result: Json
+          p_updated_at: string
+        }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string }
         Returns: Json
@@ -2661,6 +2729,8 @@ export type Database = {
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean }
         Returns: {
+          adjustment_note: string | null
+          adjustment_pct: number
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
