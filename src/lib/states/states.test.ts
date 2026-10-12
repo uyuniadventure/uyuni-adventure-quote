@@ -266,7 +266,9 @@ describe("reasons, red warnings, deposit and immutable versions", () => {
     );
     await expect(transitionQuote(id, "enviada")).rejects.toThrow(/Recalculate/);
     await recalculateQuote(id);
-    await expect(transitionQuote(id, "enviada")).rejects.toThrow(/Review all/);
+    await expect(transitionQuote(id, "enviada")).rejects.toThrow(
+      "Faltan revisar los textos de los días 1 (idioma ES)",
+    );
     await pg.query(
       "update quote_days set snapshot=snapshot || '{\"reviewed\":true}' where quote_id=$1",
       [id],

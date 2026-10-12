@@ -1,18 +1,18 @@
 import { pdf } from "@react-pdf/renderer";
 import { db, unwrap } from "../db";
-import { loadQuote, quotePricingInput } from "../quotes";
+import { loadQuote, quotePricingInput, unreviewedDaysMessage } from "../quotes";
 import { calculateQuote, assertCompleteCalculation, type QuoteResult } from "../pricing";
 import { QuoteDocument, type DocumentContent } from "./document";
 
 export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   const data = await loadQuote(quoteId);
   const q = data.quote;
+  const reviewMessage = unreviewedDaysMessage(data.days, q.language);
+  if (reviewMessage) throw new Error(reviewMessage);
   if (!q.calculation || !data.days.length)
     throw new Error("Recalculate a complete itinerary before PDF generation");
   const calculation = q.calculation as unknown as QuoteResult;
   assertCompleteCalculation(calculation);
-  if (data.days.some((d) => (d.snapshot as { reviewed?: boolean })?.reviewed !== true))
-    throw new Error("Review translated texts before generating the client PDF");
   const content = q.document_snapshot as unknown as DocumentContent;
   if (!content.client_name || (q.client_type === "B2B" ? !content.terms : !content.terms_url))
     throw new Error("Client name and localized terms are required in document_snapshot");

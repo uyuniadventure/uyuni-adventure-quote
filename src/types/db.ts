@@ -2534,6 +2534,10 @@ export type Database = {
         Returns: Json;
       };
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
+      review_quote_days: {
+        Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
+        Returns: Json;
+      };
       save_quote_calculation: {
         Args: { p_id: string; p_updated_at: string; p_result: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];

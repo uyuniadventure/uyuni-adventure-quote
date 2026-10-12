@@ -89,6 +89,17 @@ export function pgliteSupabase(pg: PGlite) {
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
         admin_list_users: [],
+        review_quote_days: [
+          ["p_quote_id", "uuid"],
+          ["p_day_ids", "uuid[]"],
+          ["p_also_update_block", "boolean"],
+        ],
+        save_quote_pdf: [
+          ["p_id", "uuid"],
+          ["p_updated_at", "timestamptz"],
+          ["p_path", "text"],
+          ["p_url", "text"],
+        ],
         quote_payment_summary: [["p_id", "uuid"]],
         register_quote_payment: [
           ["p_quote_id", "uuid"],

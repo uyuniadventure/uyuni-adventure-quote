@@ -102,24 +102,26 @@ try {
     columns.filter((c) => c.table_type === "BASE TABLE").map((c) => c.table_name),
   );
   const rpcType = (t) =>
-    t === "void"
-      ? "undefined"
-      : tableNames.has(t)
-        ? `Database['public']['Tables']['${t}']['Row']`
-        : enumNames.has(t)
-          ? `Database['public']['Enums']['${t}']`
-          : ["json", "jsonb"].includes(t)
-            ? "Json"
-            : ["bool", "boolean"].includes(t)
-              ? "boolean"
-              : ["integer", "numeric", "int4"].includes(t)
-                ? "number"
-                : "string";
+    t?.startsWith("_")
+      ? `${rpcType(t.slice(1))}[]`
+      : t === "void"
+        ? "undefined"
+        : tableNames.has(t)
+          ? `Database['public']['Tables']['${t}']['Row']`
+          : enumNames.has(t)
+            ? `Database['public']['Enums']['${t}']`
+            : ["json", "jsonb"].includes(t)
+              ? "Json"
+              : ["bool", "boolean"].includes(t)
+                ? "boolean"
+                : ["integer", "numeric", "int4"].includes(t)
+                  ? "number"
+                  : "string";
   for (const f of functions) {
     const args = (f.proargnames || [])
       .map(
         (name, i) =>
-          `${name}${i >= f.argtypes.length - f.pronargdefaults ? "?" : ""}: ${rpcType(typeNames.get(f.argtypes[i]))}`,
+          `${name}${i >= f.argtypes.length - f.pronargdefaults ? "?" : ""}: ${rpcType(typeNames.get(f.argtypes[i]))}${typeNames.get(f.argtypes[i])?.startsWith("_") && i >= f.argtypes.length - f.pronargdefaults ? " | null" : ""}`,
       )
       .join("; ");
     lines.push(

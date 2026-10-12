@@ -76,6 +76,7 @@ Reglas para ese prompt:
 |---|---|---|---|---|
 | T00 | Arreglar CI (bun.lock con registro privado) | [~] | — | no |
 | T01 | Paso 2 de Nueva cotización no sugiere plantillas | [ ] | T00 | sí (migraciones) |
+| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [~] | T00 | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -142,6 +143,26 @@ Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehí
 5. Tests: 0 activas + 3 pendientes → aparecen las 3; UYU→SPA 3 días encuentra un UYUSPA 4D3N; error → mensaje + "Reintentar".
 
 **Lovable.** PASO 1: pedir que aplique **todas** las migraciones de `supabase/migrations` que falten en Lovable Cloud, en orden de fecha, y liste cuáles aplicó. PASO 2 solo si el componente cambió de forma que requiera ajuste visual.
+
+---
+
+## T01b · Revisión de textos del día dentro de la cotización
+
+En revisión, por pedido explícito de Andrea. La RPC `review_quote_days` y
+`reviewQuoteDays(quoteId, dayIds?, { alsoUpdateBlock? })` revisan los días del borrador
+con usuario y fecha en `snapshot`, conservando `block_snapshot`, precios y RLS.
+La opción de catálogo es atómica, solo para Admin/Operación y omite textos
+personalizados o cambiados desde la copia. `updateDayContent` marca el día revisado.
+`unreviewedDays` devuelve los días pendientes ordenados, incluidos los que no tienen
+el campo; PDF y transición usan el mensaje detallado en español.
+
+**Lovable.** Aplicar `20261012000700_quote_day_text_review.sql` y regenerar tipos.
+Añadir lectura y confirmación «Marcar revisado» por día y «Revisar todos (n)»;
+en PDF y envío, lista enlazada de pendientes y botón bloqueado con el motivo.
+Encolar `reviewQuoteDays` con `useQuoteActions`. Sin cambiar el resto del diseño.
+
+**Aceptación.** Revisar los días desbloquea el PDF; no funciona fuera de borrador;
+editar el texto lo marca revisado; el bloque original no cambia.
 
 ---
 

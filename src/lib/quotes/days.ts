@@ -19,6 +19,29 @@ export interface DayMutationResult {
   block_id: string | null;
   calculation: QuoteResult;
 }
+
+export interface DayReviewResult {
+  quote_id: string;
+  day_ids: string[];
+  block_translation_ids: string[];
+  skipped_blocks: { day_id: string; reason: string }[];
+}
+
+/** One transaction, including optional catalog review. Undefined = all days;
+ * [] = none. Queue via useQuoteActions alongside other quote mutations. */
+export async function reviewQuoteDays(
+  quoteId: string,
+  dayIds?: string[],
+  options: { alsoUpdateBlock?: boolean } = {},
+): Promise<DayReviewResult> {
+  return unwrap(
+    await db.rpc("review_quote_days", {
+      p_quote_id: quoteId,
+      p_day_ids: dayIds ?? null,
+      p_also_update_block: options.alsoUpdateBlock ?? false,
+    }),
+  ) as unknown as DayReviewResult;
+}
 /** Preparation performs no writes. A second call applies the same operation under
  * the quote lock and checks the revision before saving children and totals. */
 async function mutate(
