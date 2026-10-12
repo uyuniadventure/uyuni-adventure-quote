@@ -4,8 +4,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, BedDouble, FilePlus2, LayoutTemplate, Loader2, PencilLine, Plus, RefreshCw, Replace, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
-import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
-import { addBlockDay, addBlockDays, deleteDay, moveDay, validateContinuity } from "@/lib/quotes/days";
+import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, unreviewedDays, updateQuoteItem } from "@/lib/quotes";
+import { addBlockDay, addBlockDays, deleteDay, moveDay, resolveDay, reviewQuoteDays, validateContinuity } from "@/lib/quotes/days";
 import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QuoteResult } from "@/lib/pricing";
@@ -92,6 +92,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
     }
   }, [q.data, actions]);
 
+  const [tab, setTab] = useState("editor");
   const continuity = useQuery({ queryKey: ["quote-continuity", quoteId, q.data?.quote.updated_at], enabled: !!q.data, queryFn: () => validateContinuity(quoteId) });
   if (q.isError) return <p className="text-sm text-destructive">No se pudo cargar la cotización: {(q.error as Error).message}</p>;
   if (!q.data) return <p className="text-sm text-muted-foreground">Cargando cotización…</p>;
@@ -116,7 +117,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
     <div className="mx-auto max-w-[1400px] space-y-4">
       <TopBar data={data} blocked={blocked} actions={actions} onReset={onReset} />
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
-      <Tabs defaultValue="editor">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
         <TabsContent value="editor">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -135,7 +136,10 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
           </div>
         </TabsContent>
         <TabsContent value="pagos"><QuotePayments quote={data.quote} /></TabsContent>
-        <TabsContent value="envio"><QuoteDelivery quote={data.quote} actions={actions} /></TabsContent>
+        <TabsContent value="envio"><QuoteDelivery quote={data.quote} actions={actions} days={data.days} onGoToDay={(n) => {
+          setTab("editor");
+          setTimeout(() => document.getElementById(`day-${n}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+        }} /></TabsContent>
         <TabsContent value="historial"><History quoteId={data.quote.id} /></TabsContent>
       </Tabs>
     </div>
@@ -259,14 +263,30 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   const { quote, days, items } = data;
   const { act } = actions;
   const [selectedBlocks, setSelectedBlocks] = useState<PickOption[]>([]);
+  const pending = unreviewedDays(days);
+  const pendingIds = new Set(pending.map((d) => d.id));
+  const canReview = quote.status === "borrador" && !quote.archived_at;
+  // Review only touches metadata; recalculate only if the stored calculation was already invalidated.
+  const recalc = !quote.calculation;
+  const review = (ids?: string[]) => act(() => reviewQuoteDays(quote.id, ids), "Textos revisados.", recalc);
   return (
     <div className="space-y-3">
+      {pending.length > 0 && (
+        <Card className="flex flex-wrap items-center gap-2 border-brand-orange/40 p-3 text-sm">
+          <span className="flex-1 text-muted-foreground">{pending.length === 1 ? "1 día tiene" : `${pending.length} días tienen`} el texto sin revisar ({quote.language.toUpperCase()}).</span>
+          <Button size="sm" variant="outline" disabled={!canReview || actions.busy}
+            onClick={() => confirm(`¿Marcar como revisados los textos de ${pending.length} días (${pending.map((d) => d.day_number).join(", ")})?`) && review()}>
+            Revisar todos ({pending.length})
+          </Button>
+        </Card>
+      )}
       {days.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">Cotización vacía. Agrega bloques diarios para armar el itinerario.</p>}
       {days.map((d, i) => (
         <DayCard key={d.id} day={d} index={i} count={days.length}
           canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
           canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
-          editable={editable} actions={actions}
+          editable={editable} actions={actions} language={quote.language}
+          pendingReview={pendingIds.has(d.id)} canReview={canReview} onReview={() => review([d.id])}
           onMove={(to) => act(() => moveDayByPosition(quote, days, i, to))}
           onReplace={(blockId) => act(async () => {
             await addBlockDay(quote.id, blockId);
@@ -298,8 +318,9 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   );
 }
 
-function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, onMove, onRemove, onReplace }: {
+function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, language, pendingReview, canReview, onReview, onMove, onRemove, onReplace }: {
   day: Tables<"quote_days">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
+  language: string; pendingReview: boolean; canReview: boolean; onReview: () => void;
   onMove: (to: number) => void; onRemove: () => void; onReplace: (blockId: string) => void;
 }) {
   const [replacing, setReplacing] = useState(false);
@@ -307,7 +328,7 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
   const [hotelOpen, setHotelOpen] = useState(false);
   const [newItem, setNewItem] = useState(false);
   const hotels = items.filter((i) => i.type === "alojamiento" && i.pricing_unit !== "per_staff");
-  const reviewed = (day.snapshot as { reviewed?: boolean })?.reviewed;
+  const [reading, setReading] = useState(false);
   const dayTotal = result?.days.find((x) => x.day_number === day.day_number);
 
   return (
@@ -318,7 +339,8 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
           <div className="truncate font-medium text-foreground">{day.title}</div>
           <div className="font-mono text-xs text-muted-foreground">{day.date ?? ""} {day.route_from || day.route_to ? `· ${day.route_from ?? "—"} → ${day.route_to ?? "—"}` : ""}</div>
         </div>
-        {reviewed === false && <Badge variant="outline" className="border-brand-orange/40 text-brand-orange-deep">Texto sin revisar</Badge>}
+        {pendingReview && <Badge variant="outline" className="border-brand-orange/40 text-brand-orange-deep">Texto sin revisar</Badge>}
+        {pendingReview && <Button size="sm" variant="outline" className="h-7" disabled={!canReview || actions.busy} onClick={() => setReading(true)}>Marcar revisado</Button>}
         {dayTotal && <span className="text-xs text-muted-foreground">Costo {money(dayTotal.total_cost_usd, "USD")}</span>}
         {editable && (
           <div className="flex">
@@ -360,6 +382,8 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
           </div>
         )}
       </div>
+      {reading && <ReviewDayDialog day={day} language={language} disabled={!canReview || actions.busy}
+        onOpenChange={setReading} onConfirm={() => { setReading(false); onReview(); }} />}
       <HotelDialog open={hotelOpen} onOpenChange={setHotelOpen}
         onConfirm={(ids) => act(() => replaceDayHotel(day.id, hotels.map((h) => h.id), ids), "Hotel actualizado.")} />
       <NewItemDialog open={newItem} onOpenChange={setNewItem}
@@ -578,5 +602,52 @@ function NewItemDialog({ open, onOpenChange, onConfirm }: {
         <DialogFooter><Button disabled={!!err} onClick={submit}>Agregar ítem</Button></DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ReviewDayDialog({ day, language, disabled, onOpenChange, onConfirm }: {
+  day: Tables<"quote_days">; language: string; disabled: boolean; onOpenChange: (v: boolean) => void; onConfirm: () => void;
+}) {
+  // Effective content frozen in the quote (snapshot + overrides), never the live library block.
+  let content: ReturnType<typeof resolveDay> | null = null;
+  let error: string | null = null;
+  try { content = resolveDay(day); } catch (e) { error = (e as Error).message; }
+  const t = (v?: Record<string, string>) => v?.[language];
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Día {day.day_number}: revisar texto ({language.toUpperCase()})</DialogTitle>
+          <DialogDescription>Lee el contenido que se usará en esta cotización y confirma que está correcto.</DialogDescription>
+        </DialogHeader>
+        {error ? <p className="text-sm text-destructive">No se pudo leer el contenido: {error}</p> : (
+          <div className="space-y-3 text-sm">
+            <ReviewField label="Título" value={t(content?.title) ?? day.title} />
+            <ReviewField label="Descripción" value={t(content?.description) ?? day.description} />
+            <ReviewField label="Alojamiento" value={t(content?.accommodation_text)} />
+            <ReviewField label="Transporte" value={t(content?.transport_text)} />
+            <ReviewField label="Comidas" value={content?.meals?.join(", ")} />
+            <ReviewField label="Horarios" value={content?.schedule?.join("\n")} />
+            <ReviewField label="Inicio → fin" value={content?.start_point || content?.end_point ? `${content?.start_point ?? "—"} → ${content?.end_point ?? "—"}` : undefined} />
+            <ReviewField label="Incluye" value={day.includes ?? undefined} />
+            <ReviewField label="No incluye" value={day.excludes ?? undefined} />
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button disabled={disabled || !!error} onClick={onConfirm}>Confirmar revisado</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ReviewField({ label, value }: { label: string; value?: string | null }) {
+  if (!value?.trim()) return null;
+  return (
+    <div>
+      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+      <p className="whitespace-pre-line text-foreground">{value}</p>
+    </div>
   );
 }

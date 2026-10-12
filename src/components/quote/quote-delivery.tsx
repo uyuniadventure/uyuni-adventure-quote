@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { recalculateQuote } from "@/lib/quotes";
+import { recalculateQuote, unreviewedDays, unreviewedDaysMessage } from "@/lib/quotes";
 import { saveQuoteTermsUrl, sendQuoteEmail } from "@/lib/quotes/delivery";
 import type { Tables } from "@/types/db";
 import type { useQuoteActions } from "./quote-workspace";
@@ -12,10 +12,16 @@ import { Card } from "@/components/ui/card";
 export function QuoteDelivery({
   quote,
   actions,
+  days = [],
+  onGoToDay,
 }: {
   quote: Tables<"quotes">;
   actions: ReturnType<typeof useQuoteActions>;
+  days?: Tables<"quote_days">[];
+  onGoToDay?: (dayNumber: number) => void;
 }) {
+  const pending = unreviewedDays(days);
+  const pendingMessage = unreviewedDaysMessage(days, quote.language);
   const qc = useQueryClient();
   const content = (quote.document_snapshot ?? {}) as { client_email?: string; terms_url?: string };
   const [terms, setTerms] = useState(content.terms_url ?? "");
@@ -70,9 +76,33 @@ export function QuoteDelivery({
           />
         </div>
       )}
+      {pendingMessage && (
+        <div className="space-y-1 rounded-md border border-brand-orange/40 p-3 text-sm">
+          <p className="font-medium text-brand-orange-deep">No se puede generar el PDF: {pendingMessage}.</p>
+          <ul className="list-inside list-disc text-muted-foreground">
+            {pending.map((d) => (
+              <li key={d.id}>
+                <a
+                  href={`#day-${d.day_number}`}
+                  className="text-primary underline-offset-2 hover:underline"
+                  onClick={(e) => {
+                    if (!onGoToDay) return;
+                    e.preventDefault();
+                    onGoToDay(d.day_number);
+                  }}
+                >
+                  Día {d.day_number}: {d.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         <Button
-          disabled={!editable || actions.busy || (quote.client_type === "B2C" && !terms)}
+          disabled={
+            !editable || actions.busy || pending.length > 0 || (quote.client_type === "B2C" && !terms)
+          }
           onClick={() => void generate()}
         >
           Generar PDF
