@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, BedDouble, FilePlus2, LayoutTemplate, Loader2, Penc
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
-import { addBlockDay, deleteDay, moveDay, validateContinuity } from "@/lib/quotes/days";
+import { addBlockDay, addBlockDays, deleteDay, moveDay, validateContinuity } from "@/lib/quotes/days";
 import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QuoteResult } from "@/lib/pricing";
@@ -258,6 +258,7 @@ type Actions = ReturnType<typeof useQuoteActions>;
 function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean; actions: Actions }) {
   const { quote, days, items } = data;
   const { act } = actions;
+  const [selectedBlocks, setSelectedBlocks] = useState<PickOption[]>([]);
   return (
     <div className="space-y-3">
       {days.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">Cotización vacía. Agrega bloques diarios para armar el itinerario.</p>}
@@ -280,7 +281,17 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
         <Card className="flex flex-wrap items-center gap-2 p-3">
           <span className="text-sm text-muted-foreground">Agregar día {days.length + 1}:</span>
           <SearchPicker className="w-full sm:w-[420px]" placeholder="Buscar bloque diario…" queryKey="blocks" fetcher={fetchBlocks}
-            onPick={(o) => o && act(() => addBlockDay(quote.id, o.id), "Bloque agregado.")} />
+            disabled={actions.busy} onPick={(o) => o && setSelectedBlocks(current => [...current, o])} />
+          {selectedBlocks.length > 0 && <div className="w-full space-y-2">
+            <ol className="space-y-1 text-sm">{selectedBlocks.map((block, i) => <li key={`${block.id}-${i}`} className="flex items-center gap-2">
+              <span>Día {days.length + i + 1}: {block.label}</span>
+              <Button size="sm" variant="ghost" disabled={actions.busy} aria-label={`Quitar bloque seleccionado ${i + 1}`} onClick={() => setSelectedBlocks(current => current.filter((_, n) => n !== i))}>Quitar</Button>
+            </li>)}</ol>
+            <p className="text-xs text-muted-foreground">Selecciona todos los días de un servicio multi-día antes de añadir el tramo.</p>
+            <Button disabled={actions.busy} onClick={async () => {
+              if (await act(() => addBlockDays(quote.id, selectedBlocks.map(b => b.id)), "Bloques agregados.")) setSelectedBlocks([]);
+            }}>Añadir bloques</Button>
+          </div>}
         </Card>
       )}
     </div>
