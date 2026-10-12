@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { generateQuotePdf } from "@/lib/pdf";
 import { recalculateQuote } from "@/lib/quotes";
 import { saveQuoteTermsUrl, sendQuoteEmail } from "@/lib/quotes/delivery";
 import type { Tables } from "@/types/db";
@@ -18,12 +17,13 @@ export function QuoteDelivery({
   actions: ReturnType<typeof useQuoteActions>;
 }) {
   const qc = useQueryClient();
-  const content = quote.document_snapshot as { client_email?: string; terms_url?: string };
+  const content = (quote.document_snapshot ?? {}) as { client_email?: string; terms_url?: string };
   const [terms, setTerms] = useState(content.terms_url ?? "");
   const editable = !quote.archived_at && ["borrador", "revisada"].includes(quote.status);
   const generate = () =>
     actions.act(
       async () => {
+        const { generateQuotePdf } = await import("@/lib/pdf");
         if (quote.client_type === "B2C" && terms !== content.terms_url) {
           await saveQuoteTermsUrl(quote.id, terms);
           await recalculateQuote(quote.id);
@@ -82,6 +82,7 @@ export function QuoteDelivery({
             actions.busy ||
             !!quote.archived_at ||
             !quote.pdf_path ||
+            (quote.client_type === "B2C" && terms !== content.terms_url) ||
             !content.client_email ||
             !["revisada", "enviada"].includes(quote.status)
           }

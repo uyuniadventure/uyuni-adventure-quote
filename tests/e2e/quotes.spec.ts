@@ -1,8 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
-import spa from "../fixtures/SPAUYU-3D2N-MP.json";
-import bolivia from "../fixtures/BOLIVIA-5D4N-9+1.json";
+import spa from "../fixtures/SPAUYU-3D2N-MP.json" with { type: "json" };
+import bolivia from "../fixtures/BOLIVIA-5D4N-9+1.json" with { type: "json" };
 import { compareReference, type QuoteReference } from "../../src/lib/pricing/reference";
 import { localOnly } from "./local-only.mjs";
 
@@ -56,30 +56,30 @@ async function fromTemplate(page: Page, sku: string) {
 }
 async function assertTotals(page: Page, expectedCost: number, expectedPrice: number | null) {
   await expect
-    .poll(async () => Number((await quote(page)).total_cost_usd))
-    .toBeCloseTo(expectedCost, 0);
+    .poll(async () => Math.abs(Number((await quote(page)).total_cost_usd) - expectedCost))
+    .toBeLessThanOrEqual(1);
   const q = await quote(page);
   expect(
     Math.abs(Number(q.total_cost_usd) - expectedCost),
     "Costo vs Sheets, tolerancia USD 1",
   ).toBeLessThanOrEqual(1);
   expect(q.calculation.status).toBe("ok");
-  await expect(page.getByTestId("quote-total")).not.toHaveText(/^(0 USD|—)$/);
+  await expect(page.getByTestId("quote-total")).toHaveText(
+    `${new Intl.NumberFormat("es-CL", { maximumFractionDigits: 2 }).format(Number(q.total_price_usd))} USD`,
+  );
   if (expectedPrice !== null)
     expect(
       Math.abs(Number(q.total_price_usd) - expectedPrice),
       "Venta vs referencia, tolerancia USD 1",
     ).toBeLessThanOrEqual(1);
-  await test
-    .info()
-    .attach("quote-calculation.json", {
-      body: JSON.stringify(
-        { cost: q.total_cost_usd, sale: q.total_price_usd, calculation: q.calculation },
-        null,
-        2,
-      ),
-      contentType: "application/json",
-    });
+  await test.info().attach("quote-calculation.json", {
+    body: JSON.stringify(
+      { cost: q.total_cost_usd, sale: q.total_price_usd, calculation: q.calculation },
+      null,
+      2,
+    ),
+    contentType: "application/json",
+  });
   return q;
 }
 async function deliver(page: Page) {

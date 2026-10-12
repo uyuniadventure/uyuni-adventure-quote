@@ -15,7 +15,7 @@ export async function saveQuoteTermsUrl(quoteId: string, value: string) {
   const url = new URL(value);
   if (!["https:", "http:"].includes(url.protocol)) throw new Error("URL de términos inválida");
   const quote = unwrap(
-    await db.from("quotes").select("document_snapshot").eq("id", quoteId).single(),
+    await db.from("quotes").select("document_snapshot,updated_at").eq("id", quoteId).single(),
   );
   unwrap(
     await db
@@ -24,6 +24,7 @@ export async function saveQuoteTermsUrl(quoteId: string, value: string) {
         document_snapshot: { ...(quote.document_snapshot as object), terms_url: url.href },
       })
       .eq("id", quoteId)
+      .eq("updated_at", quote.updated_at)
       .select("id")
       .single(),
   );

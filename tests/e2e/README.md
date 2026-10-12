@@ -8,12 +8,12 @@ Desde la raíz del repositorio:
 bun install --frozen-lockfile
 bunx playwright install --with-deps chromium
 node tests/e2e/prepare-functions.mjs
-bunx supabase start --workdir tests/e2e
-bun run e2e:setup
-bunx supabase functions serve send-quote-email --workdir tests/e2e --env-file tests/e2e/.local/functions.env
+bun --no-env-file x supabase start --workdir tests/e2e
+bun --no-env-file run e2e:setup
+bun --no-env-file x supabase functions serve send-quote-email --workdir tests/e2e --env-file tests/e2e/.local/functions.env
 ```
 
-En otra terminal, `bun run test:e2e`. Playwright inicia Vite en 127.0.0.1:4173 con las claves locales, realiza login por UI como vendedor y ejecuta **dos repeticiones, sin retries**. Al terminar: `bunx supabase stop --workdir tests/e2e --no-backup`. El setup rechaza una base existente y cualquier host remoto. No usar `supabase link`, `db push` ni `deploy`.
+En otra terminal, `bun --no-env-file run test:e2e`. Playwright inicia Vite en 127.0.0.1:4173 con las claves locales, realiza login por UI como vendedor y ejecuta **dos repeticiones, sin retries**. Al terminar: `bun --no-env-file x supabase stop --workdir tests/e2e --no-backup`. El setup rechaza una base existente y cualquier host remoto. No usar `supabase link`, `db push` ni `deploy`.
 
 El CI ejecuta lo mismo en cada push y PR. El reporte HTML, capturas, videos, traces y PDF quedan siete días en el artefacto `playwright-report`. Las credenciales efímeras no se incluyen en el artefacto; las trazas pueden contener sesiones de la base local, que se destruye al finalizar.
 

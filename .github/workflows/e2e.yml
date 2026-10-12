@@ -12,6 +12,8 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      SUPABASE_PROJECT_ID: uyuni-quote-e2e
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -25,11 +27,11 @@ jobs:
       - run: bunx playwright install --with-deps chromium
       - run: node tests/e2e/prepare-functions.mjs
       - name: Supabase aislado (sin conexión a Cloud)
-        run: bunx supabase start --workdir tests/e2e
-      - run: bun run e2e:setup
+        run: bun --no-env-file x supabase start --workdir tests/e2e
+      - run: bun --no-env-file run e2e:setup
       - name: Email simulado, handler y RPC reales
         run: |
-          bunx supabase functions serve send-quote-email --workdir tests/e2e --env-file tests/e2e/.local/functions.env > /tmp/e2e-edge.log 2>&1 &
+          bun --no-env-file x supabase functions serve send-quote-email --workdir tests/e2e --env-file tests/e2e/.local/functions.env > /tmp/e2e-edge.log 2>&1 &
           for i in $(seq 1 30); do
             if curl --fail -X OPTIONS http://127.0.0.1:54321/functions/v1/send-quote-email; then exit 0; fi
             sleep 2
@@ -37,7 +39,7 @@ jobs:
           cat /tmp/e2e-edge.log
           exit 1
       - name: Playwright — dos repeticiones, sin reintentos
-        run: bun run test:e2e
+        run: bun --no-env-file run test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -51,4 +53,4 @@ jobs:
         run: cat /tmp/e2e-edge.log || true
       - name: Limpiar entorno efímero
         if: always()
-        run: bunx supabase stop --workdir tests/e2e --no-backup
+        run: bun --no-env-file x supabase stop --workdir tests/e2e --no-backup

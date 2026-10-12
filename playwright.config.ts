@@ -27,10 +27,17 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "bun run dev --host 127.0.0.1 --port 4173 --strictPort",
+    command: "bun --no-env-file run dev --host 127.0.0.1 --port 4173 --strictPort",
     url: "http://127.0.0.1:4173/login",
     reuseExistingServer: false,
     timeout: 120000,
-    env: { VITE_SUPABASE_URL: runtime.api, VITE_SUPABASE_PUBLISHABLE_KEY: runtime.anonKey },
+    env: {
+      VITE_SUPABASE_URL: runtime.api,
+      VITE_SUPABASE_PUBLISHABLE_KEY: runtime.anonKey,
+      SUPABASE_URL: runtime.api,
+      SUPABASE_PUBLISHABLE_KEY: runtime.anonKey,
+      SUPABASE_PROJECT_ID: "uyuni-quote-e2e",
+      VITE_SUPABASE_PROJECT_ID: "uyuni-quote-e2e",
+    },
   },
 });
