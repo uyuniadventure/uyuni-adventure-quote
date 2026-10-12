@@ -3020,7 +3020,13 @@ export type Database = {
         | "per_vehicle"
         | "per_staff"
         | "per_unit"
-      quote_status: "borrador" | "revisada" | "enviada" | "vendida" | "perdida"
+      quote_status:
+        | "borrador"
+        | "revisada"
+        | "enviada"
+        | "vendida"
+        | "perdida"
+        | "cancelada"
       route_type: "ROUNDTRIP" | "ONEWAY"
       season: "ALL" | "DRY" | "RAIN" | "BAJA" | "MEDIA" | "ALTA" | "FESTIVO"
       service_modality: "privado" | "compartido" | "ambos"
@@ -3195,7 +3201,14 @@ export const Constants = {
         "per_staff",
         "per_unit",
       ],
-      quote_status: ["borrador", "revisada", "enviada", "vendida", "perdida"],
+      quote_status: [
+        "borrador",
+        "revisada",
+        "enviada",
+        "vendida",
+        "perdida",
+        "cancelada",
+      ],
       route_type: ["ROUNDTRIP", "ONEWAY"],
       season: ["ALL", "DRY", "RAIN", "BAJA", "MEDIA", "ALTA", "FESTIVO"],
       service_modality: ["privado", "compartido", "ambos"],
