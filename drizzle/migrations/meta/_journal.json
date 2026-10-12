@@ -99,6 +99,13 @@
       "when": 1791805383738,
       "tag": "0013_role_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791810628908,
+      "tag": "0014_pending_template_quotes",
+      "breakpoints": true
     }
   ]
 }
