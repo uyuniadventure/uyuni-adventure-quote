@@ -215,39 +215,51 @@ export type Database = {
       }
       clients: {
         Row: {
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           contact: string | null
           country: string | null
           created_at: string
           created_by: string | null
+          deposit_pct: number | null
           email: string | null
           id: string
           language: string
+          margin_pct: number | null
           name: string
           terms_id: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at: string
         }
         Insert: {
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           contact?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_pct?: number | null
           email?: string | null
           id?: string
           language?: string
+          margin_pct?: number | null
           name: string
           terms_id?: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at?: string
         }
         Update: {
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           contact?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_pct?: number | null
           email?: string | null
           id?: string
           language?: string
+          margin_pct?: number | null
           name?: string
           terms_id?: string | null
           type?: Database["public"]["Enums"]["client_type"]
@@ -458,43 +470,58 @@ export type Database = {
       day_blocks: {
         Row: {
           code: string
+          content: Json
           created_at: string
           created_by: string | null
           default_day_position: number | null
+          end_point: string | null
           hotel_service_id: string | null
           id: string
           modality: Database["public"]["Enums"]["itinerary_modality"]
+          name: string | null
+          parent_block_id: string | null
           places: string[]
           route_from: string | null
           route_to: string | null
+          start_point: string | null
           status: Database["public"]["Enums"]["catalog_status"]
           updated_at: string
         }
         Insert: {
           code: string
+          content?: Json
           created_at?: string
           created_by?: string | null
           default_day_position?: number | null
+          end_point?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
+          name?: string | null
+          parent_block_id?: string | null
           places?: string[]
           route_from?: string | null
           route_to?: string | null
+          start_point?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
         Update: {
           code?: string
+          content?: Json
           created_at?: string
           created_by?: string | null
           default_day_position?: number | null
+          end_point?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
+          name?: string | null
+          parent_block_id?: string | null
           places?: string[]
           route_from?: string | null
           route_to?: string | null
+          start_point?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
@@ -511,6 +538,13 @@ export type Database = {
             columns: ["hotel_service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "day_blocks_parent_block_id_fkey"
+            columns: ["parent_block_id"]
+            isOneToOne: false
+            referencedRelation: "day_blocks"
             referencedColumns: ["id"]
           },
           {
@@ -681,6 +715,7 @@ export type Database = {
       }
       itinerary_templates: {
         Row: {
+          approval_issues: string[]
           category: Database["public"]["Enums"]["tour_category"]
           countries: string[]
           created_at: string
@@ -697,6 +732,7 @@ export type Database = {
           modality: Database["public"]["Enums"]["itinerary_modality"]
           name: string
           nights: number
+          quote_defaults: Json
           route_from: string | null
           route_to: string | null
           route_type: Database["public"]["Enums"]["route_type"]
@@ -706,6 +742,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_issues?: string[]
           category: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -722,6 +759,7 @@ export type Database = {
           modality?: Database["public"]["Enums"]["itinerary_modality"]
           name: string
           nights: number
+          quote_defaults?: Json
           route_from?: string | null
           route_to?: string | null
           route_type: Database["public"]["Enums"]["route_type"]
@@ -731,6 +769,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_issues?: string[]
           category?: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -747,6 +786,7 @@ export type Database = {
           modality?: Database["public"]["Enums"]["itinerary_modality"]
           name?: string
           nights?: number
+          quote_defaults?: Json
           route_from?: string | null
           route_to?: string | null
           route_type?: Database["public"]["Enums"]["route_type"]
@@ -1092,11 +1132,13 @@ export type Database = {
           client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
+          days_snapshot: Json
           end_date: string
           id: string
           language: string
           pax: number
           quote_id: string
+          quote_snapshot: Json
           quoted_cost_usd: number | null
           real_cost_usd: number | null
           real_margin_usd: number | null
@@ -1112,11 +1154,13 @@ export type Database = {
           client_name?: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
+          days_snapshot?: Json
           end_date: string
           id?: string
           language?: string
           pax: number
           quote_id: string
+          quote_snapshot?: Json
           quoted_cost_usd?: number | null
           real_cost_usd?: number | null
           real_margin_usd?: number | null
@@ -1132,11 +1176,13 @@ export type Database = {
           client_name?: string | null
           client_type?: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
+          days_snapshot?: Json
           end_date?: string
           id?: string
           language?: string
           pax?: number
           quote_id?: string
+          quote_snapshot?: Json
           quoted_cost_usd?: number | null
           real_cost_usd?: number | null
           real_margin_usd?: number | null
@@ -1271,6 +1317,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_settings: {
+        Row: {
+          created_at: string
+          deposit_pct: number
+          id: string
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_pct?: number
+          id?: string
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
+          margin_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposit_pct?: number
+          id?: string
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
+          margin_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1297,47 +1370,65 @@ export type Database = {
       }
       quote_days: {
         Row: {
+          block_snapshot: Json
           created_at: string
           date: string | null
           day_number: number
           description: string
           excludes: string | null
+          group_id: string | null
+          group_position: number | null
           id: string
           includes: string | null
+          link_type: string
+          overrides: Json
           quote_id: string
           route_from: string | null
           route_to: string | null
           snapshot: Json
+          source_block_id: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          block_snapshot?: Json
           created_at?: string
           date?: string | null
           day_number: number
           description?: string
           excludes?: string | null
+          group_id?: string | null
+          group_position?: number | null
           id?: string
           includes?: string | null
+          link_type?: string
+          overrides?: Json
           quote_id: string
           route_from?: string | null
           route_to?: string | null
           snapshot?: Json
+          source_block_id?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          block_snapshot?: Json
           created_at?: string
           date?: string | null
           day_number?: number
           description?: string
           excludes?: string | null
+          group_id?: string | null
+          group_position?: number | null
           id?: string
           includes?: string | null
+          link_type?: string
+          overrides?: Json
           quote_id?: string
           route_from?: string | null
           route_to?: string | null
           snapshot?: Json
+          source_block_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -1347,6 +1438,13 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_days_source_block_id_fkey"
+            columns: ["source_block_id"]
+            isOneToOne: false
+            referencedRelation: "day_blocks"
             referencedColumns: ["id"]
           },
         ]
@@ -1470,6 +1568,8 @@ export type Database = {
       }
       quote_items: {
         Row: {
+          adjustment_note: string | null
+          adjustment_pct: number
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
@@ -1497,6 +1597,7 @@ export type Database = {
           route: string | null
           service_id: string | null
           sku: string | null
+          source_block_service_id: string | null
           supplier_id: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
@@ -1506,6 +1607,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adjustment_note?: string | null
+          adjustment_pct?: number
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
@@ -1533,6 +1636,7 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          source_block_service_id?: string | null
           supplier_id?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
@@ -1542,6 +1646,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adjustment_note?: string | null
+          adjustment_pct?: number
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
@@ -1569,6 +1675,7 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          source_block_service_id?: string | null
           supplier_id?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
@@ -1611,9 +1718,12 @@ export type Database = {
       quote_payments: {
         Row: {
           amount: number
+          amount_usd: number | null
+          bank: string | null
           created_at: string
           currency: string
           date: string
+          fx_rate: number | null
           id: string
           method: string
           quote_id: string
@@ -1624,9 +1734,12 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_usd?: number | null
+          bank?: string | null
           created_at?: string
           currency: string
           date: string
+          fx_rate?: number | null
           id?: string
           method: string
           quote_id: string
@@ -1637,9 +1750,12 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_usd?: number | null
+          bank?: string | null
           created_at?: string
           currency?: string
           date?: string
+          fx_rate?: number | null
           id?: string
           method?: string
           quote_id?: string
@@ -1752,11 +1868,14 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -1764,6 +1883,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -1795,11 +1915,14 @@ export type Database = {
           archived_at?: string | null
           balance_due_days?: number
           calculation?: Json | null
+          cancel_reason?: string | null
           card_surcharge_pct?: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at?: string
           deposit_pct?: number
           document_snapshot?: Json
@@ -1807,7 +1930,8 @@ export type Database = {
           id?: string
           language?: string
           lost_reason?: string | null
-          margin_pct?: number
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
           next_followup_at?: string | null
           parent_quote_id?: string | null
           pax_paying: number
@@ -1838,11 +1962,14 @@ export type Database = {
           archived_at?: string | null
           balance_due_days?: number
           calculation?: Json | null
+          cancel_reason?: string | null
           card_surcharge_pct?: number
           category?: Database["public"]["Enums"]["tour_category"]
           client_id?: string
           client_type?: Database["public"]["Enums"]["client_type"]
           code?: string
+          commission_mode?: Database["public"]["Enums"]["commission_mode"]
+          commission_pct?: number
           created_at?: string
           deposit_pct?: number
           document_snapshot?: Json
@@ -1850,6 +1977,7 @@ export type Database = {
           id?: string
           language?: string
           lost_reason?: string | null
+          margin_mode?: Database["public"]["Enums"]["margin_mode"]
           margin_pct?: number
           next_followup_at?: string | null
           parent_quote_id?: string | null
@@ -2073,6 +2201,7 @@ export type Database = {
       services: {
         Row: {
           applies_tc_default: boolean
+          approval_issues: string[]
           country: string | null
           created_at: string
           created_by: string | null
@@ -2099,6 +2228,7 @@ export type Database = {
         }
         Insert: {
           applies_tc_default?: boolean
+          approval_issues?: string[]
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -2125,6 +2255,7 @@ export type Database = {
         }
         Update: {
           applies_tc_default?: boolean
+          approval_issues?: string[]
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -2424,6 +2555,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_list_users: { Args: never; Returns: Json }
+      apply_quote_adjustment_bulk: {
+        Args: {
+          p_filter: Json
+          p_id: string
+          p_note: string
+          p_pct: number
+          p_result: Json
+          p_updated_at: string
+        }
+        Returns: Json
+      }
+      approve_valid_imports: {
+        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string }
+        Returns: Json
+      }
       build_supplier_payables: {
         Args: { p_id: string }
         Returns: {
@@ -2449,6 +2596,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      calculation_has_errors: { Args: { result: Json }; Returns: boolean }
       claim_quote_email: {
         Args: {
           p_body: string
@@ -2487,11 +2635,13 @@ export type Database = {
           client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
+          days_snapshot: Json
           end_date: string
           id: string
           language: string
           pax: number
           quote_id: string
+          quote_snapshot: Json
           quoted_cost_usd: number | null
           real_cost_usd: number | null
           real_margin_usd: number | null
@@ -2509,17 +2659,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      create_quote_snapshot: {
-        Args: { p_days: Json; p_quote: Json }
+      create_quote_from_template: {
+        Args: {
+          p_days: Json
+          p_quote: Json
+          p_result: Json
+          p_source: Json
+          p_template: string
+        }
         Returns: {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2527,6 +2686,63 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_quote_snapshot: {
+        Args: { p_days: Json; p_quote: Json }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          cancel_reason: string | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2566,6 +2782,16 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       due_followups: { Args: never; Returns: Json }
+      edit_quote_days: {
+        Args: {
+          p_id: string
+          p_operation: string
+          p_payload: Json
+          p_result?: Json
+          p_updated_at?: string
+        }
+        Returns: Json
+      }
       edit_quote_item: {
         Args: {
           p_add?: boolean
@@ -2602,6 +2828,8 @@ export type Database = {
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean }
         Returns: {
+          adjustment_note: string | null
+          adjustment_pct: number
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
@@ -2629,6 +2857,7 @@ export type Database = {
           route: string | null
           service_id: string | null
           sku: string | null
+          source_block_service_id: string | null
           supplier_id: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
@@ -2648,19 +2877,40 @@ export type Database = {
         Args: { p_language: string; p_sku: string }
         Returns: string
       }
+      patch_day_overrides: {
+        Args: { old_overrides: Json; patch: Json; snap: Json }
+        Returns: Json
+      }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
+      quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
+      quote_payment_summary: { Args: { p_id: string }; Returns: Json }
+      quote_template_source: {
+        Args: { p_client: string; p_template: string }
+        Returns: Json
+      }
+      register_quote_payment: {
+        Args: { p_payment: Json; p_payment_id: string; p_quote_id: string }
+        Returns: Json
+      }
+      resolve_day_content: {
+        Args: { p_overrides: Json; p_snapshot: Json }
+        Returns: Json
+      }
       save_quote_calculation: {
         Args: { p_id: string; p_result: Json; p_updated_at: string }
         Returns: {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2668,6 +2918,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2711,6 +2962,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      snapshot_day_block: { Args: { p_id: string }; Returns: Json }
       transition_quote: {
         Args: {
           p_id: string
@@ -2721,11 +2973,14 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
           client_type: Database["public"]["Enums"]["client_type"]
           code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
           created_at: string
           deposit_pct: number
           document_snapshot: Json
@@ -2733,6 +2988,7 @@ export type Database = {
           id: string
           language: string
           lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
           next_followup_at: string | null
           parent_quote_id: string | null
@@ -2767,6 +3023,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_day_content: { Args: { p: Json }; Returns: boolean }
       version_quote: { Args: { p_id: string }; Returns: string }
     }
     Enums: {
@@ -2781,10 +3038,12 @@ export type Database = {
         | "cancelado"
       catalog_status: "activo" | "pendiente" | "inactivo"
       client_type: "B2B" | "B2C"
+      commission_mode: "none" | "gross"
       communication_channel: "whatsapp" | "email"
       communication_status: "pendiente" | "enviado"
       email_status: "pendiente" | "enviado" | "fallido"
       itinerary_modality: "privado" | "compartido" | "grupo"
+      margin_mode: "markup" | "margin_on_price"
       meal_plan: "NONE" | "BB" | "HB" | "FB"
       media_type: "highlight" | "alojamiento"
       ops_client_type: "PRIVADO" | "GRUPO"
@@ -2798,7 +3057,13 @@ export type Database = {
         | "per_vehicle"
         | "per_staff"
         | "per_unit"
-      quote_status: "borrador" | "revisada" | "enviada" | "vendida" | "perdida"
+      quote_status:
+        | "borrador"
+        | "revisada"
+        | "enviada"
+        | "vendida"
+        | "perdida"
+        | "cancelada"
       route_type: "ROUNDTRIP" | "ONEWAY"
       season: "ALL" | "DRY" | "RAIN" | "BAJA" | "MEDIA" | "ALTA" | "FESTIVO"
       service_modality: "privado" | "compartido" | "ambos"
@@ -2953,10 +3218,12 @@ export const Constants = {
       ],
       catalog_status: ["activo", "pendiente", "inactivo"],
       client_type: ["B2B", "B2C"],
+      commission_mode: ["none", "gross"],
       communication_channel: ["whatsapp", "email"],
       communication_status: ["pendiente", "enviado"],
       email_status: ["pendiente", "enviado", "fallido"],
       itinerary_modality: ["privado", "compartido", "grupo"],
+      margin_mode: ["markup", "margin_on_price"],
       meal_plan: ["NONE", "BB", "HB", "FB"],
       media_type: ["highlight", "alojamiento"],
       ops_client_type: ["PRIVADO", "GRUPO"],
@@ -2971,7 +3238,14 @@ export const Constants = {
         "per_staff",
         "per_unit",
       ],
-      quote_status: ["borrador", "revisada", "enviada", "vendida", "perdida"],
+      quote_status: [
+        "borrador",
+        "revisada",
+        "enviada",
+        "vendida",
+        "perdida",
+        "cancelada",
+      ],
       route_type: ["ROUNDTRIP", "ONEWAY"],
       season: ["ALL", "DRY", "RAIN", "BAJA", "MEDIA", "ALTA", "FESTIVO"],
       service_modality: ["privado", "compartido", "ambos"],

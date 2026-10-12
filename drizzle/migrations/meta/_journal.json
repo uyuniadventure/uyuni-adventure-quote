@@ -1,0 +1,104 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791804738162,
+      "tag": "0000_template_quote_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791804763059,
+      "tag": "0001_quote_pricing_errors",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791804805591,
+      "tag": "0002_margin_and_agency_commission",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791804833144,
+      "tag": "0003_bulk_catalog_approval",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791804874828,
+      "tag": "0004_quote_item_adjustments",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791804896648,
+      "tag": "0005_import_approval_unlinked_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791804949096,
+      "tag": "0006_atomic_quote_from_template",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791805017173,
+      "tag": "0007_adjustment_fraction_and_margin",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791805141701,
+      "tag": "0008_quote_days_traceability",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791805154859,
+      "tag": "0009_quote_cancelled_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791805219634,
+      "tag": "0010_quote_state_transitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791805300594,
+      "tag": "0011_quote_payments_deposit",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791805370487,
+      "tag": "0012_quote_add_block_sequence",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791805383738,
+      "tag": "0013_role_permissions",
+      "breakpoints": true
+    }
+  ]
+}
