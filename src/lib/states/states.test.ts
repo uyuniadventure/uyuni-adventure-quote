@@ -38,7 +38,8 @@ const history = async (id: string) =>
       [id],
     )
   ).rows;
-async function pay(id: string, type = "deposito", amount = 30) {
+// Above the 30% deposit on the adjusted USD 133 quote (USD 39.90).
+async function pay(id: string, type = "deposito", amount = 40) {
   return one<{ id: string }>(
     "insert into quote_payments(quote_id,amount,currency,date,method,type) values($1,$2,'USD','2026-10-12','transferencia',$3) returning id",
     [id, amount, type],

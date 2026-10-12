@@ -219,6 +219,7 @@ export type Database = {
           margin_pct: number | null;
           commission_pct: number;
           commission_mode: Database["public"]["Enums"]["commission_mode"];
+          deposit_pct: number | null;
         };
         Insert: {
           id?: string;
@@ -235,6 +236,7 @@ export type Database = {
           margin_pct?: number | null;
           commission_pct?: number;
           commission_mode?: Database["public"]["Enums"]["commission_mode"];
+          deposit_pct?: number | null;
         };
         Update: {
           id?: string;
@@ -251,6 +253,7 @@ export type Database = {
           margin_pct?: number | null;
           commission_pct?: number;
           commission_mode?: Database["public"]["Enums"]["commission_mode"];
+          deposit_pct?: number | null;
         };
         Relationships: [
           {
@@ -1112,6 +1115,8 @@ export type Database = {
           updated_at: string;
           language: string;
           client_name: string | null;
+          quote_snapshot: Json;
+          days_snapshot: Json;
         };
         Insert: {
           id?: string;
@@ -1132,6 +1137,8 @@ export type Database = {
           updated_at?: string;
           language?: string;
           client_name?: string | null;
+          quote_snapshot?: Json;
+          days_snapshot?: Json;
         };
         Update: {
           id?: string;
@@ -1152,6 +1159,8 @@ export type Database = {
           updated_at?: string;
           language?: string;
           client_name?: string | null;
+          quote_snapshot?: Json;
+          days_snapshot?: Json;
         };
         Relationships: [
           {
@@ -1277,6 +1286,7 @@ export type Database = {
           margin_mode: Database["public"]["Enums"]["margin_mode"];
           created_at: string;
           updated_at: string;
+          deposit_pct: number;
         };
         Insert: {
           id?: string;
@@ -1284,6 +1294,7 @@ export type Database = {
           margin_mode?: Database["public"]["Enums"]["margin_mode"];
           created_at?: string;
           updated_at?: string;
+          deposit_pct?: number;
         };
         Update: {
           id?: string;
@@ -1291,6 +1302,7 @@ export type Database = {
           margin_mode?: Database["public"]["Enums"]["margin_mode"];
           created_at?: string;
           updated_at?: string;
+          deposit_pct?: number;
         };
         Relationships: [];
       };
@@ -1686,6 +1698,9 @@ export type Database = {
           receipt_path: string | null;
           created_at: string;
           updated_at: string;
+          bank: string | null;
+          fx_rate: number | null;
+          amount_usd: number | null;
         };
         Insert: {
           id?: string;
@@ -1699,6 +1714,9 @@ export type Database = {
           receipt_path?: string | null;
           created_at?: string;
           updated_at?: string;
+          bank?: string | null;
+          fx_rate?: number | null;
+          amount_usd?: never;
         };
         Update: {
           id?: string;
@@ -1712,6 +1730,9 @@ export type Database = {
           receipt_path?: string | null;
           created_at?: string;
           updated_at?: string;
+          bank?: string | null;
+          fx_rate?: number | null;
+          amount_usd?: never;
         };
         Relationships: [
           {
@@ -2504,7 +2525,13 @@ export type Database = {
         Returns: Json;
       };
       promote_quote_template: { Args: { p_id: string }; Returns: string };
+      quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
+      quote_payment_summary: { Args: { p_id: string }; Returns: Json };
+      register_quote_payment: {
+        Args: { p_quote_id: string; p_payment_id: string; p_payment: Json };
+        Returns: Json;
+      };
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       save_quote_calculation: {
         Args: { p_id: string; p_updated_at: string; p_result: Json };

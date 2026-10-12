@@ -289,7 +289,7 @@ errores bloquea revisar/enviar/vender, pero permite registrar pérdida/cancelaci
 Enviar vuelve a comprobar traducciones y pendientes de importación. Los avisos
 informativos no bloquean.
 
-La venta exige un depósito real o Admin con motivo. El trigger de C6 confirma
+La venta exige alcanzar el depósito requerido o Admin con motivo. El trigger de C6 confirma
 depósito, estado, historial y Operación en la misma transacción; un segundo depósito
 no duplica el evento. `saldo`/`otro` no venden. El motivo no se arrastra a otros cambios.
 
@@ -302,3 +302,41 @@ ni versionar vendidas, perdidas o canceladas.
 Pruebas: `bun run test -- src/lib/states/states.test.ts --maxWorkers=1`,
 `bun run test:db`, `bun run typecheck` y `bun run build`. La matriz cubre los 36 pares
 de estados, más motivos, roles, depósitos, avisos bloqueantes, historial, versiones y rollback.
+
+### Pagos y confirmación por depósito (2026-10-12)
+
+Después de las dos migraciones de estados anteriores, aplicar solo la pendiente
+`20261012000300_quote_payments_deposit.sql`. No repetir seeds. No se aplicó a Cloud.
+
+- Editor → **Pagos**: fecha, monto, divisa, método, banco y comprobante opcional;
+  depósito requerido/restante, total pagado, saldo y saldo a favor. Se usan las tasas
+  congeladas de la cotización, sin introducir conversiones actuales.
+- Cliente → **Depósito %**; vacío hereda **Admin → Depósito** (30 inicialmente).
+  Se guarda al crear; las cotizaciones existentes y sus versiones lo conservan.
+- `register_quote_payment` es una RPC con bloqueo e idempotencia por UUID: pago,
+  venta, historial y copia a `ops_services`/`ops_items` se confirman juntos. Suma
+  únicamente pagos `deposito` para alcanzar el porcentaje; `saldo`/`otro` reducen
+  la deuda pero no confirman venta. Se mantiene la excepción Admin con motivo.
+- Se copian también los días libres, rooming, staff, vehículos y costos en snapshots
+  inmutables; **Operación → Itinerario cotizado** muestra el contenido copiado.
+- Comprobantes privados de hasta 10 MB (PDF/JPG/PNG/WebP), legibles por el dueño de
+  la cotización y Admin. Storage recibe el archivo antes de la RPC; esta valida la
+  referencia. Los bytes del archivo no forman parte de la transacción PostgreSQL.
+  Un fallo puede dejar un archivo sin pago, pero no un pago/venta/operación parcial.
+  Reintentar una respuesta incierta conserva UUID, datos y comprobante sin sobrescribir.
+
+La migración conserva porcentajes y estados históricos. Convierte pagos anteriores
+solo con una tasa disponible en el snapshot (USD = 1). Los que no la tienen quedan
+marcados en el resumen y bloquean nuevos pagos/confirmación hasta su revisión;
+no se inventa una tasa ni se revierten ventas existentes.
+
+Pruebas: `bun run test -- src/lib/quotes/payments.test.ts src/lib/quotes/creation.test.ts
+src/lib/states/states.test.ts src/components/quote/quote-payments.test.tsx --maxWorkers=1`,
+`bun run test:db`, `bun run typecheck` y `bun run build`.
+La aceptación local crea SPAUYU-3D2N-MP para 2 pax, simula la revisión de textos/importación,
+envía, registra el depósito y comprueba días, servicios y costo de USD 1.939 en Operación.
+No modifica la revisión del catálogo real ni las fórmulas del presupuesto.
+
+Tras migrar en Lovable: abrir una cotización de prueba revisada/enviada, registrar
+parte del depósito y comprobar que sigue enviada; completar el faltante y abrir
+**Operación** para comprobar su ficha, ítems y días. Un segundo pago no duplica la ficha.

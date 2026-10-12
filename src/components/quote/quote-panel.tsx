@@ -95,7 +95,7 @@ export function QuotePanel({ data, editable, actions, alerts }: { data: Data; ed
     <Card className="space-y-4 p-4">
       <div className="rounded-md bg-primary p-4 text-primary-foreground">
         <div className="text-xs uppercase tracking-wide opacity-80">Total</div>
-        <div className="text-3xl font-bold">{totals ? money(totals.total_price_usd, "USD") : "—"}</div>
+        <div data-testid="quote-total" className="text-3xl font-bold">{totals ? money(totals.total_price_usd, "USD") : "—"}</div>
         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           <span className="opacity-80">Costo</span><span className="text-right">{totals ? money(totals.total_cost_usd) : "—"}</span>
           <span className="opacity-80">Margen</span><span className="text-right">{totals ? money(totals.total_margin_usd) : "—"}</span>

@@ -139,7 +139,9 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
 - **`clients`**: `type` (`B2B | B2C`), nombre o agencia, contacto, email, país, `language` (es, it, en, …), `terms_id`.
   - `margin_pct` opcional: se hereda si la cotización no especifica un porcentaje. Cero es un valor explícito.
   - Comisión de agencias B2B: `commission_mode` (`none`, predeterminado, o `gross`) y `commission_pct` (0 por defecto, siempre menor que 100).
+  - `deposit_pct` opcional (0–100): porcentaje de depósito; vacío hereda el global de Admin. Cero es explícito.
 - **`pricing_settings`**: configuración global única; `margin_mode` (`markup` por defecto, confirmado por Andrea el 2026-10-11) y `margin_pct` (25 por defecto). El equipo puede leerla para cotizar; solo Admin puede modificarla.
+  Incluye `deposit_pct` (30 por defecto), editable en Admin → Depósito.
 - **`terms_conditions`**: `scope` (`B2C_general | B2B_general | B2B_cliente`), client_id (si es B2B específico), `lang`, contenido.
 - **`info_blocks`**: textos fijos por destino e idioma para el PDF (efectivo y entradas, salud y altitud, sobre la experiencia, notas importantes, métodos de pago).
 - **`bank_accounts`**: datos bancarios por entidad (Ando Libre LLC); se insertan en el PDF.
@@ -151,7 +153,7 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   - `staff` (json: número de choferes y guías que generan costo de alojamiento y comida; ej. `{drivers: 4, guides: 1}`).
   - `vehicles` (json por tramo: tipo y cantidad, definidos por el vendedor; ej. `4 × 4x4` en Bolivia).
   - `category` (`BUDGET | COMFORT | VIP | MIXTO`).
-  - **Condiciones de pago:** `deposit_pct` (default 30), `balance_due_days` (default 5 días antes en B2C; en grupos se define por cliente, ej. 45), `card_surcharge_pct` (default 3), `payment_schedule` (json opcional con hitos y penalidades específicas, como en el programa SIVOLA).
+  - **Condiciones de pago:** `deposit_pct` se copia del cliente o, si está vacío, de Admin (inicialmente 30). Se congela al crear y se conserva en las versiones; cambios posteriores no modifican acuerdos existentes. `balance_due_days` (default 5 días antes en B2C; en grupos se define por cliente, ej. 45), `card_surcharge_pct` (default 3), `payment_schedule` (json opcional con hitos y penalidades específicas, como en el programa SIVOLA).
   - `single_supplement_pp` (calculado, ver §6).
   - `fx_snapshot` (json con las tasas usadas), `margin_pct`, `margin_mode`, `commission_mode`, `commission_pct`, `rounding_rule`. La política efectiva se congela al crear la cotización; las versiones la conservan. Los cambios posteriores en cliente o Admin afectan solo a nuevas cotizaciones.
   - Totales calculados: `total_cost_usd`, `total_margin_usd`, `total_price_usd`, `price_per_pax_usd`.
@@ -183,7 +185,14 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   - Campos de vuelo (si `type = vuelo`): `airline`, `flight_no`, `route`, `dep_time`, `arr_time`, `fare_notes`. Alimentan el resumen de vuelos del PDF.
   - Campos de alojamiento: `check_in`, `check_out`, `room_distribution`, `meal_plan`. Alimentan el resumen de alojamientos.
 - **`quote_status_history`**: estado anterior y nuevo, usuario, fecha, nota.
-- **`quote_payments`**: monto, divisa, fecha, método, tipo (`deposito | saldo | otro`), registrado_por, comprobante (Storage).
+- **`quote_payments`**: monto, divisa, fecha, método, banco opcional, tipo (`deposito | saldo | otro`), registrado_por, comprobante privado (Storage `payment-receipts`). `fx_rate` copia la tasa congelada de la cotización (unidades por USD); `amount_usd` se calcula en Postgres. Los registros y comprobantes son inmutables.
+  La pestaña Pagos usa `register_quote_payment`: bloquea la cotización y confirma pago,
+  estado, historial y operación en una sola transacción. Un UUID por intento permite
+  reintentar sin duplicar pagos. El archivo se sube antes; la RPC comprueba que exista
+  y pertenezca a esa cotización y pago. No se registran pagos si falla esa validación.
+  El saldo descuenta todos los pagos; únicamente los de tipo `deposito` cuentan para
+  confirmar la venta. El objetivo es `round(total_price_usd × deposit_pct / 100, 2)`.
+  Si hay pagos históricos sin tasa, se muestra el pendiente y no se asume conversión.
 - **`quote_followups`**: fecha, nota, hecho (bool), responsable.
 - **`quote_emails`**: destinatario, asunto, cuerpo, pdf_url, enviado_at, enviado_por, estado de envío.
 
@@ -192,6 +201,9 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
 Basado en el archivo `UA_2026 - GESTION RESERVA-OPERACION` (fichas por reserva, `TEMPLATE`, `RESERVAS ACTIVAS`, `SERVICIOS TERMINADOS`, `RESUMEN2026`, `CONTACTO PROVEEDORES`).
 
 - **`ops_services`** (la ficha): se crea al pasar la quote a `vendida`.
+  Conserva `quote_snapshot` y `days_snapshot` inmutables: todos los días (también libres),
+  pax pagantes/TC, staff, rooming, vehículos, tipos de cambio y costos del acuerdo.
+  La pestaña Itinerario cotizado lee esta copia, sin consultar la biblioteca viva.
   - `booking_code` (formato actual `AAAAMMDD-DD NOMBRE xN`, ej. `20261205-08KATHRIN x2`), quote_id, `client_type` (`PRIVADO | GRUPO`), `tour_sku`, `start_date`, `end_date`, `pax`, `responsible_id`.
   - `status` (`activo | en_curso | terminado | cancelado`).
   - Totales: `quoted_cost_usd`, `real_cost_usd`, `sale_price_usd`, `real_margin_usd`.
@@ -315,10 +327,12 @@ Desde cualquier estado distinto del destino: perdida o cancelada (motivo obligat
   mediante `edit_quote_item`. La copia empieza en borrador y conserva snapshots,
   servicios y ajustes, con grupos propios; no copia pagos ni historial. La anterior
   conserva su cálculo y contenido y queda de solo lectura.
-- `vendida`: solo desde enviada, al registrar un pago positivo de tipo `deposito`,
+- `vendida`: solo desde enviada, cuando los pagos positivos de tipo `deposito` acumulados
+  alcanzan el depósito requerido en USD (Andrea, 2026-10-12),
   o por Admin con motivo explícito (Andrea, 2026-10-12). Saldo/otro no confirman venta.
   Depósito, venta, historial y creación de Operación son atómicos; depósitos
-  adicionales no duplican la venta. Perdidas/canceladas no reciben nuevos pagos.
+  adicionales no duplican la venta. Un depósito parcial no vende; la RPC de estados
+  y las escrituras directas también verifican el umbral. Perdidas/canceladas no reciben nuevos pagos.
 - Cada cambio registra `quote_status_history`: usuario, fecha/hora, estado anterior,
   nuevo y motivo. El historial y los pagos son de solo adición. La pérdida guarda
   `lost_reason`, la cancelación `cancel_reason`; ambos exigen motivo no vacío.
