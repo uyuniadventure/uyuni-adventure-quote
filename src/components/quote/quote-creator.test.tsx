@@ -1,13 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { TemplateStep } from "./quote-creator";
+import { QuoteCreator, TemplateStep } from "./quote-creator";
 import {
   suggestTemplates,
   templateSuggestionError,
   type TemplateSuggestion,
 } from "@/lib/quotes/suggestions";
-import { createQuoteFromTemplate } from "@/lib/quotes";
+import { createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -16,7 +16,35 @@ vi.mock("@/lib/db", () => ({
     },
   },
 }));
-vi.mock("@/lib/quotes", () => ({ createQuoteFromTemplate: vi.fn(), createEmptyQuote: vi.fn() }));
+vi.mock("@/lib/quotes", () => ({
+  createQuoteFromTemplate: vi.fn(),
+  createEmptyQuote: vi.fn(),
+  getTemplateForQuote: vi.fn(),
+  templateQuotePrefill: (template: {
+    route_from: string;
+    route_to: string;
+    days: number;
+    category: string;
+    modality: string;
+    quote_defaults: { pax_paying?: number; tc_count?: number };
+  }) => ({
+    route_from: template.route_from,
+    route_to: template.route_to,
+    days: String(template.days),
+    category: template.category,
+    modality: template.modality,
+    ...(template.quote_defaults.pax_paying !== undefined
+      ? { pax_paying: String(template.quote_defaults.pax_paying) }
+      : {}),
+    ...(template.quote_defaults.tc_count !== undefined
+      ? { tc_count: String(template.quote_defaults.tc_count) }
+      : {}),
+  }),
+}));
+vi.mock("@/components/catalog/kit", async (original) => ({
+  ...(await original<typeof import("@/components/catalog/kit")>()),
+  useLocationCodes: () => ({ data: [], isLoading: false }),
+}));
 vi.mock("./quote-ops", () => ({ latestFx: vi.fn(async () => ({ USD: 1 })) }));
 vi.mock("@/lib/quotes/suggestions", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/suggestions")>()),
@@ -63,6 +91,16 @@ function show() {
     </QueryClientProvider>,
   );
   return { onCreated, onBack, qc };
+}
+function showDirectTemplate() {
+  const onCreated = vi.fn();
+  const qc = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+  render(
+    <QueryClientProvider client={qc}>
+      <QuoteCreator templateId="template" onCreated={onCreated} />
+    </QueryClientProvider>,
+  );
+  return { onCreated };
 }
 beforeEach(() => vi.resetAllMocks());
 afterEach(cleanup);
@@ -114,4 +152,22 @@ it("keeps the existing reference-pax warning and a way back to basic data", asyn
   expect(screen.getByRole("button", { name: "Usar plantilla" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Datos básicos" }));
   expect(onBack).toHaveBeenCalledOnce();
+});
+it("prefills a direct template URL and reports an archived template", async () => {
+  vi.mocked(getTemplateForQuote).mockResolvedValue({
+    ...pending,
+    quote_defaults: { pax_paying: 9, tc_count: 1 },
+  } as unknown as Awaited<ReturnType<typeof getTemplateForQuote>>);
+  showDirectTemplate();
+  expect(await screen.findByText("UYUSPA-4D3N · Tour de prueba")).toBeVisible();
+  expect(screen.getByRole("spinbutton", { name: "Pax pagantes" })).toHaveValue(9);
+  expect(screen.getByRole("spinbutton", { name: "TC (liberados)" })).toHaveValue(1);
+  expect(screen.getByRole("spinbutton", { name: "Días disponibles" })).toHaveValue(4);
+  cleanup();
+
+  vi.mocked(getTemplateForQuote).mockRejectedValue(
+    new Error("La plantilla está archivada y no se puede usar para cotizar."),
+  );
+  showDirectTemplate();
+  expect(await screen.findByRole("alert")).toHaveTextContent("archivada");
 });

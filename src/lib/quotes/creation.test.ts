@@ -7,6 +7,7 @@ import fixture from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
 import { registerQuotePayment } from "./payments";
 import { transitionQuote } from "../states";
 import { calculateQuote, type QuoteInput } from "../pricing";
+import { getTemplateForQuote, templateQuotePrefill } from "./template-entry";
 
 const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSupabase> | null }));
 vi.mock("../db", () => ({
@@ -96,6 +97,23 @@ beforeEach(async () => {
 afterAll(async () => pg?.close());
 
 describe("creación atómica desde plantilla", () => {
+  it("creates from the direct template entry at the same SPA 2-pax total as the wizard", async () => {
+    await as(seller);
+    const wizard = await createQuoteFromTemplate(templateId, basics());
+    const selected = await getTemplateForQuote(templateId);
+    const prefill = templateQuotePrefill(selected);
+    const direct = await createQuoteFromTemplate(selected.id, {
+      ...basics(),
+      pax_paying: Number(prefill.pax_paying),
+      tc_count: Number(prefill.tc_count),
+      category: prefill.category,
+    });
+    expect(direct.total_price_usd).toBe(wizard.total_price_usd);
+    expect(direct.total_cost_usd).toBe(wizard.total_cost_usd);
+    expect(direct.rooming).toEqual(wizard.rooming);
+    expect(direct.staff).toEqual(wizard.staff);
+    expect(direct.template_id).toBe(wizard.template_id);
+  });
   it("registers SPAUYU 2 pax deposit and exposes the copied service in Operations", async () => {
     await as(seller);
     const quote = await createQuoteFromTemplate(templateId, basics());

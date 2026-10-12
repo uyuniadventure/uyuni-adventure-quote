@@ -3,6 +3,12 @@ import { calculateQuote, type QuoteInput, type QuoteResult, type PricingItem } f
 import type { Tables, TablesInsert, TablesUpdate, Enums, Json } from "../../types/db";
 export { createQuoteFromTemplate, type TemplateQuoteBasics } from "./from-template";
 export { unreviewedDays, unreviewedDaysMessage } from "./text-review";
+export {
+  getTemplateForQuote,
+  templateQuotePrefill,
+  quoteCreationSearch,
+  type TemplateForQuote,
+} from "./template-entry";
 
 import { adjustmentPctSchema } from "../pricing/adjustment";
 import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";

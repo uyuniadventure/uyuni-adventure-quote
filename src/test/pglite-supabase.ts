@@ -74,7 +74,7 @@ export function pgliteSupabase(pg: PGlite) {
             if (single && rows.length !== 1)
               return resolve({
                 data: null,
-                error: { message: "Record not found or inaccessible" },
+                error: { code: "PGRST116", message: "Record not found or inaccessible" },
                 count,
               });
             return resolve({
