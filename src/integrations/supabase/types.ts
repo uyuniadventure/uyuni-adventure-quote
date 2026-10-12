@@ -2897,6 +2897,14 @@ export type Database = {
         Args: { p_overrides: Json; p_snapshot: Json }
         Returns: Json
       }
+      review_quote_days: {
+        Args: {
+          p_also_update_block?: boolean
+          p_day_ids?: string[]
+          p_quote_id: string
+        }
+        Returns: Json
+      }
       save_quote_calculation: {
         Args: { p_id: string; p_result: Json; p_updated_at: string }
         Returns: {
