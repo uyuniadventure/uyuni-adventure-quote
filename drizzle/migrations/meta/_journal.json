@@ -71,6 +71,13 @@
       "when": 1791805154859,
       "tag": "0009_quote_cancelled_status",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791805219634,
+      "tag": "0010_quote_state_transitions",
+      "breakpoints": true
     }
   ]
 }

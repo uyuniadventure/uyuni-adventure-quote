@@ -1847,6 +1847,7 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -1893,6 +1894,7 @@ export type Database = {
           archived_at?: string | null
           balance_due_days?: number
           calculation?: Json | null
+          cancel_reason?: string | null
           card_surcharge_pct?: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -1939,6 +1941,7 @@ export type Database = {
           archived_at?: string | null
           balance_due_days?: number
           calculation?: Json | null
+          cancel_reason?: string | null
           card_surcharge_pct?: number
           category?: Database["public"]["Enums"]["tour_category"]
           client_id?: string
@@ -2644,6 +2647,7 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -2699,6 +2703,7 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -2868,6 +2873,7 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
@@ -2937,6 +2943,7 @@ export type Database = {
           archived_at: string | null
           balance_due_days: number
           calculation: Json | null
+          cancel_reason: string | null
           card_surcharge_pct: number
           category: Database["public"]["Enums"]["tour_category"]
           client_id: string
