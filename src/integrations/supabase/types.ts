@@ -690,6 +690,7 @@ export type Database = {
       }
       itinerary_templates: {
         Row: {
+          approval_issues: string[]
           category: Database["public"]["Enums"]["tour_category"]
           countries: string[]
           created_at: string
@@ -716,6 +717,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_issues?: string[]
           category: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -742,6 +744,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_issues?: string[]
           category?: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -2118,6 +2121,7 @@ export type Database = {
       services: {
         Row: {
           applies_tc_default: boolean
+          approval_issues: string[]
           country: string | null
           created_at: string
           created_by: string | null
@@ -2144,6 +2148,7 @@ export type Database = {
         }
         Insert: {
           applies_tc_default?: boolean
+          approval_issues?: string[]
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -2170,6 +2175,7 @@ export type Database = {
         }
         Update: {
           applies_tc_default?: boolean
+          approval_issues?: string[]
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -2469,6 +2475,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_valid_imports: {
+        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string }
+        Returns: Json
+      }
       build_supplier_payables: {
         Args: { p_id: string }
         Returns: {
