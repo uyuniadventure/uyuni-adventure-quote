@@ -113,15 +113,15 @@ Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehí
    ```
 3. Si el workflow sigue fallando en un paso posterior (`supabase start`, `e2e:setup`, `functions serve`, Playwright), lee el log de ese paso y corrígelo en la misma rama.
 
-**Aceptación.** Run del workflow en verde en el PR (enlace en el resultado).
+**Aceptación revisada por Andrea (12-10-2026).** Instalación e infraestructura de CI verificadas: 0 URLs privadas en `bun.lock`, normalización antes de instalar, `bun install --frozen-lockfile`, TypeScript, `supabase start`, `e2e:setup` y `functions serve` aprobados. Incluir el enlace al run y su resultado completo, aunque siga en rojo por los casos reales pendientes. Los fallos de datos de Bolivia y SIVOLA/WE ROAD se resuelven en T03–T04; la validación E2E completa queda en T19. No omitir tests ni convertir fallos en éxitos. Este criterio sustituye la exigencia original de todo el workflow en verde para T00 y elimina la dependencia circular.
 
-### Comprobación T00 · 12-10-2026 · en revisión, no cerrada
+### Comprobación T00 · 12-10-2026 · en revisión
 
 - La corrección ya está en `main` mediante [PR #21](https://github.com/uyuniadventure/uyuni-adventure-quote/pull/21): las 13 URLs privadas fueron sustituidas por `""` y el paso `sed` se ejecuta antes de instalar. La comparación con `f54c82a` confirma que no cambiaron versiones, hashes ni dependencias. El recuento actual de `lovable-core-prod` en `bun.lock` es **0**. No se repite ese cambio.
 - Verificación mínima de esta ejecución: `bun install --frozen-lockfile` y `bunx tsc --noEmit` aprobados; `bunx vitest run --maxWorkers=1` ejecutó **231 tests: 229 aprobados, 2 fallidos, 0 omitidos**. Los dos fallos son los fixtures de Bolivia y SIVOLA/WE ROAD con `input: null`, documentados en T04.
 - El [run de main](https://github.com/uyuniadventure/uyuni-adventure-quote/actions/runs/38238953445) supera instalación, TypeScript, Supabase, setup y Edge Functions. SPA desde plantilla y desde bloques pasan dos veces (**4/6** E2E aprobados); las dos repeticiones de Bolivia fallan por el fixture incompleto. Las correcciones del recorrido SPA ya entraron con el PR #19.
-- **La aceptación original de T00 todavía no está cumplida.** `[~]` registra esta entrega para revisión; no equivale a `[x]` ni certifica un CI completamente verde. No se omiten tests ni se cambian importes para aparentar que pasan.
-- Hay una dependencia circular que Andrea debe resolver: cerrar T00 exige completar T03/T04, pero T04 depende de T03, T03 de T02 y T02 de T00. La propuesta es cerrar T00 por la instalación/infraestructura verificadas y mantener los fallos de datos explícitos hasta T03/T04 y la aceptación E2E de T19. **Propuesta pendiente de aprobación; no modifica la aceptación ni el orden del plan.**
+- **La aceptación revisada de T00 está cumplida.** `[~]` registra esta entrega para revisión; Andrea la pasa a `[x]` al hacer merge. No certifica un CI completamente verde: siguen pendientes los casos reales. No se omiten tests ni se cambian importes para aparentar que pasan.
+- Andrea confirmó el 12-10-2026: **«Sí: ajustar ese criterio de T00»**, aceptando cerrar T00 por instalación/infraestructura verificadas y mantener los fallos de datos explícitos hasta T03/T04 y la aceptación E2E de T19. Se elimina así el ciclo T00 → T04 → T03 → T02 → T00, sin adelantar la ejecución de ninguna tarea.
 - No se ejecutan T01 ni T03/T04 en esta entrega. No hay migraciones nuevas ni cambios en Cloud. Los archivos de `referencias_para_repo.zip` siguen fuera del repositorio: D1 continúa pendiente y la visibilidad comprobada es pública.
 - En la copia pública del plan se oculta el nombre completo de una pasajera en el título de una hoja de T05, conforme a §0.8. El archivo original entregado por Andrea permanece intacto fuera de Git.
 
