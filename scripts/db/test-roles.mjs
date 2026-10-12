@@ -303,6 +303,106 @@ try {
     "updated@example.invalid",
     "Admin email reflects Auth changes",
   );
+  // Catalogue permissions include pending content, not just tariff suggestions.
+  for (const [table, columns, values] of [
+    ["day_blocks", "code", "'ROLE-BLOCK'"],
+    ["activity_modules", "code,name,duration", "'ROLE-MODULE','Prueba','FD'"],
+    [
+      "itinerary_templates",
+      "sku,name,route_type,days,nights,category",
+      "'ROLE-TEMPLATE','Prueba','ONEWAY',1,0,'COMFORT'",
+    ],
+  ]) {
+    await as("vendedor");
+    // Failed insert leaves no row; use the same code for the valid pending one.
+    await denied(`insert into ${table}(${columns},status) values(${values},'activo')`);
+    const id = await scalar(`insert into ${table}(${columns}) values(${values}) returning id`);
+    equal(
+      await scalar(`select status from ${table} where id=$1`, [id]),
+      "pendiente",
+      `${table}: own pending visible`,
+    );
+    equal(
+      (await rows(`update ${table} set status='pendiente' where id=$1 returning id`, [id])).length,
+      1,
+      `${table}: seller edits own pending`,
+    );
+    await denied(`update ${table} set status='activo' where id=$1`, [id]);
+    await as("otro");
+    equal(
+      (await rows(`select * from ${table} where id=$1`, [id])).length,
+      0,
+      `${table}: other seller cannot read pending`,
+    );
+    equal(
+      (await rows(`update ${table} set status='pendiente' where id=$1 returning id`, [id])).length,
+      0,
+      `${table}: other seller cannot edit pending`,
+    );
+    for (const role of ["operacion", "admin"]) {
+      await as(role);
+      equal(
+        (await rows(`update ${table} set status='activo' where id=$1 returning id`, [id])).length,
+        1,
+        `${table}: ${role} approves`,
+      );
+    }
+    await as("vendedor");
+    equal(
+      (await rows(`update ${table} set status='activo' where id=$1 returning id`, [id])).length,
+      0,
+      `${table}: seller cannot edit approved content`,
+    );
+    await as("otro");
+    equal(
+      (await rows(`select * from ${table} where id=$1`, [id])).length,
+      1,
+      `${table}: approved visible to other seller`,
+    );
+  }
+  for (const role of ["vendedor", "operacion"]) {
+    await as(role);
+    for (const [table, column, value] of [
+      ["currencies", "name", "'Cambiado'"],
+      ["pricing_settings", "margin_pct", "99"],
+    ]) {
+      equal(
+        (await rows(`update ${table} set ${column}=${value} returning id`)).length,
+        0,
+        `${role}: ${table} administration denied`,
+      );
+    }
+    await denied(
+      "insert into terms_conditions(scope,lang,content) values('B2C_general','es','Prohibido')",
+    );
+    await denied(
+      "insert into exchange_rates(currency,rate_to_usd,valid_from) values('USD',2,'2027-01-01')",
+    );
+  }
+  await as("admin");
+  equal(
+    (
+      await rows(
+        "insert into terms_conditions(scope,lang,content) values('B2C_general','es','Prueba') returning id",
+      )
+    ).length,
+    1,
+    "Admin manages terms",
+  );
+  equal(
+    (
+      await rows(
+        "insert into exchange_rates(currency,rate_to_usd,valid_from) values('USD',1,'2027-01-01') returning id",
+      )
+    ).length,
+    1,
+    "Admin manages FX",
+  );
+  equal(
+    (await rows("update pricing_settings set margin_pct=25 returning id")).length,
+    1,
+    "Admin manages pricing settings",
+  );
   await db.exec("set role anon");
   await denied("select public.admin_list_users()");
   await denied("select * from ops_service_summary");

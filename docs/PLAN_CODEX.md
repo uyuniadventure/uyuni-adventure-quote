@@ -92,7 +92,7 @@ Reglas para ese prompt:
 | T15 | Programas automáticos por firma | [ ] | T09 | no |
 | T16 | Seguimientos programados | [ ] | T13 | sí |
 | T17 | Dashboard | [ ] | T11 | sí |
-| T18 | Roles y permisos verificados | [ ] | — | sí (si cambia /admin) |
+| T18 | Roles y permisos verificados | [~] | — | sí (si cambia /admin) |
 | T19 | E2E de los dos caminos con las funciones nuevas | [ ] | T01–T17 | no |
 | T20 | Inventario final | [ ] | todo | no |
 
@@ -387,6 +387,20 @@ Codex: `getDashboardStats()` en `src/lib/quotes/dashboard.ts` (solo lecturas; RL
 4. Entrega tabla rol × acción con sí/no.
 
 **Lovable.** Solo si cambia /admin: columna email en la tabla de usuarios.
+
+### Entrega T18 · 12-10-2026 · en revisión
+
+T18 es la primera tarea habilitada: T00 sigue `[~]` y T18 no tiene dependencias.
+Se recupera la corrección de roles del PR #20 (fusionado en otra rama, ausente de
+`main`) y se añade el seed manual solicitado. La [matriz de permisos e
+instrucciones de Auth](T18_ROLES.md) identifica las pruebas y el orden de aplicación.
+Se conserva `admin_list_users` como consulta segura sobre Auth, con autorización
+en la RPC; no se añade otra vista ni se expone `auth.users`.
+No se ejecutaron escrituras en Cloud. Los fallos conocidos de fixtures Bolivia y
+SIVOLA/WE ROAD permanecen asignados a T03–T04, sin omitir pruebas.
+Verificación: instalación congelada y ambos TypeScript aprobados; Vitest
+238/240 (los dos fallos previos); ocho suites de BD aprobadas, con 119 aserciones
+de roles, más 9 tests nuevos de seed/emails incluidos en Vitest y CI.
 
 ---
 

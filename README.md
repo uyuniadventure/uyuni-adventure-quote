@@ -345,7 +345,7 @@ parte del depósito y comprobar que sigue enviada; completar el faltante y abrir
 
 Después de `20261012000400_quote_add_block_sequence.sql`, aplicar únicamente la
 migración pendiente `20261012000500_role_permissions.sql`, y después desplegar el
-frontend. No requiere seeds ni cambia roles de usuarios existentes. Cierra la
+frontend. La migración no cambia roles de usuarios existentes. Cierra la
 lectura indirecta de cotizaciones ajenas desde los snapshots de Operación y sus
 ítems, cuentas a proveedores, comunicaciones y vistas. `admin_list_users` devuelve
 los emails actuales de Auth exclusivamente a Admin, sin exponer credenciales.
@@ -367,8 +367,9 @@ operación y admin, comprueba API/UI y aprueba sugerencias desde el tarifario.
 El workflow ejecuta cada caso dos veces, sin reintentos. Los usuarios de CI son
 efímeros y no equivalen a cuentas disponibles en Cloud.
 
-Las cuentas Cloud autorizadas son `info+prueba-vendedor@uyuniadventure.com` y
-`info+prueba-operacion@uyuniadventure.com`; `info@uyuniadventure.com` conserva Admin.
-Su creación y comprobación en Cloud requieren acceso al proyecto de Lovable y
-todavía no están acreditadas por estas pruebas. Tras crearlas, comprobar en
-`/admin` el email completo y el rol de cada una; no guardar contraseñas en Git.
+T18 incorpora el seed manual `supabase/seed/test_role_profiles.sql` para
+`operacion@prueba.local` y `vendedor@prueba.local`, con creación previa en Auth.
+Las instrucciones, orden de aplicación y matriz completa sí/no están en
+[docs/T18_ROLES.md](docs/T18_ROLES.md). El seed no cambia las cuentas reales ni
+los alias `info+prueba-*` solicitados anteriormente. Los accesos en Cloud todavía
+deben comprobarse allí; las pruebas locales no los acreditan.
