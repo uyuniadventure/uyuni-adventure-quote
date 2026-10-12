@@ -78,6 +78,13 @@
       "when": 1791805219634,
       "tag": "0010_quote_state_transitions",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791805300594,
+      "tag": "0011_quote_payments_deposit",
+      "breakpoints": true
     }
   ]
 }

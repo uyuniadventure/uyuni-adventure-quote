@@ -221,6 +221,7 @@ export type Database = {
           country: string | null
           created_at: string
           created_by: string | null
+          deposit_pct: number | null
           email: string | null
           id: string
           language: string
@@ -237,6 +238,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_pct?: number | null
           email?: string | null
           id?: string
           language?: string
@@ -253,6 +255,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_pct?: number | null
           email?: string | null
           id?: string
           language?: string
@@ -1129,11 +1132,13 @@ export type Database = {
           client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
+          days_snapshot: Json
           end_date: string
           id: string
           language: string
           pax: number
           quote_id: string
+          quote_snapshot: Json
           quoted_cost_usd: number | null
           real_cost_usd: number | null
           real_margin_usd: number | null
@@ -1149,11 +1154,13 @@ export type Database = {
           client_name?: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
+          days_snapshot?: Json
           end_date: string
           id?: string
           language?: string
           pax: number
           quote_id: string
+          quote_snapshot?: Json
           quoted_cost_usd?: number | null
           real_cost_usd?: number | null
           real_margin_usd?: number | null
@@ -1169,11 +1176,13 @@ export type Database = {
           client_name?: string | null
           client_type?: Database["public"]["Enums"]["ops_client_type"]
           created_at?: string
+          days_snapshot?: Json
           end_date?: string
           id?: string
           language?: string
           pax?: number
           quote_id?: string
+          quote_snapshot?: Json
           quoted_cost_usd?: number | null
           real_cost_usd?: number | null
           real_margin_usd?: number | null
@@ -1311,6 +1320,7 @@ export type Database = {
       pricing_settings: {
         Row: {
           created_at: string
+          deposit_pct: number
           id: string
           margin_mode: Database["public"]["Enums"]["margin_mode"]
           margin_pct: number
@@ -1318,6 +1328,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deposit_pct?: number
           id?: string
           margin_mode?: Database["public"]["Enums"]["margin_mode"]
           margin_pct?: number
@@ -1325,6 +1336,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deposit_pct?: number
           id?: string
           margin_mode?: Database["public"]["Enums"]["margin_mode"]
           margin_pct?: number
@@ -1706,9 +1718,12 @@ export type Database = {
       quote_payments: {
         Row: {
           amount: number
+          amount_usd: number | null
+          bank: string | null
           created_at: string
           currency: string
           date: string
+          fx_rate: number | null
           id: string
           method: string
           quote_id: string
@@ -1719,9 +1734,12 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_usd?: number | null
+          bank?: string | null
           created_at?: string
           currency: string
           date: string
+          fx_rate?: number | null
           id?: string
           method: string
           quote_id: string
@@ -1732,9 +1750,12 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_usd?: number | null
+          bank?: string | null
           created_at?: string
           currency?: string
           date?: string
+          fx_rate?: number | null
           id?: string
           method?: string
           quote_id?: string
@@ -2613,11 +2634,13 @@ export type Database = {
           client_name: string | null
           client_type: Database["public"]["Enums"]["ops_client_type"]
           created_at: string
+          days_snapshot: Json
           end_date: string
           id: string
           language: string
           pax: number
           quote_id: string
+          quote_snapshot: Json
           quoted_cost_usd: number | null
           real_cost_usd: number | null
           real_margin_usd: number | null
@@ -2858,9 +2881,15 @@ export type Database = {
         Returns: Json
       }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
+      quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
+      quote_payment_summary: { Args: { p_id: string }; Returns: Json }
       quote_template_source: {
         Args: { p_client: string; p_template: string }
+        Returns: Json
+      }
+      register_quote_payment: {
+        Args: { p_payment: Json; p_payment_id: string; p_quote_id: string }
         Returns: Json
       }
       resolve_day_content: {
