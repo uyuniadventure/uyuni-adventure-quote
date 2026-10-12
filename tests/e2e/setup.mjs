@@ -56,19 +56,57 @@ try {
     ]);
   }
   const admin = createClient(api, status.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
-  const email = "seller-e2e@example.invalid",
-    password = `E2e-${randomUUID()}!`;
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-  if (error) throw error;
-  const role = await pg.query("select role from profiles where id=$1", [data.user.id]);
-  if (role.rows[0]?.role !== "vendedor") throw new Error("E2E account must have vendedor role");
+  const users = {};
+  for (const [key, role, email] of [
+    ["seller", "vendedor", "seller-e2e@example.invalid"],
+    ["operations", "operacion", "operations-e2e@example.invalid"],
+    ["admin", "admin", "admin-e2e@example.invalid"],
+    ["otherSeller", "vendedor", "other-seller-e2e@example.invalid"],
+  ]) {
+    const password = `E2e-${randomUUID()}!`;
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (error) throw error;
+    const initial = await pg.query("select role from profiles where id=$1", [data.user.id]);
+    if (initial.rows[0]?.role !== "vendedor")
+      throw new Error("New accounts must default to vendedor");
+    if (role !== "vendedor")
+      await pg.query("update profiles set role=$2 where id=$1", [data.user.id, role]);
+    users[key] = { id: data.user.id, email, password, role };
+  }
+  const { email, password, id: sellerId } = users.seller;
   const client = await pg.query(
     "insert into clients(type,name,email,language) values('B2C','Cliente E2E SPA','customer-e2e@example.invalid','es') returning id",
   );
+  const roleFixtures = { quotes: {}, operations: {} };
+  for (const key of ["seller", "otherSeller", "operations"]) {
+    const quote = await pg.query(
+      "insert into quotes(code,client_id,client_type,seller_id,start_date,pax_paying,category) values($1,$2,'B2C',$3,'2027-01-01',2,'COMFORT') returning id",
+      [`ROLE-${key}`, client.rows[0].id, users[key].id],
+    );
+    roleFixtures.quotes[key] = quote.rows[0].id;
+    const operation = await pg.query(
+      "insert into ops_services(booking_code,quote_id,client_type,start_date,end_date,pax) values($1,$2,'PRIVADO','2027-01-01','2027-01-01',2) returning id",
+      [`ROLE-${key}`, quote.rows[0].id],
+    );
+    roleFixtures.operations[key] = operation.rows[0].id;
+    await pg.query(
+      "insert into ops_items(service_id,item_snapshot,date,type,description,currency,cost_usd,cost_local) values($1,'{}','2027-01-01','extra','Ítem privado RLS','USD',100,100)",
+      [operation.rows[0].id],
+    );
+  }
+  const roleService = await pg.query(
+    "insert into services(sku,name,type,pricing_unit,currency,status) values('RLS-SERVICE','Servicio de prueba de permisos','extra','per_unit','USD','activo') returning id",
+  );
+  roleFixtures.serviceId = roleService.rows[0].id;
+  const roleRate = await pg.query(
+    "insert into service_rates(service_id,price_net) values($1,100) returning id",
+    [roleFixtures.serviceId],
+  );
+  roleFixtures.rateId = roleRate.rows[0].id;
   await pg.query("notify pgrst, 'reload schema'");
   await mkdir(new URL("./.local/", import.meta.url), { recursive: true });
   await writeFile(
@@ -79,15 +117,19 @@ try {
         anonKey: status.ANON_KEY,
         email,
         password,
-        sellerId: data.user.id,
+        sellerId,
         clientId: client.rows[0].id,
+        users,
+        roleFixtures,
       },
       null,
       2,
     ),
     { mode: 0o600 },
   );
-  console.log("Local E2E fixtures ready; vendedor account created. No Cloud access.");
+  console.log(
+    "Local E2E fixtures ready; vendedor, operación, admin and privacy-control accounts created. No Cloud access.",
+  );
 } finally {
   await pg.end();
 }

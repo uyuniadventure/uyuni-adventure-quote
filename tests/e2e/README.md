@@ -17,6 +17,15 @@ En otra terminal, `bun --no-env-file run test:e2e`. Playwright inicia Vite en 12
 
 El CI ejecuta lo mismo en cada push y PR. El reporte HTML, capturas, videos, traces y PDF quedan siete días en el artefacto `playwright-report`. Las credenciales efímeras no se incluyen en el artefacto; las trazas pueden contener sesiones de la base local, que se destruye al finalizar.
 
+`roles.spec.ts` añade tres casos (vendedor, operación y admin), también repetidos
+dos veces. El setup crea esos usuarios y un segundo vendedor para comprobar
+aislamiento, con contraseñas aleatorias en `.local/runtime.json` ignorado por Git.
+Comprueba cotizaciones propias, privacidad de Operación, prohibición de cambiarse
+de rol, sugerencias de tarifa y su aprobación desde la UI, y emails en `/admin`.
+La tarifa de estas pruebas es independiente del fixture SPA y los usuarios no
+existen en Lovable Cloud. Antes de Playwright, CI ejecuta además `test:roles` para
+cubrir las políticas SQL y las vistas operativas con 78 comprobaciones.
+
 ## Datos y límites de la validación
 
 - Se aplican todas las migraciones originales en orden y los seeds históricos. Las precondiciones históricas de migraciones se preparan con `scripts/db/migration-fixtures.mjs`, igual que en las pruebas de BD. No se omite ninguna migración ni se cambia su SQL.

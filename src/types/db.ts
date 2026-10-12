@@ -2457,6 +2457,7 @@ export type Database = {
       };
     };
     Functions: {
+      admin_list_users: { Args: Record<PropertyKey, never>; Returns: Json };
       apply_quote_adjustment_bulk: {
         Args: {
           p_id: string;
