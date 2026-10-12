@@ -2452,6 +2452,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      calculation_has_errors: { Args: { result: Json }; Returns: boolean }
       claim_quote_email: {
         Args: {
           p_body: string

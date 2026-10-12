@@ -8,6 +8,13 @@
       "when": 1791804738162,
       "tag": "0000_template_quote_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791804763059,
+      "tag": "0001_quote_pricing_errors",
+      "breakpoints": true
     }
   ]
 }
