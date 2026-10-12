@@ -46,9 +46,7 @@ async function quote(page: Page) {
   return data;
 }
 async function fromTemplate(page: Page, sku: string) {
-  const card = page
-    .locator('[data-slot="card"]')
-    .filter({ has: page.getByText(sku, { exact: true }) });
+  const card = page.getByRole("group", { name: `Plantilla ${sku}`, exact: true });
   await card.getByRole("button", { name: "Usar plantilla" }).click();
   await expect(page.getByRole("heading", { name: "Cotización", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Marcar revisada" })).toBeEnabled();

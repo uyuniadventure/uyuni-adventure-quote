@@ -24,6 +24,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure",
     acceptDownloads: true,
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

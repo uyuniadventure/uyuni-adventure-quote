@@ -180,7 +180,7 @@ function TemplateStep({ basics: b, onBack, onCreated }: { basics: Basics; onBack
           const defaults = t.quote_defaults as { pax_paying?: number; tc_count?: number };
           const incompatible = defaults.pax_paying != null && (Number(b.pax_paying) !== defaults.pax_paying || Number(b.tc_count) !== defaults.tc_count);
           return (
-            <Card key={t.id} className="flex flex-col gap-2 p-4">
+            <Card key={t.id} role="group" aria-label={`Plantilla ${t.sku}`} className="flex flex-col gap-2 p-4">
               <div className="font-mono text-xs text-muted-foreground">{t.sku}</div>
               <div className="font-medium text-foreground">{t.name}</div>
               <div className="flex flex-wrap gap-1.5">
