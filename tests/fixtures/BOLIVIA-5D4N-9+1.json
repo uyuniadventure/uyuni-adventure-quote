@@ -5,7 +5,7 @@
     "sheet": "2.0 BOLIVIA 5D/4N 9+1",
     "range": "A5:I39",
     "total_cell": "I57 / I60",
-    "read_on": "2026-10-11"
+    "read_on": "2026-10-12"
   },
   "pax_paying": 9,
   "tc_count": 1,
@@ -26,7 +26,7 @@
       "unit_cost_usd": null,
       "cost_usd": 660,
       "formula": "=550+110",
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "Madero no aparece por nombre/proveedor en el catálogo histórico local. TC en SGL confirmado por Andrea; I8 = 550+110 no identifica las tarifas por tipo ni el rooming de pagantes."
     },
     {
       "cell": "I10",
@@ -38,7 +38,7 @@
       "unit_cost_usd": 33,
       "cost_usd": 99,
       "formula": "=33*3",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "La fórmula confirma 3 × 33. Falta identificar el traslado de La Paz; no sustituirlo por un traslado de Uyuni del mismo proveedor."
     },
     {
       "cell": "I11",
@@ -50,7 +50,7 @@
       "unit_cost_usd": 220,
       "cost_usd": 2200,
       "formula": "=220*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "La fórmula confirma 10 × 220. Los vuelos BOA del catálogo local consultado son otras rutas; no usar Uyuni→La Paz para La Paz→Uyuni."
     },
     {
       "cell": "I12",
@@ -62,7 +62,7 @@
       "unit_cost_usd": 200,
       "cost_usd": 400,
       "formula": "=200*2",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato TOUR_UYU_LEO_SALAR: USD 200, per_group, tramo 1–6. Sheets usa dos unidades; falta configurar la ocupación de cada grupo/vehículo para 9+1."
     },
     {
       "cell": "I13",
@@ -74,7 +74,7 @@
       "unit_cost_usd": 15,
       "cost_usd": 150,
       "formula": "=15*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "KACHI tiene MEAL_KACHI_MEAL_PP_2026 a USD 15, pero describe CENA, no desayuno. No asignado por coincidencia de importe."
     },
     {
       "cell": "I14",
@@ -86,7 +86,7 @@
       "unit_cost_usd": null,
       "cost_usd": 150,
       "formula": null,
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "Candidato GUIDE_LEO_FULLDAY_SALAR_EN_2026: USD 80, tramo 1–5. Sheets indica USD 150 para 10 personas; falta tarifa/configuración confirmada."
     },
     {
       "cell": "I15",
@@ -98,7 +98,7 @@
       "unit_cost_usd": 30,
       "cost_usd": 300,
       "formula": "=30*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato TICKETS_LEO_UYU: USD 30 por persona, igual a la fórmula. Pendiente integrarlo en un escenario completo con TC confirmado."
     },
     {
       "cell": "I16",
@@ -110,7 +110,7 @@
       "unit_cost_usd": 20,
       "cost_usd": 200,
       "formula": "=20*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Dos candidatos FNB_UYU_LEO_BUFFET y FNB_UYU_LEO_BUFFET_APTHAPI a USD 20, ambos per_group 1–6; Sheets cobra 10 personas. Falta resolver duplicado y unidad."
     },
     {
       "cell": "I18",
@@ -122,7 +122,7 @@
       "unit_cost_usd": 10,
       "cost_usd": 100,
       "formula": "=10*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato FNB_UYU_LEO_COCKTAIL: USD 10, per_group 1–6, descripción HASTA X3. Sheets cobra 10 personas; falta confirmar unidad/tramo."
     },
     {
       "cell": "I20",
@@ -134,7 +134,7 @@
       "unit_cost_usd": 80,
       "cost_usd": 240,
       "formula": "=80*3",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato EXP_UYU_LEO_STARGAZING: USD 80 por grupo 1–4; Sheets usa 3 unidades. Falta confirmar reparto de las 10 personas entre grupos."
     },
     {
       "cell": "I21",
@@ -142,11 +142,11 @@
       "description": "Alojamiento: Hotel Atipax UYUNI  + BREAKFAST",
       "supplier": "ATIPAX",
       "sku": null,
-      "quantity": null,
-      "unit_cost_usd": null,
+      "quantity": 5,
+      "unit_cost_usd": 185,
       "cost_usd": 925,
       "formula": "=185*I4/2",
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "La fórmula da 5 unidades × USD 185 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Atipax no aparece por nombre/proveedor en el catálogo histórico local."
     },
     {
       "cell": "I23",
@@ -158,7 +158,7 @@
       "unit_cost_usd": 200,
       "cost_usd": 400,
       "formula": "=200*2",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato IMPORT_REVIEW_0479: sin unidad de cobro y USD 220; Sheets usa 2 × USD 200. No inventar unidad ni modificar tarifa para igualar."
     },
     {
       "cell": "I24",
@@ -170,7 +170,7 @@
       "unit_cost_usd": null,
       "cost_usd": 80,
       "formula": null,
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "Sheets indica USD 80 sin cantidad ni SKU del guía para Laguna Hedionda. El guía Salar no identifica este recorrido."
     },
     {
       "cell": "I25",
@@ -182,7 +182,7 @@
       "unit_cost_usd": 15,
       "cost_usd": 150,
       "formula": "=15*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato FNB_UYU_LEO_LUNCH: USD 15, per_group 1–6; Sheets cobra 10 personas. Falta confirmar unidad de cobro."
     },
     {
       "cell": "I27",
@@ -190,11 +190,11 @@
       "description": "Alojamiento: Hotel Atipax UYUNI  + BREAKFAST",
       "supplier": "ATIPAX",
       "sku": null,
-      "quantity": null,
-      "unit_cost_usd": null,
+      "quantity": 5,
+      "unit_cost_usd": 185,
       "cost_usd": 925,
       "formula": "=185*I4/2",
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "La fórmula da 5 unidades × USD 185 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Atipax no aparece por nombre/proveedor en el catálogo histórico local."
     },
     {
       "cell": "I29",
@@ -206,7 +206,7 @@
       "unit_cost_usd": 300,
       "cost_usd": 600,
       "formula": "=300*2",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato TRF_UYU_LEO_UYU_SUCRE: USD 300, per_group 1–6. Sheets usa dos unidades; falta configurar ocupación de vehículos para 9+1."
     },
     {
       "cell": "I30",
@@ -218,7 +218,7 @@
       "unit_cost_usd": 45,
       "cost_usd": 450,
       "formula": "=45*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato LH_CTCHD_1P: tramo 7–10 a USD 40,80 por persona; Sheets usa USD 45. Falta confirmar tarifa y que corresponda al tour de Potosí."
     },
     {
       "cell": "I33",
@@ -226,11 +226,11 @@
       "description": "Alojamiento Hotel du Su Merced",
       "supplier": "Hotel du Su Merced",
       "sku": null,
-      "quantity": null,
-      "unit_cost_usd": null,
+      "quantity": 5,
+      "unit_cost_usd": 100,
       "cost_usd": 500,
       "formula": "=100*I4/2",
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "La fórmula da 5 unidades × USD 100 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Su Merced no aparece por nombre/proveedor en el catálogo histórico local."
     },
     {
       "cell": "I35",
@@ -242,7 +242,7 @@
       "unit_cost_usd": 35,
       "cost_usd": 350,
       "formula": "=35*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato LH_CT_HD_1P: tramo 7–10 a USD 30,53 por persona; Sheets usa USD 35. Falta confirmar tarifa y correspondencia del recorrido."
     },
     {
       "cell": "I36",
@@ -254,7 +254,7 @@
       "unit_cost_usd": null,
       "cost_usd": 100,
       "formula": null,
-      "note": "Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app."
+      "note": "Candidato GUIDE_LEO_SUCRE_EN_2026: USD 100 por grupo, igual al importe mostrado. Sheets no explicita la cantidad."
     },
     {
       "cell": "I38",
@@ -266,12 +266,12 @@
       "unit_cost_usd": 20,
       "cost_usd": 200,
       "formula": "=20*I4",
-      "note": "Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados."
+      "note": "Candidato LH_APT_1P: tramo 7–10 a USD 15,34 por persona; Sheets usa USD 20. Falta confirmar tarifa y aeropuerto."
     }
   ],
   "blockers": [
     "No hay SKU por línea ni asignación confirmada al catálogo; no se crearán servicios ni tarifas ficticias.",
-    "I8 suma 550+110; las demás noches usan 10/2 habitaciones. Falta distribución por hotel y tratamiento del TC para reproducirla en la app.",
+    "TC en SGL confirmado por Andrea el 2026-10-12. Faltan tarifas SGL y rooming de pagantes por hotel; Atipax/Su Merced siguen calculados como 10/2 en Sheets, sin separar al TC.",
     "I60 = I57 + I59 aplica USD 3000 fijos; el motor usa porcentaje. No se convierte ese fijo en un porcentaje calculado para hacer pasar el test."
   ],
   "notes": [
@@ -279,6 +279,9 @@
     "El total de venta actual de Sheets es USD 12179; el fixture histórico del PDF decía USD 12924 (diferencia -745).",
     "Existe otra venta en I47 con markup 17 %: USD 10739.43. Se conserva I60, el resumen específico de 9 pagantes, pendiente de decisión comercial.",
     "Las fechas de la hoja son 09–13 enero 2026; el PDF antiguo es 13–17 diciembre 2026.",
-    "No se usaron totales de línea como tarifas de grupo inventadas."
+    "No se usaron totales de línea como tarifas de grupo inventadas.",
+    "Relectura de valores y fórmulas el 2026-10-12: se mantienen costo 9179 y venta 12179. Los candidatos citados se contrastaron con los seeds locales; no certifican ni cambian Cloud. No se asignaron SKU ambiguos.",
+    "Andrea, 2026-10-12: el TC duerme en single. Para pagantes sin rooming confirmado sigue disponible la regla general 4 DBL + 1 SGL; no es una distribución certificada por esta hoja.",
+    "Regla de suplemento indicada por Andrea: por noche, single − doble/2; sin tarifa single, doble/2. Sumar noches y aplicar imprevistos si van en precio y recargo del canal. Esta regla de suplemento no elige entre las dos ventas base de la hoja ni confirma tarifas de costo SGL."
   ]
 }

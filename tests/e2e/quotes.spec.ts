@@ -152,7 +152,9 @@ test("SPA 2 pax: los mismos tres bloques conservan el total de la plantilla", as
     await page.getByRole("combobox", { name: "Buscar bloque diario…" }).click();
     await page.getByPlaceholder("Buscar…", { exact: true }).fill(`IMPORT_SPAUYU_MP_2PAX_D${n}`);
     await page.getByRole("option", { name: new RegExp(`IMPORT_SPAUYU_MP_2PAX_D${n}`) }).click();
-    // A multi-day rejection is a real regression/failure, never an expected pass.
+  }
+  await page.getByRole("button", { name: "Añadir bloques", exact: true }).click();
+  for (let n = 1; n <= 3; n++) {
     await expect(
       page.locator(`#day-${n}`),
       `El bloque ${n} debe poder añadirse, incluido su servicio multi-día`,

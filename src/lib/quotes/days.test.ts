@@ -23,14 +23,17 @@ vi.mock("../db", () => ({
 }));
 import {
   createQuoteFromTemplate,
+  createEmptyQuote,
   loadQuote,
   recalculateQuote,
   applyAdjustmentBulk,
   type TemplateQuoteBasics,
+  type QuoteBasics,
 } from "./index";
 
 import {
   addBlockDay,
+  addBlockDays,
   deleteDay,
   groupDays,
   moveDay,
@@ -111,6 +114,96 @@ async function freeBlock() {
   return b.id;
 }
 describe("días congelados, grupos y operaciones atómicas", () => {
+  it("adds the SPA block sequence as seller, at the fixture total, and separates repeated purchases", async () => {
+    const source = await loadTemplateSource(templateId, clientId);
+    const ids = source.templateDays
+      .sort((a, b) => a.day_number - b.day_number)
+      .map((d) => d.block_id);
+    await as(seller);
+    const empty = await createEmptyQuote({
+      ...basics(),
+      client_type: "B2C",
+      category: "COMFORT",
+      tour_sku: "SPAUYU-3D2N-BLOCKS",
+      rooming: { paying: {}, tc: {} },
+      vehicles: {},
+      rounding_rule: { mode: "none", increment: 1 },
+    } as QuoteBasics);
+    const result = await addBlockDays(empty.id, ids);
+    expect(result.calculation.status).toBe("ok");
+    expect(result.calculation.total_cost_usd).toBe(1939);
+    const saved = await loadQuote(empty.id);
+    expect(saved.days.map((d) => d.link_type)).toEqual(["grouped", "grouped", "grouped"]);
+    expect(saved.days.map((d) => d.group_position)).toEqual([1, 2, 3]);
+    expect(new Set(saved.days.map((d) => d.group_id)).size).toBe(1);
+    expect(saved.days.every((d) => !!d.group_id && !!d.source_block_id && !!d.block_snapshot)).toBe(
+      true,
+    );
+    expect(saved.quote.template_id).toBeNull();
+    expect((await addBlockDays(empty.id, ids)).calculation.total_cost_usd).toBe(3878);
+    const twice = await loadQuote(empty.id);
+    expect(new Set(twice.days.map((d) => d.group_id)).size).toBe(2);
+    expect(twice.days.map((d) => d.date)).toEqual([
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18",
+      "2026-10-19",
+    ]);
+  });
+  it("rejects an incomplete sequence without inserting days, and rolls back a failed batch calculation", async () => {
+    const source = await loadTemplateSource(templateId, clientId);
+    const ids = source.templateDays
+      .sort((a, b) => a.day_number - b.day_number)
+      .map((d) => d.block_id);
+    const data = await newQuote();
+    await expect(addBlockDays(data.quote.id, ids.slice(0, 2))).rejects.toThrow("todos los bloques");
+    expect(await loadQuote(data.quote.id)).toEqual(data);
+    const rpc = transport.client!.rpc.bind(transport.client);
+    vi.spyOn(transport.client!, "rpc").mockImplementation(async (name, args) => {
+      if (name === "edit_quote_days" && args["p_result"])
+        (args["p_result"] as { items: unknown[] }).items.pop();
+      return rpc(name, args);
+    });
+    await expect(addBlockDays(data.quote.id, ids)).rejects.toThrow("Incomplete calculation");
+    expect(await loadQuote(data.quote.id)).toEqual(data);
+  });
+  it("expands a purchase linked only to the first library block when appending after existing days", async () => {
+    await pg.exec("begin");
+    try {
+      const data = await newQuote();
+      const source = await loadTemplateSource(templateId, clientId);
+      const ids = source.templateDays
+        .sort((a, b) => a.day_number - b.day_number)
+        .map((d) => d.block_id);
+      await pg.query(
+        "delete from day_block_items where block_id=any($1::uuid[]) and multi_day_span>1",
+        [ids.slice(1)],
+      );
+      await pg.query(
+        "update day_block_items set coverage_key=null,coverage_start_day=null where block_id=$1 and multi_day_span>1",
+        [ids[0]],
+      );
+      const result = await addBlockDays(data.quote.id, ids);
+      expect(result.calculation.total_cost_usd).toBe(3878);
+      const saved = await loadQuote(data.quote.id);
+      const addedDays = saved.days.slice(3);
+      const purchases = saved.items.filter(
+        (i) => i.day_span === 3 && addedDays.some((d) => d.id === i.quote_day_id),
+      );
+      expect(purchases).toHaveLength(3);
+      expect(new Set(purchases.map((i) => i.source_block_service_id)).size).toBe(1);
+      expect(
+        purchases.every(
+          (i) => (i.pricing_snapshot as { coverage_start_day: number }).coverage_start_day === 4,
+        ),
+      ).toBe(true);
+      expect(new Set(addedDays.map((d) => d.group_id)).size).toBe(1);
+    } finally {
+      await pg.exec("rollback");
+    }
+  });
   it("copies all languages and original service links; multi-day purchase creates one group and charges once", async () => {
     const source = await loadTemplateSource(templateId, clientId);
     const block = source.blocks[0]!;
