@@ -1858,6 +1858,7 @@ export type Database = {
           margin_mode: Database["public"]["Enums"]["margin_mode"];
           commission_mode: Database["public"]["Enums"]["commission_mode"];
           commission_pct: number;
+          cancel_reason: string | null;
         };
         Insert: {
           id?: string;
@@ -1904,6 +1905,7 @@ export type Database = {
           margin_mode: Database["public"]["Enums"]["margin_mode"];
           commission_mode: Database["public"]["Enums"]["commission_mode"];
           commission_pct: number;
+          cancel_reason?: string | null;
         };
         Update: {
           id?: string;
@@ -1950,6 +1952,7 @@ export type Database = {
           margin_mode?: Database["public"]["Enums"]["margin_mode"];
           commission_mode?: Database["public"]["Enums"]["commission_mode"];
           commission_pct?: number;
+          cancel_reason?: string | null;
         };
         Relationships: [
           {
@@ -2541,7 +2544,7 @@ export type Database = {
       payment_type: "deposito" | "saldo" | "otro";
       pricing_unit:
         "per_person" | "per_group" | "per_room" | "per_vehicle" | "per_staff" | "per_unit";
-      quote_status: "borrador" | "revisada" | "enviada" | "vendida" | "perdida";
+      quote_status: "borrador" | "revisada" | "enviada" | "vendida" | "perdida" | "cancelada";
       route_type: "ROUNDTRIP" | "ONEWAY";
       season: "ALL" | "DRY" | "RAIN" | "BAJA" | "MEDIA" | "ALTA" | "FESTIVO";
       service_modality: "privado" | "compartido" | "ambos";

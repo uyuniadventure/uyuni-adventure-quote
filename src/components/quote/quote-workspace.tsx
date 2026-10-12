@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, BedDouble, FilePlus2, Loader2, PencilLine, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { addQuoteItem, loadQuote, recalculateQuote, updateQuoteItem } from "@/lib/quotes";
+import { beginQuoteEdit } from "@/lib/states";
 import type { QuoteResult } from "@/lib/pricing";
 import type { Enums, Tables } from "@/types/db";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
@@ -77,9 +78,25 @@ export function useQuoteActions(quoteId: string) {
 }
 
 export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset: () => void }) {
+  const navigate = useNavigate({ from: "/nueva-cotizacion" });
+  const qc = useQueryClient();
+  const [versioning, setVersioning] = useState(false);
   const q = useQuery({ queryKey: ["quote-full", quoteId], queryFn: () => loadQuote(quoteId) });
   const actions = useQuoteActions(quoteId);
   const started = useRef(false);
+  const editSent = async () => {
+    setVersioning(true);
+    try {
+      const id = await beginQuoteEdit(quoteId);
+      await qc.invalidateQueries({ queryKey: ["quote-full", quoteId] });
+      await qc.invalidateQueries({ queryKey: ["quotes"] });
+      await navigate({ search: { quote: id } });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setVersioning(false);
+    }
+  };
   useEffect(() => {
     if (q.data && !started.current && !q.data.quote.archived_at && ["borrador", "revisada"].includes(q.data.quote.status)) {
       started.current = true;
@@ -105,6 +122,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
           <p className="mt-1 font-mono text-xs text-muted-foreground">{data.quote.code} · inicio {data.quote.start_date} · {data.quote.language.toUpperCase()} · {data.quote.client_type}</p>
         </div>
         <div className="flex gap-2">
+          {data.quote.status === "enviada" && !data.quote.archived_at && <Button variant="outline" disabled={versioning} onClick={() => void editSent()}><PencilLine className="mr-1 h-4 w-4" />Editar nueva versión</Button>}
           <Button variant="outline" asChild><Link to="/cotizaciones">Cotizaciones</Link></Button>
           <Button variant="outline" onClick={onReset}><FilePlus2 className="mr-1 h-4 w-4" />Otra cotización</Button>
         </div>

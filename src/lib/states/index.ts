@@ -1,26 +1,23 @@
 import { db, unwrap } from "../db";
 import type { Enums, Tables } from "../../types/db";
-const transitions: Record<Enums<"quote_status">, Enums<"quote_status">[]> = {
-  borrador: ["revisada"],
-  revisada: ["enviada"],
-  enviada: ["vendida", "perdida"],
-  vendida: [],
-  perdida: [],
-};
+/** Postgres validates the current state under a row lock, including permissions,
+ * blocking errors and the deposit/admin requirement, and records the audit row. */
 export async function transitionQuote(
   quoteId: string,
   to: Enums<"quote_status">,
   note?: string,
 ): Promise<Tables<"quotes">> {
-  const q = unwrap(await db.from("quotes").select("status").eq("id", quoteId).single());
-  if (!transitions[q.status].includes(to))
-    throw new Error(`Invalid transition: ${q.status} → ${to}`);
-  if (to === "perdida" && !note?.trim()) throw new Error("Lost reason required");
   return unwrap(
     await db.rpc("transition_quote", {
       p_id: quoteId,
       p_to: to,
-      ...(note ? { p_note: note } : {}),
+      p_note: note?.trim() ?? "",
     }),
   );
+}
+
+/** Returns the editable quote id. Sent quotes are copied atomically to a draft;
+ * the previous version remains archived and read-only. */
+export async function beginQuoteEdit(quoteId: string): Promise<string> {
+  return unwrap(await db.rpc("version_quote", { p_id: quoteId }));
 }

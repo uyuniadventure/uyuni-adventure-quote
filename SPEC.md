@@ -156,7 +156,7 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   - `fx_snapshot` (json con las tasas usadas), `margin_pct`, `margin_mode`, `commission_mode`, `commission_pct`, `rounding_rule`. La política efectiva se congela al crear la cotización; las versiones la conservan. Los cambios posteriores en cliente o Admin afectan solo a nuevas cotizaciones.
   - Totales calculados: `total_cost_usd`, `total_margin_usd`, `total_price_usd`, `price_per_pax_usd`.
   - `pax_scenarios` (json opcional para tabla B2B: lista de pax, por ejemplo [2,4,6,10], con su configuración de vehículos y habitaciones por escenario).
-  - `status`, `lost_reason`, `next_followup_at`.
+  - `status`, `lost_reason`, `cancel_reason`, `next_followup_at`.
 - **`quote_days`**: `quote_id`, `day_number`, `date`; `source_block_id` nullable y
   `block_snapshot` completo, con todos los idiomas, módulos y enlaces del bloque al copiarlo.
   `overrides` contiene solo diferencias de contenido: title/description por idioma,
@@ -299,12 +299,29 @@ El vendedor puede leer los tipos de cambio, pero solo Admin puede administrarlos
 **Estados:**
 ```
 borrador → revisada → enviada → vendida
-                         ↘ perdida (motivo obligatorio)
+Desde cualquier estado distinto del destino: perdida o cancelada (motivo obligatorio)
 ```
 - `revisada`: control interno; el mismo vendedor puede marcarla y enviarla.
+- `transitionQuote` llama a `transition_quote`: Postgres bloquea la cotización,
+  valida estado, permisos y motivo, y escribe el historial en la misma transacción.
+  No se permiten saltos, retrocesos ni transiciones al mismo estado. Perdida y
+  cancelada pueden convertirse entre sí con motivo, pero no reabrirse como borrador.
 - `enviada`: se genera el PDF, se envía el email y queda registrado.
+- Antes de revisar o enviar: cálculo vigente, sin errores en cotización, ítems
+  o escenarios; textos revisados y sin pendientes de importación. Los avisos
+  informativos (por ejemplo, continuidad) no bloquean el envío.
 - Editar una cotización `enviada` crea una **nueva versión** (`-v2`); la anterior queda archivada.
-- `vendida`: se activa automáticamente al registrar un pago de tipo `deposito`.
+  `beginQuoteEdit` usa `version_quote`; los ítems también versionan automáticamente
+  mediante `edit_quote_item`. La copia empieza en borrador y conserva snapshots,
+  servicios y ajustes, con grupos propios; no copia pagos ni historial. La anterior
+  conserva su cálculo y contenido y queda de solo lectura.
+- `vendida`: solo desde enviada, al registrar un pago positivo de tipo `deposito`,
+  o por Admin con motivo explícito (Andrea, 2026-10-12). Saldo/otro no confirman venta.
+  Depósito, venta, historial y creación de Operación son atómicos; depósitos
+  adicionales no duplican la venta. Perdidas/canceladas no reciben nuevos pagos.
+- Cada cambio registra `quote_status_history`: usuario, fecha/hora, estado anterior,
+  nuevo y motivo. El historial y los pagos son de solo adición. La pérdida guarda
+  `lost_reason`, la cancelación `cancel_reason`; ambos exigen motivo no vacío.
 - **Recordatorios de seguimiento:** cada cotización enviada tiene `next_followup_at`. Un dashboard muestra las pendientes de hoy y las vencidas; opcionalmente, un email diario al vendedor (Edge Function programada).
 - Al pasar a `vendida`: se crea el registro en `services_ops` (Fase 2).
 

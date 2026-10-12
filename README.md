@@ -269,3 +269,36 @@ Verificación local: `bun run test -- src/lib/quotes/days.test.ts src/lib/quotes
 La plantilla de aceptación es SPAUYU-3D2N-MP, 2 pagantes: costo USD 1.939.
 Las discrepancias anteriores de los casos reales Bolivia/WE ROAD se mantienen
 separadas de este cambio; no se ajustó el motor para ocultarlas.
+
+### Estados, depósitos e historial (2026-10-12)
+
+Después de `20261011001000_quote_days_traceability.sql`, aplicar en orden:
+
+1. `20261012000100_quote_cancelled_status.sql`: añade `cancelada` al enum.
+2. `20261012000200_quote_state_transitions.sql`: reglas de estado y motivo de cancelación.
+
+Son dos migraciones porque PostgreSQL requiere confirmar el nuevo valor del enum
+antes de usarlo. Aplicar solo las pendientes, sin repetir seeds. No se ejecutaron
+contra Lovable Cloud.
+
+`transitionQuote` en `src/lib/states` delega en la RPC `transition_quote`; la base
+valida bajo bloqueo y registra cada cambio en `quote_status_history`. El flujo es
+borrador → revisada → enviada → vendida. Desde cualquier estado se permite perdida
+o cancelada, con motivo, salvo una transición al mismo estado. Un cálculo con
+errores bloquea revisar/enviar/vender, pero permite registrar pérdida/cancelación.
+Enviar vuelve a comprobar traducciones y pendientes de importación. Los avisos
+informativos no bloquean.
+
+La venta exige un depósito real o Admin con motivo. El trigger de C6 confirma
+depósito, estado, historial y Operación en la misma transacción; un segundo depósito
+no duplica el evento. `saldo`/`otro` no venden. El motivo no se arrastra a otros cambios.
+
+`beginQuoteEdit` llama a `version_quote`. En el editor de una enviada, **Editar nueva
+versión** abre el nuevo borrador. La versión enviada queda archivada e inmutable;
+los snapshots, ajustes y grupos se conservan en la nueva, sin copiar pagos/historial.
+La edición por `updateQuoteItem` también versiona atómicamente. No se pueden editar
+ni versionar vendidas, perdidas o canceladas.
+
+Pruebas: `bun run test -- src/lib/states/states.test.ts --maxWorkers=1`,
+`bun run test:db`, `bun run typecheck` y `bun run build`. La matriz cubre los 36 pares
+de estados, más motivos, roles, depósitos, avisos bloqueantes, historial, versiones y rollback.
