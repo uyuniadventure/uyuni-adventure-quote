@@ -30,31 +30,31 @@ Bolivia 5D4N · 9+1
 Fuente: https://docs.google.com/spreadsheets/d/1TLN4VVpfFl1_kV8b1H_bVp5jj3XDrSWt5j4ZjN4pRE8/edit?gid=417295995#gid=417295995 · 2.0 BOLIVIA 5D/4N 9+1!A5:I39
 | Celda | Servicio | Cantidad Sheets / app | Tarifa USD Sheets / app | Costo app | Costo Sheets | Diferencia | Causa probable |
 |---|---|---|---|---:|---:|---:|---|
-| I8 | Alojamiento Madero Hotel & Suits o simliar | N/D / N/D | N/D / N/D | N/D | 660.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I10 | Transfer Hotel - Aeropuerto | 3 / N/D | 33.00 / N/D | N/D | 99.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I11 | Vuelo La Paz - Uyuni OB306 07:10 - 08:10 | 10 / N/D | 220.00 / N/D | N/D | 2200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I12 | FULL DAY SALAR | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I13 | EXTRA BREAKFAST | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I14 | GUÍA EN INGLÉS | N/D / N/D | N/D / N/D | N/D | 150.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I15 | ENTRADAS PARQUES | 10 / N/D | 30.00 / N/D | N/D | 300.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I16 | Almuerzo buffet en medio del Salar | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I18 | Sunset & Cocktail en el Salar | 10 / N/D | 10.00 / N/D | N/D | 100.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I20 | Tour Stargazing (sin telescopio) | 3 / N/D | 80.00 / N/D | N/D | 240.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I21 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | N/D / N/D | N/D / N/D | N/D | 925.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I23 | Laguna Hedionda | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I24 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 80.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I25 | Almuerzo incluído | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I27 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | N/D / N/D | N/D / N/D | N/D | 925.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I29 | Transporte Uyuni - Sucre | 2 / N/D | 300.00 / N/D | N/D | 600.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I30 | CITY TOUR COLONIAL HD (ENTRADA + GUÍA BILINGÜE) | 10 / N/D | 45.00 / N/D | N/D | 450.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I33 | Alojamiento Hotel du Su Merced | N/D / N/D | N/D / N/D | N/D | 500.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I35 | City tour HD | 10 / N/D | 35.00 / N/D | N/D | 350.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
-| I36 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 100.00 | N/D | Sin SKU ni cantidad/unidad confirmados para construir el ítem de la app. |
-| I38 | Transfer al Aeropuerto | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Cantidad visible en fórmula; falta SKU y configuración de cobro/TC confirmados. |
+| I8 | Alojamiento Madero Hotel & Suits o simliar | N/D / N/D | N/D / N/D | N/D | 660.00 | N/D | Madero no aparece por nombre/proveedor en el catálogo histórico local. TC en SGL confirmado por Andrea; I8 = 550+110 no identifica las tarifas por tipo ni el rooming de pagantes. |
+| I10 | Transfer Hotel - Aeropuerto | 3 / N/D | 33.00 / N/D | N/D | 99.00 | N/D | La fórmula confirma 3 × 33. Falta identificar el traslado de La Paz; no sustituirlo por un traslado de Uyuni del mismo proveedor. |
+| I11 | Vuelo La Paz - Uyuni OB306 07:10 - 08:10 | 10 / N/D | 220.00 / N/D | N/D | 2200.00 | N/D | La fórmula confirma 10 × 220. Los vuelos BOA del catálogo local consultado son otras rutas; no usar Uyuni→La Paz para La Paz→Uyuni. |
+| I12 | FULL DAY SALAR | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Candidato TOUR_UYU_LEO_SALAR: USD 200, per_group, tramo 1–6. Sheets usa dos unidades; falta configurar la ocupación de cada grupo/vehículo para 9+1. |
+| I13 | EXTRA BREAKFAST | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | KACHI tiene MEAL_KACHI_MEAL_PP_2026 a USD 15, pero describe CENA, no desayuno. No asignado por coincidencia de importe. |
+| I14 | GUÍA EN INGLÉS | N/D / N/D | N/D / N/D | N/D | 150.00 | N/D | Candidato GUIDE_LEO_FULLDAY_SALAR_EN_2026: USD 80, tramo 1–5. Sheets indica USD 150 para 10 personas; falta tarifa/configuración confirmada. |
+| I15 | ENTRADAS PARQUES | 10 / N/D | 30.00 / N/D | N/D | 300.00 | N/D | Candidato TICKETS_LEO_UYU: USD 30 por persona, igual a la fórmula. Pendiente integrarlo en un escenario completo con TC confirmado. |
+| I16 | Almuerzo buffet en medio del Salar | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Dos candidatos FNB_UYU_LEO_BUFFET y FNB_UYU_LEO_BUFFET_APTHAPI a USD 20, ambos per_group 1–6; Sheets cobra 10 personas. Falta resolver duplicado y unidad. |
+| I18 | Sunset & Cocktail en el Salar | 10 / N/D | 10.00 / N/D | N/D | 100.00 | N/D | Candidato FNB_UYU_LEO_COCKTAIL: USD 10, per_group 1–6, descripción HASTA X3. Sheets cobra 10 personas; falta confirmar unidad/tramo. |
+| I20 | Tour Stargazing (sin telescopio) | 3 / N/D | 80.00 / N/D | N/D | 240.00 | N/D | Candidato EXP_UYU_LEO_STARGAZING: USD 80 por grupo 1–4; Sheets usa 3 unidades. Falta confirmar reparto de las 10 personas entre grupos. |
+| I21 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | 5 / N/D | 185.00 / N/D | N/D | 925.00 | N/D | La fórmula da 5 unidades × USD 185 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Atipax no aparece por nombre/proveedor en el catálogo histórico local. |
+| I23 | Laguna Hedionda | 2 / N/D | 200.00 / N/D | N/D | 400.00 | N/D | Candidato IMPORT_REVIEW_0479: sin unidad de cobro y USD 220; Sheets usa 2 × USD 200. No inventar unidad ni modificar tarifa para igualar. |
+| I24 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 80.00 | N/D | Sheets indica USD 80 sin cantidad ni SKU del guía para Laguna Hedionda. El guía Salar no identifica este recorrido. |
+| I25 | Almuerzo incluído | 10 / N/D | 15.00 / N/D | N/D | 150.00 | N/D | Candidato FNB_UYU_LEO_LUNCH: USD 15, per_group 1–6; Sheets cobra 10 personas. Falta confirmar unidad de cobro. |
+| I27 | Alojamiento: Hotel Atipax UYUNI  + BREAKFAST | 5 / N/D | 185.00 / N/D | N/D | 925.00 | N/D | La fórmula da 5 unidades × USD 185 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Atipax no aparece por nombre/proveedor en el catálogo histórico local. |
+| I29 | Transporte Uyuni - Sucre | 2 / N/D | 300.00 / N/D | N/D | 600.00 | N/D | Candidato TRF_UYU_LEO_UYU_SUCRE: USD 300, per_group 1–6. Sheets usa dos unidades; falta configurar ocupación de vehículos para 9+1. |
+| I30 | CITY TOUR COLONIAL HD (ENTRADA + GUÍA BILINGÜE) | 10 / N/D | 45.00 / N/D | N/D | 450.00 | N/D | Candidato LH_CTCHD_1P: tramo 7–10 a USD 40,80 por persona; Sheets usa USD 45. Falta confirmar tarifa y que corresponda al tour de Potosí. |
+| I33 | Alojamiento Hotel du Su Merced | 5 / N/D | 100.00 / N/D | N/D | 500.00 | N/D | La fórmula da 5 unidades × USD 100 para 10 personas, sin separar el TC en SGL confirmado por Andrea. Falta rooming/tarifa SGL; Su Merced no aparece por nombre/proveedor en el catálogo histórico local. |
+| I35 | City tour HD | 10 / N/D | 35.00 / N/D | N/D | 350.00 | N/D | Candidato LH_CT_HD_1P: tramo 7–10 a USD 30,53 por persona; Sheets usa USD 35. Falta confirmar tarifa y correspondencia del recorrido. |
+| I36 | Guía en inglés | N/D / N/D | N/D / N/D | N/D | 100.00 | N/D | Candidato GUIDE_LEO_SUCRE_EN_2026: USD 100 por grupo, igual al importe mostrado. Sheets no explicita la cantidad. |
+| I38 | Transfer al Aeropuerto | 10 / N/D | 20.00 / N/D | N/D | 200.00 | N/D | Candidato LH_APT_1P: tramo 7–10 a USD 15,34 por persona; Sheets usa USD 20. Falta confirmar tarifa y aeropuerto. |
 Costo: app N/D / Sheets 9179.00 / diferencia N/D USD.
 Venta: app N/D / Sheets 12179.00 / diferencia N/D USD.
 Pendiente: No hay SKU por línea ni asignación confirmada al catálogo; no se crearán servicios ni tarifas ficticias.
-Pendiente: I8 suma 550+110; las demás noches usan 10/2 habitaciones. Falta distribución por hotel y tratamiento del TC para reproducirla en la app.
+Pendiente: TC en SGL confirmado por Andrea el 2026-10-12. Faltan tarifas SGL y rooming de pagantes por hotel; Atipax/Su Merced siguen calculados como 10/2 en Sheets, sin separar al TC.
 Pendiente: I60 = I57 + I59 aplica USD 3000 fijos; el motor usa porcentaje. No se convierte ese fijo en un porcentaje calculado para hacer pasar el test.
 Pendiente: No hay QuoteInput verificable: faltan datos de la fuente indicados abajo.
 Nota: Fuente indicada por Andrea. Columna I: 10 personas; I58 e I61 dividen entre 9 pagantes.
@@ -62,6 +62,9 @@ Nota: El total de venta actual de Sheets es USD 12179; el fixture histórico del
 Nota: Existe otra venta en I47 con markup 17 %: USD 10739.43. Se conserva I60, el resumen específico de 9 pagantes, pendiente de decisión comercial.
 Nota: Las fechas de la hoja son 09–13 enero 2026; el PDF antiguo es 13–17 diciembre 2026.
 Nota: No se usaron totales de línea como tarifas de grupo inventadas.
+Nota: Relectura de valores y fórmulas el 2026-10-12: se mantienen costo 9179 y venta 12179. Los candidatos citados se contrastaron con los seeds locales; no certifican ni cambian Cloud. No se asignaron SKU ambiguos.
+Nota: Andrea, 2026-10-12: el TC duerme en single. Para pagantes sin rooming confirmado sigue disponible la regla general 4 DBL + 1 SGL; no es una distribución certificada por esta hoja.
+Nota: Regla de suplemento indicada por Andrea: por noche, single − doble/2; sin tarifa single, doble/2. Sumar noches y aplicar imprevistos si van en precio y recargo del canal. Esta regla de suplemento no elige entre las dos ventas base de la hoja ni confirma tarifas de costo SGL.
 
 REQUIERE DECISIÓN
 Caso SIVOLA sustituido por WE ROAD Bolivia Highlights 10D · solicitado 14+1
