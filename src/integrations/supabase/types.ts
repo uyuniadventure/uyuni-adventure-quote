@@ -467,43 +467,58 @@ export type Database = {
       day_blocks: {
         Row: {
           code: string
+          content: Json
           created_at: string
           created_by: string | null
           default_day_position: number | null
+          end_point: string | null
           hotel_service_id: string | null
           id: string
           modality: Database["public"]["Enums"]["itinerary_modality"]
+          name: string | null
+          parent_block_id: string | null
           places: string[]
           route_from: string | null
           route_to: string | null
+          start_point: string | null
           status: Database["public"]["Enums"]["catalog_status"]
           updated_at: string
         }
         Insert: {
           code: string
+          content?: Json
           created_at?: string
           created_by?: string | null
           default_day_position?: number | null
+          end_point?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
+          name?: string | null
+          parent_block_id?: string | null
           places?: string[]
           route_from?: string | null
           route_to?: string | null
+          start_point?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
         Update: {
           code?: string
+          content?: Json
           created_at?: string
           created_by?: string | null
           default_day_position?: number | null
+          end_point?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
+          name?: string | null
+          parent_block_id?: string | null
           places?: string[]
           route_from?: string | null
           route_to?: string | null
+          start_point?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
@@ -520,6 +535,13 @@ export type Database = {
             columns: ["hotel_service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "day_blocks_parent_block_id_fkey"
+            columns: ["parent_block_id"]
+            isOneToOne: false
+            referencedRelation: "day_blocks"
             referencedColumns: ["id"]
           },
           {
@@ -1336,47 +1358,65 @@ export type Database = {
       }
       quote_days: {
         Row: {
+          block_snapshot: Json
           created_at: string
           date: string | null
           day_number: number
           description: string
           excludes: string | null
+          group_id: string | null
+          group_position: number | null
           id: string
           includes: string | null
+          link_type: string
+          overrides: Json
           quote_id: string
           route_from: string | null
           route_to: string | null
           snapshot: Json
+          source_block_id: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          block_snapshot?: Json
           created_at?: string
           date?: string | null
           day_number: number
           description?: string
           excludes?: string | null
+          group_id?: string | null
+          group_position?: number | null
           id?: string
           includes?: string | null
+          link_type?: string
+          overrides?: Json
           quote_id: string
           route_from?: string | null
           route_to?: string | null
           snapshot?: Json
+          source_block_id?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          block_snapshot?: Json
           created_at?: string
           date?: string | null
           day_number?: number
           description?: string
           excludes?: string | null
+          group_id?: string | null
+          group_position?: number | null
           id?: string
           includes?: string | null
+          link_type?: string
+          overrides?: Json
           quote_id?: string
           route_from?: string | null
           route_to?: string | null
           snapshot?: Json
+          source_block_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -1386,6 +1426,13 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_days_source_block_id_fkey"
+            columns: ["source_block_id"]
+            isOneToOne: false
+            referencedRelation: "day_blocks"
             referencedColumns: ["id"]
           },
         ]
@@ -1538,6 +1585,7 @@ export type Database = {
           route: string | null
           service_id: string | null
           sku: string | null
+          source_block_service_id: string | null
           supplier_id: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
@@ -1576,6 +1624,7 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          source_block_service_id?: string | null
           supplier_id?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
@@ -1614,6 +1663,7 @@ export type Database = {
           route?: string | null
           service_id?: string | null
           sku?: string | null
+          source_block_service_id?: string | null
           supplier_id?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
@@ -2703,6 +2753,16 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       due_followups: { Args: never; Returns: Json }
+      edit_quote_days: {
+        Args: {
+          p_id: string
+          p_operation: string
+          p_payload: Json
+          p_result?: Json
+          p_updated_at?: string
+        }
+        Returns: Json
+      }
       edit_quote_item: {
         Args: {
           p_add?: boolean
@@ -2768,6 +2828,7 @@ export type Database = {
           route: string | null
           service_id: string | null
           sku: string | null
+          source_block_service_id: string | null
           supplier_id: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
@@ -2787,10 +2848,18 @@ export type Database = {
         Args: { p_language: string; p_sku: string }
         Returns: string
       }
+      patch_day_overrides: {
+        Args: { old_overrides: Json; patch: Json; snap: Json }
+        Returns: Json
+      }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
       quote_template_source: {
         Args: { p_client: string; p_template: string }
+        Returns: Json
+      }
+      resolve_day_content: {
+        Args: { p_overrides: Json; p_snapshot: Json }
         Returns: Json
       }
       save_quote_calculation: {
@@ -2857,6 +2926,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      snapshot_day_block: { Args: { p_id: string }; Returns: Json }
       transition_quote: {
         Args: {
           p_id: string
@@ -2916,6 +2986,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_day_content: { Args: { p: Json }; Returns: boolean }
       version_quote: { Args: { p_id: string }; Returns: string }
     }
     Enums: {

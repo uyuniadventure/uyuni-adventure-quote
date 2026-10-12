@@ -57,6 +57,13 @@
       "when": 1791805017173,
       "tag": "0007_adjustment_fraction_and_margin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791805141701,
+      "tag": "0008_quote_days_traceability",
+      "breakpoints": true
     }
   ]
 }
