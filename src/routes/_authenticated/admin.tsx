@@ -4,6 +4,7 @@ import { ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { SECTIONS, sectionHead } from "@/components/section";
 import { db } from "@/lib/db";
+import { listAdminUsers } from "@/lib/admin/users";
 import type { Enums } from "@/types/db";
 import { ROLE_LABELS, useCurrentUser, type AppRole } from "@/hooks/use-auth";
 import { PageHeader, LANGS } from "@/components/catalog/kit";
@@ -79,11 +80,7 @@ function UsersPanel() {
   const me = useCurrentUser();
   const q = useQuery({
     queryKey: ["admin-profiles"],
-    queryFn: async () => {
-      const { data, error } = await db.from("profiles").select("id, full_name, role, created_at").order("created_at");
-      if (error) throw error;
-      return data;
-    },
+    queryFn: listAdminUsers,
   });
   const setRole = useMutation({
     mutationFn: async ({ id, role }: { id: string; role: Enums<"app_role"> }) => {
@@ -98,12 +95,14 @@ function UsersPanel() {
       <p className="text-sm text-muted-foreground">Los usuarios se registran desde la pantalla de acceso y quedan como Vendedor; aquí se asigna su rol.</p>
       <div className="rounded-md border bg-card">
         <Table>
-          <TableHeader><TableRow><TableHead>Nombre</TableHead><TableHead>ID</TableHead><TableHead>Alta</TableHead><TableHead className="w-48">Rol</TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Nombre</TableHead><TableHead>Email</TableHead><TableHead>ID</TableHead><TableHead>Alta</TableHead><TableHead className="w-48">Rol</TableHead></TableRow></TableHeader>
           <TableBody>
-            {q.isLoading && <TableRow><TableCell colSpan={4} className="text-muted-foreground">Cargando…</TableCell></TableRow>}
+            {q.isLoading && <TableRow><TableCell colSpan={5} className="text-muted-foreground">Cargando…</TableCell></TableRow>}
+            {q.error && <TableRow><TableCell colSpan={5} role="alert">{q.error.message}</TableCell></TableRow>}
             {q.data?.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.full_name || "—"}{p.id === me.user.id && <span className="ml-2 text-xs text-muted-foreground">(tú)</span>}</TableCell>
+                <TableCell>{p.email || "—"}</TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">{p.id.slice(0, 8)}</TableCell>
                 <TableCell>{new Date(p.created_at).toLocaleDateString("es")}</TableCell>
                 <TableCell>

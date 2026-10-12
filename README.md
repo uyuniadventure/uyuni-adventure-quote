@@ -340,3 +340,35 @@ No modifica la revisión del catálogo real ni las fórmulas del presupuesto.
 Tras migrar en Lovable: abrir una cotización de prueba revisada/enviada, registrar
 parte del depósito y comprobar que sigue enviada; completar el faltante y abrir
 **Operación** para comprobar su ficha, ítems y días. Un segundo pago no duplica la ficha.
+
+### Permisos por rol y emails en Admin (2026-10-12)
+
+Después de `20261012000400_quote_add_block_sequence.sql`, aplicar únicamente la
+migración pendiente `20261012000500_role_permissions.sql`, y después desplegar el
+frontend. No requiere seeds ni cambia roles de usuarios existentes. Cierra la
+lectura indirecta de cotizaciones ajenas desde los snapshots de Operación y sus
+ítems, cuentas a proveedores, comunicaciones y vistas. `admin_list_users` devuelve
+los emails actuales de Auth exclusivamente a Admin, sin exponer credenciales.
+
+| Acción | Vendedor | Operación | Admin |
+| --- | --- | --- | --- |
+| Crear, editar y enviar cotizaciones | Propias | Propias | Todas |
+| Leer cotizaciones y sus PDF/emails | Propias | Propias | Todas |
+| Proponer cambios de tarifa | Sí | Sí | Sí |
+| Cambiar tarifas y aprobar sugerencias | No | Sí | Sí |
+| Leer fichas, costos y comunicaciones en Operación | Propias ventas | Todas | Todas |
+| Modificar Operación y consultar pasajeros | No | Sí | Sí |
+| Consultar emails y asignar roles en Admin | No | No | Sí |
+
+Validación aislada: `bun run test:roles` (también incluido en `test:db`) comprueba
+RLS, vistas, RPC, aislamiento entre vendedores, envío propio y prohibición de
+autoasignarse Admin. `tests/e2e/roles.spec.ts` inicia sesiones reales de vendedor,
+operación y admin, comprueba API/UI y aprueba sugerencias desde el tarifario.
+El workflow ejecuta cada caso dos veces, sin reintentos. Los usuarios de CI son
+efímeros y no equivalen a cuentas disponibles en Cloud.
+
+Las cuentas Cloud autorizadas son `info+prueba-vendedor@uyuniadventure.com` y
+`info+prueba-operacion@uyuniadventure.com`; `info@uyuniadventure.com` conserva Admin.
+Su creación y comprobación en Cloud requieren acceso al proyecto de Lovable y
+todavía no están acreditadas por estas pruebas. Tras crearlas, comprobar en
+`/admin` el email completo y el rol de cada una; no guardar contraseñas en Git.
