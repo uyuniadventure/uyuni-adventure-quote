@@ -50,6 +50,13 @@
       "when": 1791804949096,
       "tag": "0006_atomic_quote_from_template",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791805017173,
+      "tag": "0007_adjustment_fraction_and_margin",
+      "breakpoints": true
     }
   ]
 }
