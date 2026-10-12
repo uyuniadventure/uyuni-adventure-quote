@@ -92,7 +92,7 @@ export function ChangeRequestsPanel({ onOpenService }: { onOpenService: (id: str
         const current = r.service_rates;
         const proposed = pickRate(r.proposed_values);
         return (
-          <div key={r.id} className="rounded-lg border border-border bg-card p-4">
+          <div key={r.id} data-testid={`change-request-${r.id}`} className="rounded-lg border border-border bg-card p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">

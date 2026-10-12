@@ -52,10 +52,17 @@ Proyecto nuevo e independiente: no comparte base de datos con otros sistemas exi
 | Crear y editar bloques y plantillas | ✔ | ✔ | ✔ (pendiente de aprobación) |
 | Crear, editar y enviar cotizaciones | ✔ | ✔ | ✔ (solo las propias, salvo admin) |
 | Registrar pagos del cliente | ✔ | ✔ | ✔ |
-| Gestionar SERVICIO (Fase 2) | ✔ | ✔ | lectura |
+| Gestionar SERVICIO (Fase 2) | ✔ | ✔ | lectura de sus propias ventas |
 | Gestionar usuarios, divisas, T&C | ✔ | ✘ | ✘ |
 
 Implementar con tabla `profiles.role` y políticas RLS en Supabase. Un producto `pendiente` creado por un vendedor **se puede usar en su cotización** de inmediato, pero no aparece como activo para los demás hasta que se apruebe.
+
+La privacidad de cotizaciones también cubre sus copias en Operación: un vendedor
+solo lee fichas, ítems, costos a proveedores y comunicaciones de sus propias ventas.
+Operación y Admin gestionan todas las fichas operativas; las cotizaciones del editor
+siguen limitadas al propietario, salvo Admin. Los pasajeros quedan reservados a
+Operación y Admin. `/admin` obtiene los emails actuales de Auth con `admin_list_users`,
+una RPC exclusiva de Admin; no amplía la lectura de perfiles para los demás roles.
 
 La aprobación masiva de importación es exclusiva de **Admin** mediante `approve_valid_imports`.
 Primero simula sin escrituras, devuelve conteos y motivos, y requiere confirmación explícita
