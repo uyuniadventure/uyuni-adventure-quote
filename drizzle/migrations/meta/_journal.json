@@ -85,6 +85,13 @@
       "when": 1791805300594,
       "tag": "0011_quote_payments_deposit",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791805370487,
+      "tag": "0012_quote_add_block_sequence",
+      "breakpoints": true
     }
   ]
 }
