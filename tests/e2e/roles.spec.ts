@@ -141,7 +141,7 @@ for (const key of ["seller", "operations", "admin"]) {
     if (key === "admin") {
       expect(listed.error).toBeNull();
       for (const account of Object.values(runtime.users) as { email: string }[])
-        await expect(page.getByRole("row").filter({ hasText: account.email })).toHaveCount(1);
+        await expect(page.getByRole("cell", { name: account.email, exact: true })).toHaveCount(1);
       await expect(page.getByRole("columnheader", { name: "Email", exact: true })).toBeVisible();
     } else {
       expect(listed.error?.code).toBe("42501");
