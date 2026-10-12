@@ -26,6 +26,7 @@ import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, mon
 import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToItem } from "./quote-ops";
 import { QuotePanel, type Alert } from "./quote-panel";
 import { QuotePayments } from "./quote-payments";
+import { QuoteDelivery } from "./quote-delivery";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -50,7 +51,7 @@ export function useQuoteActions(quoteId: string) {
 
   /** Serializa escrituras + recálculo (save_quote_calculation exige updated_at vigente). */
   const act = useCallback(
-    (fn: () => Promise<unknown>, ok?: string) => {
+    (fn: () => Promise<unknown>, ok?: string, recalculate = true) => {
       setBusy((b) => b + 1);
       const p = chain.current.then(async () => {
         let success = true;
@@ -67,7 +68,7 @@ export function useQuoteActions(quoteId: string) {
           success = false;
           toast.error((e as Error).message);
         }
-        if (!calculated) await recalc();
+        if (!calculated && recalculate) await recalc();
         await qc.invalidateQueries({ queryKey: ["quote-full", quoteId] });
         await qc.invalidateQueries({ queryKey: ["quotes"] });
         return success;
@@ -116,7 +117,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
       <TopBar data={data} blocked={blocked} actions={actions} onReset={onReset} />
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
       <Tabs defaultValue="editor">
-        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
+        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
         <TabsContent value="editor">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <DaysEditor data={data} editable={editable} actions={displayedActions} />
@@ -134,6 +135,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
           </div>
         </TabsContent>
         <TabsContent value="pagos"><QuotePayments quote={data.quote} /></TabsContent>
+        <TabsContent value="envio"><QuoteDelivery quote={data.quote} actions={actions} /></TabsContent>
         <TabsContent value="historial"><History quoteId={data.quote.id} /></TabsContent>
       </Tabs>
     </div>

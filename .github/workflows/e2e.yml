@@ -1,0 +1,54 @@
+name: Cotización E2E
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - run: bunx tsc -p tsconfig.e2e.json
+      - run: bunx playwright install --with-deps chromium
+      - run: node tests/e2e/prepare-functions.mjs
+      - name: Supabase aislado (sin conexión a Cloud)
+        run: bunx supabase start --workdir tests/e2e
+      - run: bun run e2e:setup
+      - name: Email simulado, handler y RPC reales
+        run: |
+          bunx supabase functions serve send-quote-email --workdir tests/e2e --env-file tests/e2e/.local/functions.env > /tmp/e2e-edge.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail -X OPTIONS http://127.0.0.1:54321/functions/v1/send-quote-email; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/e2e-edge.log
+          exit 1
+      - name: Playwright — dos repeticiones, sin reintentos
+        run: bun run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+      - name: Logs Edge en caso de fallo
+        if: failure()
+        run: cat /tmp/e2e-edge.log || true
+      - name: Limpiar entorno efímero
+        if: always()
+        run: bunx supabase stop --workdir tests/e2e --no-backup

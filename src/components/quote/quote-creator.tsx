@@ -91,10 +91,10 @@ export function QuoteCreator({ onCreated }: { onCreated: (id: string) => void })
                 <SelectContent>{LANGS.map(([l, n]) => <SelectItem key={l} value={l}>{n}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="Fecha de inicio"><Input type="date" value={b.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Fecha de inicio"><Input aria-label="Fecha de inicio" type="date" value={b.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
             <div className="grid grid-cols-2 gap-2">
-              <Field label="Pax pagantes"><Input type="number" min={1} value={b.pax_paying} onChange={(e) => set("pax_paying", e.target.value)} /></Field>
-              <Field label="TC (liberados)"><Input type="number" min={0} value={b.tc_count} onChange={(e) => set("tc_count", e.target.value)} /></Field>
+              <Field label="Pax pagantes"><Input aria-label="Pax pagantes" type="number" min={1} value={b.pax_paying} onChange={(e) => set("pax_paying", e.target.value)} /></Field>
+              <Field label="TC (liberados)"><Input aria-label="TC (liberados)" type="number" min={0} value={b.tc_count} onChange={(e) => set("tc_count", e.target.value)} /></Field>
             </div>
             <Field label="Modalidad">
               <Select value={b.modality} onValueChange={(v) => set("modality", v as Enums<"itinerary_modality">)}>
