@@ -18,8 +18,11 @@ const BASE_ROOMS = ["SGL", "DBL", "TWN", "TPL"];
 
 interface PanelState {
   pax_paying: number; tc_count: number; rooming: Rooming; vehicles: Num; staff: { drivers: number; guides: number };
-  margin_pct: number; fx_snapshot: Num; pax_scenarios: PaxScenario[];
+  margin_pct: number; margin_mode: "markup" | "margin_on_price"; commission_mode: "none" | "gross"; commission_pct: number;
+  fx_snapshot: Num; pax_scenarios: PaxScenario[];
 }
+
+export interface Alert { level: "red" | "yellow"; text: string; target?: string }
 
 function fromQuote(q: Data["quote"]): PanelState {
   const r = (q.rooming ?? {}) as Partial<Rooming>;
@@ -28,7 +31,8 @@ function fromQuote(q: Data["quote"]): PanelState {
     pax_paying: q.pax_paying, tc_count: q.tc_count,
     rooming: { paying: { ...(r.paying ?? {}) }, tc: { ...(r.tc ?? {}) } },
     vehicles: { ...((q.vehicles ?? {}) as Num) }, staff: { drivers: st.drivers ?? 0, guides: st.guides ?? 0 },
-    margin_pct: Number(q.margin_pct), fx_snapshot: { USD: 1, ...((q.fx_snapshot ?? {}) as Num) },
+    margin_pct: Number(q.margin_pct), margin_mode: q.margin_mode as PanelState["margin_mode"],
+    commission_mode: q.commission_mode as PanelState["commission_mode"], commission_pct: Number(q.commission_pct ?? 0), fx_snapshot: { USD: 1, ...((q.fx_snapshot ?? {}) as Num) },
     pax_scenarios: ((q.pax_scenarios ?? []) as unknown as PaxScenario[]),
   };
 }
@@ -42,7 +46,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return <div className="space-y-2"><h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>{children}</div>;
 }
 
-export function QuotePanel({ data, editable, actions }: { data: Data; editable: boolean; actions: Actions }) {
+export function QuotePanel({ data, editable, actions, alerts }: { data: Data; editable: boolean; actions: Actions; alerts: Alert[] }) {
   const { quote, items } = data;
   const { act, result, calcError, busy } = actions;
   const [s, setS] = useState<PanelState>(() => fromQuote(quote));
@@ -64,7 +68,8 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
       if (snapshot.pax_paying < 1) throw new Error("Debe haber al menos 1 pax pagante.");
       const { error } = await db.from("quotes").update({
         pax_paying: snapshot.pax_paying, tc_count: snapshot.tc_count, rooming: json(snapshot.rooming), vehicles: json(snapshot.vehicles),
-        staff: json(snapshot.staff), margin_pct: snapshot.margin_pct, fx_snapshot: json(snapshot.fx_snapshot), pax_scenarios: json(snapshot.pax_scenarios),
+        staff: json(snapshot.staff), margin_pct: snapshot.margin_pct, margin_mode: snapshot.margin_mode,
+        commission_mode: snapshot.commission_mode, commission_pct: snapshot.commission_pct, fx_snapshot: json(snapshot.fx_snapshot), pax_scenarios: json(snapshot.pax_scenarios),
       }).eq("id", quote.id);
       if (error) throw error;
       setSavedAt(new Date());
@@ -80,7 +85,7 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
 
   const totals = result ?? (quote.total_price_usd != null ? {
     total_cost_usd: Number(quote.total_cost_usd), total_margin_usd: Number(quote.total_margin_usd), total_price_usd: Number(quote.total_price_usd),
-    price_per_pax_usd: Number(quote.price_per_pax_usd), single_supplement_pp: Number(quote.single_supplement_pp ?? 0), scenarios: [], warnings: [],
+    price_per_pax_usd: Number(quote.price_per_pax_usd), single_supplement_pp: Number(quote.single_supplement_pp ?? 0), total_commission_usd: null as number | null, total_adjustments_usd: null as number | null, effective_rooming: undefined, scenarios: [], warnings: [],
   } : null);
   const missingFx = currencies.filter((c) => !((s.fx_snapshot[c] ?? 0) > 0));
 
@@ -94,14 +99,14 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           <span className="opacity-80">Costo</span><span className="text-right">{totals ? money(totals.total_cost_usd) : "—"}</span>
           <span className="opacity-80">Margen</span><span className="text-right">{totals ? money(totals.total_margin_usd) : "—"}</span>
+          <span className="opacity-80">Comisión</span><span className="text-right">{totals ? money(totals.total_commission_usd) : "—"}</span>
+          {totals?.total_adjustments_usd ? <><span className="opacity-80">Ajustes</span><span className="text-right">{money(totals.total_adjustments_usd)}</span></> : null}
           <span className="opacity-80">Por pax</span><span className="text-right font-semibold">{totals ? money(totals.price_per_pax_usd) : "—"}</span>
           <span className="opacity-80">Supl. single</span><span className="text-right">{totals ? money(totals.single_supplement_pp) : "—"}</span>
         </div>
       </div>
       {calcError && <p className="rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">No se pudo calcular: {calcError}</p>}
-      {result && result.warnings.length > 0 && (
-        <ul className="space-y-0.5 rounded-md border border-brand-orange/40 p-2 text-xs text-brand-orange-deep">{result.warnings.slice(0, 6).map((w, i) => <li key={i}>{w}</li>)}</ul>
-      )}
+      <AlertList alerts={alerts} />
 
       {editable && (
         <Button className="w-full" onClick={() => save(true)} disabled={busy && !dirty}>
@@ -126,6 +131,11 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
               onChange={(kind, n) => update((p) => ({ ...p, rooming: { ...p.rooming, [kind]: { ...p.rooming[kind], [rt]: Math.round(n) } } }))} />
           ))}
         </div>
+        {totals?.effective_rooming && (
+          <p className="text-xs text-muted-foreground">Aplicado: {Object.entries(totals.effective_rooming.paying).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(" + ") || "—"}
+            {Object.values(totals.effective_rooming.tc).some((n) => n > 0) && ` · TC: ${Object.entries(totals.effective_rooming.tc).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(" + ")}`}
+            {Object.values(s.rooming.paying).every((n) => !n) && " (sugerido según pax; escribe cantidades para fijarlo)"}</p>
+        )}
       </Section>
 
       <Section title="Vehículos por tramo">
@@ -145,7 +155,18 @@ export function QuotePanel({ data, editable, actions }: { data: Data; editable: 
         </div>
       </Section>
 
-      <Section title="Margen y tipo de cambio">
+      <Section title="Margen, comisión y tipo de cambio">
+        <label className="flex items-center justify-between gap-2 text-sm"><span>Modo de margen</span>
+          <select className="h-8 rounded-md border bg-background px-2 text-sm" value={s.margin_mode} disabled={!editable} onChange={(e) => update((p) => ({ ...p, margin_mode: e.target.value as PanelState["margin_mode"] }))}>
+            <option value="markup">Markup sobre costo</option><option value="margin_on_price">Margen sobre precio</option>
+          </select></label>
+        <label className="flex items-center justify-between gap-2 text-sm"><span>Comisión agencia</span>
+          <span className="flex gap-1">
+            <select className="h-8 rounded-md border bg-background px-2 text-sm" value={s.commission_mode} disabled={!editable} onChange={(e) => update((p) => ({ ...p, commission_mode: e.target.value as PanelState["commission_mode"] }))}>
+              <option value="none">Sin comisión</option><option value="gross">Bruta %</option>
+            </select>
+            <NumIn value={s.commission_pct} step="0.5" className="w-20" disabled={!editable || s.commission_mode === "none"} onChange={(n) => update((p) => ({ ...p, commission_pct: n }))} />
+          </span></label>
         <label className="flex items-center justify-between gap-2 text-sm"><span>Margen %</span><NumIn value={s.margin_pct} step="0.5" className="w-24" disabled={!editable} onChange={(n) => update((p) => ({ ...p, margin_pct: n }))} /></label>
         <div className="grid grid-cols-[1fr_110px] items-center gap-2 text-sm">
           {currencies.map((c) => (
@@ -212,5 +233,22 @@ function SegmentRow({ label, value, disabled, onChange, step, warn }: { label: s
       <span className={`text-xs ${warn ? "text-destructive" : ""}`}>{label}{warn ? " · falta" : ""}</span>
       <NumIn value={value ?? 0} step={step} disabled={disabled} onChange={onChange} />
     </>
+  );
+}
+
+function AlertList({ alerts }: { alerts: Alert[] }) {
+  if (!alerts.length) return <p className="flex items-center gap-2 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary" />Sin avisos.</p>;
+  const reds = alerts.filter((a) => a.level === "red").length;
+  const go = (t?: string) => { if (!t) return; const el = document.getElementById(t); el?.scrollIntoView({ behavior: "smooth", block: "center" }); el?.classList.add("ring-2", "ring-brand-orange"); setTimeout(() => el?.classList.remove("ring-2", "ring-brand-orange"), 1500); };
+  return (
+    <div className="space-y-1">
+      <div className="text-xs font-semibold">{reds ? `${reds} bloqueante(s) · no se puede enviar` : `${alerts.length} aviso(s) informativo(s)`}</div>
+      <ul className="max-h-48 space-y-1 overflow-y-auto">
+        {alerts.map((a, i) => (
+          <li key={i}><button type="button" onClick={() => go(a.target)} className={`flex w-full items-start gap-2 rounded px-1 py-0.5 text-left text-xs hover:bg-muted ${a.level === "red" ? "text-destructive" : "text-brand-orange-deep"}`}>
+            <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${a.level === "red" ? "bg-destructive" : "bg-brand-orange"}`} />{a.text}</button></li>
+        ))}
+      </ul>
+    </div>
   );
 }
