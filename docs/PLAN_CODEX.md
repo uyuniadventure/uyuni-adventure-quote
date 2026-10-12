@@ -173,6 +173,11 @@ del bloque permanece inmutable. `updateDayContent` deja revisado el día.
 incluidos los que no tienen `reviewed`. Los controles visuales se entregan en el
 prompt para Lovable y deben usar `useQuoteActions`.
 
+Verificación: 16/16 pruebas nuevas de revisión; Vitest 269/271, sin omitidos.
+Persisten únicamente los dos fixtures incompletos de Bolivia y WE ROAD (T03–T04).
+Instalación congelada y ambos TypeScript aprobados. No se modificaron precios,
+fixtures ni estados del resto del plan para ocultar esos fallos.
+
 ## T01c · Crear cotización desde /plantillas
 
 Hoy solo se puede elegir una plantilla dentro del asistente de Nueva cotización. Andrea quiere elegirla en /plantillas y crear la cotización desde ahí.
