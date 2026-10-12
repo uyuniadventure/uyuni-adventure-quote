@@ -8,9 +8,12 @@ export const dayContentSchema = z
   .object({
     title: localized.optional(),
     description: localized.optional(),
+    includes: localized.optional(),
+    excludes: localized.optional(),
     meals: z.array(z.string()).optional(),
     accommodation_text: localized.optional(),
     transport_text: localized.optional(),
+    client_note: localized.optional(),
     schedule: z.array(z.string()).optional(),
     start_point: z.string().nullable().optional(),
     end_point: z.string().nullable().optional(),
@@ -25,7 +28,15 @@ export function resolveDay(day: FrozenDay): DayContent {
   const base = dayContentSchema.parse(snapshot.content ?? {});
   const overrides = dayContentSchema.parse(day.overrides);
   const result = { ...base, ...overrides };
-  for (const key of ["title", "description", "accommodation_text", "transport_text"] as const) {
+  for (const key of [
+    "title",
+    "description",
+    "includes",
+    "excludes",
+    "accommodation_text",
+    "transport_text",
+    "client_note",
+  ] as const) {
     if (overrides[key]) result[key] = { ...base[key], ...overrides[key] };
   }
   return result;
@@ -99,6 +110,12 @@ export function snapshotBlock(block: Tables<"day_blocks">, source: TemplateSourc
             }),
           ].join("\n\n"),
         ]),
+      ),
+      includes: Object.fromEntries(
+        translations.filter((t) => t.includes !== null).map((t) => [t.lang, t.includes!]),
+      ),
+      excludes: Object.fromEntries(
+        translations.filter((t) => t.excludes !== null).map((t) => [t.lang, t.excludes!]),
       ),
       start_point: block.start_point ?? block.route_from,
       end_point: block.end_point ?? block.route_to,

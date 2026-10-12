@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { mkdir, writeFile } from "node:fs/promises";
 import { QuoteDocument, type QuotePdfData } from "./document";
+import { buildQuoteDocumentModel, type DocumentContent } from "../quotes";
 import { Children, isValidElement, type ReactNode } from "react";
 
 function visibleText(node: ReactNode): string {
@@ -20,7 +21,7 @@ describe("PDF rendering", () => {
   it.each(["B2B", "B2C"] as const)(
     "renders %s without passenger or internal cost data",
     async (client_type) => {
-      const data = {
+      const source = {
         quote: {
           id: "preview",
           code: "SPAUYU-3D2N-MP-ES-26-0001",
@@ -47,6 +48,21 @@ describe("PDF rendering", () => {
           excludes: "Gastos personales",
           route_from: "SPA",
           route_to: "UYU",
+          overrides: {},
+          block_snapshot: {
+            content: {
+              title: {
+                es: ["Lagunas Altiplánicas", "Salar de Uyuni", "Regreso a Uyuni"][n - 1],
+              },
+              description: {
+                es: "Un recorrido privado por los paisajes del Altiplano boliviano, con tiempo para explorar las lagunas y disfrutar de la inmensidad del salar. Nuestro conductor acompaña al grupo durante toda la jornada.",
+              },
+              includes: { es: "Almuerzo y traslados" },
+              excludes: { es: "Gastos personales" },
+              start_point: "SPA",
+              end_point: "UYU",
+            },
+          },
         })),
         items: [1, 2, 3].map((n) => ({
           id: "item" + n,
@@ -97,7 +113,17 @@ describe("PDF rendering", () => {
           scenarios: [],
         },
         optional_prices: {},
-      } as unknown as QuotePdfData;
+      };
+      const model = buildQuoteDocumentModel(
+        {
+          quote: source.quote,
+          days: source.days,
+          items: source.items,
+          content: source.content as DocumentContent,
+        } as unknown as Parameters<typeof buildQuoteDocumentModel>[0],
+        "es",
+      );
+      const data = { ...source, model } as unknown as QuotePdfData;
       const text = visibleText(QuoteDocument({ data }));
       expect(text).not.toMatch(/INTERNO_COMBUSTIBLE|6[.,]4\s*%|876[.,]54|932[.,]6|56[.,]09/);
       expect(text).toContain(
@@ -114,4 +140,95 @@ describe("PDF rendering", () => {
       await writeFile(`tmp/pdfs/preview-${client_type}.pdf`, buffer);
     },
   );
+
+  it("renders title and included text from the effective day snapshot", () => {
+    const quote = {
+      id: "quote",
+      code: "PDF-OVERRIDE",
+      language: "es",
+      client_type: "B2C",
+      start_date: "2026-12-01",
+      pax_paying: 2,
+      tc_count: 0,
+      rooming: {},
+      vehicles: {},
+      deposit_pct: 30,
+      balance_due_days: 5,
+      card_surcharge_pct: 3,
+      payment_schedule: null,
+      tour_sku: "DEMO",
+    };
+    const days = [
+      {
+        id: "day-1",
+        day_number: 1,
+        date: "2026-12-01",
+        title: "Old column title",
+        description: "Old column description",
+        includes: "Old column includes",
+        excludes: null,
+        route_from: "Old route",
+        route_to: "Old end",
+        block_snapshot: {
+          content: {
+            title: { es: "Original block title" },
+            description: { es: "Original block description" },
+            includes: { es: "Original includes" },
+            excludes: { es: "Original excludes" },
+            start_point: "SPA",
+            end_point: "UYU",
+          },
+        },
+        overrides: {
+          title: { es: "Edited title" },
+          includes: { es: "Edited included text" },
+        },
+      },
+    ];
+    const content = {
+      client_name: "Client",
+      terms_url: "https://example.com/terms",
+      item_labels: { "item-1": "Etiqueta de cliente" },
+    };
+    const items = [
+      {
+        id: "item-1",
+        quote_day_id: "day-1",
+        description: "Etiqueta original del servicio",
+        sku: "SERVICE-1",
+        type: "transporte",
+        included: true,
+      },
+    ];
+    const model = buildQuoteDocumentModel(
+      { quote, days, items, content } as unknown as Parameters<
+        typeof buildQuoteDocumentModel
+      >[0],
+      "es",
+    );
+    const text = visibleText(
+      QuoteDocument({
+        data: {
+          quote,
+          days: days as unknown as QuotePdfData["days"],
+          items: items as unknown as QuotePdfData["items"],
+          model,
+          calculation: {
+            total_price_usd: 0,
+            price_per_pax_usd: 0,
+            single_supplement_pp: 0,
+            items: [],
+            scenarios: [],
+          },
+          optional_prices: {},
+        } as unknown as QuotePdfData,
+      }),
+    );
+    expect(text).toContain("Edited title");
+    expect(text).toContain("Edited included text");
+    expect(text).toContain("Etiqueta de cliente");
+    expect(text).not.toContain("Etiqueta original del servicio");
+    expect(text).not.toContain("Old column title");
+    expect(text).not.toContain("Old column includes");
+  });
 });

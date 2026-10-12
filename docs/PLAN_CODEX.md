@@ -78,7 +78,7 @@ Reglas para ese prompt:
 | T01 | Paso 2 de Nueva cotización no sugiere plantillas | [x] | T00 | sí (migraciones) |
 | T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [x] | T00 | sí |
 | T01c | Crear cotización desde /plantillas | [~] | T01 | sí |
-| T01d | Editor de textos del PDF | [ ] | T01b | sí |
+| T01d | Editor de textos del PDF | [~] | T01b | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |

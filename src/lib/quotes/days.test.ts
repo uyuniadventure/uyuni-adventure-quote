@@ -38,6 +38,7 @@ import {
   groupDays,
   moveDay,
   resolveDay,
+  resetDayField,
   saveDayAsNewBlock,
   setDayLinkType,
   ungroup,
@@ -263,6 +264,16 @@ describe("días congelados, grupos y operaciones atómicas", () => {
     expect((await loadQuote(data.quote.id)).days[0]!.overrides).toEqual({
       internal_notes: "Solo para esta cotización",
     });
+    const textEdit = await updateDayContent(day.id, { includes: { es: "Incluye personalizado" } });
+    expect(textEdit.calculation.total_cost_usd).toBe(changed.calculation.total_cost_usd);
+    expect(resolveDay((await loadQuote(data.quote.id)).days[0]!).includes?.["es"]).toBe(
+      "Incluye personalizado",
+    );
+    await resetDayField(day.id, "includes");
+    const reset = (await loadQuote(data.quote.id)).days[0]!;
+    expect(resolveDay(reset).includes).toEqual(before.includes);
+    expect(reset.overrides).not.toHaveProperty("includes");
+    expect(reset.block_snapshot).toEqual(day.block_snapshot);
     const frozen = resolveDay((await loadQuote(data.quote.id)).days[0]!);
     await pg.query(
       "update day_block_translations set title='Biblioteca editada' where block_id=$1",

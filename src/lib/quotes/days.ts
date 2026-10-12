@@ -70,6 +70,20 @@ export async function updateDayContent(dayId: string, fields: DayContent) {
   const day = unwrap(await db.from("quote_days").select("*").eq("id", dayId).single());
   return mutate(day.quote_id, "content", { day_id: dayId, fields });
 }
+/** Remove one snapshot difference and restore its frozen block value. */
+export async function resetDayField(dayId: string, field: keyof DayContent) {
+  const day = unwrap(await db.from("quote_days").select("quote_id").eq("id", dayId).single());
+  const quote = unwrap(
+    await db.from("quotes").select("updated_at").eq("id", day.quote_id).single(),
+  );
+  return unwrap(
+    await db.rpc("reset_quote_day_field", {
+      p_day_id: dayId,
+      p_field: field,
+      p_updated_at: quote.updated_at,
+    }),
+  );
+}
 export async function setDayLinkType(dayId: string, linkType: "chained" | "independent") {
   const day = unwrap(await db.from("quote_days").select("*").eq("id", dayId).single());
   return mutate(day.quote_id, "link", { day_id: dayId, link_type: linkType });
