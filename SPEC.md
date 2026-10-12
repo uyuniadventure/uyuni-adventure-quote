@@ -169,6 +169,11 @@ el estado propio de esos bloques/módulos ni ganar permisos de edición.
   `group_position`. Al copiar una plantilla, una compra multi-día agrupa todos
   sus días; se cobra una vez. Mover/borrar un miembro afecta al grupo completo.
   Desagrupar conserva la compra; se rechazan operaciones que la partan.
+  Desde la biblioteca se pueden seleccionar varios bloques en orden y añadirlos
+  juntos mediante `addBlockDays` / `edit_quote_days(add_blocks)`. La inserción y
+  el recálculo son atómicos; un servicio multi-día exige su tramo completo.
+  Cada inserción recibe una identidad de compra nueva, para cobrar una sola vez
+  dentro del tramo sin confundirlo con otro tramo igual de la misma cotización.
   Días encadenados adyacentes con puntos conocidos incompatibles generan avisos
   (normalización de caja, espacios y tildes); independent omite esa comparación.
   Edición, agrupación, movimientos y borrado guardan el recálculo atómicamente.
