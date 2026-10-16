@@ -152,6 +152,7 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
                 ),
               ),
               id: i.id,
+              sku: i.sku ?? undefined,
               label: i.sku ?? i.description,
               pricing_unit: i.pricing_unit,
               currency: i.currency,

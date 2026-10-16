@@ -7,7 +7,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { loadQuote, recalculateQuote } from "@/lib/quotes";
 import { beginQuoteEdit, transitionQuote } from "@/lib/states";
@@ -154,6 +154,28 @@ it.each([
     expect(recalculateQuote).not.toHaveBeenCalled();
   },
 );
+
+it("shows a missing-rate line in red and offers Precio manual with the full diagnostic", async () => {
+  const data = savedQuote("borrador");
+  const warning = "Día 1 · BUFFET: sin tarifa para 04-11-2026 y 2 pax. Tarifas cargadas: ninguna.";
+  data.quote.calculation = {
+    ...(data.quote.calculation as object),
+    status: "error",
+    total_cost_usd: null,
+    total_price_usd: null,
+    price_per_pax_usd: null,
+    items: [{ id: "item", status: "error", quantity: 2, total_cost_usd: null, warning }],
+  };
+  renderQuote(data);
+  const row = (await screen.findByText("Buffet guardado")).closest("tr")!;
+  expect(row).toHaveClass("text-destructive");
+  expect(within(row).getByText(warning)).toBeInTheDocument();
+  fireEvent.click(within(row).getByRole("button", { name: "Precio manual" }));
+  expect(
+    await screen.findByRole("dialog", { name: "Precio solo para esta cotización" }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Aplicar precio" })).toBeDisabled();
+});
 
 it("keeps Editor/Historial and edits a sent quote through a new version", async () => {
   vi.mocked(beginQuoteEdit).mockResolvedValue("new-draft");

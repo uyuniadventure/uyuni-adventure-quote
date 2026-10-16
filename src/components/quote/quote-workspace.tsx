@@ -403,7 +403,7 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
   const s = snap(item);
   const upd = (changes: Parameters<typeof updateQuoteItem>[1]) => act(() => updateQuoteItem(item.id, changes));
   return (
-    <TableRow id={`item-${item.id}`} className={item.included ? "" : "opacity-60"}>
+    <TableRow id={`item-${item.id}`} className={r?.status === "error" ? "bg-destructive/10 text-destructive" : item.included ? "" : "opacity-60"}>
       <TableCell className="max-w-[320px]">
         <div className="truncate font-medium">{item.description}</div>
         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
@@ -434,7 +434,7 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
       <TableCell className="whitespace-nowrap text-right">
         {editable && (
           <>
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setOverride(true)} aria-label="Sobrescribir precio"><PencilLine className="h-4 w-4" /></Button>
+            <Button size={r?.status === "error" ? "sm" : "icon"} variant="ghost" className="h-8" onClick={() => setOverride(true)} aria-label="Precio manual"><PencilLine className="h-4 w-4" />{r?.status === "error" && <span className="ml-1">Precio manual</span>}</Button>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => act(() => deleteItem(item.id), "Servicio quitado.")} aria-label="Quitar"><Trash2 className="h-4 w-4" /></Button>
           </>
         )}

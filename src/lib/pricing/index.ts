@@ -31,6 +31,8 @@ export interface Rooming {
 }
 export interface PricingItem {
   id: string;
+  sku?: string;
+  day_number?: number;
   pricing_unit: Enums<"pricing_unit">;
   currency: string;
   qty: number;
@@ -98,6 +100,7 @@ export interface ItemResult {
   total_margin_usd: number | null;
   covered: boolean;
   warning?: string;
+  rate_error?: Pick<RateError, "code" | "sku" | "day" | "date" | "pax" | "rates">;
   pricing_config?: PartialPricingConfig;
   room_breakdown?: {
     room_type: string;
@@ -194,6 +197,39 @@ function fx(input: QuoteInput, currency: string): number {
     throw new Error(`Missing/invalid FX: ${currency}`);
   return rate;
 }
+const displayDate = (date: string) => date.split("-").reverse().join("-");
+
+/** A catalog gap is recoverable in a draft, with enough context to fix the line. */
+export class RateError extends Error {
+  override readonly name = "RateError";
+  readonly sku: string;
+  readonly day: number;
+  readonly rates: Rate[];
+
+  constructor(
+    readonly code: "missing" | "ambiguous",
+    item: PricingItem,
+    readonly date: string,
+    readonly pax: number,
+  ) {
+    const sku = item.sku ?? item.label ?? "Servicio sin SKU";
+    const day = item.day_number ?? 1;
+    const loaded =
+      item.rates
+        .map(
+          (r) =>
+            `${r.season} · ${r.valid_from ? displayDate(r.valid_from) : "sin inicio"} a ${r.valid_to ? displayDate(r.valid_to) : "sin fin"} · ${r.pax_min ?? 0}–${r.pax_max ?? "∞"} pax${r.room_type ? ` · ${r.room_type}` : ""} · ${r.price_net ?? r.price_rack ?? "sin costo"} ${item.currency}`,
+        )
+        .join("; ") || "ninguna";
+    super(
+      `Día ${day} · ${sku}: ${code === "missing" ? "sin tarifa" : "tarifas ambiguas"} para ${displayDate(date)} y ${pax} pax. Tarifas cargadas: ${loaded}.`,
+    );
+    this.sku = sku;
+    this.day = day;
+    this.rates = item.rates.map((r) => ({ ...r }));
+  }
+}
+
 export function selectRate(
   item: PricingItem,
   date: string,
@@ -221,9 +257,7 @@ export function selectRate(
   const seasonal = candidates.filter((r) => r.season !== "ALL");
   const chosen = seasonal.length ? seasonal : candidates;
   if (chosen.length !== 1)
-    throw new Error(
-      `${chosen.length ? "Ambiguous" : "Missing"} rate: ${item.id} (${date}, ${pax} pax)`,
-    );
+    throw new RateError(chosen.length ? "ambiguous" : "missing", item, date, pax);
   return chosen[0]!;
 }
 function quantity(input: QuoteInput, item: PricingItem): number {
@@ -367,187 +401,227 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       }
       const warnings: string[] = [];
       const label = item.label ?? item.id;
-      const config = parsePricingConfig(item.pricing_unit, item.pricing_config);
-      nonnegative(item.qty, "qty");
-      Object.assign(item, config);
-      const ratePax =
-        item.pricing_unit === "per_vehicle"
-          ? input.pax_paying +
-            input.tc_count +
-            count(input.staff?.drivers ?? 0, "drivers") +
-            count(input.staff?.guides ?? 0, "guides")
-          : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
-      let autoVehicleRate: Rate | undefined;
-      if (
-        item.pricing_unit === "per_vehicle" &&
-        (!item.vehicle_segment || input.vehicles[item.vehicle_segment] === undefined)
-      ) {
-        autoVehicleRate = selectRate(item, date, ratePax, input.seasons);
-        const capacity = autoVehicleRate.pax_max ?? item.vehicle_max_pax;
-        if (capacity != null && capacity < ratePax)
-          throw new Error(`Vehicle rate band/capacity required: ${label} (${ratePax} personas)`);
-        item.vehicle_segment ??= `auto:${item.coverage_key ?? item.id}`;
-        config.vehicle_segment = item.vehicle_segment;
-        config.rate_band = { pax_min: autoVehicleRate.pax_min, pax_max: autoVehicleRate.pax_max };
-        warnings.push(
-          `${label}: vehículo por defecto, 1 unidad; tramo ${autoVehicleRate.pax_min ?? 0}–${capacity ?? "sin límite informado"} para ${ratePax} personas (pagantes + TC + staff).${capacity == null ? " Revisar la capacidad del vehículo." : ""}`,
-        );
-      }
-      let roomParts: { type: string; quantity: number }[] | undefined;
-      if (item.pricing_unit === "per_room") {
-        if (item.nights == null) {
-          item.nights = 1;
-          warnings.push(`${label}: 1 noche por defecto.`);
-        }
-        if (count(item.nights, "nights") < 1) throw new Error(`Invalid nights: ${label}`);
-        const type = occupancyType(item.room_type);
-        // Legacy non-occupancy labels (e.g. STANDARD) may be explicitly present
-        // in older rooming. Otherwise this service prices the selected rooms.
-        const legacySelected =
-          item.room_type &&
-          ((configuredInput.rooming.paying[item.room_type] ?? 0) > 0 ||
-            (configuredInput.rooming.tc[item.room_type] ?? 0) > 0);
-        if (type || legacySelected || item.room_type === "QUAD") {
-          if (type) item.room_type = type;
-          roomParts = [{ type: item.room_type!, quantity: quantity(configuredInput, item) }];
-        } else {
+      item.day_number = day.day_number;
+      let errorQuantity = item.qty;
+      try {
+        const config = parsePricingConfig(item.pricing_unit, item.pricing_config);
+        nonnegative(item.qty, "qty");
+        Object.assign(item, config);
+        const ratePax =
+          item.pricing_unit === "per_vehicle"
+            ? input.pax_paying +
+              input.tc_count +
+              count(input.staff?.drivers ?? 0, "drivers") +
+              count(input.staff?.guides ?? 0, "guides")
+            : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
+        let autoVehicleRate: Rate | undefined;
+        let autoVehicle = false;
+        if (
+          item.pricing_unit === "per_vehicle" &&
+          (!item.vehicle_segment || input.vehicles[item.vehicle_segment] === undefined)
+        ) {
+          autoVehicle = true;
+          if (!item.price_overridden)
+            autoVehicleRate = selectRate(item, date, ratePax, input.seasons);
+          const capacity = autoVehicleRate?.pax_max ?? item.vehicle_max_pax;
+          if (capacity != null && capacity < ratePax)
+            throw new Error(`Vehicle rate band/capacity required: ${label} (${ratePax} personas)`);
+          item.vehicle_segment ??= `auto:${item.coverage_key ?? item.id}`;
+          config.vehicle_segment = item.vehicle_segment;
+          if (autoVehicleRate)
+            config.rate_band = {
+              pax_min: autoVehicleRate.pax_min,
+              pax_max: autoVehicleRate.pax_max,
+            };
           warnings.push(
-            `${label}: sin tipo de ocupación; se usa la distribución de la cotización o DBL/SGL por defecto con las tarifas disponibles.`,
+            `${label}: vehículo por defecto, 1 unidad; tramo ${autoVehicleRate?.pax_min ?? 0}–${capacity ?? "sin límite informado"} para ${ratePax} personas (pagantes + TC + staff).${capacity == null ? " Revisar la capacidad del vehículo." : ""}`,
           );
-          const types = new Set([
-            ...Object.keys(configuredInput.rooming.paying),
-            ...Object.keys(configuredInput.rooming.tc),
-          ]);
-          roomParts = [...types].map((type) => ({
-            type,
-            quantity: quantity(configuredInput, { ...item, room_type: type }),
-          }));
         }
-        config.nights = item.nights;
-        const resolvedType =
-          occupancyType(item.room_type) ?? roomParts.find((r) => r.quantity > 0)?.type;
-        if (resolvedType && ["SGL", "DBL", "TPL", "MAT"].includes(resolvedType))
-          config.room_type = resolvedType as NonNullable<PartialPricingConfig["room_type"]>;
-      }
-      const qty = roomParts
-        ? roomParts.reduce((n, r) => n + r.quantity, 0)
-        : autoVehicleRate
-          ? 1
-          : quantity(configuredInput, item);
-      // An unused room variant has no cost and requires no matching rate.
-      if (qty === 0) {
+        let roomParts: { type: string; quantity: number }[] | undefined;
+        if (item.pricing_unit === "per_room") {
+          if (item.nights == null) {
+            item.nights = 1;
+            warnings.push(`${label}: 1 noche por defecto.`);
+          }
+          if (count(item.nights, "nights") < 1) throw new Error(`Invalid nights: ${label}`);
+          const type = occupancyType(item.room_type);
+          // Legacy non-occupancy labels (e.g. STANDARD) may be explicitly present
+          // in older rooming. Otherwise this service prices the selected rooms.
+          const legacySelected =
+            item.room_type &&
+            ((configuredInput.rooming.paying[item.room_type] ?? 0) > 0 ||
+              (configuredInput.rooming.tc[item.room_type] ?? 0) > 0);
+          if (type || legacySelected || item.room_type === "QUAD") {
+            if (type) item.room_type = type;
+            roomParts = [{ type: item.room_type!, quantity: quantity(configuredInput, item) }];
+          } else {
+            warnings.push(
+              `${label}: sin tipo de ocupación; se usa la distribución de la cotización o DBL/SGL por defecto con las tarifas disponibles.`,
+            );
+            const types = new Set([
+              ...Object.keys(configuredInput.rooming.paying),
+              ...Object.keys(configuredInput.rooming.tc),
+            ]);
+            roomParts = [...types].map((type) => ({
+              type,
+              quantity: quantity(configuredInput, { ...item, room_type: type }),
+            }));
+          }
+          config.nights = item.nights;
+          const resolvedType =
+            occupancyType(item.room_type) ?? roomParts.find((r) => r.quantity > 0)?.type;
+          if (resolvedType && ["SGL", "DBL", "TPL", "MAT"].includes(resolvedType))
+            config.room_type = resolvedType as NonNullable<PartialPricingConfig["room_type"]>;
+        }
+        const qty = roomParts
+          ? roomParts.reduce((n, r) => n + r.quantity, 0)
+          : autoVehicle
+            ? 1
+            : quantity(configuredInput, item);
+        errorQuantity = qty;
+        // An unused room variant has no cost and requires no matching rate.
+        if (qty === 0) {
+          items.push({
+            status: "ok",
+            id: item.id,
+            day_number: day.day_number,
+            date,
+            quantity: 0,
+            unit_cost_original: 0,
+            unit_cost_usd: 0,
+            base_cost_usd: 0,
+            costo_base: 0,
+            adjustment_pct: item.adjustment_pct,
+            adjustment_amount_usd: 0,
+            adjustment_usd: 0,
+            costo_ajustado: 0,
+            total_cost_usd: 0,
+            total_margin_usd: 0,
+            covered: false,
+            ...(warnings.length ? { warning: warnings.join(" ") } : {}),
+          });
+          continue;
+        }
+        let native: number;
+        const roomBreakdown: NonNullable<ItemResult["room_breakdown"]> = [];
+        if (item.price_overridden) {
+          if (!item.override_note?.trim() || item.unit_cost_original === undefined)
+            throw new Error("Override requires price and note");
+          native = nonnegative(item.unit_cost_original, "override");
+        } else {
+          const parts = roomParts?.filter((r) => r.quantity > 0) ?? [
+            { type: undefined, quantity: qty },
+          ];
+          let totalNative = 0;
+          let missingPrice = false;
+          for (const part of parts) {
+            const rate =
+              autoVehicleRate ??
+              selectRate(
+                part.type ? { ...item, room_type: part.type } : item,
+                date,
+                ratePax,
+                input.seasons,
+              );
+            const price = rate.price_net ?? rate.price_rack;
+            if (price == null) {
+              missingPrice = true;
+              break;
+            }
+            nonnegative(price, "price");
+            totalNative += price * part.quantity;
+            if (part.type)
+              roomBreakdown.push({
+                room_type: part.type,
+                quantity: part.quantity,
+                unit_cost_original: price,
+                total_cost_usd: adjustedCost(
+                  (price * part.quantity) / fx(input, item.currency),
+                  item.adjustment_pct,
+                ),
+              });
+          }
+          if (missingPrice) {
+            items.push({
+              status: "error",
+              id: item.id,
+              day_number: day.day_number,
+              date,
+              quantity: qty,
+              unit_cost_usd: null,
+              base_cost_usd: null,
+              costo_base: null,
+              adjustment_pct: item.adjustment_pct,
+              adjustment_amount_usd: null,
+              adjustment_usd: null,
+              costo_ajustado: null,
+              total_cost_usd: null,
+              total_margin_usd: null,
+              covered: false,
+              warning: [`${item.id}: sin costo neto ni rack`, ...warnings].join(" "),
+            });
+            continue;
+          }
+          native = totalNative / qty;
+        }
+        const usd = native / fx(input, item.currency),
+          baseCost = qty * usd,
+          cost = adjustedCost(baseCost, item.adjustment_pct);
         items.push({
           status: "ok",
           id: item.id,
           day_number: day.day_number,
           date,
-          quantity: 0,
-          unit_cost_original: 0,
-          unit_cost_usd: 0,
-          base_cost_usd: 0,
-          costo_base: 0,
+          quantity: qty,
+          unit_cost_original: native,
+          unit_cost_usd: usd,
+          base_cost_usd: baseCost,
+          costo_base: baseCost,
           adjustment_pct: item.adjustment_pct,
-          adjustment_amount_usd: 0,
-          adjustment_usd: 0,
-          costo_ajustado: 0,
-          total_cost_usd: 0,
-          total_margin_usd: 0,
+          adjustment_amount_usd: cost - baseCost,
+          adjustment_usd: cost - baseCost,
+          costo_ajustado: cost,
+          total_cost_usd: cost,
+          // Andrea's revised rule: margin applies to adjusted cost (2026-10-11).
+          total_margin_usd: item.margin_applicable
+            ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
+            : 0,
           covered: false,
+          ...(item.pricing_unit === "per_room" || item.pricing_unit === "per_vehicle"
+            ? { pricing_config: config }
+            : {}),
+          ...(roomBreakdown.length ? { room_breakdown: roomBreakdown } : {}),
           ...(warnings.length ? { warning: warnings.join(" ") } : {}),
         });
-        continue;
+      } catch (error) {
+        if (!(error instanceof RateError)) throw error;
+        items.push({
+          status: "error",
+          id: item.id,
+          day_number: day.day_number,
+          date,
+          quantity: errorQuantity,
+          unit_cost_usd: null,
+          base_cost_usd: null,
+          costo_base: null,
+          adjustment_pct: item.adjustment_pct,
+          adjustment_amount_usd: null,
+          adjustment_usd: null,
+          costo_ajustado: null,
+          total_cost_usd: null,
+          total_margin_usd: null,
+          covered: false,
+          warning: [error.message, ...warnings].join(" "),
+          rate_error: {
+            code: error.code,
+            sku: error.sku,
+            day: error.day,
+            date: error.date,
+            pax: error.pax,
+            rates: error.rates,
+          },
+        });
       }
-      let native: number;
-      const roomBreakdown: NonNullable<ItemResult["room_breakdown"]> = [];
-      if (item.price_overridden) {
-        if (!item.override_note?.trim() || item.unit_cost_original === undefined)
-          throw new Error("Override requires price and note");
-        native = nonnegative(item.unit_cost_original, "override");
-      } else {
-        const parts = roomParts?.filter((r) => r.quantity > 0) ?? [
-          { type: undefined, quantity: qty },
-        ];
-        let totalNative = 0;
-        let missingPrice = false;
-        for (const part of parts) {
-          const rate =
-            autoVehicleRate ??
-            selectRate(
-              part.type ? { ...item, room_type: part.type } : item,
-              date,
-              ratePax,
-              input.seasons,
-            );
-          const price = rate.price_net ?? rate.price_rack;
-          if (price == null) {
-            missingPrice = true;
-            break;
-          }
-          nonnegative(price, "price");
-          totalNative += price * part.quantity;
-          if (part.type)
-            roomBreakdown.push({
-              room_type: part.type,
-              quantity: part.quantity,
-              unit_cost_original: price,
-              total_cost_usd: adjustedCost(
-                (price * part.quantity) / fx(input, item.currency),
-                item.adjustment_pct,
-              ),
-            });
-        }
-        if (missingPrice) {
-          items.push({
-            status: "error",
-            id: item.id,
-            day_number: day.day_number,
-            date,
-            quantity: qty,
-            unit_cost_usd: null,
-            base_cost_usd: null,
-            costo_base: null,
-            adjustment_pct: item.adjustment_pct,
-            adjustment_amount_usd: null,
-            adjustment_usd: null,
-            costo_ajustado: null,
-            total_cost_usd: null,
-            total_margin_usd: null,
-            covered: false,
-            warning: [`${item.id}: sin costo neto ni rack`, ...warnings].join(" "),
-          });
-          continue;
-        }
-        native = totalNative / qty;
-      }
-      const usd = native / fx(input, item.currency),
-        baseCost = qty * usd,
-        cost = adjustedCost(baseCost, item.adjustment_pct);
-      items.push({
-        status: "ok",
-        id: item.id,
-        day_number: day.day_number,
-        date,
-        quantity: qty,
-        unit_cost_original: native,
-        unit_cost_usd: usd,
-        base_cost_usd: baseCost,
-        costo_base: baseCost,
-        adjustment_pct: item.adjustment_pct,
-        adjustment_amount_usd: cost - baseCost,
-        adjustment_usd: cost - baseCost,
-        costo_ajustado: cost,
-        total_cost_usd: cost,
-        // Andrea's revised rule: margin applies to adjusted cost (2026-10-11).
-        total_margin_usd: item.margin_applicable
-          ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
-          : 0,
-        covered: false,
-        ...(item.pricing_unit === "per_room" || item.pricing_unit === "per_vehicle"
-          ? { pricing_config: config }
-          : {}),
-        ...(roomBreakdown.length ? { room_breakdown: roomBreakdown } : {}),
-        ...(warnings.length ? { warning: warnings.join(" ") } : {}),
-      });
     }
   }
   // Known amounts are used only when every billable item and scenario is valid.

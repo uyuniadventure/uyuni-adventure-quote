@@ -7,6 +7,7 @@ import {
   type DayContent,
 } from "./day-content";
 import type { QuoteResult } from "../pricing";
+import { prepareDayText } from "./day-text";
 export {
   resolveDay,
   dayContentSchema,
@@ -116,7 +117,7 @@ export async function saveDayAsNewBlock(dayId: string, nombre: string) {
 /** Append one library day with its translations, defaults and frozen tariffs. */
 export async function addBlockDay(quoteId: string, blockId: string) {
   const { quote, days } = await loadQuote(quoteId);
-  const bundle = await prepareBlockDay(quote, blockId, days.length + 1);
+  const bundle = (await prepareBlockDays(quote, [blockId], days.length + 1))[0]!;
   if (bundle.items.some((i) => (i.day_span ?? 1) > 1))
     throw new Error("Selecciona todos los bloques del tramo multi-día y añádelos juntos");
   return mutate(quoteId, "add_block", bundle);
@@ -126,9 +127,7 @@ export async function addBlockDay(quoteId: string, blockId: string) {
 export async function addBlockDays(quoteId: string, blockIds: string[]) {
   if (!blockIds.length) throw new Error("Selecciona al menos un bloque");
   const { quote, days } = await loadQuote(quoteId);
-  const bundles = await Promise.all(
-    blockIds.map((id, index) => prepareBlockDay(quote, id, days.length + index + 1)),
-  );
+  const bundles = await prepareBlockDays(quote, blockIds, days.length + 1);
   const purchasePrefix = crypto.randomUUID();
   for (const bundle of bundles)
     for (const item of bundle.items) {
@@ -190,93 +189,109 @@ export async function addBlockDays(quoteId: string, blockIds: string[]) {
   });
 }
 
-async function prepareBlockDay(
+type BlockSnapshot = {
+  block: import("../../types/db").Tables<"day_blocks">;
+  translations: import("../../types/db").Tables<"day_block_translations">[];
+  services: import("../../types/db").Tables<"day_block_items">[];
+  modules: {
+    link: import("../../types/db").Tables<"day_block_modules">;
+    module: import("../../types/db").Tables<"activity_modules">;
+    translations: import("../../types/db").Tables<"activity_module_translations">[];
+    items: import("../../types/db").Tables<"activity_module_items">[];
+  }[];
+  content: DayContent;
+};
+
+async function prepareBlockDays(
   quote: Awaited<ReturnType<typeof loadQuote>>["quote"],
-  blockId: string,
-  dayNumber: number,
+  blockIds: string[],
+  firstDay: number,
 ) {
   const { serviceItem } = await import("./from-template");
-  const snapshot = unwrap(await db.rpc("snapshot_day_block", { p_id: blockId })) as unknown as {
-    block: import("../../types/db").Tables<"day_blocks">;
-    translations: import("../../types/db").Tables<"day_block_translations">[];
-    services: import("../../types/db").Tables<"day_block_items">[];
-    modules: {
-      link: import("../../types/db").Tables<"day_block_modules">;
-      module: import("../../types/db").Tables<"activity_modules">;
-      translations: import("../../types/db").Tables<"activity_module_translations">[];
-      items: import("../../types/db").Tables<"activity_module_items">[];
-    }[];
-    content: DayContent;
-  };
-  const tr = snapshot.translations.find((t) => t.lang === quote.language);
-  if (!tr) throw new Error(`Falta traducción ${quote.language}`);
-  const rows = [...snapshot.services, ...snapshot.modules.flatMap((m) => m.items)];
-  const hotel = snapshot.block.hotel_service_id;
+  const snapshots = await Promise.all(
+    blockIds.map(
+      async (blockId) =>
+        unwrap(await db.rpc("snapshot_day_block", { p_id: blockId })) as unknown as BlockSnapshot,
+    ),
+  );
   const ids = [
-    ...new Set([...rows.map((r) => r.service_id), hotel].filter((id): id is string => !!id)),
+    ...new Set(
+      snapshots
+        .flatMap((s) => [
+          ...s.services.map((r) => r.service_id),
+          ...s.modules.flatMap((m) => m.items.map((r) => r.service_id)),
+          s.block.hotel_service_id,
+        ])
+        .filter((id): id is string => !!id),
+    ),
   ];
+  // One catalog read per table for the whole selection, including repeated services.
   const [services, rates] = await Promise.all([
     db.from("services").select("*").in("id", ids).order("id").then(unwrap),
     db.from("service_rates").select("*").in("service_id", ids).order("id").then(unwrap),
   ]);
   const source = { services, rates };
-  // Coverage coordinates belong to the library until addBlockDays relocates them.
-  const libraryDay = snapshot.block.default_day_position ?? dayNumber;
-  const frozen = rows.map((r) => serviceItem(r, libraryDay, source));
-  if (hotel && !frozen.some((i) => i.service_id === hotel))
-    frozen.push(
-      serviceItem(
-        {
-          service_id: hotel,
-          source_kind: "hotel",
-          qty: 1,
-          applies_tc: null,
-          margin_applicable: null,
-          multi_day_span: 1,
-        },
-        dayNumber,
-        source,
-      ),
-    );
-  const id = crypto.randomUUID();
-  const day = {
-    id,
-    quote_id: quote.id,
-    day_number: dayNumber,
-    title: snapshot.content.title?.[quote.language] ?? tr.title,
-    description: snapshot.content.description?.[quote.language] ?? tr.description,
-    includes: tr.includes,
-    excludes: tr.excludes,
-    route_from: snapshot.block.route_from,
-    route_to: snapshot.block.route_to,
-    source_block_id: blockId,
-    block_snapshot: snapshot,
-    overrides: {},
-    link_type: "chained",
-    group_id: null,
-    group_position: null,
-    snapshot: {
-      reviewed:
-        tr.reviewed &&
-        snapshot.modules.every((m) =>
-          m.translations.some((t) => t.lang === quote.language && t.reviewed),
+  return snapshots.map((snapshot, index) => {
+    const blockId = blockIds[index]!;
+    const dayNumber = firstDay + index;
+    const text = prepareDayText(snapshot, quote.language);
+    const rows = [...snapshot.services, ...snapshot.modules.flatMap((m) => m.items)];
+    const hotel = snapshot.block.hotel_service_id;
+    // Coverage coordinates belong to the library until addBlockDays relocates them.
+    const libraryDay = snapshot.block.default_day_position ?? dayNumber;
+    const frozen = rows.map((r) => serviceItem(r, libraryDay, source));
+    if (hotel && !frozen.some((i) => i.service_id === hotel))
+      frozen.push(
+        serviceItem(
+          {
+            service_id: hotel,
+            source_kind: "hotel",
+            qty: 1,
+            applies_tc: null,
+            margin_applicable: null,
+            multi_day_span: 1,
+          },
+          dayNumber,
+          source,
         ),
-      language: quote.language,
-      places: snapshot.block.places,
-      hotel_service_id: hotel,
-      block_id: blockId,
-    },
-  };
-  const items = frozen.map((i) => ({
-    ...i,
-    id: crypto.randomUUID(),
-    quote_day_id: id,
-    adjustment_pct: i.adjustment_pct ?? 0,
-    adjustment_note: i.adjustment_note ?? null,
-    price_overridden: i.price_overridden ?? false,
-    included: i.included ?? true,
-    source_block_service_id:
-      (i.pricing_snapshot as { _source_link?: { id?: string } })._source_link?.id ?? null,
-  }));
-  return { block_id: blockId, source: snapshot, day, items };
+      );
+    const id = crypto.randomUUID();
+    const day = {
+      id,
+      quote_id: quote.id,
+      day_number: dayNumber,
+      title: text.title,
+      description: text.description,
+      includes: text.includes,
+      excludes: text.excludes,
+      route_from: snapshot.block.route_from,
+      route_to: snapshot.block.route_to,
+      source_block_id: blockId,
+      block_snapshot: snapshot,
+      overrides: text.overrides,
+      link_type: "chained",
+      group_id: null,
+      group_position: null,
+      snapshot: {
+        reviewed: text.reviewed,
+        source_language: text.source_language,
+        language: quote.language,
+        places: snapshot.block.places,
+        hotel_service_id: hotel,
+        block_id: blockId,
+      },
+    };
+    const items = frozen.map((i) => ({
+      ...i,
+      id: crypto.randomUUID(),
+      quote_day_id: id,
+      adjustment_pct: i.adjustment_pct ?? 0,
+      adjustment_note: i.adjustment_note ?? null,
+      price_overridden: i.price_overridden ?? false,
+      included: i.included ?? true,
+      source_block_service_id:
+        (i.pricing_snapshot as { _source_link?: { id?: string } })._source_link?.id ?? null,
+    }));
+    return { block_id: blockId, source: snapshot, day, items };
+  });
 }
