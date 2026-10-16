@@ -28,6 +28,7 @@ import { QuotePanel, type Alert } from "./quote-panel";
 import { QuotePayments } from "./quote-payments";
 import { QuoteDelivery } from "./quote-delivery";
 import { SaveTemplateDialog } from "./save-template-dialog";
+import { QuoteTexts } from "./quote-texts";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -121,7 +122,8 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
       {saveTemplateOpen && <SaveTemplateDialog quoteId={quoteId} actions={actions} onClose={() => setSaveTemplateOpen(false)} />}
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
+        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="textos">Textos del PDF</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
+        <TabsContent value="textos"><QuoteTexts quote={data.quote} days={data.days} items={data.items} actions={actions} onGeneratePdf={() => setTab("envio")} /></TabsContent>
         <TabsContent value="editor">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <DaysEditor data={data} editable={editable} actions={displayedActions} />
