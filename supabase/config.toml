@@ -2,15 +2,15 @@ project_id = "bdewqhmaafzufyegbkts"
 
 [functions.send-quote-email]
 verify_jwt = true
-import_map = "./functions/deno.json"
+import_map = "./deno.json"
 
 [functions.translate-block]
 verify_jwt = true
-import_map = "./functions/deno.json"
+import_map = "./deno.json"
 
 [functions.proposal-document]
 verify_jwt = true
-import_map = "./functions/deno.json"
+import_map = "./deno.json"
 
 [functions.followup-reminders]
 # Dedicated cron token is checked inside the handler (no user JWT for pg_cron).
