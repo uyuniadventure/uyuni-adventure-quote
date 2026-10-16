@@ -41,4 +41,15 @@ TanStack Start (React, rutas basadas en archivos en src/routes) + TypeScript + T
 8. Moneda de venta: USD. Los costos se guardan en su moneda original y se convierten con el tipo de cambio congelado en la cotización.
 9. Al terminar, resume en el PR qué cambió, qué migraciones hay que aplicar y cómo probarlo.
 10. La base de datos es Lovable Cloud y Codex no tiene acceso directo. Todo cambio de base se entrega como migración o seed SQL en `supabase/`; el PR debe indicar el orden exacto de ejecución para que Lovable lo aplique. No ejecutar cambios contra una base remota.
-11. Código compartido entre la app y Edge Functions (p. ej. `supabase/functions/_shared/`): no uses especificadores `npm:`/`jsr:` directos en los imports. Si una dependencia lo requiere, declárala en el import map de Deno (`supabase/functions/deno.json`) e importa por el nombre del paquete, para que el mismo archivo funcione en ambos lados. Caso actual: `proposal-html.ts` importa `npm:parse5@7.3.0`; el frontend lo resuelve con el alias `deno-npm-parse5` en `vite.config.ts`, el alias en `vitest.config.ts` y la declaración de tipos `src/@types/npm-parse5.d.ts` — si se migra al import map, eliminar esos tres soportes.
+11. Código compartido entre la app y Edge Functions (p. ej. los módulos de `supabase/functions/_shared/` importados desde `src/`): no introduzcas especificadores `npm:`/`jsr:` directos en imports, reexports ni imports dinámicos. Declara la resolución de Deno en `supabase/functions/deno.json` e importa por el nombre del paquete en el archivo compartido. Ejemplo: `from "parse5"` en TypeScript y `"parse5": "npm:parse5@7.3.0"` en el import map; la app instala la misma versión en `package.json`.
+
+Compatibilidad existente confirmada por Andrea (16-10-2026): conservar el plugin
+`deno-npm-parse5` de `vite.config.ts`, que resuelve a una ruta real con
+`createRequire().resolve("parse5")`, la declaración `src/@types/npm-parse5.d.ts`
+y el alias de `vitest.config.ts`. Cubren el import actual de `proposal-html.ts`;
+no son el patrón para dependencias compartidas nuevas. No retirarlos como parte
+de una sincronización ni devolver únicamente `"parse5"` desde el plugin de Vite.
+Vitest tiene configuración propia y no hereda los plugins de `vite.config.ts`.
+Al cambiar esta integración, comprobar `bunx tsc --noEmit`, `bunx vitest run`
+y `bun run build`; al cambiar imports de Edge, comprobar también Deno usando
+`--config supabase/functions/deno.json`.
