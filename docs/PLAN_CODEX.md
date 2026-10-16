@@ -89,7 +89,7 @@ Reglas para ese prompt:
 | T10 | Editor de días: ajuste masivo, enlaces, grupos, guardar bloque | [ ] | T09 | sí |
 | T11 | Condiciones de pago, extras opcionales y resumen de pagos | [ ] | T03 | sí |
 | T12 | Control de la propuesta antes de PDF y email | [ ] | T11 | sí |
-| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [ ] | T12 | sí |
+| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [ ] | T11, T12 | sí |
 | T14 | Moneda de presentación (EUR/CLP) | [ ] | T13 | sí |
 | T15 | Programas automáticos por firma | [ ] | T09 | no |
 | T16 | Seguimientos programados | [ ] | T13 | sí |
@@ -373,17 +373,83 @@ Tests con estructuras basadas en esos casos (sin datos de clientes).
 
 ## T13 · Plantilla de propuesta B2C y B2B (PDF + email)
 
-Una sola fuente de render para `send-quote-email` y `src/lib/pdf`, en es / en / it.
+**Depende de:** T11 y T12. **Lovable:** sí.
 
-- B2C, orden fijo: intro → ficha (destino, duración, servicio) → itinerario por día (texto, alojamiento, comidas, nota) → distribución de hoteles → incluido / no incluido → precio y condiciones (T11) → métodos de pago → extras opcionales (T11, fuera del total) → notas → salud y altitud → T&C → "Propuesta válida hasta <fecha hora>".
-- B2B: igual, más desglose diario de servicios y total neto; con tramos (T08) usa la tabla. Nunca costos, ajustes ni imprevistos.
-- Contenido de cada día desde `resolveDay`, nunca del bloque vivo.
-- Datos bancarios desde `bank_accounts`; textos fijos (salud, T&C, nota de hoteles) desde tablas de configuración. Nada hardcodeado en código ni en el repo.
-- Total del grupo; si pax > 1, también por persona. Suplemento single en línea aparte.
-- Bloquea si `validateProposal` tiene errores.
-- Snapshot tests del HTML con 2 cotizaciones de prueba (B2C 2 pax y B2B con tramos).
+**Objetivo.** Igual que los días se arman con bloques diarios, el PDF y el email se arman con bloques de documento que se ordenan arrastrando, se editan y se guardan para reutilizar. Una sola fuente de render, en es / en / it.
 
-**Lovable.** Botón "Vista previa" en `quote-delivery.tsx` que muestra el email/PDF; en /admin, formulario de textos fijos por idioma y gestión de `bank_accounts` si aún no existe.
+**Modelo de documento.**
+
+- Dos tipos de bloque: `static` (texto editable por idioma) y `dynamic` (datos automáticos de la cotización).
+- Los bloques de dato no se editan como texto: solo se mueven, se ocultan y tienen opciones, por ejemplo itinerario "con fotos / sin fotos" o precio "total + por persona".
+- Una plantilla de documento es una lista ordenada de bloques, como `template_days`. Hay una plantilla por defecto para B2C y otra para B2B.
+- Al abrir "PDF y envío", la cotización copia la plantilla por defecto de su canal como snapshot, igual que `quote_days`. Editar después un bloque o una traducción del catálogo no cambia cotizaciones existentes.
+- Al pasar a `enviada`, se congela el HTML renderizado en la versión. Reenviar o descargar después usa ese HTML.
+
+**Editor y compatibilidad PDF/email.** El mismo bloque va al PDF y a clientes de correo como Gmail y Outlook. El editor solo permite este subconjunto, sanitizado tanto en servidor como en cliente:
+
+`p`, `h2`, `h3`, `strong`, `em`, `u`, `a[href]`, `ul`, `ol`, `li`, `br`, `hr`, `table`, `tr`, `td`, `th`, más clase de alineación permitida. Sin `style`, `script`, `iframe`, atributos `on*` ni imágenes externas; las imágenes solo proceden de Media, no de HTML libre pegado en el editor.
+
+Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado al actualizar este plan (16-10-2026): usa `@react-pdf/renderer` y `pdf(...).toBlob()`.** Implementar `htmlToPdfNodes` para convertir el subconjunto permitido a nodos del motor actual. Si no se puede cubrir alguna parte, explicar la limitación en el PR; no cambiar de motor sin "OK" de Andrea.
+
+**Variables.** Menú "Insertar variable" con esta lista cerrada: `{{cliente}}`, `{{vendedor}}`, `{{fecha_inicio}}`, `{{duracion}}`, `{{pax}}`, `{{total}}`, `{{por_persona}}`, `{{deposito}}`, `{{saldo}}`, `{{fecha_saldo}}`, `{{valida_hasta}}`, `{{sku}}`. Una variable desconocida es error en `validateProposal`. Nunca admitir variables de costo, margen, ajustes o imprevistos.
+
+**Codex · Hacer.**
+
+1. Migración fechada en `supabase/migrations/`:
+   - `doc_blocks(id, code unique, kind 'static'|'dynamic', data_key text null, channel 'b2b'|'b2c'|'all', required bool default false, status 'activo'|'pendiente'|'archivado', created_by)`. `data_key` solo en `dynamic`: obligatorio en ese tipo, nulo en `static`, con valores de un enum cerrado validado por `CHECK`.
+   - `doc_block_translations(block_id, lang, title, body_html, reviewed bool default false, reviewed_by, reviewed_at)`.
+   - `doc_layouts(id, name, channel, is_default)` y `doc_layout_items(layout_id, block_id, sort, options jsonb)`. Un default por canal, con índice único parcial.
+   - `quote_doc_sections(id, quote_id, block_id, sort, hidden bool, options jsonb, title_override, body_override_html, snapshot jsonb, reviewed bool)`. El snapshot conserva el bloque y sus traducciones/revisión por idioma; los overrides pertenecen a la cotización.
+   - RLS en todas las tablas nuevas: catálogo (`doc_blocks`, `doc_layouts` y sus traducciones/ítems) editable por Admin y Operación y legible por todos los roles de la app; `quote_doc_sections`, igual que `quote_items`, editable solo en borrador. Las RPC de guardado como bloque/plantilla respetan el acceso a la cotización; guardar como bloque nuevo crea un pendiente, sin habilitar la edición directa del catálogo al vendedor.
+   - Seed SQL de estructura, sin textos de clientes ni datos bancarios: todos los bloques `dynamic`, bloques `static` vacíos con códigos `TYC`, `FOOTER`, `SALUD_ALTITUD`, `NOTA_HOTELES`, `INTRO`, y las dos plantillas por defecto. El texto real lo carga Andrea desde la app.
+   - Conservar como **orden inicial B2C** el de la T13 original: intro → ficha (destino, duración, servicio) → itinerario por día (texto, alojamiento, comidas, nota) → distribución de hoteles → incluido / no incluido → precio y condiciones (T11) → métodos de pago → extras opcionales (T11, fuera del total) → notas → salud y altitud → T&C → "Propuesta válida hasta <fecha hora>". El orden se puede cambiar en la cotización.
+   - **B2B:** mismo orden inicial, más desglose diario de servicios y total neto; con tramos (T08) usa la tabla. Nunca costos, márgenes, ajustes ni imprevistos.
+   - En ambos canales: datos bancarios desde `bank_accounts`; total del grupo y, si pax > 1, también por persona; suplemento single en línea aparte.
+   - El campo actual "Enlace a términos y condiciones" pasa a ser opción del bloque `TYC`: enlace, texto completo o ambos. Itinerario, precio y T&C son obligatorios (`required`).
+2. RPC atómicas:
+   - `ensure_quote_doc_sections(quote_id, layout_id null)`: copia la plantilla por defecto solo si no existe el documento; con `layout_id` explícito reemplaza las secciones por un nuevo snapshot de esa plantilla.
+   - `reorder_quote_doc_sections(quote_id, ids uuid[])`.
+   - `save_doc_section_as_block(section_id, code, title)`: crea un bloque nuevo en `pendiente`.
+   - `save_quote_doc_as_layout(quote_id, name, channel)`.
+3. `src/lib/quotes/document.ts`: `listDocBlocks(filters)`, `ensureDocSections`, `reorderDocSections`, `setSectionHidden`, `updateSectionText` (sanitiza y marca revisado en el idioma editado), `resetSection` (restaura desde el snapshot), `addSection(blockId, position)`, `removeSection` (bloquea si `required`), `saveSectionAsBlock`, `saveAsLayout`. Las escrituras respetan el borrador y los permisos; los bloques `dynamic` no admiten edición de texto.
+4. `renderProposal(quoteId, { target: 'pdf' | 'email', lang })`: única fuente de render para `send-quote-email` y `src/lib/pdf`. Recorre las secciones visibles en orden, resuelve bloques `dynamic` con las funciones existentes (`resolveDay`, `paymentSummary`, `calculatePriceGrid`), reemplaza variables y devuelve HTML + lista de avisos. Contenido de cada día desde `resolveDay`, nunca del bloque vivo. B2B nunca muestra costos, márgenes, ajustes ni imprevistos. El PDF consume ese HTML mediante `htmlToPdfNodes`.
+5. Ampliar `validateProposal` (T12) con errores que bloquean PDF y envío:
+   - bloque `required` oculto o ausente: itinerario, precio o T&C;
+   - sección de texto vacía en el idioma de la cotización;
+   - texto `static` sin revisar en ese idioma, con lista de secciones y enlaces para corregirlas, siguiendo el patrón de T01b;
+   - variable desconocida;
+   - tabla de tramos visible sin tramos calculados.
+6. Congelar al enviar: al pasar a `enviada`, guardar en la versión el HTML renderizado y el snapshot de secciones. Reenviar o descargar después usa ese HTML congelado, sin volver a leer el catálogo vivo.
+7. Tests:
+   - mover "Precio" antes de "Itinerario" cambia el orden en el HTML de PDF y email por igual;
+   - `{{total}}` se reemplaza; `{{costo}}` da error;
+   - el sanitizado elimina `script`, `style`, `onclick` e `iframe`;
+   - ocultar T&C (`required`) da error en `validateProposal`;
+   - editar `doc_block_translations` después de copiar no cambia la cotización;
+   - B2B con tramos: HTML sin palabras costo/margen/imprevistos;
+   - snapshots del HTML: B2C 2 pax y B2B con tramos, con datos de prueba y sin clientes reales.
+
+**Permiso por defecto para T&C.** Los vendedores pueden editar los textos de la cotización excepto T&C, cuyo texto queda bloqueado y solo lo puede editar Admin. Mover u ocultar no concede edición del texto; ocultar T&C produce el error de bloque obligatorio. Aplicar la restricción en servidor además de la UI.
+
+**Lovable · PASO 1 · Base de datos.** Después del merge del PR de implementación, aplicar la migración nueva y el seed en el orden exacto indicado en ese PR; regenerar los tipos de Supabase. Codex entrega el SQL; Lovable lo aplica en Cloud.
+
+**Lovable · PASO 2 · Pantalla.** En `src/components/quote/quote-delivery.tsx`, "PDF y envío" con tres columnas:
+
+- **Izquierda · Biblioteca:** buscador, pestañas "Textos" / "Datos de la cotización" y tarjetas arrastrables desde `listDocBlocks`. Arrastrar al centro llama a `addSection`.
+- **Centro · Documento:** lista de secciones con `@dnd-kit` (ya está en el repo), conectada a `reorderDocSections`. Cada tarjeta tiene asa de arrastre, título, badge "Dato automático" (azul) o "Texto" (gris), badge "Texto sin revisar" (ámbar), ojo (ocultar), lápiz (editar texto cuando corresponda) y menú ⋯ (restaurar, guardar como bloque). Bloques obligatorios con candado. Los datos automáticos muestran sus opciones, sin editor de texto.
+- **Editor de texto en panel lateral:** barra limitada al subconjunto permitido (títulos, negrita, cursiva, subrayado, alineación, listas, enlace, tabla, separador) y botón "Insertar variable". "Guardar y marcar revisado" llama a `updateSectionText`; respetar el bloqueo de T&C por rol.
+- **Derecha · Vista previa:** HTML de `renderProposal` en un iframe de vista previa, con interruptor "PDF / Email"; se actualiza al soltar o guardar. El iframe de la pantalla no forma parte del HTML editable permitido.
+- **Arriba:** selector "Plantilla de documento" (cambiar pide confirmación y llama a `ensureDocSections` con `layoutId`) y botón "Guardar como plantilla" → `saveAsLayout`.
+- Errores (rojo) y avisos (ámbar) de `validateProposal` encima de "Generar PDF" / "Enviar por email"; botones deshabilitados con el motivo si hay errores.
+- Nueva página `/bloques-documento` en el menú "Diseño del viaje": tabla de bloques de texto con idiomas ES · EN · IT y punto de revisado, editor y botón "Traducir" igual que en bloques diarios.
+- No calcular nada en la UI. Usar las funciones de `src/lib` y la cola `useQuoteActions` para las escrituras de la cotización. Colores solo por tokens de `src/styles.css`. Solo editable en borrador; en otros estados, solo lectura.
+
+**Lovable · PASO 3 · Cómo lo pruebo.**
+
+1. Abrir una cotización B2C en borrador → "PDF y envío": aparecen las secciones de la plantilla B2C.
+2. Arrastrar "Precio y condiciones" arriba del itinerario: la vista previa cambia en PDF y en Email.
+3. Editar "Intro", insertar `{{cliente}}` y guardar: en la vista previa aparece el nombre del cliente.
+4. Ocultar "Términos y condiciones": aparece el error y "Generar PDF" queda deshabilitado.
 
 ---
 
