@@ -4,7 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, BedDouble, FilePlus2, LayoutTemplate, Loader2, PencilLine, Plus, RefreshCw, Replace, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
-import { addQuoteItem, loadQuote, promoteQuoteToTemplate, recalculateQuote, unreviewedDays, updateQuoteItem } from "@/lib/quotes";
+import { addQuoteItem, loadQuote, recalculateQuote, unreviewedDays, updateQuoteItem } from "@/lib/quotes";
 import { addBlockDay, addBlockDays, deleteDay, moveDay, resolveDay, reviewQuoteDays, validateContinuity } from "@/lib/quotes/days";
 import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +27,7 @@ import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToIte
 import { QuotePanel, type Alert } from "./quote-panel";
 import { QuotePayments } from "./quote-payments";
 import { QuoteDelivery } from "./quote-delivery";
+import { SaveTemplateDialog } from "./save-template-dialog";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -93,6 +94,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
   }, [q.data, actions]);
 
   const [tab, setTab] = useState("editor");
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const continuity = useQuery({ queryKey: ["quote-continuity", quoteId, q.data?.quote.updated_at], enabled: !!q.data, queryFn: () => validateContinuity(quoteId) });
   if (q.isError) return <p className="text-sm text-destructive">No se pudo cargar la cotización: {(q.error as Error).message}</p>;
   if (!q.data) return <p className="text-sm text-muted-foreground">Cargando cotización…</p>;
@@ -116,6 +118,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
   return (
     <div className="mx-auto max-w-[1400px] space-y-4">
       <TopBar data={data} blocked={blocked} actions={actions} onReset={onReset} />
+      {saveTemplateOpen && <SaveTemplateDialog quoteId={quoteId} actions={actions} onClose={() => setSaveTemplateOpen(false)} />}
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
@@ -126,9 +129,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
               {editable && (
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" className="flex-1" title="Recalcula con las tarifas guardadas en la cotización" onClick={() => actions.act(async () => {}, "Tarifas recalculadas.")}><RefreshCw className="mr-1 h-4 w-4" />Actualizar tarifas</Button>
-                  {!data.quote.template_id && (
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => actions.act(() => promoteQuoteToTemplate(data.quote.id), "Plantilla creada (pendiente de revisión).")}><LayoutTemplate className="mr-1 h-4 w-4" />Guardar como plantilla</Button>
-                  )}
+                  <Button variant="outline" size="sm" className="flex-1" disabled={actions.busy} onClick={() => setSaveTemplateOpen(true)}><LayoutTemplate className="mr-1 h-4 w-4" />Guardar como plantilla</Button>
                 </div>
               )}
               <QuotePanel data={data} editable={editable} actions={displayedActions} alerts={alerts} />

@@ -77,8 +77,10 @@ Reglas para ese prompt:
 | T00 | Arreglar CI (bun.lock con registro privado) | [x] | — | no |
 | T01 | Paso 2 de Nueva cotización no sugiere plantillas | [x] | T00 | sí (migraciones) |
 | T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [x] | T00 | sí |
-| T01c | Crear cotización desde /plantillas | [~] | T01 | sí |
-| T01d | Editor de textos del PDF | [~] | T01b | sí |
+| T01c | Crear cotización desde /plantillas | [x] | T01 | sí |
+| T01d | Editor de textos del PDF | [x] | T01b | sí |
+| T01g | Guardar como plantilla: SKU y duplicados | [~] | — | sí (migración) |
+| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [ ] | T01g; T11/T12 completan después | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -90,7 +92,6 @@ Reglas para ese prompt:
 | T10 | Editor de días: ajuste masivo, enlaces, grupos, guardar bloque | [ ] | T09 | sí |
 | T11 | Condiciones de pago, extras opcionales y resumen de pagos | [ ] | T03 | sí |
 | T12 | Control de la propuesta antes de PDF y email | [ ] | T11 | sí |
-| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [ ] | T11, T12 | sí |
 | T14 | Moneda de presentación (EUR/CLP) | [ ] | T13 | sí |
 | T15 | Programas automáticos por firma | [ ] | T09 | no |
 | T16 | Seguimientos programados | [ ] | T13 | sí |
@@ -105,6 +106,14 @@ merge `34769d3`; T01b → PR #25, merge `f2c5ba9`. Se actualizan a `[x]`
 según la regla §0.4. Las notas históricas de cada entrega conservan el resultado
 de aquel momento; estos cierres no certifican despliegues de UI en Cloud ni
 eliminan los fallos de fixtures pendientes de T03–T04.
+
+Comprobación al iniciar T01g (16-10-2026): `origin/main` en `cd9f51f` incluye
+T01c (PR #26, merge `fd98f9f`) y T01d (PR #27, merge `197cfb6`, incorporado a
+main con #26); se marcan `[x]`. Andrea prioriza T01g y después T13 antes de T11/T12,
+con entrega y parada al terminar cada tarea. El documento citado
+`docs/T13_constructor_propuesta.md` no se encontró en el checkout ni en main
+al iniciar; no se inventa su contenido. Para T13 rigen también las decisiones
+explícitas de Andrea del 16-10-2026 registradas más abajo.
 
 Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehículo, importador SPAUYU, aprobación masiva, días trazables con snapshot y overrides, creación atómica desde plantilla, ajuste % por línea (`applyAdjustmentBulk` en lib), listado, estados e historial, pagos con depósito y paso a Operación (`quote-payments.tsx`), botones PDF y email (`quote-delivery.tsx`), depósito % por cliente y en `pricing_settings`, E2E con Playwright (falla en CI, ver T00).
 
@@ -233,6 +242,43 @@ Lovable: en /plantillas, botón "Crear cotización" en cada fila (icono + texto,
 - Solo editable en borrador; en otros estados, solo lectura.
 - Botón "Generar PDF" al final que lleva a "PDF y envío".
 - Usar solo `buildQuoteDocumentModel`, `saveQuoteDocument`, `updateDayContent`, `resetDayField` y `saveItemLabel`. No calcular nada en la UI.
+
+---
+
+## T01g · Guardar como plantilla: SKU y duplicados
+
+**Prioridad de Andrea (16-10-2026):** corregir primero, en rama propia, y detenerse al entregar.
+
+- El SKU usa el origen del primer día y el destino del último (campos reales `quote_days.route_from` / `route_to`, equivalentes a `from_location` / `to_location` del pedido). Si faltan o son desconocidos, el diálogo exige elegir códigos de `location_codes`; nunca usa `XXX`.
+- Ante un duplicado, ofrecer "Guardar como nueva" con el siguiente sufijo libre `-V2`, `-V3`… o "Reemplazar plantilla existente", solo para Admin/Operación y con confirmación de la plantilla concreta.
+- RPC atómica, errores en español, comprobación de cambios concurrentes, permisos en servidor y pruebas del duplicado, roles y reversión completa.
+
+### Entrega T01g · 16-10-2026 · en revisión
+
+`prepare_quote_template` prepara ruta/SKU y detecta la plantilla visible;
+`save_quote_as_template` guarda todo en una transacción. El bloqueo por SKU y la
+restricción única resuelven también colisiones con plantillas no visibles al vendedor.
+El reemplazo conserva el ID, deja la plantilla pendiente y no borra bloques anteriores
+ni modifica cotizaciones. `promote_quote_template` conserva compatibilidad y crea
+la siguiente versión libre para consumidores anteriores.
+`src/lib/quotes/save-template.ts` expone preparación, lugares y guardado;
+`save-template-dialog.tsx` usa la cola `useQuoteActions` sin recalcular precios.
+
+Verificación: 14/14 pruebas nuevas; Vitest completo 292/294, con los dos fallos
+previos de fixtures Bolivia y WE ROAD (T03–T04), sin omitir pruebas. Instalación
+congelada, TypeScript y ESLint de los archivos nuevos aprobados; ocho suites de
+base de datos aprobadas, incluidas 119 aserciones de permisos. CI incorpora las
+pruebas nuevas del guardado y el diálogo.
+
+**Migración:** aplicar `20261016000100_quote_template_sku.sql` después de
+`20261012000800_quote_pdf_document_model.sql` y regenerar tipos. El espejo
+`drizzle/migrations/0017_quote_template_sku.sql` contiene el mismo SQL: no aplicar
+ambas copias en la misma base. No se ejecutaron cambios en Cloud.
+
+**Prueba manual:** guardar una cotización dos veces y elegir "Guardar como nueva";
+ver `-V2`. Repetir para `-V3`. Con Admin/Operación, confirmar el reemplazo y comprobar
+que conserva el ID. Con vendedor, comprobar que no aparece el reemplazo. Si falta
+un extremo del itinerario, elegirlo en el diálogo antes de guardar.
 
 ---
 
@@ -414,7 +460,15 @@ Tests con estructuras basadas en esos casos (sin datos de clientes).
 
 ## T13 · Plantilla de propuesta B2C y B2B (PDF + email)
 
-**Depende de:** T11 y T12. **Lovable:** sí.
+**Prioridad revisada por Andrea (16-10-2026):** después de T01g y antes de T11/T12. **Lovable:** sí.
+
+Implementar ya bloques de documento, drag and drop, editor de texto, variables,
+`renderProposal`, vista previa y congelado al enviar. En esta entrega adelantada,
+"Precio y condiciones" usa el total guardado de la cotización y el depósito actual
+de `quote_payments`; T11 completará las condiciones de pago. Los controles de
+`validateProposal` que dependen de T12 quedan como **TODO explícito en el PR**;
+no presentar esos controles como implementados. Esta prioridad sustituye la
+dependencia bloqueante anterior de T11/T12.
 
 **Objetivo.** Igual que los días se arman con bloques diarios, el PDF y el email se arman con bloques de documento que se ordenan arrastrando, se editan y se guardan para reutilizar. Una sola fuente de render, en es / en / it.
 
@@ -453,8 +507,8 @@ Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado
    - `save_doc_section_as_block(section_id, code, title)`: crea un bloque nuevo en `pendiente`.
    - `save_quote_doc_as_layout(quote_id, name, channel)`.
 3. `src/lib/quotes/document.ts`: `listDocBlocks(filters)`, `ensureDocSections`, `reorderDocSections`, `setSectionHidden`, `updateSectionText` (sanitiza y marca revisado en el idioma editado), `resetSection` (restaura desde el snapshot), `addSection(blockId, position)`, `removeSection` (bloquea si `required`), `saveSectionAsBlock`, `saveAsLayout`. Las escrituras respetan el borrador y los permisos; los bloques `dynamic` no admiten edición de texto.
-4. `renderProposal(quoteId, { target: 'pdf' | 'email', lang })`: única fuente de render para `send-quote-email` y `src/lib/pdf`. Recorre las secciones visibles en orden, resuelve bloques `dynamic` con las funciones existentes (`resolveDay`, `paymentSummary`, `calculatePriceGrid`), reemplaza variables y devuelve HTML + lista de avisos. Contenido de cada día desde `resolveDay`, nunca del bloque vivo. B2B nunca muestra costos, márgenes, ajustes ni imprevistos. El PDF consume ese HTML mediante `htmlToPdfNodes`.
-5. Ampliar `validateProposal` (T12) con errores que bloquean PDF y envío:
+4. `renderProposal(quoteId, { target: 'pdf' | 'email', lang })`: única fuente de render para `send-quote-email` y `src/lib/pdf`. Recorre las secciones visibles en orden, resuelve bloques `dynamic`, reemplaza variables y devuelve HTML + lista de avisos. Contenido de cada día desde `resolveDay`, nunca del bloque vivo. En la entrega adelantada usa el total guardado y el depósito actual de `quote_payments`; integrar `paymentSummary` cuando esté T11 y `calculatePriceGrid` cuando esté T08, sin inventar cálculos. B2B nunca muestra costos, márgenes, ajustes ni imprevistos. El PDF consume ese HTML mediante `htmlToPdfNodes`.
+5. Validaciones de documento y ampliación futura de `validateProposal` (T12). Mantener los controles disponibles; enumerar en el PR los TODO que dependen de T12:
    - bloque `required` oculto o ausente: itinerario, precio o T&C;
    - sección de texto vacía en el idioma de la cotización;
    - texto `static` sin revisar en ese idioma, con lista de secciones y enlaces para corregirlas, siguiendo el patrón de T01b;
@@ -465,12 +519,12 @@ Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado
    - mover "Precio" antes de "Itinerario" cambia el orden en el HTML de PDF y email por igual;
    - `{{total}}` se reemplaza; `{{costo}}` da error;
    - el sanitizado elimina `script`, `style`, `onclick` e `iframe`;
-   - ocultar T&C (`required`) da error en `validateProposal`;
+   - el vendedor puede editar T&C pero no ocultarlo (D6); rechazar el ocultamiento también en servidor;
    - editar `doc_block_translations` después de copiar no cambia la cotización;
    - B2B con tramos: HTML sin palabras costo/margen/imprevistos;
    - snapshots del HTML: B2C 2 pax y B2B con tramos, con datos de prueba y sin clientes reales.
 
-**Permiso por defecto para T&C.** Los vendedores pueden editar los textos de la cotización excepto T&C, cuyo texto queda bloqueado y solo lo puede editar Admin. Mover u ocultar no concede edición del texto; ocultar T&C produce el error de bloque obligatorio. Aplicar la restricción en servidor además de la UI.
+**D6 confirmada por Andrea (16-10-2026).** El vendedor puede editar T&C dentro de su cotización, pero no ocultarlo. Aplicar el permiso y la prohibición en servidor además de la UI. Sustituye el default anterior que reservaba la edición del texto a Admin.
 
 **Lovable · PASO 1 · Base de datos.** Después del merge del PR de implementación, aplicar la migración nueva y el seed en el orden exacto indicado en ese PR; regenerar los tipos de Supabase. Codex entrega el SQL; Lovable lo aplica en Cloud.
 
@@ -478,7 +532,7 @@ Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado
 
 - **Izquierda · Biblioteca:** buscador, pestañas "Textos" / "Datos de la cotización" y tarjetas arrastrables desde `listDocBlocks`. Arrastrar al centro llama a `addSection`.
 - **Centro · Documento:** lista de secciones con `@dnd-kit` (ya está en el repo), conectada a `reorderDocSections`. Cada tarjeta tiene asa de arrastre, título, badge "Dato automático" (azul) o "Texto" (gris), badge "Texto sin revisar" (ámbar), ojo (ocultar), lápiz (editar texto cuando corresponda) y menú ⋯ (restaurar, guardar como bloque). Bloques obligatorios con candado. Los datos automáticos muestran sus opciones, sin editor de texto.
-- **Editor de texto en panel lateral:** barra limitada al subconjunto permitido (títulos, negrita, cursiva, subrayado, alineación, listas, enlace, tabla, separador) y botón "Insertar variable". "Guardar y marcar revisado" llama a `updateSectionText`; respetar el bloqueo de T&C por rol.
+- **Editor de texto en panel lateral:** barra limitada al subconjunto permitido (títulos, negrita, cursiva, subrayado, alineación, listas, enlace, tabla, separador) y botón "Insertar variable". "Guardar y marcar revisado" llama a `updateSectionText`; permitir al vendedor editar T&C y bloquear su ocultamiento (D6).
 - **Derecha · Vista previa:** HTML de `renderProposal` en un iframe de vista previa, con interruptor "PDF / Email"; se actualiza al soltar o guardar. El iframe de la pantalla no forma parte del HTML editable permitido.
 - **Arriba:** selector "Plantilla de documento" (cambiar pide confirmación y llama a `ensureDocSections` con `layoutId`) y botón "Guardar como plantilla" → `saveAsLayout`.
 - Errores (rojo) y avisos (ámbar) de `validateProposal` encima de "Generar PDF" / "Enviar por email"; botones deshabilitados con el motivo si hay errores.
@@ -490,7 +544,7 @@ Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado
 1. Abrir una cotización B2C en borrador → "PDF y envío": aparecen las secciones de la plantilla B2C.
 2. Arrastrar "Precio y condiciones" arriba del itinerario: la vista previa cambia en PDF y en Email.
 3. Editar "Intro", insertar `{{cliente}}` y guardar: en la vista previa aparece el nombre del cliente.
-4. Ocultar "Términos y condiciones": aparece el error y "Generar PDF" queda deshabilitado.
+4. Como vendedor, editar "Términos y condiciones" y guardar; comprobar que no puede ocultarlo.
 
 ---
 
@@ -590,3 +644,4 @@ Terminado cuando: 0 tests fallando u omitidos · 0 plantillas aprobadas sin serv
 | D2 | Imprevistos por defecto dentro o fuera del precio | Fuera (`contingency_in_price = false`), 0 % |
 | D3 | Programa automático al pasar a `enviada` o `vendida` | `enviada` |
 | D4 | Suplemento single: diferencia o habitación completa | Diferencia |
+| D6 | Edición de T&C por vendedor en su cotización | Confirmada 16-10-2026: puede editar, no ocultar |

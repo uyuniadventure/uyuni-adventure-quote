@@ -2525,6 +2525,10 @@ export type Database = {
         Args: { snap: Json; old_overrides: Json; patch: Json };
         Returns: Json;
       };
+      prepare_quote_template: {
+        Args: { p_id: string; p_route_from?: string; p_route_to?: string };
+        Returns: Json;
+      };
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
@@ -2540,6 +2544,19 @@ export type Database = {
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       review_quote_days: {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
+        Returns: Json;
+      };
+      save_quote_as_template: {
+        Args: {
+          p_id: string;
+          p_mode?: string;
+          p_route_from?: string;
+          p_route_to?: string;
+          p_expected_sku?: string;
+          p_updated_at?: string;
+          p_replace_id?: string;
+          p_replace_updated_at?: string;
+        };
         Returns: Json;
       };
       save_quote_calculation: {

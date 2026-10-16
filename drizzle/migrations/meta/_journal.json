@@ -120,6 +120,13 @@
       "when": 1791811200000,
       "tag": "0016_quote_pdf_document_model",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792108800000,
+      "tag": "0017_quote_template_sku",
+      "breakpoints": true
     }
   ]
 }

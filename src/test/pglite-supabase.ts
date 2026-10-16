@@ -91,6 +91,21 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        prepare_quote_template: [
+          ["p_id", "uuid"],
+          ["p_route_from", "text"],
+          ["p_route_to", "text"],
+        ],
+        save_quote_as_template: [
+          ["p_id", "uuid"],
+          ["p_mode", "text"],
+          ["p_route_from", "text"],
+          ["p_route_to", "text"],
+          ["p_expected_sku", "text"],
+          ["p_updated_at", "timestamptz"],
+          ["p_replace_id", "uuid"],
+          ["p_replace_updated_at", "timestamptz"],
+        ],
         admin_list_users: [],
         review_quote_days: [
           ["p_quote_id", "uuid"],
@@ -181,7 +196,11 @@ export function pgliteSupabase(pg: PGlite) {
         );
         return { data: rows[0]!.data, error: null };
       } catch (e) {
-        return { data: null, error: { message: (e as Error).message } };
+        const error = e as Error & { code?: string; hint?: string };
+        return {
+          data: null,
+          error: { message: error.message, code: error.code, hint: error.hint },
+        };
       }
     },
   };
