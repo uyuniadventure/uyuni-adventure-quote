@@ -13,11 +13,16 @@ declare module "npm:parse5@7.3.0" {
     nodeName: string;
     tagName?: string;
     value?: string;
-    attrs?: Attribute[];
-    childNodes?: ChildNode[];
+    attrs: Attribute[];
+    childNodes: ChildNode[];
+  }
+  export interface TextNode {
+    nodeName: "#text";
+    value: string;
   }
   export interface DefaultTreeAdapterMap {
     childNode: ChildNode;
+    textNode: TextNode;
   }
   export interface DocumentFragment {
     childNodes: ChildNode[];
