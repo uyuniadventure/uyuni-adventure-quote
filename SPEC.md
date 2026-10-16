@@ -377,6 +377,33 @@ Desde cualquier estado distinto del destino: perdida o cancelada (motivo obligat
 
 ## 8. Salidas: PDF y email
 
+**Constructor T13 (adelantado, Andrea 16-10-2026).** En PDF y envío, una cotización
+en borrador copia el diseño de su canal a `quote_doc_sections`, con las traducciones
+de `doc_blocks` y opciones como snapshot. Biblioteca, drag and drop, editor de texto
+sanitizado, variables cerradas y vista previa comparten un render HTML para PDF y
+correo. Los bloques automáticos reutilizan `buildQuoteDocumentModel` de T01d;
+el PDF sigue usando `@react-pdf/renderer` mediante `htmlToPdfNodes`.
+
+Itinerario, Precio y T&C son obligatorios. **D6: el vendedor puede editar T&C de
+su cotización, pero no ocultarlo ni eliminarlo.** Admin/Operación gestionan el
+catálogo; guardar una sección como nuevo bloque crea un pendiente. Las ediciones
+del documento solo invalidan el PDF, conservando el cálculo guardado.
+
+La Edge Function `proposal-document` prepara el HTML autorizado. `quote_proposals`
+conserva la revisión de origen y vincula el PDF generado a ese contenido. Al reservar
+el correo en la outbox se fija el HTML y las secciones para reintentos; al pasar a
+enviada también queda congelado. Descargas y reenvíos del constructor usan esa
+copia, aun cuando cambien pagos o biblioteca. Una nueva versión copia las secciones
+editables, sin reutilizar el HTML congelado. Cotizaciones sin documento que ya
+salieron de borrador mantienen el circuito anterior hasta volver a borrador.
+
+Por ahora Precio y condiciones muestra el total guardado, objetivo de depósito y
+depósitos registrados en `quote_payments`, saldo y fecha actual del saldo. T11
+completará el resumen comercial y precios de extras; T12 completará los controles
+de coherencia descritos en `docs/PLAN_CODEX.md`. No se consideran implementados
+por la entrega de T13. Las imágenes se seleccionan en Media (PNG/JPEG, hasta
+10 imágenes / 4 MB por documento); no se admiten URLs de imágenes pegadas.
+
 El idioma de todo el PDF y del email es el **idioma del cliente**. Si un bloque no tiene traducción en ese idioma, la IA la genera, se guarda en `day_block_translations` con `reviewed = false` y se avisa al vendedor para que la revise antes de enviar.
 
 La revisión de los textos copiados se registra en `quote_days.snapshot` con

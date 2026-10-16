@@ -9,10 +9,41 @@ import {
 } from "../quotes";
 import { calculateQuote, assertCompleteCalculation, type QuoteResult } from "../pricing";
 import { QuoteDocument } from "./document";
+import { ProposalDocument } from "./proposal-document";
+import { renderProposal, listDocSections } from "../quotes/document";
 
 export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   const data = await loadQuote(quoteId);
   const q = data.quote;
+  if ((await listDocSections(quoteId)).length) {
+    const proposal = await renderProposal(quoteId, { target: "pdf", lang: q.language });
+    if (!proposal) throw new Error("La propuesta no tiene secciones.");
+    const errors = proposal.avisos.filter((a) => a.level === "error");
+    if (errors.length) throw new Error(errors.map((a) => a.message).join(" "));
+    if (!proposal.frozen) {
+      assertCompleteCalculation(q.calculation as unknown as QuoteResult);
+      const pending = unreviewedDaysMessage(data.days, q.language);
+      if (pending) throw new Error(pending);
+    }
+    const blob = await pdf(<ProposalDocument html={proposal.html} />).toBlob();
+    if (proposal.frozen) return blob;
+    const path = `${q.id}/${crypto.randomUUID()}.pdf`;
+    unwrap(
+      await db.storage
+        .from("quote-pdfs")
+        .upload(path, blob, { contentType: "application/pdf", upsert: false }),
+    );
+    const signed = unwrap(await db.storage.from("quote-pdfs").createSignedUrl(path, 604800));
+    unwrap(
+      await db.rpc("save_quote_pdf", {
+        p_id: q.id,
+        p_updated_at: q.updated_at,
+        p_path: path,
+        p_url: signed.signedUrl,
+      }),
+    );
+    return blob;
+  }
   const reviewMessage = unreviewedDaysMessage(data.days, q.language);
   if (reviewMessage) throw new Error(reviewMessage);
   if (!q.calculation || !data.days.length)

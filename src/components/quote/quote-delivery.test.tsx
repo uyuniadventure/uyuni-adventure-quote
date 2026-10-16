@@ -1,5 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { Tables } from "@/types/db";
 import { recalculateQuote } from "@/lib/quotes";
@@ -10,6 +18,10 @@ vi.mock("@/lib/quotes", async (original) => ({
   ...(await original<typeof import("@/lib/quotes")>()),
   recalculateQuote: vi.fn(),
 }));
+vi.mock("@/lib/quotes/document", async (original) => ({
+  ...(await original<typeof import("@/lib/quotes/document")>()),
+  listDocSections: vi.fn().mockResolvedValue([]),
+}));
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -18,7 +30,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
 );
 
-it("does not send an old PDF while new terms are unsaved", () => {
+it("does not send an old PDF while new terms are unsaved", async () => {
   const actions = { busy: false, act: vi.fn(), result: null, calcError: null };
   const quote = {
     id: "q",
@@ -32,7 +44,9 @@ it("does not send an old PDF while new terms are unsaved", () => {
     },
   } as unknown as Tables<"quotes">;
   render(<QuoteDelivery quote={quote} actions={actions} />, { wrapper });
-  expect(screen.getByRole("button", { name: "Enviar por email" })).toBeEnabled();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Enviar por email" })).toBeEnabled(),
+  );
   fireEvent.change(screen.getByLabelText("Enlace a términos y condiciones"), {
     target: { value: "https://example.invalid/new" },
   });

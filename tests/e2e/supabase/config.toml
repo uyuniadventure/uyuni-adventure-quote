@@ -33,3 +33,4 @@ enable_signup = false
 [functions.send-quote-email]
 verify_jwt = true
 entrypoint = "./functions/send-quote-email/index.ts"
+import_map = "./functions/deno.json"

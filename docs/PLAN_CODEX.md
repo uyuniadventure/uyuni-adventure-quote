@@ -79,13 +79,16 @@ Reglas para ese prompt:
 | T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [x] | T00 | sí |
 | T01c | Crear cotización desde /plantillas | [x] | T01 | sí |
 | T01d | Editor de textos del PDF | [x] | T01b | sí |
-| T01g | Guardar como plantilla: SKU y duplicados | [~] | — | sí (migración) |
-| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [ ] | T01g; T11/T12 completan después | sí |
+| T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
+| T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g | sí |
+| T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
+| T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
+| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [~] | T01g; T11/T12 completan después | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
-| T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
+| T04 | Fixtures de presupuestos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
 | T05 | Fixtures de octubre: Melting, WeRoad x2, Pellegrini (ALTO) | [ ] | T04 | no |
-| T06 | Reglas de cantidad por pax (vehículos, guía escalonada) | [ ] | T03 | sí |
+| T06 | Absorbida por T01j: reglas de cantidad por pax | — | T01j | — |
 | T07 | Suplemento single | [ ] | T03 | sí |
 | T08 | Tabla de precios por tramo de pax | [ ] | T05, T06 | sí |
 | T09 | Crear cotización desde bloques de día | [ ] | T02 | sí |
@@ -110,9 +113,8 @@ eliminan los fallos de fixtures pendientes de T03–T04.
 Comprobación al iniciar T01g (16-10-2026): `origin/main` en `cd9f51f` incluye
 T01c (PR #26, merge `fd98f9f`) y T01d (PR #27, merge `197cfb6`, incorporado a
 main con #26); se marcan `[x]`. Andrea prioriza T01g y después T13 antes de T11/T12,
-con entrega y parada al terminar cada tarea. El documento citado
-`docs/T13_constructor_propuesta.md` no se encontró en el checkout ni en main
-al iniciar; no se inventa su contenido. Para T13 rigen también las decisiones
+con entrega y parada al terminar cada tarea.
+T13 está en la sección T13 de este plan (PR #28); no hay archivo aparte. Para T13 rigen también las decisiones
 explícitas de Andrea del 16-10-2026 registradas más abajo.
 
 Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehículo, importador SPAUYU, aprobación masiva, días trazables con snapshot y overrides, creación atómica desde plantilla, ajuste % por línea (`applyAdjustmentBulk` en lib), listado, estados e historial, pagos con depósito y paso a Operación (`quote-payments.tsx`), botones PDF y email (`quote-delivery.tsx`), depósito % por cliente y en `pricing_settings`, E2E con Playwright (falla en CI, ver T00).
@@ -255,6 +257,9 @@ Lovable: en /plantillas, botón "Crear cotización" en cada fila (icono + texto,
 
 ### Entrega T01g · 16-10-2026 · en revisión
 
+Actualización: PR #30 fusionado en main (`50e906c`, 16-10-2026). La tabla marca
+el código terminado; el despliegue se verifica por separado en Lovable.
+
 `prepare_quote_template` prepara ruta/SKU y detecta la plantilla visible;
 `save_quote_as_template` guarda todo en una transacción. El bloqueo por SKU y la
 restricción única resuelven también colisiones con plantillas no visibles al vendedor.
@@ -281,6 +286,10 @@ que conserva el ID. Con vendedor, comprobar que no aparece el reemplazo. Si falt
 un extremo del itinerario, elegirlo en el diálogo antes de guardar.
 
 ---
+
+## T01h · T01i · T01j — Bloques v2, reimportación y recálculo
+
+Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g y antes de T02. T01i sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
 
 ## T02 · Sacar quote-ops.ts y limpiar migración con placeholder
 
@@ -315,7 +324,9 @@ Hoy `MarginMode = "markup" | "margin_on_price"`. Las planillas usan además mont
 
 ---
 
-## T04 · Importador con unidades inferidas + casos 9+1 y WE ROAD — ALTO
+## T04 · Fixtures de presupuestos 9+1 y WE ROAD — ALTO
+
+La importación de plantillas se traslada a T01i. Esta tarea conserva solo los fixtures de presupuestos y sus conciliaciones; los requisitos antiguos de plantillas quedan sustituidos por T01i.
 
 Hoy fallan 2 tests de `src/lib/pricing/real-cases.test.ts`: "Bolivia 5D4N · 9+1" y "Caso SIVOLA sustituido por WE ROAD".
 
@@ -349,7 +360,11 @@ Fuentes: Google Sheet `1TLN4VVpfFl1_kV8b1H_bVp5jj3XDrSWt5j4ZjN4pRE8` y los archi
 
 ---
 
-## T06 · Reglas de cantidad por pax
+## T06 · Reglas de cantidad por pax — absorbida por T01j
+
+El alcance siguiente queda sustituido por T01j y D7 en [la especificación](T01h_bloques_pax_reimport.md); no ejecutar como tarea separada.
+
+### Referencia original
 
 1. Migración: `services.qty_rule jsonb null`:
    - `{"type":"per_vehicle","capacity":5}` → cantidad = ceil(pax_total / capacity)
@@ -526,6 +541,52 @@ Codex: comprobar con `rg` cómo genera hoy `src/lib/pdf/index.tsx`. **Comprobado
 
 **D6 confirmada por Andrea (16-10-2026).** El vendedor puede editar T&C dentro de su cotización, pero no ocultarlo. Aplicar el permiso y la prohibición en servidor además de la UI. Sustituye el default anterior que reservaba la edición del texto a Admin.
 
+### Entrega T13 · 16-10-2026 · en revisión
+
+Rama `codex/t13-constructor-propuesta`. Constructor implementado en PDF y envío:
+biblioteca de texto/datos, orden con dnd-kit, editor restringido y variables,
+opciones, diseños, Media, vista previa y exportación común. Nueva sección
+`/bloques-documento` para Admin/Operación, con ES/EN/IT y traducción sin revisar.
+Las secciones se copian al abrir el documento en borrador. Edición de textos y
+orden conservan el cálculo, invalidan el PDF y respetan D6 en servidor y pantalla.
+
+`buildQuoteDocumentModel` conserva su API de T01d y comparte su implementación pura
+con Edge. `renderProposal`/`validateProposal` usan `proposal-document`; el correo
+y el PDF consumen ese HTML. Solo Edge puede guardar el render autorizado. La
+outbox fija HTML y secciones antes de llamar al proveedor, valida el vínculo con
+el PDF y permite reintentos idénticos. Cambiar a enviada también congela; versiones
+nuevas copian las secciones sin el render congelado. Sin secciones, las cotizaciones
+que ya salieron de borrador conservan la compatibilidad anterior; volver a borrador
+permite inicializar el constructor.
+
+Migración: `supabase/migrations/20261016000200_proposal_builder.sql`, después de
+`20261016000100_quote_template_sku.sql`. Incluye estructura y seed vacío; no hay
+textos de clientes ni datos bancarios nuevos. Espejo idéntico Drizzle `0018`, no
+ejecutar ambos. Regenerar tipos y desplegar `proposal-document`, `send-quote-email`
+y `translate-block`, con el import map `supabase/functions/deno.json`.
+
+Precio usa total/per pax/suplemento guardados, objetivo de depósito, depósitos y
+pagos actuales de `quote_payments`; muestra escenarios existentes B2B sin costos.
+Banco/textos de día proceden del snapshot de T01d. Imágenes: solo PNG/JPEG de Media,
+máximo 10 / 4 MB, incorporadas a la copia fija. La vista HTML muestra contenido y
+orden; la paginación se comprueba descargando el PDF del motor existente.
+
+**TODO explícito para T11:** depósito fijo, `paymentSummary`, reglas de validez,
+recargo/enlace de pago y catálogo/precios de extras opcionales. Por ahora se pueden
+mostrar sus etiquetas; no se inventan precios ni condiciones.
+
+**TODO explícito para T12:** comprobación integral precio mostrado vs. versión;
+título/descripción por idioma de cada día; orden de días del documento; hotel del
+texto vs. rooming; coherencia de incluidos con cruces a San Pedro/Hito Cajón;
+depósito según T11 y saldo negativo; avisos regreso/ruta, desayuno de la siguiente
+noche y pax del bloque vs. cotización. Los datos salen del modelo común y se
+conserva la revisión de T01b, pero no se presenta esta lista como implementada.
+Sí se validan secciones obligatorias, textos estáticos vacíos/sin revisar, variables
+desconocidas, enlaces T&C, tramos visibles no calculados e imágenes no disponibles.
+
+Se añade [T01h/T01i/T01j](T01h_bloques_pax_reimport.md), sin implementarlas en T13.
+T01j absorbe T06; T04 conserva fixtures y T01i asume reimportación de plantillas.
+
 **Lovable · PASO 1 · Base de datos.** Después del merge del PR de implementación, aplicar la migración nueva y el seed en el orden exacto indicado en ese PR; regenerar los tipos de Supabase. Codex entrega el SQL; Lovable lo aplica en Cloud.
 
 **Lovable · PASO 2 · Pantalla.** En `src/components/quote/quote-delivery.tsx`, "PDF y envío" con tres columnas:
@@ -645,3 +706,6 @@ Terminado cuando: 0 tests fallando u omitidos · 0 plantillas aprobadas sin serv
 | D3 | Programa automático al pasar a `enviada` o `vendida` | `enviada` |
 | D4 | Suplemento single: diferencia o habitación completa | Diferencia |
 | D6 | Edición de T&C por vendedor en su cotización | Confirmada 16-10-2026: puede editar, no ocultar |
+| D7 | Rooming y vehículo/transportista | Vendedor elige; la app propone y conserva elecciones manuales |
+| D8 | Textos actuales de los días | Reasignar por tour/día; lo no conciliado queda sin revisar |
+| D9 | Módulos de actividad | Ocultos mediante flag en T01h |
