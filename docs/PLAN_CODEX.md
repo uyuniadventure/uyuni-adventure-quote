@@ -88,6 +88,7 @@ Reglas para ese prompt:
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
+| T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Fixtures de presupuestos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -544,6 +545,33 @@ Tests con estructuras basadas en esos casos (sin datos de clientes).
 ---
 
 ## T13 · Plantilla de propuesta B2C y B2B (PDF + email)
+
+### T13-build · Compatibilidad app/Edge · 16-10-2026 · en revisión
+
+Actualizado mediante `git pull --ff-only origin main` hasta `cd53acb`.
+El PR #32 está fusionado (`363781c`), por lo que T13-fix pasa a `[x]`.
+Se conservan sin cambios el plugin `deno-npm-parse5` de `vite.config.ts`
+(resolución a ruta absoluta con `createRequire().resolve("parse5")`),
+`src/@types/npm-parse5.d.ts` y el alias de `vitest.config.ts` añadidos por Lovable.
+Vitest usa su configuración independiente y no hereda los plugins de Vite.
+
+La regla 11 de `AGENTS.md` exige imports por nombre de paquete en código
+compartido nuevo y resolución Deno en `supabase/functions/deno.json`.
+Documenta expresamente la conservación del soporte existente solicitado por
+Andrea, sin convertir el caso heredado en patrón para nuevas dependencias.
+
+CI incorpora el job independiente «Build y compatibilidad app/Edge» con Node 22,
+Bun 1.3.11, instalación congelada, `tsc --noEmit`, los tests existentes de HTML,
+PDF y constructor, y `bun run build`. Así se comprueba el plugin de producción
+además del alias de Vitest; el job E2E conserva sus pruebas y fixtures originales.
+Sin migraciones ni cambios en lógica de negocio o precios.
+
+Verificación local con los tres soportes de Lovable intactos: instalación
+congelada, `tsc --noEmit`, TypeScript E2E y build de producción aprobados.
+Vitest completo: 328/330, sin omitidos; solo fallan los fixtures pendientes de
+Bolivia y WE ROAD. Las tres suites de compatibilidad del nuevo job pasan 19/19.
+
+---
 
 Comprobado al iniciar T13-fix: PR #31 fusionado en `main`, commit `c404759`.
 Base de la corrección: `0553f4b`; se actualiza T13 a `[x]` por esa evidencia.
