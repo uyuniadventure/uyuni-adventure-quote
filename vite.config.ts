@@ -8,6 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { createRequire } from "node:module";
 
 const browserEvents = createRequire(import.meta.url).resolve("events/");
+const parse5Entry = createRequire(import.meta.url).resolve("parse5");
 
 export default defineConfig({
   vite: {
@@ -20,6 +21,16 @@ export default defineConfig({
         resolveId(source, _importer, options) {
           if (!options.ssr && (source === "events" || source === "node:events"))
             return browserEvents;
+          return null;
+        },
+      },
+      {
+        name: "deno-npm-parse5",
+        // supabase/functions/_shared/proposal-html.ts uses Deno's `npm:` specifier;
+        // map it to the installed parse5 package for browser/SSR bundles.
+        enforce: "pre",
+        resolveId(source) {
+          if (source === "npm:parse5@7.3.0") return parse5Entry;
           return null;
         },
       },
