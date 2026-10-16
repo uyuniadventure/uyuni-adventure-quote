@@ -563,6 +563,187 @@ export type Database = {
           },
         ]
       }
+      doc_block_translations: {
+        Row: {
+          block_id: string
+          body_html: string
+          created_at: string
+          lang: string
+          reviewed: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          block_id: string
+          body_html?: string
+          created_at?: string
+          lang: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string
+          body_html?: string
+          created_at?: string
+          lang?: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_block_translations_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "doc_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_block_translations_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_blocks: {
+        Row: {
+          channel: string
+          code: string
+          created_at: string
+          created_by: string | null
+          data_key: string | null
+          id: string
+          kind: string
+          required: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          data_key?: string | null
+          id?: string
+          kind: string
+          required?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          data_key?: string | null
+          id?: string
+          kind?: string
+          required?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_blocks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_layout_items: {
+        Row: {
+          block_id: string
+          created_at: string
+          id: string
+          layout_id: string
+          options: Json
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          block_id: string
+          created_at?: string
+          id?: string
+          layout_id: string
+          options?: Json
+          sort: number
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string
+          created_at?: string
+          id?: string
+          layout_id?: string
+          options?: Json
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_layout_items_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "doc_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_layout_items_layout_id_fkey"
+            columns: ["layout_id"]
+            isOneToOne: false
+            referencedRelation: "doc_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doc_layouts: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_layouts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -1449,6 +1630,69 @@ export type Database = {
           },
         ]
       }
+      quote_doc_sections: {
+        Row: {
+          block_id: string | null
+          body_override_html: string | null
+          created_at: string
+          hidden: boolean
+          id: string
+          options: Json
+          override_lang: string | null
+          quote_id: string
+          reviewed: boolean
+          snapshot: Json
+          sort: number
+          title_override: string | null
+          updated_at: string
+        }
+        Insert: {
+          block_id?: string | null
+          body_override_html?: string | null
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          options?: Json
+          override_lang?: string | null
+          quote_id: string
+          reviewed?: boolean
+          snapshot: Json
+          sort: number
+          title_override?: string | null
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string | null
+          body_override_html?: string | null
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          options?: Json
+          override_lang?: string | null
+          quote_id?: string
+          reviewed?: boolean
+          snapshot?: Json
+          sort?: number
+          title_override?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_doc_sections_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "doc_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_doc_sections_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_emails: {
         Row: {
           body: string
@@ -1784,6 +2028,50 @@ export type Database = {
             columns: ["registered_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_proposals: {
+        Row: {
+          created_at: string
+          frozen_at: string | null
+          html: string
+          lang: string
+          pdf_path: string | null
+          quote_id: string
+          sections: Json
+          source_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          frozen_at?: string | null
+          html: string
+          lang: string
+          pdf_path?: string | null
+          quote_id: string
+          sections: Json
+          source_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          frozen_at?: string | null
+          html?: string
+          lang?: string
+          pdf_path?: string | null
+          quote_id?: string
+          sections?: Json
+          source_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_proposals_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: true
+            referencedRelation: "quotes"
             referencedColumns: ["id"]
           },
         ]
@@ -2555,6 +2843,65 @@ export type Database = {
       }
     }
     Functions: {
+      _doc_snapshot: { Args: { p_id: string }; Returns: Json }
+      _editable_doc_quote: {
+        Args: { p_id: string }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          cancel_reason: string | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      _invalidate_proposal: { Args: { p_id: string }; Returns: undefined }
+      _proposal_context: { Args: { p_id: string }; Returns: Json }
       admin_list_users: { Args: never; Returns: Json }
       apply_quote_adjustment_bulk: {
         Args: {
@@ -2792,6 +3139,15 @@ export type Database = {
         }
         Returns: Json
       }
+      edit_quote_doc_section: {
+        Args: {
+          p_action: string
+          p_data?: Json
+          p_quote_id: string
+          p_section_id?: string
+        }
+        Returns: string
+      }
       edit_quote_item: {
         Args: {
           p_add?: boolean
@@ -2800,6 +3156,10 @@ export type Database = {
           p_promote?: boolean
         }
         Returns: Json
+      }
+      ensure_quote_doc_sections: {
+        Args: { p_layout_id?: string; p_quote_id: string }
+        Returns: undefined
       }
       finish_quote_email: {
         Args: { p_id: string; p_provider_id: string }
@@ -2886,9 +3246,11 @@ export type Database = {
         Returns: Json
       }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
+      proposal_html_valid: { Args: { p_html: string }; Returns: boolean }
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
       quote_payment_summary: { Args: { p_id: string }; Returns: Json }
+      quote_proposal_context: { Args: { p_id: string }; Returns: Json }
       quote_template_source: {
         Args: { p_client: string; p_template: string }
         Returns: Json
@@ -2896,6 +3258,10 @@ export type Database = {
       register_quote_payment: {
         Args: { p_payment: Json; p_payment_id: string; p_quote_id: string }
         Returns: Json
+      }
+      reorder_quote_doc_sections: {
+        Args: { p_ids: string[]; p_quote_id: string }
+        Returns: undefined
       }
       reset_quote_day_field: {
         Args: { p_day_id: string; p_field: string; p_updated_at: string }
@@ -2912,6 +3278,10 @@ export type Database = {
           p_quote_id: string
         }
         Returns: Json
+      }
+      save_doc_section_as_block: {
+        Args: { p_code: string; p_quote_id: string; p_section_id: string }
+        Returns: string
       }
       save_quote_as_template: {
         Args: {
@@ -2981,6 +3351,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_quote_doc_as_layout: {
+        Args: { p_name: string; p_quote_id: string }
+        Returns: string
       }
       save_quote_document: {
         Args: { p_patch: Json; p_quote_id: string; p_updated_at: string }
@@ -3109,6 +3483,10 @@ export type Database = {
         Returns: undefined
       }
       snapshot_day_block: { Args: { p_id: string }; Returns: Json }
+      store_rendered_proposal: {
+        Args: { p_hash: string; p_html: string; p_id: string; p_lang: string }
+        Returns: undefined
+      }
       transition_quote: {
         Args: {
           p_id: string
