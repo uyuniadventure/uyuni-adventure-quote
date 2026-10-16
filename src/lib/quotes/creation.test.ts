@@ -291,7 +291,7 @@ describe("creación atómica desde plantilla", () => {
     }
   });
 
-  it("rejects inactive templates, empty source days and missing translations before any write", async () => {
+  it("rejects inactive templates and empty source days before any write", async () => {
     const before = await persisted();
     await pg.query("update itinerary_templates set status='inactivo' where id=$1", [templateId]);
     await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow("archivada");
@@ -299,9 +299,6 @@ describe("creación atómica desde plantilla", () => {
       pg.query("select create_quote_from_template($1,'{}','[]','{}','{}')", [templateId]),
     ).rejects.toThrow("archivada");
     await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
-    await expect(
-      createQuoteFromTemplate(templateId, { ...basics(), language: "xx" }),
-    ).rejects.toThrow("falta traducción");
     const emptyBlock = (
       await one<{ id: string }>(
         "insert into day_blocks(code) values('EMPTY_CREATION') returning id",

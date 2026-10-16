@@ -4,6 +4,8 @@
 > Estado del repo revisado: `main` en `f54c82a` (12-10-2026).
 > Primera ejecución del plan: base `main` en `186740c` (12-10-2026); ver comprobación de T00.
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
+> Prioridad de Andrea, 16-10-2026: **T01s · Estabilizar el flujo básico**. Se detienen
+> T01h y las demás funciones nuevas hasta validar este flujo. Entregar T01s y parar.
 
 ---
 
@@ -80,12 +82,13 @@ Reglas para ese prompt:
 | T01c | Crear cotización desde /plantillas | [x] | T01 | sí |
 | T01d | Editor de textos del PDF | [x] | T01b | sí |
 | T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
+| T01s | Estabilizar creación, tarifas, textos y adición de bloques | [~] | —; prioridad de Andrea | sí (migración) |
 | T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
-| T13-build | Compatibilidad del alias parse5 en app, tests y build | [~] | T13-fix | no |
+| T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Fixtures de presupuestos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -289,7 +292,73 @@ un extremo del itinerario, elegirlo en el diálogo antes de guardar.
 
 ---
 
+## T01s · Estabilizar el flujo básico · 16-10-2026 · en revisión
+
+Pedido prioritario de Andrea: detener funciones nuevas y corregir tres fallos
+observados en producción. Rama `codex/t01s-estabilizar-flujo`, desde `cd53acb`,
+incorporando el merge de PR #33 (`86e10cc`) con los soportes de parse5 intactos.
+
+- `selectRate` devuelve un `RateError` con `missing`/`ambiguous`, SKU, día, fecha,
+  pasajeros y tarifas disponibles. `calculateQuote` lo convierte en error de
+  línea y totales nulos. La creación atómica y la inserción de uno o varios bloques
+  conservan ese borrador; el editor muestra el diagnóstico en rojo y «Precio manual».
+  Un precio manual con nota puede resolver también vehículos sin tarifa vigente.
+- Plantillas/servicios pendientes se pueden copiar dentro de los permisos actuales;
+  no se aprueban ni se hacen visibles a otros vendedores. Se mantienen los bloqueos
+  de revisión, PDF y envío, y las verificaciones de origen, fecha, revisión y rollback.
+- Sin traducción al idioma solicitado: ES → EN → IT, o código si no hay texto.
+  La misma regla cubre los módulos. Se conserva el bloque original, se guardan los
+  textos de respaldo como overrides y quedan «Texto sin revisar», también al reabrir
+  y en el modelo que consume el PDF. No hay traducción automática ni reimportación.
+- `addBlockDays` consulta servicios/tarifas una vez para toda la selección.
+  `edit_quote_days` compara cada servicio/tarifas una vez por lote y no reescribe
+  días ni snapshots anteriores que siguen iguales. `save_quote_calculation` escribe
+  los resultados con un UPDATE de conjunto. `guard_quote_child` conserva permisos,
+  bloqueo y revisión concurrente, pero invalida una vez por sentencia/cotización.
+  No usa flags de sesión que permitan saltarse controles.
+
+**Timeout: hallazgo y límite.** Había invalidación de la cotización por cada fila,
+renumeración/escritura de días anteriores y consultas repetidas por servicio.
+Los índices simples solicitados ya existían desde la migración inicial;
+`quote_items` se enlaza por `quote_day_id`, no tiene `quote_id`. Se añaden los
+compuestos `(service_id,id)` y `(block_id,id)` para las lecturas ordenadas.
+La prueba instrumentada registra dos actualizaciones de la cotización al añadir
+cuatro bloques: invalidación y guardado final, manteniendo intactos los días previos.
+No se reprodujo el timeout de Cloud localmente y no se atribuye su causa exacta
+sin el plan real. [diagnostico_timeout.sql](consultas/diagnostico_timeout.sql) reúne
+EXPLAIN ANALYZE con RLS del vendedor, tamaños, índices, triggers y bloqueos.
+Se ejecuta en transacción READ ONLY; no llama RPC de escritura ni cambia datos.
+Andrea devuelve los planes A–F antes/después del despliegue. Si el editor solo
+muestra un resultado, las instrucciones permiten ejecutar cada bloque por separado.
+
+**Pruebas.** Fixture sintético con 360 servicios, 1.440 tarifas, 120 bloques,
+30 módulos, unidades distintas, pendientes, idiomas ausentes y tarifas vencidas;
+sin datos personales. En PGlite se ejercitan las migraciones y RLS reales.
+Crear SPASPA-4D3N, 04-11-2026, 2 pax con tarifa vencida guarda el error y permite
+corregirlo con precio manual. El recorrido con tarifas vigentes crea desde plantilla,
+añade cuatro bloques, conserva total al recargar, revisa textos y genera/guarda un
+PDF real con el constructor T13. Se comprueban los permisos, el bloqueo de PDF con
+tarifa faltante y la ejecución de solo lectura del diagnóstico.
+
+Última medición local: **816,2 ms** en `addBlockDays(4)` completo, desde la llamada
+de la app hasta el resultado confirmado de la segunda RPC; límite del test **2 s**.
+Excluye inicialización/carga del fixture y creación de la cotización; no simula
+latencia de red ni carga concurrente de Cloud. La suite completa: **343/345**, sin
+omitidos; persisten solo los fixtures Bolivia y WE ROAD pendientes de T03–T04.
+Las 15 pruebas nuevas pasan. Nueve suites de base de datos, instalación congelada,
+TypeScript app/E2E y build aprobados. CI incorpora las pruebas de T01s.
+
+**Migración:** `20261016000400_quote_flow_stabilization.sql`, después de
+`20261016000300_quote_document_text_sections.sql`. Regenerar tipos en Lovable.
+El espejo `drizzle/migrations/0020_quote_flow_stabilization.sql` es idéntico:
+aplicar solo la copia de Supabase. Ninguna migración histórica fue editada.
+No se ejecutaron cambios en Cloud. **Entrega y parada:** T01h y el resto de
+funciones nuevas siguen detenidas hasta la validación del flujo en producción.
+
 ## T01h · T01i · T01j — Bloques v2, reimportación y recálculo
+
+**En pausa por pedido de Andrea:** validar T01s antes de continuar. T13-fix está
+fusionada: PR #32, commit de merge `363781c`, comprobado en `origin/main`.
 
 Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g y antes de T02. T01i sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
 

@@ -141,6 +141,13 @@
       "when": 1792137600000,
       "tag": "0019_quote_document_text_sections",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792159200000,
+      "tag": "0020_quote_flow_stabilization",
+      "breakpoints": true
     }
   ]
 }

@@ -332,11 +332,14 @@ describe("pricing", () => {
     expect(result.total_price_usd).toBe(490);
     expect(result.scenarios[0]?.total_price_usd).toBe(140);
   });
-  it("rejects ambiguous/missing rates and FX", () => {
-    for (const change of [{ rates: [] }, { rates: [rate, rate] }, { currency: "EUR" }])
-      expect(() =>
-        calculateQuote({ ...base, days: [{ day_number: 1, items: [{ ...item, ...change }] }] }),
-      ).toThrow();
+  it("keeps ambiguous/missing rates in draft error but rejects invalid FX and pax", () => {
+    for (const rates of [[], [rate, rate]])
+      expect(
+        calculateQuote({ ...base, days: [{ day_number: 1, items: [{ ...item, rates }] }] }).status,
+      ).toBe("error");
+    expect(() =>
+      calculateQuote({ ...base, days: [{ day_number: 1, items: [{ ...item, currency: "EUR" }] }] }),
+    ).toThrow("FX");
     expect(() => calculateQuote({ ...base, pax_paying: 0 })).toThrow();
   });
   it("excludes optional items and unoccupied room variants", () => {

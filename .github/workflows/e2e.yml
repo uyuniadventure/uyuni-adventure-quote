@@ -55,6 +55,8 @@ jobs:
         run: bunx vitest run src/lib/admin/users.test.ts --maxWorkers=1
       - name: Revisión de textos, PDF y estados (PGlite)
         run: bunx vitest run src/lib/quotes/text-review.test.ts src/lib/quotes/days.test.ts src/lib/states/states.test.ts src/lib/pdf/pdf.test.tsx --maxWorkers=1
+      - name: Flujo básico y catálogo realista (T01s)
+        run: bunx vitest run src/lib/quotes/stabilization.test.ts src/lib/pricing/rate-error.test.ts --maxWorkers=1 --silent=false
       - name: Guardado de plantillas — SKU, permisos y diálogo (T01g)
         run: bunx vitest run src/lib/quotes/save-template.test.ts src/components/quote/save-template-dialog.test.tsx --maxWorkers=1
       - name: Constructor de propuesta, HTML y PDF (T13)

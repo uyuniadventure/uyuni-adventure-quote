@@ -152,23 +152,23 @@ describe("pricing_config and automatic room/vehicle selection", () => {
     expect(result.warnings).toEqual([]);
   });
   it("checks date/season and never substitutes an undersized or ambiguous vehicle tariff", () => {
-    expect(() =>
+    expect(
       calculateQuote({
         ...base,
         pax_paying: 16,
         tc_count: 1,
         days: [{ day_number: 1, items: [{ ...vehicle, rates: vehicle.rates.slice(0, 3) }] }],
-      }),
-    ).toThrow("Missing rate");
-    expect(() =>
+      }).items[0]?.rate_error?.code,
+    ).toBe("missing");
+    expect(
       calculateQuote({
         ...base,
         days: [
           { day_number: 1, items: [{ ...vehicle, rates: [...vehicle.rates, vehicle.rates[0]!] }] },
         ],
-      }),
-    ).toThrow("Ambiguous");
-    expect(() =>
+      }).items[0]?.rate_error?.code,
+    ).toBe("ambiguous");
+    expect(
       calculateQuote({
         ...base,
         start_date: "2027-01-01",
@@ -180,8 +180,8 @@ describe("pricing_config and automatic room/vehicle selection", () => {
             ],
           },
         ],
-      }),
-    ).toThrow("Missing rate");
+      }).items[0]?.rate_error?.code,
+    ).toBe("missing");
   });
   it("warns when the only vehicle tariff has no capacity rather than blocking missing configuration", () => {
     const result = calculateQuote({

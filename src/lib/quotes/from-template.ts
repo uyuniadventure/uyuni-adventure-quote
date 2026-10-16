@@ -1,5 +1,5 @@
 import { db, json, unwrap } from "../db";
-import { assertCompleteCalculation, resolvePricingPolicy } from "../pricing";
+import { resolvePricingPolicy } from "../pricing";
 import { parsePricingConfig } from "../pricing/config";
 import type { Tables, Enums, Json } from "../../types/db";
 import {
@@ -11,6 +11,7 @@ import {
 import { snapshotBlock, groupCoveredDays } from "./day-content";
 import { applyTemplateDefaults } from "./template-defaults";
 import { loadTemplateSource, type TemplateSource } from "./template-source";
+import { prepareDayText } from "./day-text";
 
 export type TemplateQuoteBasics = Pick<
   QuoteBasics,
@@ -79,6 +80,7 @@ export function serviceItem(
   if (!row.service_id) throw new Error("Service or frozen snapshot required");
   const s = source.services.find((s) => s.id === row.service_id);
   if (!s) throw new Error("Servicio no accesible en el catálogo");
+  if (!["activo", "pendiente"].includes(s.status)) throw new Error(`Servicio inactivo: ${s.sku}`);
   if (!s.pricing_unit || !s.currency)
     throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
   const rates = source.rates.filter((r) => r.service_id === s.id);
@@ -196,27 +198,18 @@ export async function createQuoteFromTemplate(
     const block = source.blocks.find((b) => b.id === td.block_id);
     if (!block || block.status === "inactivo")
       throw new Error(`Día ${td.day_number}: bloque no disponible`);
-    const text = source.texts.find((t) => t.block_id === block.id && t.lang === basics.language);
-    if (!text) throw new Error(`Día ${td.day_number}: falta traducción ${basics.language}`);
+    const frozenBlock = snapshotBlock(block, source);
+    const text = prepareDayText(frozenBlock, basics.language);
     const rows = source.items.filter((i) => i.block_id === block.id);
     const items = rows.map((i) => serviceItem(i, td.day_number, source));
     const links = source.links
       .filter((l) => l.block_id === block.id)
       .sort((a, b) => a.order - b.order);
-    const moduleTexts: string[] = [];
-    let reviewed = text.reviewed;
     for (const link of links) {
       const module = source.modules.find((m) => m.id === link.module_id);
-      const mt = source.moduleTexts.find(
-        (t) => t.module_id === link.module_id && t.lang === basics.language,
-      );
       const mi = source.moduleItems.filter((i) => i.module_id === link.module_id);
       if (!module || module.status === "inactivo" || !mi.length)
         throw new Error(`Día ${td.day_number}: módulo vacío o no disponible`);
-      if (!mt)
-        throw new Error(`Día ${td.day_number}: falta traducción de módulo ${basics.language}`);
-      reviewed = reviewed && mt.reviewed;
-      moduleTexts.push(`${mt.title}\n${mt.description}`);
       items.push(...mi.map((i) => serviceItem(i, td.day_number, source)));
     }
     if (block.hotel_service_id && !items.some((i) => i.service_id === block.hotel_service_id)) {
@@ -239,22 +232,23 @@ export async function createQuoteFromTemplate(
     return {
       day_number: td.day_number,
       source_block_id: block.id,
-      block_snapshot: json(snapshotBlock(block, source)),
-      overrides: json({}),
+      block_snapshot: json(frozenBlock),
+      overrides: json(text.overrides),
       title: text.title,
-      description: [text.description, ...moduleTexts].join("\n\n"),
+      description: text.description,
       includes: text.includes,
       excludes: text.excludes,
       route_from: block.route_from,
       route_to: block.route_to,
       snapshot: json({
-        reviewed,
+        reviewed: text.reviewed,
+        source_language: text.source_language,
         language: basics.language,
         places: block.places,
         hotel_service_id: block.hotel_service_id,
         source_day: td,
         block,
-        translation: text,
+        translation: text.translation,
         modules: links.map((l) => ({
           link: l,
           module: source.modules.find((m) => m.id === l.module_id),
@@ -309,7 +303,6 @@ export async function createQuoteFromTemplate(
     items: prepared.flatMap((d) => d.items.map((i) => ({ ...i, quote_day_id: d.id }))),
   } as unknown as Awaited<ReturnType<typeof loadQuote>>;
   const result = calculateSavedQuote(data);
-  assertCompleteCalculation(result);
   return unwrap(
     await db.rpc("create_quote_from_template", {
       p_template: templateId,

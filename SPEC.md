@@ -304,7 +304,7 @@ Módulo puro de TypeScript, sin dependencias de UI, con tests unitarios. Entrada
 9. **Suplemento single** (por persona) = (costo SGL − costo de media habitación doble) × noches, con margen aplicado. Se muestra cuando la base es twin.
 10. **Escenarios B2B por pax** (como hoy en `RESUMEN COSTOS` y en las columnas 2-4-6-10… de los presupuestos grupales): para cada escenario de `pax_scenarios` se recalcula todo con su propia configuración de vehículos y habitaciones, y se devuelve una tabla pax → precio total → precio por pax.
 11. El historial guarda siempre **costo, margen y precio**, para poder analizar la rentabilidad de lo vendido.
-12. Si una tarifa que debe cobrarse no tiene neto ni rack, el ítem devuelve `status: error` y un aviso. Los totales de la cotización quedan sin calcular (`null`), nunca cero ni un subtotal parcial; el borrador conserva el error al reabrirse. Se debe resolver antes de revisar o emitir la cotización. Un precio cero informado sí es válido.
+12. Si falta una tarifa vigente para fecha/pax, hay varias aplicables, o la tarifa no tiene neto ni rack, el ítem devuelve `status: error` y un aviso. `selectRate` identifica los dos primeros casos con `RateError` (`code`, SKU, día, fecha, pax y tarifas cargadas); `calculateQuote` conserva la línea sin lanzar ese error. Los totales de la cotización quedan sin calcular (`null`), nunca cero ni un subtotal parcial; el borrador conserva el error al reabrirse. Crear desde plantilla o añadir bloques guarda el borrador con esos errores. La línea muestra el diagnóstico y «Precio manual»; se debe corregir antes de revisar, generar PDF o enviar. Un precio cero informado sí es válido. Los errores de configuración estructural siguen rechazándose.
 13. `applyAdjustmentBulk(quoteId, { filtro, pct, nota })` reemplaza el ajuste de los ítems filtrados por tipo, proveedor, número de día o lista de IDs; si se combinan filtros se exige cumplirlos todos. `pct` usa la misma fracción que `adjustment_pct`. Una compra multi-día seleccionada actualiza sus copias de visualización y sigue cobrándose una vez. Una RPC guarda los ajustes y el recálculo en una única transacción comprobando `updated_at`; devuelve los ítems guardados y sus IDs afectados. Cualquier error revierte todo. Cotizaciones enviadas requieren crear una versión antes de aplicar el lote. El tarifario permanece intacto.
 
 ---
@@ -338,8 +338,14 @@ asigna código/fechas y guarda el cálculo en la misma transacción. Un fallo re
 también historial y correlativo. Si cambió el origen, hay que repetir la creación.
 Cada día elige su tarifa por fecha real, temporada configurada y tramo de pasajeros.
 La cotización conserva los textos, los datos de los servicios, las tarifas y la
-configuración copiados: editar el catálogo después no la modifica. Plantilla inactiva/inaccesible,
-días vacíos o traducción ausente devuelven un motivo sin crear un borrador parcial.
+configuración copiados: editar el catálogo después no la modifica. Plantilla inactiva/inaccesible
+o días vacíos devuelven un motivo sin crear un borrador parcial. Servicios activos
+o pendientes accesibles pueden copiarse; los pendientes no ganan aprobación ni visibilidad.
+Si falta el texto en el idioma solicitado, se usa ES → EN → IT, o el código del
+bloque si no hay texto. También se resuelven módulos. Los textos de respaldo se
+guardan como overrides de la cotización, conservando el snapshot original y
+`reviewed: false` («Texto sin revisar»). Crear desde plantilla y añadir bloques
+comparten esta regla; no se llama a la IA durante esas operaciones (T01s).
 El vendedor puede leer los tipos de cambio, pero solo Admin puede administrarlos.
 
 **Estados:**
@@ -418,7 +424,7 @@ de coherencia descritos en `docs/PLAN_CODEX.md`. No se consideran implementados
 por la entrega de T13. Las imágenes se seleccionan en Media (PNG/JPEG, hasta
 10 imágenes / 4 MB por documento); no se admiten URLs de imágenes pegadas.
 
-El idioma de todo el PDF y del email es el **idioma del cliente**. Si un bloque no tiene traducción en ese idioma, la IA la genera, se guarda en `day_block_translations` con `reviewed = false` y se avisa al vendedor para que la revise antes de enviar.
+El idioma de todo el PDF y del email es el **idioma del cliente**. Si un bloque no tiene traducción en ese idioma, el borrador utiliza el respaldo de T01s y exige revisión. El usuario puede corregir el texto o solicitar una traducción desde el catálogo; las traducciones generadas quedan con `reviewed = false` antes de poder enviar.
 
 La revisión de los textos copiados se registra en `quote_days.snapshot` con
 `reviewed`, `reviewed_by` y `reviewed_at`. `review_quote_days` permite revisar uno,
