@@ -2881,6 +2881,10 @@ export type Database = {
         Args: { old_overrides: Json; patch: Json; snap: Json }
         Returns: Json
       }
+      prepare_quote_template: {
+        Args: { p_id: string; p_route_from?: string; p_route_to?: string }
+        Returns: Json
+      }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
@@ -2891,6 +2895,10 @@ export type Database = {
       }
       register_quote_payment: {
         Args: { p_payment: Json; p_payment_id: string; p_quote_id: string }
+        Returns: Json
+      }
+      reset_quote_day_field: {
+        Args: { p_day_id: string; p_field: string; p_updated_at: string }
         Returns: Json
       }
       resolve_day_content: {
@@ -2905,8 +2913,138 @@ export type Database = {
         }
         Returns: Json
       }
+      save_quote_as_template: {
+        Args: {
+          p_expected_sku?: string
+          p_id: string
+          p_mode?: string
+          p_replace_id?: string
+          p_replace_updated_at?: string
+          p_route_from?: string
+          p_route_to?: string
+          p_updated_at?: string
+        }
+        Returns: Json
+      }
       save_quote_calculation: {
         Args: { p_id: string; p_result: Json; p_updated_at: string }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          cancel_reason: string | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_quote_document: {
+        Args: { p_patch: Json; p_quote_id: string; p_updated_at: string }
+        Returns: {
+          archived_at: string | null
+          balance_due_days: number
+          calculation: Json | null
+          cancel_reason: string | null
+          card_surcharge_pct: number
+          category: Database["public"]["Enums"]["tour_category"]
+          client_id: string
+          client_type: Database["public"]["Enums"]["client_type"]
+          code: string
+          commission_mode: Database["public"]["Enums"]["commission_mode"]
+          commission_pct: number
+          created_at: string
+          deposit_pct: number
+          document_snapshot: Json
+          fx_snapshot: Json
+          id: string
+          language: string
+          lost_reason: string | null
+          margin_mode: Database["public"]["Enums"]["margin_mode"]
+          margin_pct: number
+          next_followup_at: string | null
+          parent_quote_id: string | null
+          pax_paying: number
+          pax_scenarios: Json | null
+          payment_schedule: Json | null
+          pdf_path: string | null
+          pdf_url: string | null
+          price_per_pax_usd: number | null
+          pricing_config: Json
+          rooming: Json
+          rounding_rule: Json
+          seller_id: string
+          single_supplement_pp: number | null
+          staff: Json
+          start_date: string
+          status: Database["public"]["Enums"]["quote_status"]
+          tc_count: number
+          template_id: string | null
+          total_cost_usd: number | null
+          total_margin_usd: number | null
+          total_price_usd: number | null
+          tour_sku: string | null
+          updated_at: string
+          vehicles: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_quote_item_label: {
+        Args: {
+          p_item_id: string
+          p_label: string
+          p_quote_id: string
+          p_updated_at: string
+        }
         Returns: {
           archived_at: string | null
           balance_due_days: number
@@ -3032,6 +3170,7 @@ export type Database = {
         }
       }
       validate_day_content: { Args: { p: Json }; Returns: boolean }
+      validate_quote_document_patch: { Args: { p: Json }; Returns: boolean }
       version_quote: { Args: { p_id: string }; Returns: string }
     }
     Enums: {
