@@ -24,6 +24,10 @@ export interface DocumentItem {
   pricing_snapshot: unknown;
   included?: boolean;
   type?: string;
+  room_distribution?: unknown;
+  check_in?: string | null;
+  check_out?: string | null;
+  meal_plan?: string | null;
 }
 export interface DayText {
   title?: Record<string, string> | undefined;

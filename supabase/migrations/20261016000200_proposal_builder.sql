@@ -84,7 +84,7 @@ create function public._editable_doc_quote(p_id uuid) returns public.quotes lang
 declare q public.quotes;
 begin
  select * into q from public.quotes where id=p_id for update;
- if q.id is null or auth.uid() is null or (q.seller_id<>auth.uid() and public.current_role()<>'admin') then raise exception 'No tienes permiso para editar esta propuesta.'; end if;
+ if q.id is null or auth.uid() is null or (q.seller_id is distinct from auth.uid() and public.current_role() is distinct from 'admin') then raise exception 'No tienes permiso para editar esta propuesta.'; end if;
  if q.status<>'borrador' or q.archived_at is not null then raise exception 'La propuesta solo se puede editar en borrador. Crea una nueva versión.'; end if;
  if exists(select 1 from public.quote_emails where quote_id=p_id and status='pendiente') then raise exception 'Hay un envío pendiente. Reintenta ese envío antes de editar.'; end if;
  return q;
@@ -110,7 +110,7 @@ begin
  not exists(select 1 from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where i.layout_id=layout and b.code='PRECIO') then raise exception 'El diseño debe incluir Itinerario, Precio y T&C.'; end if;
  delete from public.quote_doc_sections where quote_id=p_quote_id;
  insert into public.quote_doc_sections(quote_id,block_id,sort,options,snapshot)
- select p_quote_id,i.block_id,i.sort,case when b.code='TYC' then i.options||jsonb_build_object('mode',case when q.client_type='B2C' then 'link' else 'full' end,'url',coalesce(q.document_snapshot->>'terms_url','')) else i.options end,public._doc_snapshot(i.block_id)
+ select p_quote_id,i.block_id,i.sort,case when b.code='TYC' then jsonb_build_object('mode',case when q.client_type='B2C' then 'link' else 'full' end,'url',coalesce(q.document_snapshot->>'terms_url',''))||i.options else i.options end,public._doc_snapshot(i.block_id)
  from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where layout_id=layout order by sort;
  perform public._invalidate_proposal(p_quote_id);
 end $$;
@@ -127,7 +127,7 @@ begin
  elsif p_action='reorder' then
   if jsonb_typeof(p_data->'ids') is distinct from 'array' then raise exception 'La lista de secciones es inválida.'; end if;
   select array_agg(value::uuid) into ids from jsonb_array_elements_text(p_data->'ids');
-  if cardinality(ids)<>(select count(*) from public.quote_doc_sections where quote_id=p_quote_id) or cardinality(ids)<>(select count(distinct x) from unnest(ids) x) or exists(select 1 from unnest(ids) x where not exists(select 1 from public.quote_doc_sections where id=x and quote_id=p_quote_id)) then raise exception 'La lista de secciones cambió. Recarga la propuesta.'; end if;
+  if coalesce(cardinality(ids),0)<>(select count(*) from public.quote_doc_sections where quote_id=p_quote_id) or coalesce(cardinality(ids),0)<>(select count(distinct x) from unnest(ids) x) or exists(select 1 from unnest(ids) x where not exists(select 1 from public.quote_doc_sections where id=x and quote_id=p_quote_id)) then raise exception 'La lista de secciones cambió. Recarga la propuesta.'; end if;
   update public.quote_doc_sections target set sort=i.ord from unnest(ids) with ordinality i(id,ord) where target.id=i.id;
  else
   select * into s from public.quote_doc_sections where id=p_section_id and quote_id=p_quote_id for update;

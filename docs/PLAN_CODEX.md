@@ -584,6 +584,13 @@ conserva la revisión de T01b, pero no se presenta esta lista como implementada.
 Sí se validan secciones obligatorias, textos estáticos vacíos/sin revisar, variables
 desconocidas, enlaces T&C, tramos visibles no calculados e imágenes no disponibles.
 
+Verificación local: 19/19 tests nuevos; suite completa 311/313, sin omitidos.
+Persisten los dos fixtures pendientes de Bolivia y WE ROAD. Nueve suites de base
+de datos aprobadas; la de propuestas verifica 35 aserciones. TypeScript principal
+y E2E, build e instalación congelada aprobados; las tres Edge Functions modificadas
+pasan `deno check`. ESLint de los archivos cambiados: sin errores, tres avisos
+de Fast Refresh. No se desplegó Cloud ni se envió correo real.
+
 Se añade [T01h/T01i/T01j](T01h_bloques_pax_reimport.md), sin implementarlas en T13.
 T01j absorbe T06; T04 conserva fixtures y T01i asume reimportación de plantillas.
 

@@ -11,6 +11,7 @@ describe("constructor de propuesta", () => {
   it("PDF y email usan el orden visible y los mismos datos de T01d", () => {
     const ctx = proposalFixture();
     ctx.sections[0]!.sort = 10;
+    ctx.sections[2]!.sort = 0;
     ctx.sections.push({
       ...ctx.sections[0]!,
       id: "hidden",
@@ -25,6 +26,7 @@ describe("constructor de propuesta", () => {
     const email = renderProposalContent(ctx, { target: "email", lang: "es" });
     expect(pdf.avisos).toEqual([]);
     expect(pdf.html).toBe(email.html);
+    expect(pdf.html.indexOf("Precio y condiciones")).toBeLessThan(pdf.html.indexOf("Itinerario"));
     expect(pdf.html.indexOf("Itinerario")).toBeLessThan(pdf.html.indexOf("Hola"));
     expect(pdf.html).toContain("Texto propio T01d");
     expect(pdf.html).not.toContain("OCULTO");
@@ -106,7 +108,21 @@ describe("constructor de propuesta", () => {
   });
   it("B2B exporta los tramos guardados sin costos, márgenes ni ajustes", () => {
     const ctx = proposalFixture("B2B");
+    ctx.items[0]!.type = "alojamiento";
+    ctx.items[0]!.room_distribution = { DBL: 2, total_cost_usd: "SECRET_ROOM_COST" };
+    for (const [code, key] of [
+      ["HOTELES", "hoteles"],
+      ["INCLUYE", "incluye"],
+    ])
+      ctx.sections.push({
+        ...ctx.sections[1]!,
+        id: code!,
+        sort: 8,
+        snapshot: { ...ctx.sections[1]!.snapshot, code: code!, data_key: key! },
+      });
     const result = renderProposalContent(ctx, { target: "pdf", lang: "es" });
+    expect(result.html).toContain("2 DBL");
+    expect(result.html).toContain("Servicio para viajeros");
     expect(result.html).toContain("USD 1600.00");
     expect(result.html).toContain("Total neto agencia");
     expect(result.html).not.toMatch(/SECRET_|INTERNAL_|total_cost|margin|adjustment/);

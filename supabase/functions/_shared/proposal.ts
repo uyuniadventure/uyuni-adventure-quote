@@ -57,6 +57,7 @@ export interface ProposalQuote {
   balance_due_days: number;
   tour_sku: string | null;
   single_supplement_pp?: number | null;
+  rooming?: unknown;
   valid_until?: string | null;
   document_snapshot: DocumentContent & { valid_until?: string };
   calculation: {
@@ -271,6 +272,31 @@ export function renderProposalContent(
     });
   const table = (rows: string[][]) =>
     `<table><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${e(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  const roomingText = (value: unknown): string => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+    const record = value as Record<string, unknown>;
+    const parts = Object.entries(record)
+      .filter(
+        ([key, count]) =>
+          ["SGL", "DBL", "DBL_TWN", "DBL_MAT", "TWN", "MAT", "TPL", "QUAD", "SUITE"].includes(
+            key,
+          ) &&
+          typeof count === "number" &&
+          count > 0,
+      )
+      .map(([key, count]) => `${count} ${key}`);
+    return [...parts, ...["paying", "tc"].map((key) => roomingText(record[key]))]
+      .filter(Boolean)
+      .join(" + ");
+  };
+  const servicesFor = (dayId: string, included: boolean) =>
+    model.services
+      .filter(
+        (v) =>
+          v.day_id === dayId &&
+          ctx.items.some((i) => i.id === v.item_id && i.included === included),
+      )
+      .map((v) => v.label);
   const pieces = [...ctx.sections]
     .sort((a, b) => a.sort - b.sort || a.id.localeCompare(b.id))
     .filter((s) => !s.hidden)
@@ -329,17 +355,39 @@ export function renderProposalContent(
             break;
           case "hoteles":
             body = table(
-              model.days
-                .filter((d) => d.accommodation_text.value)
-                .map((d) => [`${labels.day} ${d.day_number}`, d.accommodation_text.value]),
+              model.days.flatMap((d) => {
+                const hotels = ctx.items.filter(
+                  (i) => i.quote_day_id === d.id && i.type === "alojamiento" && i.included,
+                );
+                return hotels.length
+                  ? hotels.map((h) => [
+                      `${labels.day} ${d.day_number}`,
+                      model.services.find((v) => v.item_id === h.id)?.label ?? "",
+                      h.check_in ?? d.date ?? "",
+                      h.check_out ?? "",
+                      h.meal_plan ?? "",
+                      roomingText(h.room_distribution ?? q.rooming),
+                    ])
+                  : d.accommodation_text.value
+                    ? [[`${labels.day} ${d.day_number}`, d.accommodation_text.value]]
+                    : [];
+              }),
             );
             break;
           case "incluye":
             body =
               `<h3>${e(labels.included)}</h3>` +
-              list(model.days.map((d) => d.includes.value)) +
+              list([
+                ...new Set(
+                  model.days.flatMap((d) => [d.includes.value, ...servicesFor(d.id, true)]),
+                ),
+              ]) +
               `<h3>${e(labels.excluded)}</h3>` +
-              list(model.days.map((d) => d.excludes.value));
+              list([
+                ...new Set(
+                  model.days.flatMap((d) => [d.excludes.value, ...servicesFor(d.id, false)]),
+                ),
+              ]);
             break;
           case "precio":
             body =
@@ -473,5 +521,12 @@ export function renderProposalContent(
       }
       return `<h2>${e(title)}</h2>${body}`;
     });
-  return { html: pieces.join("\n"), avisos, sourceHash: ctx.source_hash, frozen: false };
+  // Fixed renderer-owned styles keep alignment in mail clients. Editor-supplied styles were stripped above.
+  const html = pieces
+    .join("\n")
+    .replace(
+      /class="align-(left|center|right)"/g,
+      (_match, alignment: string) => `class="align-${alignment}" style="text-align:${alignment}"`,
+    );
+  return { html, avisos, sourceHash: ctx.source_hash, frozen: false };
 }

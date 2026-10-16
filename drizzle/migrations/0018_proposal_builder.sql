@@ -84,9 +84,9 @@ create function public._editable_doc_quote(p_id uuid) returns public.quotes lang
 declare q public.quotes;
 begin
  select * into q from public.quotes where id=p_id for update;
- if q.id is null or auth.uid() is null or (q.seller_id<>auth.uid() and public.current_role()<>'admin') then raise exception 'No tienes permiso para editar esta propuesta.'; end if;
- if q.status<>'borrador' or q.archived_at is not null then raise exception 'La propuesta solo se puede editar en borrador. Crea una nueva versiÃ³n.'; end if;
- if exists(select 1 from public.quote_emails where quote_id=p_id and status='pendiente') then raise exception 'Hay un envÃ­o pendiente. Reintenta ese envÃ­o antes de editar.'; end if;
+ if q.id is null or auth.uid() is null or (q.seller_id is distinct from auth.uid() and public.current_role() is distinct from 'admin') then raise exception 'No tienes permiso para editar esta propuesta.'; end if;
+ if q.status<>'borrador' or q.archived_at is not null then raise exception 'La propuesta solo se puede editar en borrador. Crea una nueva versión.'; end if;
+ if exists(select 1 from public.quote_emails where quote_id=p_id and status='pendiente') then raise exception 'Hay un envío pendiente. Reintenta ese envío antes de editar.'; end if;
  return q;
 end $$;
 create function public._doc_snapshot(p_id uuid) returns jsonb language sql stable security definer set search_path=public as $$
@@ -104,13 +104,13 @@ begin
  q:=public._editable_doc_quote(p_quote_id);
  if p_layout_id is null and exists(select 1 from public.quote_doc_sections where quote_id=p_quote_id) then return; end if;
  select id into layout from public.doc_layouts where channel=lower(q.client_type::text) and (id=p_layout_id or (p_layout_id is null and is_default)) limit 1;
- if layout is null then raise exception 'No existe un diseÃ±o para este canal.'; end if;
+ if layout is null then raise exception 'No existe un diseño para este canal.'; end if;
  if not exists(select 1 from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where i.layout_id=layout and b.code='TYC') or
  not exists(select 1 from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where i.layout_id=layout and b.code='ITINERARIO') or
- not exists(select 1 from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where i.layout_id=layout and b.code='PRECIO') then raise exception 'El diseÃ±o debe incluir Itinerario, Precio y T&C.'; end if;
+ not exists(select 1 from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where i.layout_id=layout and b.code='PRECIO') then raise exception 'El diseño debe incluir Itinerario, Precio y T&C.'; end if;
  delete from public.quote_doc_sections where quote_id=p_quote_id;
  insert into public.quote_doc_sections(quote_id,block_id,sort,options,snapshot)
- select p_quote_id,i.block_id,i.sort,case when b.code='TYC' then i.options||jsonb_build_object('mode',case when q.client_type='B2C' then 'link' else 'full' end,'url',coalesce(q.document_snapshot->>'terms_url','')) else i.options end,public._doc_snapshot(i.block_id)
+ select p_quote_id,i.block_id,i.sort,case when b.code='TYC' then jsonb_build_object('mode',case when q.client_type='B2C' then 'link' else 'full' end,'url',coalesce(q.document_snapshot->>'terms_url',''))||i.options else i.options end,public._doc_snapshot(i.block_id)
  from public.doc_layout_items i join public.doc_blocks b on b.id=i.block_id where layout_id=layout order by sort;
  perform public._invalidate_proposal(p_quote_id);
 end $$;
@@ -121,31 +121,31 @@ begin
  q:=public._editable_doc_quote(p_quote_id);
  if p_action='add' then
   select * into b from public.doc_blocks where id=(p_data->>'block_id')::uuid and (status='activo' or created_by=auth.uid() or public.current_role() in ('admin','operacion')) and channel in ('all',lower(q.client_type::text));
-  if b.id is null then raise exception 'El bloque no estÃ¡ disponible para este canal.'; end if;
+  if b.id is null then raise exception 'El bloque no está disponible para este canal.'; end if;
   update public.quote_doc_sections set sort=sort+1 where quote_id=p_quote_id and sort>=coalesce((p_data->>'sort')::int,9999);
   insert into public.quote_doc_sections(quote_id,block_id,sort,snapshot) values(p_quote_id,b.id,coalesce((p_data->>'sort')::int,(select coalesce(max(sort),0)+1 from public.quote_doc_sections where quote_id=p_quote_id)),public._doc_snapshot(b.id)) returning id into result;
  elsif p_action='reorder' then
-  if jsonb_typeof(p_data->'ids') is distinct from 'array' then raise exception 'La lista de secciones es invÃ¡lida.'; end if;
+  if jsonb_typeof(p_data->'ids') is distinct from 'array' then raise exception 'La lista de secciones es inválida.'; end if;
   select array_agg(value::uuid) into ids from jsonb_array_elements_text(p_data->'ids');
-  if cardinality(ids)<>(select count(*) from public.quote_doc_sections where quote_id=p_quote_id) or cardinality(ids)<>(select count(distinct x) from unnest(ids) x) or exists(select 1 from unnest(ids) x where not exists(select 1 from public.quote_doc_sections where id=x and quote_id=p_quote_id)) then raise exception 'La lista de secciones cambiÃ³. Recarga la propuesta.'; end if;
+  if coalesce(cardinality(ids),0)<>(select count(*) from public.quote_doc_sections where quote_id=p_quote_id) or coalesce(cardinality(ids),0)<>(select count(distinct x) from unnest(ids) x) or exists(select 1 from unnest(ids) x where not exists(select 1 from public.quote_doc_sections where id=x and quote_id=p_quote_id)) then raise exception 'La lista de secciones cambió. Recarga la propuesta.'; end if;
   update public.quote_doc_sections target set sort=i.ord from unnest(ids) with ordinality i(id,ord) where target.id=i.id;
  else
   select * into s from public.quote_doc_sections where id=p_section_id and quote_id=p_quote_id for update;
-  if s.id is null then raise exception 'La secciÃ³n no pertenece a esta cotizaciÃ³n.'; end if;
+  if s.id is null then raise exception 'La sección no pertenece a esta cotización.'; end if;
   result:=s.id;
-  if (p_action='remove' or (p_action='hide' and coalesce((p_data->>'hidden')::boolean,false))) and (coalesce((s.snapshot->>'required')::boolean,false) or s.snapshot->>'code' in ('ITINERARIO','PRECIO','TYC')) then raise exception 'Esta secciÃ³n es obligatoria y no se puede ocultar ni eliminar.'; end if;
+  if (p_action='remove' or (p_action='hide' and coalesce((p_data->>'hidden')::boolean,false))) and (coalesce((s.snapshot->>'required')::boolean,false) or s.snapshot->>'code' in ('ITINERARIO','PRECIO','TYC')) then raise exception 'Esta sección es obligatoria y no se puede ocultar ni eliminar.'; end if;
   case p_action
    when 'hide' then update public.quote_doc_sections set hidden=coalesce((p_data->>'hidden')::boolean,false) where id=s.id;
    when 'remove' then delete from public.quote_doc_sections where id=s.id;
    when 'text' then
-    if s.snapshot->>'kind'<>'static' then raise exception 'Edita los datos de este bloque desde la cotizaciÃ³n.'; end if;
+    if s.snapshot->>'kind'<>'static' then raise exception 'Edita los datos de este bloque desde la cotización.'; end if;
     if not public.proposal_html_valid(p_data->>'body_html') or length(p_data->>'title')>200 then raise exception 'El texto contiene formato no permitido.'; end if;
     update public.quote_doc_sections set title_override=p_data->>'title',body_override_html=p_data->>'body_html',override_lang=q.language,reviewed=coalesce((p_data->>'reviewed')::boolean,false) where id=s.id;
    when 'options' then
-    if jsonb_typeof(p_data)<>'object' or octet_length(p_data::text)>5000 then raise exception 'Opciones invÃ¡lidas.'; end if;
+    if jsonb_typeof(p_data)<>'object' or octet_length(p_data::text)>5000 then raise exception 'Opciones inválidas.'; end if;
     update public.quote_doc_sections set options=p_data where id=s.id;
    when 'reset' then update public.quote_doc_sections set title_override=null,body_override_html=null,override_lang=null,reviewed=false where id=s.id;
-   else raise exception 'AcciÃ³n de documento desconocida.';
+   else raise exception 'Acción de documento desconocida.';
   end case;
  end if;
  perform public._invalidate_proposal(p_quote_id);
@@ -164,20 +164,20 @@ declare q public.quotes; s public.quote_doc_sections; result uuid;
 begin
  q:=public._editable_doc_quote(p_quote_id);
  select * into s from public.quote_doc_sections where id=p_section_id and quote_id=p_quote_id;
- if s.id is null or s.snapshot->>'kind'<>'static' then raise exception 'Selecciona una secciÃ³n de texto.'; end if;
- if p_code !~ '^[A-Z][A-Z0-9_]{2,59}$' then raise exception 'Usa un cÃ³digo de 3 a 60 letras mayÃºsculas, nÃºmeros o guiones bajos.'; end if;
+ if s.id is null or s.snapshot->>'kind'<>'static' then raise exception 'Selecciona una sección de texto.'; end if;
+ if p_code !~ '^[A-Z][A-Z0-9_]{2,59}$' then raise exception 'Usa un código de 3 a 60 letras mayúsculas, números o guiones bajos.'; end if;
  insert into public.doc_blocks(code,kind,channel,status,created_by) values(p_code,'static',lower(q.client_type::text),'pendiente',auth.uid()) returning id into result;
  insert into public.doc_block_translations(block_id,lang,title,body_html,reviewed)
  select result,t->>'lang',case when t->>'lang'=s.override_lang then coalesce(s.title_override,t->>'title') else t->>'title' end,case when t->>'lang'=s.override_lang then coalesce(s.body_override_html,t->>'body_html') else t->>'body_html' end,false from jsonb_array_elements(s.snapshot->'translations') t;
  if s.override_lang is not null then insert into public.doc_block_translations(block_id,lang,title,body_html) values(result,s.override_lang,coalesce(s.title_override,''),coalesce(s.body_override_html,'')) on conflict(block_id,lang) do update set title=excluded.title,body_html=excluded.body_html; end if;
  return result;
-exception when unique_violation then raise exception 'Ya existe un bloque con ese cÃ³digo.';
+exception when unique_violation then raise exception 'Ya existe un bloque con ese código.';
 end $$;
 create function public.save_quote_doc_as_layout(p_quote_id uuid,p_name text) returns uuid language plpgsql security definer set search_path=public as $$
 declare q public.quotes; result uuid;
 begin
  q:=public._editable_doc_quote(p_quote_id);
- if public.current_role() not in ('admin','operacion') then raise exception 'Solo Admin y OperaciÃ³n pueden guardar diseÃ±os.'; end if;
+ if public.current_role() not in ('admin','operacion') then raise exception 'Solo Admin y Operación pueden guardar diseños.'; end if;
  insert into public.doc_layouts(name,channel) values(trim(p_name),lower(q.client_type::text)) returning id into result;
  insert into public.doc_layout_items(layout_id,block_id,sort,options) select result,block_id,sort,options from public.quote_doc_sections where quote_id=p_quote_id and not hidden and block_id is not null;
  return result;
@@ -206,7 +206,7 @@ begin
  perform 1 from public.quotes where id=p_id for update;
  if exists(select 1 from public.quote_proposals where quote_id=p_id and frozen_at is not null) then return; end if;
  ctx:=public._proposal_context(p_id);
- if ctx->>'source_hash' is distinct from p_hash or ctx->'quote'->>'language'<>p_lang then raise exception 'La cotizaciÃ³n cambiÃ³ durante la preparaciÃ³n. Reintenta.'; end if;
+ if ctx->>'source_hash' is distinct from p_hash or ctx->'quote'->>'language'<>p_lang then raise exception 'La cotización cambió durante la preparación. Reintenta.'; end if;
  insert into public.quote_proposals(quote_id,html,sections,source_hash,lang) values(p_id,p_html,ctx->'sections',p_hash,p_lang) on conflict(quote_id) do update set html=excluded.html,sections=excluded.sections,source_hash=excluded.source_hash,lang=excluded.lang,pdf_path=case when quote_proposals.source_hash=excluded.source_hash and quote_proposals.html=excluded.html then quote_proposals.pdf_path else null end;
 end $$;
 

@@ -93,6 +93,24 @@ try {
     /permiso/,
   );
   await as(adminId);
+  await db.query("select edit_quote_doc_section($1,'options',$2,$3)", [
+    q,
+    tyc.id,
+    { mode: "both", url: "https://example.invalid/terms" },
+  ]);
+  const layout = await scalar("select save_quote_doc_as_layout($1,$2)", [q, "Diseño de prueba"]);
+  const layoutQuote = await scalar(
+    "insert into quotes(code,client_id,client_type,start_date,pax_paying,category)values('LAYOUT-TEST',$1,'B2C','2027-01-20',2,'COMFORT')returning id",
+    [cid],
+  );
+  await db.query("select ensure_quote_doc_sections($1,$2)", [layoutQuote, layout]);
+  check(
+    await scalar(
+      "select options from quote_doc_sections where quote_id=$1 and snapshot->>'code'='TYC'",
+      [layoutQuote],
+    ),
+    { mode: "both", url: "https://example.invalid/terms" },
+  );
   await db.query(
     "update doc_block_translations set body_html='<p>CAMBIO BIBLIOTECA</p>',reviewed=true where block_id=$1 and lang='es'",
     [intro.block_id],
@@ -122,6 +140,7 @@ try {
     /lista/,
   );
   const context = await scalar("select quote_proposal_context($1)", [q]);
+  await reject(() => db.query("select reorder_quote_doc_sections($1,$2)", [q, []]), /lista/);
   check(context.payments.deposit_required_usd, 300);
   await reject(
     () =>
