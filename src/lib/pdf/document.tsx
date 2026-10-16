@@ -1,37 +1,12 @@
 import { Document, Image, Link, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { CompleteQuoteResult } from "../pricing";
 import type { Tables } from "../../types/db";
-
-export interface DocumentContent {
-  client_name: string;
-  introduction?: string;
-  guide?: string;
-  cover_photo?: string;
-  terms?: string;
-  terms_url?: string;
-  eur_payment_url?: string;
-  cancellation?: string;
-  payment_text?: string;
-  banks?: {
-    entity: string;
-    bank_name: string;
-    account_holder: string;
-    account_number: string;
-    currency: string;
-    swift?: string;
-    routing_number?: string;
-    iban?: string;
-    instructions?: string;
-  }[];
-  info?: { title: string; content: string }[];
-  day_photos?: Record<string, string[]>;
-  item_labels?: Record<string, string>;
-}
+import type { QuoteDocumentModel } from "../quotes/document-model";
 export interface QuotePdfData {
   quote: Tables<"quotes">;
   days: Tables<"quote_days">[];
   items: Tables<"quote_items">[];
-  content: DocumentContent;
+  model: QuoteDocumentModel;
   calculation: CompleteQuoteResult;
   optional_prices: Record<string, number>;
 }
@@ -66,6 +41,9 @@ const labels = {
     covered: "incluido",
     scenario: "Escenarios por pasajeros",
     night: "noches",
+    meals: "Comidas",
+    transport: "Transporte",
+    note: "Nota",
   },
   en: {
     program: "TRAVEL PROGRAM",
@@ -97,6 +75,9 @@ const labels = {
     covered: "included",
     scenario: "Passenger scenarios",
     night: "nights",
+    meals: "Meals",
+    transport: "Transport",
+    note: "Note",
   },
   it: {
     program: "PROGRAMMA DI VIAGGIO",
@@ -128,6 +109,9 @@ const labels = {
     covered: "incluso",
     scenario: "Scenari per partecipanti",
     night: "notti",
+    meals: "Pasti",
+    transport: "Trasporto",
+    note: "Nota",
   },
 };
 const styles = StyleSheet.create({
@@ -198,7 +182,10 @@ function safeLink(url: string) {
   return url;
 }
 export function QuoteDocument({ data }: { data: QuotePdfData }) {
-  const { quote: q, days, items, content: c, calculation: totals } = data;
+  const { quote: q, items, model, calculation: totals } = data;
+  const c = model.document;
+  const days = model.days;
+  const itemLabels = new Map(model.services.map((service) => [service.item_id, service.label]));
   const isIncluded = (i: Tables<"quote_items">) => {
     const priced = totals.items.find((r) => r.id === i.id);
     return i.included && (!priced || priced.quantity > 0 || priced.covered);
@@ -220,10 +207,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
       timeZone: "UTC",
     }).format(new Date(d));
   const text = (i: Tables<"quote_items">) => {
-    const translated = c.item_labels?.[i.id] ?? c.item_labels?.[i.sku ?? ""];
-    if (language !== "es" && !translated)
-      throw new Error(`Translate item before PDF: ${i.sku ?? i.id}`);
-    return translated ?? i.description;
+    return itemLabels.get(i.id) ?? "";
   };
   const config = (v: unknown): string =>
     Object.entries((v ?? {}) as Record<string, unknown>)
@@ -277,14 +261,27 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
           <View key={d.id}>
             <View wrap={false}>
               <Text style={styles.h2} minPresenceAhead={65}>
-                {l.day} {d.day_number} · {date(d.date ?? q.start_date)} · {d.title}
+                {l.day} {d.day_number} · {date(d.date ?? q.start_date)} · {d.title.value}
               </Text>
-              {(d.route_from || d.route_to) && (
+              {(d.route.value.from || d.route.value.to) && (
                 <Text>
-                  {d.route_from} — {d.route_to}
+                  {d.route.value.from} — {d.route.value.to}
                 </Text>
               )}
-              <Text style={styles.paragraph}>{d.description}</Text>
+              <Text style={styles.paragraph}>{d.description.value}</Text>
+              {d.accommodation_text.value && (
+                <Text style={styles.paragraph}>{d.accommodation_text.value}</Text>
+              )}
+              {d.meals.value.length > 0 && (
+                <Text style={styles.paragraph}>
+                  {l.meals}: {d.meals.value.join(", ")}
+                </Text>
+              )}
+              {d.transport_text.value && (
+                <Text style={styles.paragraph}>
+                  {l.transport}: {d.transport_text.value}
+                </Text>
+              )}
             </View>
             <Text style={styles.section} minPresenceAhead={25}>
               {l.included}
@@ -297,14 +294,19 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
                   {totals.items.find((x) => x.id === i.id)?.covered ? ` (${l.covered})` : ""}
                 </Text>
               ))}
-            {d.includes && <Text style={styles.item}>{d.includes}</Text>}
+            {d.includes.value && <Text style={styles.item}>{d.includes.value}</Text>}
             <Text style={styles.h3}>{l.excluded}</Text>
             {items
               .filter((i) => i.quote_day_id === d.id && !i.included)
               .map((i) => (
                 <Text key={i.id}>{text(i)}</Text>
               ))}
-            {d.excludes && <Text>{d.excludes}</Text>}
+            {d.excludes.value && <Text>{d.excludes.value}</Text>}
+            {d.client_note.value && (
+              <Text style={styles.paragraph}>
+                {l.note}: {d.client_note.value}
+              </Text>
+            )}
             {items
               .filter((i) => i.quote_day_id === d.id && i.type === "alojamiento" && isIncluded(i))
               .map((i) => (
@@ -313,9 +315,9 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
                   {config(i.room_distribution ?? q.rooming)}
                 </Text>
               ))}
-            {q.client_type === "B2C" && c.day_photos?.[String(d.day_number)]?.length && (
+            {q.client_type === "B2C" && d.photos.length > 0 && (
               <View style={styles.photoRow}>
-                {c.day_photos[String(d.day_number)]!.slice(0, 2).map((src, n) => (
+                {d.photos.slice(0, 2).map((src, n) => (
                   <Image key={n} src={src} style={styles.smallPhoto} />
                 ))}
               </View>

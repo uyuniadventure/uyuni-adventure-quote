@@ -9,6 +9,14 @@ export {
   quoteCreationSearch,
   type TemplateForQuote,
 } from "./template-entry";
+export {
+  buildQuoteDocumentModel,
+  documentContentPatchSchema,
+  type DocumentContent,
+  type DocumentContentPatch,
+  type QuoteDocumentModel,
+} from "./document-model";
+export { saveQuoteDocument, saveItemLabel } from "./document";
 
 import { adjustmentPctSchema } from "../pricing/adjustment";
 import { adjustmentTargets, type AdjustmentFilter } from "./adjustment-filter";
