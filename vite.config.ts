@@ -8,6 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { createRequire } from "node:module";
 
 const browserEvents = createRequire(import.meta.url).resolve("events/");
+const parse5Entry = createRequire(import.meta.url).resolve("parse5");
 
 export default defineConfig({
   vite: {
@@ -29,7 +30,7 @@ export default defineConfig({
         // map it to the installed parse5 package for browser/SSR bundles.
         enforce: "pre",
         resolveId(source) {
-          if (source === "npm:parse5@7.3.0") return "parse5";
+          if (source === "npm:parse5@7.3.0") return parse5Entry;
           return null;
         },
       },
