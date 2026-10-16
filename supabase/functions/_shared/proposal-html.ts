@@ -1,4 +1,4 @@
-import { parseFragment, type DefaultTreeAdapterMap } from "parse5";
+import { parseFragment, type DefaultTreeAdapterMap } from "npm:parse5@7.3.0";
 
 export type HtmlNode = DefaultTreeAdapterMap["childNode"];
 export const escapeHtml = (value: unknown): string =>
