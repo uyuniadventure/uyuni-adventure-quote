@@ -11,6 +11,10 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      // Deno `npm:` specifier used by supabase/functions/_shared/proposal-html.ts
+      "npm:parse5@7.3.0": "parse5",
+    },
   },
 });
