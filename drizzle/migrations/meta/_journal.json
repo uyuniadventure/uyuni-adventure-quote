@@ -134,6 +134,13 @@
       "when": 1792116000000,
       "tag": "0018_proposal_builder",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792137600000,
+      "tag": "0019_quote_document_text_sections",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import type { Enums } from "@/types/db";
 import { money } from "@/components/catalog/shared";
 import { QuoteWorkspace } from "./quote-workspace";
+import { updateDayContent } from "@/lib/quotes/days";
 
 vi.mock("@/lib/quotes", async (original) => ({
   ...(await original<typeof import("@/lib/quotes")>()),
@@ -29,6 +30,7 @@ vi.mock("@/lib/states", () => ({ beginQuoteEdit: vi.fn(), transitionQuote: vi.fn
 vi.mock("@/lib/quotes/days", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/days")>()),
   validateContinuity: vi.fn().mockResolvedValue([]),
+  updateDayContent: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("@/lib/db", async (original) => ({
   ...(await original<typeof import("@/lib/db")>()),
@@ -158,10 +160,32 @@ it("keeps Editor/Historial and edits a sent quote through a new version", async 
   const router = renderQuote();
   expect(await screen.findByRole("tab", { name: "Editor" })).toBeInTheDocument();
   expect(screen.getByRole("tab", { name: "Historial" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "PDF y envío" })).toBeInTheDocument();
+  expect(screen.queryByRole("tab", { name: "Textos del PDF" })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Editar nueva versión" }));
   await waitFor(() => expect(beginQuoteEdit).toHaveBeenCalledWith("quote"));
   await waitFor(() => expect(router.state.location.search).toEqual({ quote: "new-draft" }));
   expect(transitionQuote).not.toHaveBeenCalled();
+});
+
+it("edits day text inside Editor through the saved snapshot, without recalculating prices", async () => {
+  const data = savedQuote("borrador");
+  data.days[0]!.block_snapshot = { content: { description: { es: "Descripción guardada" } } };
+  renderQuote(data);
+  await screen.findByText("Textos del día");
+  fireEvent.click(screen.getByText("Textos del día"));
+  await waitFor(() => expect(recalculateQuote).toHaveBeenCalledTimes(1));
+  vi.mocked(recalculateQuote).mockClear();
+  const description = screen.getByLabelText("Descripción");
+  expect(description).toHaveValue("Descripción guardada");
+  fireEvent.change(description, { target: { value: "Narrativa actualizada" } });
+  fireEvent.blur(description);
+  await waitFor(() =>
+    expect(updateDayContent).toHaveBeenCalledWith("day", {
+      description: { es: "Narrativa actualizada" },
+    }),
+  );
+  expect(recalculateQuote).not.toHaveBeenCalled();
 });
 
 it("does not offer a manual sale to a seller", async () => {

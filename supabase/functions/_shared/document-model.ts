@@ -63,6 +63,8 @@ export function resolveDocumentDay(day: DocumentDay): DayText {
   );
 }
 export interface DocumentContent extends DocumentContentPatch {
+  /** Legacy text is retained for audit; document sections are authoritative after migration. */
+  text_sections_migrated?: boolean;
   cover_photo?: string;
   terms?: string;
   eur_payment_url?: string;
