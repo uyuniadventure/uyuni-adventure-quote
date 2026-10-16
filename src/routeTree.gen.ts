@@ -15,6 +15,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBloquesDiariosRouteImport } from './routes/_authenticated/bloques-diarios'
+import { Route as AuthenticatedBloquesDocumentoRouteImport } from './routes/_authenticated/bloques-documento'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedCotizacionesRouteImport } from './routes/_authenticated/cotizaciones'
 import { Route as AuthenticatedMediaRouteImport } from './routes/_authenticated/media'
@@ -54,6 +55,12 @@ const AuthenticatedBloquesDiariosRoute =
   AuthenticatedBloquesDiariosRouteImport.update({
     id: '/bloques-diarios',
     path: '/bloques-diarios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBloquesDocumentoRoute =
+  AuthenticatedBloquesDocumentoRouteImport.update({
+    id: '/bloques-documento',
+    path: '/bloques-documento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
@@ -118,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/bloques-diarios': typeof AuthenticatedBloquesDiariosRoute
+  '/bloques-documento': typeof AuthenticatedBloquesDocumentoRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/cotizaciones': typeof AuthenticatedCotizacionesRoute
   '/media': typeof AuthenticatedMediaRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/bloques-diarios': typeof AuthenticatedBloquesDiariosRoute
+  '/bloques-documento': typeof AuthenticatedBloquesDocumentoRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/cotizaciones': typeof AuthenticatedCotizacionesRoute
   '/media': typeof AuthenticatedMediaRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/bloques-diarios': typeof AuthenticatedBloquesDiariosRoute
+  '/_authenticated/bloques-documento': typeof AuthenticatedBloquesDocumentoRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/cotizaciones': typeof AuthenticatedCotizacionesRoute
   '/_authenticated/media': typeof AuthenticatedMediaRoute
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/bloques-diarios'
+    | '/bloques-documento'
     | '/clientes'
     | '/cotizaciones'
     | '/media'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/bloques-diarios'
+    | '/bloques-documento'
     | '/clientes'
     | '/cotizaciones'
     | '/media'
@@ -207,6 +219,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/bloques-diarios'
+    | '/_authenticated/bloques-documento'
     | '/_authenticated/clientes'
     | '/_authenticated/cotizaciones'
     | '/_authenticated/media'
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/bloques-diarios'
       fullPath: '/bloques-diarios'
       preLoaderRoute: typeof AuthenticatedBloquesDiariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bloques-documento': {
+      id: '/_authenticated/bloques-documento'
+      path: '/bloques-documento'
+      fullPath: '/bloques-documento'
+      preLoaderRoute: typeof AuthenticatedBloquesDocumentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clientes': {
@@ -346,6 +366,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBloquesDiariosRoute: typeof AuthenticatedBloquesDiariosRoute
+  AuthenticatedBloquesDocumentoRoute: typeof AuthenticatedBloquesDocumentoRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedCotizacionesRoute: typeof AuthenticatedCotizacionesRoute
   AuthenticatedMediaRoute: typeof AuthenticatedMediaRoute
@@ -362,6 +383,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBloquesDiariosRoute: AuthenticatedBloquesDiariosRoute,
+  AuthenticatedBloquesDocumentoRoute: AuthenticatedBloquesDocumentoRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedCotizacionesRoute: AuthenticatedCotizacionesRoute,
   AuthenticatedMediaRoute: AuthenticatedMediaRoute,

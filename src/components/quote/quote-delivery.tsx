@@ -1,3 +1,6 @@
+import { ProposalBuilder } from "./proposal-builder";
+import { useQuery } from "@tanstack/react-query";
+import { listDocSections } from "@/lib/quotes/document";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { recalculateQuote, unreviewedDays, unreviewedDaysMessage } from "@/lib/quotes";
@@ -9,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 
-export function QuoteDelivery({
+function LegacyQuoteDelivery({
   quote,
   actions,
   days = [],
@@ -78,7 +81,9 @@ export function QuoteDelivery({
       )}
       {pendingMessage && (
         <div className="space-y-1 rounded-md border border-brand-orange/40 p-3 text-sm">
-          <p className="font-medium text-brand-orange-deep">No se puede generar el PDF: {pendingMessage}.</p>
+          <p className="font-medium text-brand-orange-deep">
+            No se puede generar el PDF: {pendingMessage}.
+          </p>
           <ul className="list-inside list-disc text-muted-foreground">
             {pending.map((d) => (
               <li key={d.id}>
@@ -101,7 +106,10 @@ export function QuoteDelivery({
       <div className="flex flex-wrap gap-2">
         <Button
           disabled={
-            !editable || actions.busy || pending.length > 0 || (quote.client_type === "B2C" && !terms)
+            !editable ||
+            actions.busy ||
+            pending.length > 0 ||
+            (quote.client_type === "B2C" && !terms)
           }
           onClick={() => void generate()}
         >
@@ -127,4 +135,16 @@ export function QuoteDelivery({
       </p>
     </Card>
   );
+}
+
+export function QuoteDelivery(props: Parameters<typeof LegacyQuoteDelivery>[0]) {
+  const sections = useQuery({
+    queryKey: ["doc-sections", props.quote.id],
+    queryFn: () => listDocSections(props.quote.id),
+  });
+  if (props.quote.status === "borrador" || sections.data?.length)
+    return <ProposalBuilder quote={props.quote} actions={props.actions} days={props.days ?? []} />;
+  if (sections.isLoading) return <p>Cargando propuesta…</p>;
+  if (sections.error) return <p role="alert">{sections.error.message}</p>;
+  return <LegacyQuoteDelivery {...props} />;
 }

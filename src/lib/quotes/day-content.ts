@@ -1,3 +1,4 @@
+import { mergeDayContent } from "../../../supabase/functions/_shared/document-model";
 import { z } from "zod";
 import type { Json, Tables } from "../../types/db";
 import type { TemplateSource } from "./template-source";
@@ -27,19 +28,7 @@ export function resolveDay(day: FrozenDay): DayContent {
   const snapshot = day.block_snapshot as { content?: DayContent };
   const base = dayContentSchema.parse(snapshot.content ?? {});
   const overrides = dayContentSchema.parse(day.overrides);
-  const result = { ...base, ...overrides };
-  for (const key of [
-    "title",
-    "description",
-    "includes",
-    "excludes",
-    "accommodation_text",
-    "transport_text",
-    "client_note",
-  ] as const) {
-    if (overrides[key]) result[key] = { ...base[key], ...overrides[key] };
-  }
-  return result;
+  return { ...base, ...overrides, ...mergeDayContent(base, overrides) };
 }
 export interface ContinuityWarning {
   nivel: "aviso";

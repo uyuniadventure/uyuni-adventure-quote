@@ -8,6 +8,7 @@ import {
   secret,
   serve,
 } from "../_shared/runtime.ts";
+import { prepareProposal } from "../_shared/prepare-proposal.ts";
 serve(async (request) => {
   const { client } = await authenticated(request);
   const input = await request.json();
@@ -43,7 +44,19 @@ serve(async (request) => {
   const localized = templates[language];
   const recipient = input.recipient ?? quote.document_snapshot?.client_email;
   const subject = input.subject ?? (localized ? `${localized.subject} · ${quote.code}` : null);
+  const proposal = await prepareProposal(client, quoteId, "email", quote.language);
+  if (proposal?.avisos.some((a) => a.level === "error"))
+    return response(
+      {
+        error: proposal.avisos
+          .filter((a) => a.level === "error")
+          .map((a) => a.message)
+          .join(" "),
+      },
+      400,
+    );
   const body =
+    proposal?.html ??
     input.body ??
     (localized
       ? `${localized.greeting} ${quote.document_snapshot?.client_name ?? ""},\n\n${localized.summary}\n\n${quote.tour_sku}\n${quote.start_date} · ${quote.pax_paying} + ${quote.tc_count} TC\nUSD ${quote.total_price_usd}\n\nUyuni Adventure`
@@ -68,7 +81,7 @@ serve(async (request) => {
         from: secret("RESEND_FROM"),
         to: [email.recipient],
         subject: email.subject,
-        text: email.body,
+        ...(proposal ? { html: email.body } : { text: email.body }),
         attachments: [
           {
             filename: `${quoteId}.pdf`,

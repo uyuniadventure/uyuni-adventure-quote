@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`constructor de propuesta > snapshot HTML sintético B2B 1`] = `
+"<h2>INTRO</h2><p>Hola Cliente de prueba, viajas con Vendedora.</p>
+<h2>Itinerario</h2><h3>Día 1 · Salar</h3><p>Texto propio T01d</p><p>Hotel de prueba</p><p>Desayuno</p>
+<h2>Precio y condiciones</h2><table><tbody><tr><td>Total neto agencia</td><td>USD 1000.00</td></tr><tr><td>Por persona</td><td>USD 500.00</td></tr><tr><td>Depósito requerido</td><td>USD 300.00</td></tr><tr><td>Depósitos registrados</td><td>USD 100.00</td></tr><tr><td>Saldo</td><td>USD 850.00</td></tr><tr><td>Fecha del saldo</td><td>2027-01-15</td></tr></tbody></table><p>Saldo antes del viaje</p><table><tbody><tr><td>Pasajeros</td><td>Total</td><td>Por persona</td></tr><tr><td>4</td><td>USD 1600.00</td><td>USD 400.00</td></tr></tbody></table>
+<h2>TYC</h2><p>Condiciones de prueba.</p>
+<h2>Validez de la propuesta</h2><p>Propuesta válida hasta 2026-12-01T18:00</p>"
+`;
+
+exports[`constructor de propuesta > snapshot HTML sintético B2C 1`] = `
+"<h2>INTRO</h2><p>Hola Cliente de prueba, viajas con Vendedora.</p>
+<h2>Itinerario</h2><h3>Día 1 · Salar</h3><p>Texto propio T01d</p><p>Hotel de prueba</p><p>Desayuno</p>
+<h2>Precio y condiciones</h2><table><tbody><tr><td>Total</td><td>USD 1000.00</td></tr><tr><td>Por persona</td><td>USD 500.00</td></tr><tr><td>Depósito requerido</td><td>USD 300.00</td></tr><tr><td>Depósitos registrados</td><td>USD 100.00</td></tr><tr><td>Saldo</td><td>USD 850.00</td></tr><tr><td>Fecha del saldo</td><td>2027-01-15</td></tr></tbody></table><p>Saldo antes del viaje</p>
+<h2>TYC</h2><p>Condiciones de prueba.</p>
+<h2>Validez de la propuesta</h2><p>Propuesta válida hasta 2026-12-01T18:00</p>"
+`;
