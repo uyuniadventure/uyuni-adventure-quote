@@ -130,6 +130,17 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
   - `status`, `source_quote_id` (si se promovió desde una cotización).
 - **`template_days`**: template_id, `day_number`, block_id.
 
+**Guardar una cotización como plantilla (T01g, Andrea, 16-10-2026):** el SKU toma
+el origen del primer día y el destino del último (`quote_days.route_from` y
+`route_to`); si falta alguno, el diálogo exige elegirlo de `location_codes`.
+Nunca usa `XXX`. Si el SKU está ocupado, el usuario puede guardar una nueva
+plantilla con el siguiente sufijo libre `-V2`, `-V3`…; solo Admin/Operación pueden
+confirmar el reemplazo de la existente. `prepare_quote_template` prepara el diálogo
+y `save_quote_as_template` copia plantilla, días y servicios en una transacción,
+con permisos RLS y control de cambios concurrentes. El reemplazo conserva el ID,
+queda pendiente de revisión y no modifica los snapshots de cotizaciones existentes
+ni borra los bloques anteriores que puedan estar compartidos.
+
 **Aprobación masiva de pendientes:** un servicio necesita unidad, moneda y al menos
 una tarifa vigente en la fecha de Santiago con costo neto o rack; cero explícito es válido.
 Una plantilla necesita todos sus días numerados del 1 a su duración, con servicios
