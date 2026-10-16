@@ -23,6 +23,16 @@ export default defineConfig({
           return null;
         },
       },
+      {
+        name: "deno-npm-parse5",
+        // supabase/functions/_shared/proposal-html.ts uses Deno's `npm:` specifier;
+        // map it to the installed parse5 package for browser/SSR bundles.
+        enforce: "pre",
+        resolveId(source) {
+          if (source === "npm:parse5@7.3.0") return "parse5";
+          return null;
+        },
+      },
     ],
   },
   tanstackStart: {
