@@ -413,8 +413,9 @@ export function renderProposalContent(
                 [labels.balance, variables["saldo"]!],
                 [labels.due, variables["fecha_saldo"]!],
               ]) +
-              paragraph(model.document.payment_text) +
-              paragraph(model.document.cancellation);
+              (q.document_snapshot.text_sections_migrated
+                ? ""
+                : paragraph(model.document.payment_text) + paragraph(model.document.cancellation));
             if (
               q.client_type === "B2B" &&
               s.options["tiers"] === true &&

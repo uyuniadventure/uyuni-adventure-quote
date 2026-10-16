@@ -83,7 +83,8 @@ Reglas para ese prompt:
 | T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
-| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [~] | T01g; T11/T12 completan después | sí |
+| T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
+| T13-fix | Validación JSON y textos en el constructor | [~] | T13 | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Fixtures de presupuestos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -474,6 +475,57 @@ Tests con estructuras basadas en esos casos (sin datos de clientes).
 ---
 
 ## T13 · Plantilla de propuesta B2C y B2B (PDF + email)
+
+Comprobado al iniciar T13-fix: PR #31 fusionado en `main`, commit `c404759`.
+Base de la corrección: `0553f4b`; se actualiza T13 a `[x]` por esa evidencia.
+
+### T13-fix · Textos del documento · 16-10-2026 · en revisión
+
+Pedido explícito de Andrea: reemplazar la función inexistente
+`jsonb_object_length` mediante una migración nueva y un test PGlite que guarde
+`info[]` válido. La validación usa `count(*) from jsonb_object_keys(block)` y
+comprueba el tipo antes de recorrer arrays/objetos. No se toca la migración vieja.
+
+Se retira la pestaña «Textos del PDF». `quote-day-texts.tsx` conserva la edición
+de narrativas y etiquetas dentro de cada día del Editor, y cliente/guía arriba.
+Introducción, pago, cancelación, info práctica y T&C se editan en el constructor
+existente, con las mismas RPC de T13. Se añaden a la biblioteca los bloques vacíos
+PAGO_TEXTO, CANCELACION e INFO_PRACTICA, sin publicar textos privados en el catálogo.
+
+Origen real: `quotes.document_snapshot` (no existe columna `document_content`).
+La migración recupera todos sus textos en snapshots privados de `quote_doc_sections`,
+con saltos de línea y caracteres HTML escapados. Conserva cada entrada de `info[]`,
+incluso con títulos repetidos; mantiene el idioma y los enlaces T&C. No sobrescribe
+ediciones T13: ante conflicto conserva ambos textos en secciones distintas.
+Los originales permanecen como respaldo y las secciones recuperadas quedan sin revisar.
+El render evita repetir pago/cancelación desde el respaldo tras la migración.
+Reabrir, eliminar bloques o reemplazar un diseño no vuelve a importar el respaldo.
+
+Solo se migran borradores editables; HTML/PDF enviados, versiones archivadas,
+cotizaciones revisadas y outboxes pendientes se conservan. La nueva versión
+recupera los textos antiguos sin modificar la anterior. Una cotización sin textos
+ni constructor mantiene la inicialización al abrir PDF y envío.
+
+**Despliegue:** aplicar `20261016000300_quote_document_text_sections.sql` después
+de `20261016000200_proposal_builder.sql`, regenerar tipos y redesplegar
+`proposal-document` y `send-quote-email` con `supabase/functions/deno.json`.
+El espejo Drizzle `0019_quote_document_text_sections.sql` es idéntico: no aplicar
+las dos copias. No se ejecutan cambios en Lovable Cloud desde Codex.
+
+**Prueba manual:** abrir un borrador con textos anteriores, comprobar todos los
+bloques en PDF y envío, editar/reordenar y comparar PDF/email sin duplicados.
+Editar una descripción en Editor → Textos del día y comprobar el resultado.
+Crear una nueva versión de una enviada y verificar que la enviada no cambia.
+La ampliación comercial de T11 y los controles integrales de T12 siguen pendientes.
+
+**Verificación local:** 17 tests nuevos aprobados (15 de migración/validación,
+1 de guardado real de `info[]`, 1 de edición de días en Editor). Suite completa:
+328/330, sin omitidos; solo fallan los fixtures ya documentados de Bolivia y
+WE ROAD. Nueve suites `test:db`, instalación congelada, TypeScript de app/E2E,
+build y comprobación Deno de las dos Edge Functions aprobados. Se regeneraron
+los tipos desde PGlite sin diferencias. La migración histórica queda intacta.
+
+---
 
 **Prioridad revisada por Andrea (16-10-2026):** después de T01g y antes de T11/T12. **Lovable:** sí.
 

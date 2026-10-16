@@ -28,7 +28,8 @@ import { QuotePanel, type Alert } from "./quote-panel";
 import { QuotePayments } from "./quote-payments";
 import { QuoteDelivery } from "./quote-delivery";
 import { SaveTemplateDialog } from "./save-template-dialog";
-import { QuoteTexts } from "./quote-texts";
+import { QuoteDayTexts, QuoteIdentityTexts } from "./quote-day-texts";
+import type { DocumentContent } from "@/lib/quotes/document-model";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -122,11 +123,10 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
       {saveTemplateOpen && <SaveTemplateDialog quoteId={quoteId} actions={actions} onClose={() => setSaveTemplateOpen(false)} />}
       {!editable && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{data.quote.archived_at ? "Versión anterior: solo lectura." : "Esta cotización ya no es un borrador; editarla requiere crear una nueva versión."}</p>}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="textos">Textos del PDF</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
-        <TabsContent value="textos"><QuoteTexts quote={data.quote} days={data.days} items={data.items} actions={actions} onGeneratePdf={() => setTab("envio")} /></TabsContent>
+        <TabsList><TabsTrigger value="editor">Editor</TabsTrigger><TabsTrigger value="envio">PDF y envío</TabsTrigger><TabsTrigger value="pagos">Pagos</TabsTrigger><TabsTrigger value="historial">Historial</TabsTrigger></TabsList>
         <TabsContent value="editor">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <DaysEditor data={data} editable={editable} actions={displayedActions} />
+            <div className="space-y-3"><QuoteIdentityTexts quote={data.quote} actions={actions} /><DaysEditor data={data} editable={editable} actions={displayedActions} /></div>
             <div className="space-y-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
               {editable && (
                 <div className="flex flex-wrap gap-2">
@@ -288,7 +288,7 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
         <DayCard key={d.id} day={d} index={i} count={days.length}
           canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
           canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
-          editable={editable} actions={actions} language={quote.language}
+          editable={editable} actions={actions} language={quote.language} content={(quote.document_snapshot ?? {}) as DocumentContent}
           pendingReview={pendingIds.has(d.id)} canReview={canReview} onReview={() => review([d.id])}
           onMove={(to) => act(() => moveDayByPosition(quote, days, i, to))}
           onReplace={(blockId) => act(async () => {
@@ -321,9 +321,9 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   );
 }
 
-function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, language, pendingReview, canReview, onReview, onMove, onRemove, onReplace }: {
+function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, language, content, pendingReview, canReview, onReview, onMove, onRemove, onReplace }: {
   day: Tables<"quote_days">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
-  language: string; pendingReview: boolean; canReview: boolean; onReview: () => void;
+  language: string; content: DocumentContent; pendingReview: boolean; canReview: boolean; onReview: () => void;
   onMove: (to: number) => void; onRemove: () => void; onReplace: (blockId: string) => void;
 }) {
   const [replacing, setReplacing] = useState(false);
@@ -355,6 +355,7 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
         )}
       </div>
       <div className="space-y-3 p-4">
+        <QuoteDayTexts day={day} items={items} language={language} content={content} disabled={!canReview} actions={actions} />
         {replacing && editable && (
           <SearchPicker className="w-full" placeholder="Bloque que reemplaza este día…" queryKey="blocks" fetcher={fetchBlocks}
             onPick={(o) => { if (o) { setReplacing(false); onReplace(o.id); } }} />

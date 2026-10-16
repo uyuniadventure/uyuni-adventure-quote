@@ -133,6 +133,17 @@ describe("creación atómica desde plantilla", () => {
     );
   });
 
+  it("saves a valid nonempty info[] through PGlite and preserves the saved calculation", async () => {
+    const quote = await createQuoteFromTemplate(templateId, basics());
+    const info = [{ title: "Salud y altitud", content: "Texto práctico válido." }];
+    await saveQuoteDocument(quote.id, { info });
+    const { quote: saved } = await loadQuote(quote.id);
+    expect((saved.document_snapshot as { info: unknown }).info).toEqual(info);
+    expect(saved.total_cost_usd).toBe(quote.total_cost_usd);
+    expect(saved.total_price_usd).toBe(quote.total_price_usd);
+    expect(saved.calculation).toEqual(quote.calculation);
+  });
+
   it("creates from the direct template entry at the same SPA 2-pax total as the wizard", async () => {
     await as(seller);
     const wizard = await createQuoteFromTemplate(templateId, basics());

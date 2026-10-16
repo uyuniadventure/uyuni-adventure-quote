@@ -389,6 +389,20 @@ su cotización, pero no ocultarlo ni eliminarlo.** Admin/Operación gestionan el
 catálogo; guardar una sección como nuevo bloque crea un pendiente. Las ediciones
 del documento solo invalidan el PDF, conservando el cálculo guardado.
 
+**Corrección T13 (16-10-2026):** se elimina la pestaña «Textos del PDF».
+Introducción, condiciones de pago, cancelación, información práctica y T&C se
+editan como bloques de texto en «PDF y envío». El bloque automático de métodos
+de pago conserva los datos bancarios. Los textos y etiquetas de cada día siguen
+en su tarjeta del Editor; cliente y guía también permanecen en el Editor.
+Los textos anteriores viven realmente en `quotes.document_snapshot`: se copian
+a snapshots de `quote_doc_sections`, conservando los originales como respaldo.
+Se rellenan bloques vacíos; si T13 ya tiene texto, se añade el texto anterior
+en otra sección sin sobrescribirlo. Los bloques recuperados requieren revisión.
+No se alteran propuestas congeladas, cotizaciones fuera de borrador ni envíos
+pendientes; la recuperación se realiza al crear su nueva versión en borrador.
+La marca `text_sections_migrated` impide imprimir dos veces pago/cancelación o
+recuperar textos eliminados al volver a abrir el documento.
+
 La Edge Function `proposal-document` prepara el HTML autorizado. `quote_proposals`
 conserva la revisión de origen y vincula el PDF generado a ese contenido. Al reservar
 el correo en la outbox se fija el HTML y las secciones para reintentos; al pasar a
