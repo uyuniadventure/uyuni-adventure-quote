@@ -1,8 +1,14 @@
 import { pdf } from "@react-pdf/renderer";
 import { db, unwrap } from "../db";
-import { loadQuote, quotePricingInput, unreviewedDaysMessage } from "../quotes";
+import {
+  buildQuoteDocumentModel,
+  loadQuote,
+  quotePricingInput,
+  unreviewedDaysMessage,
+  type DocumentContent,
+} from "../quotes";
 import { calculateQuote, assertCompleteCalculation, type QuoteResult } from "../pricing";
-import { QuoteDocument, type DocumentContent } from "./document";
+import { QuoteDocument } from "./document";
 
 export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   const data = await loadQuote(quoteId);
@@ -17,6 +23,13 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
   if (!content.client_name || (q.client_type === "B2B" ? !content.terms : !content.terms_url))
     throw new Error("Client name and localized terms are required in document_snapshot");
   const input = quotePricingInput(data);
+  const model = buildQuoteDocumentModel(
+    {
+      ...data,
+      content,
+    },
+    q.language,
+  );
   const optional_prices: Record<string, number> = {};
   for (const day of input.days) {
     for (const item of day.items.filter((i) => !i.included)) {
@@ -37,7 +50,7 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
     <QuoteDocument
       data={{
         ...data,
-        content,
+        model,
         calculation,
         optional_prices,
       }}

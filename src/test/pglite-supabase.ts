@@ -74,7 +74,7 @@ export function pgliteSupabase(pg: PGlite) {
             if (single && rows.length !== 1)
               return resolve({
                 data: null,
-                error: { message: "Record not found or inaccessible" },
+                error: { code: "PGRST116", message: "Record not found or inaccessible" },
                 count,
               });
             return resolve({
@@ -102,6 +102,22 @@ export function pgliteSupabase(pg: PGlite) {
           ["p_updated_at", "timestamptz"],
           ["p_path", "text"],
           ["p_url", "text"],
+        ],
+        save_quote_document: [
+          ["p_quote_id", "uuid"],
+          ["p_updated_at", "timestamptz"],
+          ["p_patch", "jsonb"],
+        ],
+        save_quote_item_label: [
+          ["p_quote_id", "uuid"],
+          ["p_item_id", "uuid"],
+          ["p_updated_at", "timestamptz"],
+          ["p_label", "text"],
+        ],
+        reset_quote_day_field: [
+          ["p_day_id", "uuid"],
+          ["p_field", "text"],
+          ["p_updated_at", "timestamptz"],
         ],
         quote_payment_summary: [["p_id", "uuid"]],
         register_quote_payment: [

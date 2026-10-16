@@ -7,6 +7,8 @@ import fixture from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
 import { registerQuotePayment } from "./payments";
 import { transitionQuote } from "../states";
 import { calculateQuote, type QuoteInput } from "../pricing";
+import { getTemplateForQuote, templateQuotePrefill } from "./template-entry";
+import { saveItemLabel, saveQuoteDocument } from "./document";
 
 const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSupabase> | null }));
 vi.mock("../db", () => ({
@@ -96,6 +98,58 @@ beforeEach(async () => {
 afterAll(async () => pg?.close());
 
 describe("creación atómica desde plantilla", () => {
+  it("saves PDF text without changing totals, rejects unknown keys and freezes non-drafts", async () => {
+    const quote = await createQuoteFromTemplate(templateId, basics());
+    const originalCost = quote.total_cost_usd;
+    const originalPrice = quote.total_price_usd;
+    await expect(
+      saveQuoteDocument(quote.id, { arbitrary_sql_key: "no" } as never),
+    ).rejects.toThrow();
+    const edited = await saveQuoteDocument(quote.id, {
+      client_name: "Cliente editado",
+      introduction: "Introducción revisada para el PDF.",
+    });
+    expect(edited.total_cost_usd).toBe(originalCost);
+    expect(edited.total_price_usd).toBe(originalPrice);
+    expect(edited.calculation).toEqual(quote.calculation);
+
+    const saved = await loadQuote(quote.id);
+    const label = await saveItemLabel(quote.id, saved.items[0]!.id, "Traslado personalizado");
+    expect(
+      (label.document_snapshot as { item_labels: Record<string, string> }).item_labels[
+        saved.items[0]!.id
+      ],
+    ).toBe("Traslado personalizado");
+    const afterLabel = await loadQuote(quote.id);
+    expect(afterLabel.quote.total_cost_usd).toBe(originalCost);
+    expect(afterLabel.quote.total_price_usd).toBe(originalPrice);
+
+    await transitionQuote(quote.id, "perdida", "Prueba de estado no editable");
+    await expect(saveQuoteDocument(quote.id, { introduction: "No guardar" })).rejects.toThrow(
+      "solo se pueden editar en borrador",
+    );
+    await expect(saveItemLabel(quote.id, saved.items[0]!.id, "No guardar")).rejects.toThrow(
+      "solo se pueden editar en borrador",
+    );
+  });
+
+  it("creates from the direct template entry at the same SPA 2-pax total as the wizard", async () => {
+    await as(seller);
+    const wizard = await createQuoteFromTemplate(templateId, basics());
+    const selected = await getTemplateForQuote(templateId);
+    const prefill = templateQuotePrefill(selected);
+    const direct = await createQuoteFromTemplate(selected.id, {
+      ...basics(),
+      pax_paying: Number(prefill.pax_paying),
+      tc_count: Number(prefill.tc_count),
+      category: prefill.category,
+    });
+    expect(direct.total_price_usd).toBe(wizard.total_price_usd);
+    expect(direct.total_cost_usd).toBe(wizard.total_cost_usd);
+    expect(direct.rooming).toEqual(wizard.rooming);
+    expect(direct.staff).toEqual(wizard.staff);
+    expect(direct.template_id).toBe(wizard.template_id);
+  });
   it("registers SPAUYU 2 pax deposit and exposes the copied service in Operations", async () => {
     await as(seller);
     const quote = await createQuoteFromTemplate(templateId, basics());

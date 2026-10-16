@@ -12,7 +12,7 @@
 1. Lee `AGENTS.md`, `SPEC.md` y este archivo completos antes de empezar.
 2. Busca la **primera tarea con estado `[ ]`** cuyas dependencias estén en `[x]`. Haz solo esa.
 3. Rama `codex/<id-tarea>-<nombre>` desde `main` actualizado. Nunca push a `main`, nunca force push, nunca rebase de commits publicados.
-4. Al terminar la tarea, en el mismo PR, cambia su estado en este archivo de `[ ]` a `[~]` (en revisión). Andrea lo pasa a `[x]` al hacer merge.
+4. Al terminar la tarea, en el mismo PR, cambia su estado en este archivo de `[ ]` a `[~]` (en revisión). Al empezar la siguiente, actualiza `origin/main`, comprueba en `git log origin/main` los PR de tareas mergeados y márcalas `[x]` tú mismo. Registra PR y commit de merge como evidencia; no cierres tareas por tener solo una rama o un PR abierto (decisión de Andrea, 12-10-2026).
 5. Si la tarea tiene un **ALTO**, entrega lo pedido para revisión y no sigas hasta recibir "OK" de Andrea.
 6. Si algo del plan no coincide con el código real, sigue el código real y explícalo en el PR. No inventes tablas ni funciones: busca primero con `grep`.
 7. Codex no tiene acceso a la base. Todo cambio de base va como migración fechada en `supabase/migrations/` y debe aplicarse en Lovable Cloud (ver sección 2).
@@ -74,10 +74,11 @@ Reglas para ese prompt:
 
 | # | Tarea | Estado | Depende de | Lovable |
 |---|---|---|---|---|
-| T00 | Arreglar CI (bun.lock con registro privado) | [~] | — | no |
-| T01 | Paso 2 de Nueva cotización no sugiere plantillas | [ ] | T00 | sí (migraciones) |
-| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [~] | T00 | sí |
-| T01c | Crear cotización desde /plantillas | [ ] | T01 | sí |
+| T00 | Arreglar CI (bun.lock con registro privado) | [x] | — | no |
+| T01 | Paso 2 de Nueva cotización no sugiere plantillas | [x] | T00 | sí (migraciones) |
+| T01b | Revisión de textos del día dentro de la cotización (PDF bloqueado) | [x] | T00 | sí |
+| T01c | Crear cotización desde /plantillas | [~] | T01 | sí |
+| T01d | Editor de textos del PDF | [~] | T01b | sí |
 | T02 | Sacar quote-ops.ts y limpiar migración con placeholder | [ ] | T00 | sí (migraciones) |
 | T03 | Política de precio única (margen, imprevistos, canal B2B/B2C) | [ ] | T02 | sí |
 | T04 | Importador con unidades inferidas + casos 9+1 y WE ROAD (ALTO) | [ ] | T03 | no |
@@ -94,9 +95,16 @@ Reglas para ese prompt:
 | T15 | Programas automáticos por firma | [ ] | T09 | no |
 | T16 | Seguimientos programados | [ ] | T13 | sí |
 | T17 | Dashboard | [ ] | T11 | sí |
-| T18 | Roles y permisos verificados | [~] | — | sí (si cambia /admin) |
+| T18 | Roles y permisos verificados | [x] | — | sí (si cambia /admin) |
 | T19 | E2E de los dos caminos con las funciones nuevas | [ ] | T01–T17 | no |
 | T20 | Inventario final | [ ] | todo | no |
+
+Comprobación al iniciar T01c (12-10-2026), con `git log origin/main`: T00 →
+PR #22, merge `53610b5`; T18 → PR #23, merge `920700b`; T01 → PR #24,
+merge `34769d3`; T01b → PR #25, merge `f2c5ba9`. Se actualizan a `[x]`
+según la regla §0.4. Las notas históricas de cada entrega conservan el resultado
+de aquel momento; estos cierres no certifican despliegues de UI en Cloud ni
+eliminan los fallos de fixtures pendientes de T03–T04.
 
 Ya hecho en `main` (no repetir): rack como neto, defaults de habitación y vehículo, importador SPAUYU, aprobación masiva, días trazables con snapshot y overrides, creación atómica desde plantilla, ajuste % por línea (`applyAdjustmentBulk` en lib), listado, estados e historial, pagos con depósito y paso a Operación (`quote-payments.tsx`), botones PDF y email (`quote-delivery.tsx`), depósito % por cliente y en `pricing_settings`, E2E con Playwright (falla en CI, ver T00).
 
@@ -192,6 +200,39 @@ Hacer:
 7. Ajusta T01: toda plantilla que se ve en /plantillas con estado activo o pendiente debe aparecer en el paso 2.
 
 Lovable: en /plantillas, botón "Crear cotización" en cada fila (icono + texto, visible al pasar el mouse y siempre en móvil) y también dentro del editor de la plantilla. Navega a /nueva-cotizacion?template=<id>.
+
+---
+
+## T01d · Editor de textos del PDF
+
+**Objetivo.** Andrea ve y edita, como campos, todos los textos que componen el PDF, y lo que edita es exactamente lo que se imprime.
+
+**Problema detectado.** `src/lib/pdf/document.tsx` imprime `d.title`, `d.description`, `d.includes` y `d.excludes` desde las columnas de `quote_days`, no desde `resolveDay(day)`. Lo editado con `updateDayContent` (overrides) no llega al PDF.
+
+**Hacer.**
+1. `dayContentSchema`: agrega `includes` y `excludes` localizados, como `description`. Migra los valores existentes de las columnas de `quote_days` al contenido resuelto sin perder nada.
+2. Una sola fuente: crea `buildQuoteDocumentModel(data, lang)` en `src/lib/quotes/document-model.ts`, función pura que devuelve todo el texto del PDF en orden:
+   - Documento: `client_name`, `introduction`, `guide`, `payment_text`, `cancellation`, `terms_url`, `info[] { title, content }`.
+   - Por día: título, descripción, ruta, alojamiento (`accommodation_text`), comidas, transporte, incluye, no incluye y nota para el cliente; cada campo con `{ value, overridden: boolean }`.
+   - Por servicio: la etiqueta que se imprime (`item_labels` o el nombre del servicio).
+   `document.tsx` renderiza solo desde ese modelo, sin leer columnas antiguas.
+3. Guardado:
+   - `saveQuoteDocument(quoteId, patch)`: RPC atómica que valida con Zod y solo acepta claves de `DocumentContent` editables; usa `updated_at` como guarda y solo admite cotizaciones en borrador.
+   - Días: `updateDayContent` deja el día revisado; `resetDayField(dayId, campo)` borra el override y restaura el texto del bloque.
+   - Etiquetas: `saveItemLabel(quoteId, itemId, texto)` guarda en `item_labels`.
+   Ningún cambio de texto altera precios ni `block_snapshot`.
+4. Tests: un override de título e incluye aparece en el PDF; `resetDayField` vuelve al texto original; `saveQuoteDocument` rechaza claves desconocidas y cotizaciones fuera de borrador; el total no cambia al editar textos.
+
+**Lovable.** Nueva pestaña "Textos del PDF" en el editor, entre "Editor" y "PDF y envío", con los campos en el mismo orden del PDF:
+- Documento: Cliente, Introducción, Guía (inputs y textareas autoajustables).
+- Una tarjeta por día: Título, Descripción, Alojamiento, Comidas, Transporte, Incluye, No incluye, Nota. Cada campo modificado lleva un punto "modificado" y botón "Restaurar". Badge "Texto sin revisar" / "Revisado" por día.
+- Servicios: lista de etiquetas impresas editables.
+- Pago, Cancelación, Información práctica (agregar/quitar bloques título + texto) y enlace T&C.
+- Guardado al salir de cada campo por la cola `useQuoteActions`, con aviso "Guardado".
+- Selector de idioma si la cotización tiene más de uno; por defecto el idioma de la cotización.
+- Solo editable en borrador; en otros estados, solo lectura.
+- Botón "Generar PDF" al final que lleva a "PDF y envío".
+- Usar solo `buildQuoteDocumentModel`, `saveQuoteDocument`, `updateDayContent`, `resetDayField` y `saveItemLabel`. No calcular nada en la UI.
 
 ---
 

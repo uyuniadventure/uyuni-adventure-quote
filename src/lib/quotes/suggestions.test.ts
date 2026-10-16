@@ -6,6 +6,8 @@ import { pgliteSupabase } from "@/test/pglite-supabase";
 const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSupabase> | null }));
 vi.mock("../db", () => ({ db: { from: (table: string) => transport.client!.from(table) } }));
 import { suggestTemplates, templateSuggestionError, templateImportWarnings } from "./suggestions";
+import { getTemplateForQuote, templateQuotePrefill, quoteCreationSearch } from "./template-entry";
+import { templatePassengerDefaults, templatePassengerMismatch } from "./template-defaults";
 
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 const admin = randomUUID(),
@@ -131,4 +133,55 @@ it("keeps warnings readable without discarding structured import details", () =>
     '{"day":2,"reason":"Falta texto"}',
   ]);
   expect(templateImportWarnings(null)).toEqual([]);
+});
+
+it("loads a pending template through RLS with warnings and prefills only itinerary and passenger fields", async () => {
+  await add("SELECTED", "pendiente", 4, seller);
+  const id = (await suggestTemplates({}))[0]!.id;
+  await pg.query(
+    "update itinerary_templates set quote_defaults=$2,import_warnings=$3 where id=$1",
+    [id, { pax_paying: 9, tc_count: 1 }, ["Confirmar hotel"]],
+  );
+  await as(seller);
+  const template = await getTemplateForQuote(id);
+  expect(template.status).toBe("pendiente");
+  expect(template.import_warnings).toEqual(["Confirmar hotel"]);
+  expect(templateQuotePrefill(template)).toEqual({
+    route_from: "UYU",
+    route_to: "SPA",
+    days: "4",
+    category: "COMFORT",
+    modality: "privado",
+    pax_paying: "9",
+    tc_count: "1",
+  });
+});
+it("rejects inactive templates, missing UUIDs and another user's pending template", async () => {
+  await add("CLOSED", "activo");
+  const id = (await suggestTemplates({}))[0]!.id;
+  await pg.query("update itinerary_templates set status='inactivo' where id=$1", [id]);
+  await expect(getTemplateForQuote(id)).rejects.toThrow("archivada");
+  await pg.query("update itinerary_templates set status='pendiente' where id=$1", [id]);
+  await as(seller);
+  await expect(getTemplateForQuote(id)).rejects.toThrow("no existe o no tienes acceso");
+  await expect(getTemplateForQuote(randomUUID())).rejects.toThrow("no existe o no tienes acceso");
+  await expect(getTemplateForQuote("not-an-id")).rejects.toThrow("identificador");
+});
+it("keeps absent passenger defaults empty and respects explicit zero TC", () => {
+  expect(templatePassengerDefaults({})).toEqual({});
+  expect(templatePassengerDefaults({ pax_paying: 2, tc_count: 0 })).toEqual({
+    pax_paying: 2,
+    tc_count: 0,
+  });
+  expect(templatePassengerMismatch({ pax_paying: "2", tc_count: "0" }, { pax_paying: 2 })).toBe(
+    false,
+  );
+  expect(templatePassengerMismatch({ pax_paying: "2", tc_count: "1" }, { tc_count: 0 })).toBe(true);
+  expect(() => templatePassengerDefaults({ pax_paying: -1 })).toThrow("configuración");
+});
+it("validates template URLs and gives an existing quote precedence", () => {
+  expect(quoteCreationSearch({ template: "id" })).toEqual({ template: "id" });
+  expect(quoteCreationSearch({ quote: "saved", template: "id" })).toEqual({ quote: "saved" });
+  expect(quoteCreationSearch({ template: 42, quote: [] })).toEqual({});
+  expect(quoteCreationSearch({ template: " ", quote: "" })).toEqual({});
 });

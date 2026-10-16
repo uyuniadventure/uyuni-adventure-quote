@@ -2533,6 +2533,10 @@ export type Database = {
         Args: { p_quote_id: string; p_payment_id: string; p_payment: Json };
         Returns: Json;
       };
+      reset_quote_day_field: {
+        Args: { p_day_id: string; p_field: string; p_updated_at: string };
+        Returns: Json;
+      };
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       review_quote_days: {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
@@ -2540,6 +2544,14 @@ export type Database = {
       };
       save_quote_calculation: {
         Args: { p_id: string; p_updated_at: string; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      save_quote_document: {
+        Args: { p_quote_id: string; p_updated_at: string; p_patch: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      save_quote_item_label: {
+        Args: { p_quote_id: string; p_item_id: string; p_updated_at: string; p_label: string };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
       };
       save_quote_pdf: {
@@ -2552,6 +2564,7 @@ export type Database = {
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
       };
       validate_day_content: { Args: { p: Json }; Returns: boolean };
+      validate_quote_document_patch: { Args: { p: Json }; Returns: boolean };
       version_quote: { Args: { p_id: string }; Returns: string };
     };
     Enums: {
