@@ -22,6 +22,7 @@ export const Route = createFileRoute("/login")({
         content: "Acceso interno al cotizador de Uyuni Adventure DMC.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   ssr: false,
