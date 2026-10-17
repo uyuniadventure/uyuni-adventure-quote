@@ -72,7 +72,13 @@ describe("importador de presupuesto SPAUYU · lectura, diff y seed", () => {
     expect(plan.fixture.lines.find((l) => l.cell === "F46")?.day).toBe(1);
     expect(plan.fixture.lines.find((l) => l.cell === "F55")?.day).toBe(2);
     expect(plan.fixture.input?.fx_snapshot["CLP"]).toBe(925.92);
-    expect(plan.sql).toBe(await sql("supabase/seed/04_spauyu_mp_2pax.sql"));
+    // The archived seed predates explicit provenance. Its business content must
+    // stay byte-for-byte identical; only new import-origin metadata is added.
+    const legacySql = plan.sql
+      .replaceAll("day_blocks(catalog_origin,id,", "day_blocks(id,")
+      .replaceAll("select 'importacion',md5(", "select md5(")
+      .replaceAll("set catalog_origin='importacion',quote_defaults=", "set quote_defaults=");
+    expect(legacySql).toBe(await sql("supabase/seed/04_spauyu_mp_2pax.sql"));
   });
   it("does not silently accept compound lookup formulas or conflicting room SKUs", async () => {
     expect(
@@ -126,6 +132,17 @@ describe("importador de presupuesto SPAUYU · lectura, diff y seed", () => {
       );
     const othersBefore = await otherTemplates();
     await pg.exec(plan.sql);
+    expect(
+      (
+        await pg.query(
+          "select catalog_origin from day_blocks where code like 'IMPORT_SPAUYU_MP_2PAX_D%' order by code",
+        )
+      ).rows,
+    ).toEqual(Array.from({ length: 3 }, () => ({ catalog_origin: "importacion" })));
+    expect(
+      (await pg.query("select catalog_origin from itinerary_templates where sku='SPAUYU-3D2N-MP'"))
+        .rows,
+    ).toEqual([{ catalog_origin: "importacion" }]);
     expect(await catalogSnapshot()).toEqual(catalogBefore);
     expect(await otherTemplates()).toEqual(othersBefore);
     const newItems = await pg.query("select to_jsonb(i) data from day_block_items i order by id");

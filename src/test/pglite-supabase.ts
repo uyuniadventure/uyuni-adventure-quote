@@ -91,6 +91,12 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        delete_day_blocks: [
+          ["ids", "uuid[]"],
+          ["force", "boolean"],
+        ],
+        delete_templates: [["ids", "uuid[]"]],
+        purge_imported_catalog: [["confirm", "text"]],
         prepare_quote_template: [
           ["p_id", "uuid"],
           ["p_route_from", "text"],

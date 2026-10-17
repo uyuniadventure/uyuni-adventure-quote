@@ -155,6 +155,13 @@
       "when": 1792227360823,
       "tag": "0021_fix_quoted_quote_language",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792278000000,
+      "tag": "0022_catalog_deletion",
+      "breakpoints": true
     }
   ]
 }

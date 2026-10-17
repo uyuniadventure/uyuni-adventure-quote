@@ -153,6 +153,28 @@ advertencias de importación. Los registros activos o inactivos no se modifican.
 El vendedor puede leer los bloques y módulos de una plantilla activa sin cambiar
 el estado propio de esos bloques/módulos ni ganar permisos de edición.
 
+**Borrado de catálogo (T01u, Andrea, 17-10-2026):** solo Admin/Operación,
+mediante `delete_day_blocks`, `delete_templates` y `purge_imported_catalog`.
+Sin `force`, un bloque utilizado devuelve sus plantillas y no se elimina nada
+del lote. Con `force`, se quitan esos enlaces, se renumeran los días restantes
+y las plantillas quedan pendientes. Se conserva su duración comercial y SKU
+para revisión, incluso si quedan vacías. Borrar una plantilla conserva los
+bloques; cotizaciones conservan sus días, ítems, cálculo y PDF, con `template_id`
+nulo. Al borrar un bloque, solo su referencia `source_block_id` queda nula en
+los días copiados, incluso en cotizaciones enviadas o archivadas.
+
+`catalog_origin` distingue `manual` (predeterminado, también al guardar desde
+cotización) e `importacion`. La migración identifica los IDs de los seeds
+históricos, incluidos huérfanos; no infiere origen por autor nulo, estado ni
+prefijo. Nuevas importaciones deben marcar `importacion` explícitamente.
+La purga exige `BORRAR` exacto y elimina plantillas importadas (excepto las
+reemplazadas desde una cotización), bloques importados y sus enlaces/traducciones/
+ítems. Conserva servicios, tarifas, módulos, clientes y snapshots de cotizaciones.
+Si un bloque importado está en una plantilla manual, esta se conserva pendiente
+con los días restantes renumerados. Antes se exportan los SELECT de
+`docs/consultas/respaldo_catalogo.sql`; la purga devuelve los conteos reales.
+Contrato de UI y despliegue: `docs/T01u_borrado_catalogo.md`.
+
 ### 4.5 Clientes y condiciones
 - **`clients`**: `type` (`B2B | B2C`), nombre o agencia, contacto, email, país, `language` (es, it, en, …), `terms_id`.
   - `margin_pct` opcional: se hereda si la cotización no especifica un porcentaje. Cero es un valor explícito.

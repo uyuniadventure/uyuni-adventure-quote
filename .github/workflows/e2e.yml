@@ -63,6 +63,8 @@ jobs:
         run: bunx vitest run src/lib/quotes/document-sections-migration.test.ts src/components/quote/quote-workspace.test.tsx src/lib/quotes/proposal.test.ts src/lib/pdf/proposal-document.test.tsx src/components/quote/proposal-builder.test.tsx src/components/quote/quote-delivery.test.tsx --maxWorkers=1
       - name: Documento atómico, RLS y congelado (T13)
         run: node scripts/db/test-proposals.mjs
+      - name: Borrado de catalogo con PGlite (T01u)
+        run: bunx vitest run src/lib/catalog/catalog.test.ts src/lib/catalog/catalog-origin.test.ts --maxWorkers=1
       - run: bunx playwright install --with-deps chromium
       - run: node tests/e2e/prepare-functions.mjs
       - name: Supabase aislado (sin conexión a Cloud)
