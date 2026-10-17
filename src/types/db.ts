@@ -477,6 +477,7 @@ export type Database = {
           name: string | null;
           content: Json;
           catalog_origin: string;
+          approval_issues: string[];
         };
         Insert: {
           id?: string;
@@ -497,6 +498,7 @@ export type Database = {
           name?: string | null;
           content?: Json;
           catalog_origin?: string;
+          approval_issues?: string[];
         };
         Update: {
           id?: string;
@@ -517,6 +519,7 @@ export type Database = {
           name?: string | null;
           content?: Json;
           catalog_origin?: string;
+          approval_issues?: string[];
         };
         Relationships: [
           {
@@ -2763,10 +2766,13 @@ export type Database = {
         };
         Returns: Json;
       };
+      approve_day_blocks: { Args: { ids: string[]; accept_warnings?: boolean }; Returns: Json };
+      approve_templates: { Args: { ids: string[]; accept_warnings?: boolean }; Returns: Json };
       approve_valid_imports: {
-        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string };
+        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string; p_accept_warnings?: boolean };
         Returns: Json;
       };
+      archive_catalog: { Args: { kind: string; ids: string[] }; Returns: Json };
       build_supplier_payables: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_supplier_payables"]["Row"][];
@@ -2833,6 +2839,7 @@ export type Database = {
         Args: { p_id: string; p_route_from?: string; p_route_to?: string };
         Returns: Json;
       };
+      preview_template_deletion: { Args: { ids: string[] }; Returns: Json };
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean };
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json };
@@ -2853,6 +2860,7 @@ export type Database = {
         Returns: Json;
       };
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
+      review_catalog_approval: { Args: { kind: string; ids: string[] }; Returns: Json };
       review_quote_days: {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
         Returns: Json;

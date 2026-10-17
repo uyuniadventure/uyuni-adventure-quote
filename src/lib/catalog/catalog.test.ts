@@ -15,7 +15,12 @@ vi.mock("../db", () => ({
     return data;
   },
 }));
-import { deleteDayBlocks, deleteTemplates, purgeImportedCatalog } from "./index";
+import {
+  deleteDayBlocks,
+  deleteTemplates,
+  purgeImportedCatalog,
+  previewTemplateDeletion,
+} from "./index";
 
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 const admin = "71000000-0000-0000-0000-000000000001";
@@ -181,7 +186,7 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
       ).toEqual([{ day_number: 1 }, { day_number: 2 }]);
       expect(
         await one("select status,days,nights from itinerary_templates where id=$1", [id]),
-      ).toEqual({ status: "pendiente", days: 4, nights: 3 });
+      ).toEqual({ status: "pendiente", days: 2, nights: 1 });
     }
   });
   it("permite quitar todos los días y conserva la plantilla vacía pendiente de revisión", async () => {
@@ -222,9 +227,16 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
     it(`elimina plantilla usada en cotización ${status}: solo template_id cambia`, async () => {
       const id = await quote(status === "archivada" ? "enviada" : status, status === "archivada");
       const before = await snapshot(id);
+      expect(await rows("select id from quotes where id=$1", [id])).toEqual([]);
+      expect(await previewTemplateDeletion([template, template])).toEqual({
+        templates: 1,
+        template_days: 4,
+        quotes_detached: 1,
+      });
       expect(await deleteTemplates([template, template])).toEqual({
         templates: 1,
         template_days: 4,
+        quotes_detached: 1,
       });
       before.quote["template_id"] = null;
       expect(await snapshot(id)).toEqual(before);
@@ -287,6 +299,7 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
     expect(await deleteTemplates([crypto.randomUUID()])).toEqual({
       templates: 0,
       template_days: 0,
+      quotes_detached: 0,
     });
     for (const sql of [
       "delete_templates(null)",
@@ -386,14 +399,14 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
       (await rows("select id from template_days where template_id=$1", [template])).length,
     ).toBe(4);
   });
-  it("mantiene NO ACTION de block_id y SET NULL de template_id", async () => {
+  it("declara RESTRICT de block_id y SET NULL de template_id", async () => {
     expect(
       await rows(
         "select conname,confdeltype from pg_constraint where conname in ('quotes_template_id_fkey','template_days_block_id_fkey') order by conname",
       ),
     ).toEqual([
       { conname: "quotes_template_id_fkey", confdeltype: "n" },
-      { conname: "template_days_block_id_fkey", confdeltype: "a" },
+      { conname: "template_days_block_id_fkey", confdeltype: "r" },
     ]);
   });
   it("el respaldo se ejecuta en READ ONLY sin mutaciones y cubre el mismo origen que purge", async () => {

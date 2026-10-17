@@ -162,6 +162,13 @@
       "when": 1792278000000,
       "tag": "0022_catalog_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792278000001,
+      "tag": "0023_catalog_approval_actions",
+      "breakpoints": true
     }
   ]
 }
