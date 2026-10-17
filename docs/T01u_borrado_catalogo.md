@@ -3,6 +3,12 @@
 Backend listo para las pantallas de Lovable. No se ejecutan borrados ni migraciones
 en Cloud desde Codex. Rama `codex/t01u-borrar-catalogo`, base `071b16c`.
 
+**Actualización T01k:** [T01k_catalogo.md](T01k_catalogo.md) amplía las acciones
+diarias: FK de bloque RESTRICT, `deleteTemplates` añade `quotes_detached`, borrado
+seleccionado ajusta duración restante, aprobación con avisos y archivado. Su
+contrato de pantalla sustituye el de listas/editores de este documento. La purga,
+su respaldo y la tarjeta de Admin mantienen el contrato T01u descrito aquí.
+
 ## Aplicación y respaldo
 
 1. Con las migraciones anteriores ya aplicadas, ejecutar únicamente

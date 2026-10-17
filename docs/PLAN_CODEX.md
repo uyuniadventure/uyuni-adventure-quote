@@ -1,11 +1,11 @@
 # PLAN_CODEX — Cotizador Uyuni Adventure
 
 > Archivo de trabajo para Codex. Guardarlo en `docs/PLAN_CODEX.md`.
-> Estado del repo revisado: `main` en `071b16c` (17-10-2026).
+> Estado del repo revisado: `main` en `ff9ee99` (17-10-2026).
 > Primera ejecución del plan: base `main` en `186740c` (12-10-2026); ver comprobación de T00.
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
-> Prioridad de Andrea, 17-10-2026: **T01u · Borrar bloques diarios y plantillas**,
-> antes de reimportar. Entregar T01u y parar. No iniciar T01h/T01i en esta entrega.
+> Prioridad de Andrea, 17-10-2026: **T01k · Borrar plantillas y bloques, aprobar bloques**,
+> antes de T01h. Entregar T01k y parar. No iniciar T01h/T01i en esta entrega.
 
 ---
 
@@ -83,8 +83,9 @@ Reglas para ese prompt:
 | T01d | Editor de textos del PDF | [x] | T01b | sí |
 | T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
 | T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
-| T01u | Borrar bloques diarios, plantillas y catálogo importado | [~] | T01s; prioridad de Andrea | sí |
-| T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g | sí |
+| T01u | Borrar bloques diarios, plantillas y catálogo importado | [x] | T01s; prioridad de Andrea | sí |
+| T01k | Borrar plantillas y bloques, aprobar bloques | [~] | T01u; antes de T01h | sí |
+| T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g, T01k | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
@@ -356,7 +357,11 @@ aplicar solo la copia de Supabase. Ninguna migración histórica fue editada.
 No se ejecutaron cambios en Cloud. **Entrega y parada:** T01h y el resto de
 funciones nuevas siguen detenidas hasta la validación del flujo en producción.
 
-## T01u · Borrar bloques diarios y plantillas · 17-10-2026 · en revisión
+## T01u · Borrar bloques diarios y plantillas · 17-10-2026 · integrada
+
+Integración comprobada en `origin/main`: PR #35, merge `ff9ee99`. Acredita el
+backend integrado, no la aplicación de migraciones ni las pantallas en Cloud.
+T01k amplía los contratos de borrado y aprobación descritos abajo.
 
 Pedido explícito de Andrea; se entrega y se detiene antes de la reimportación.
 Base `origin/main` en `071b16c`. T01s pasa a `[x]` por PR #34, merge `1298324`,
@@ -389,12 +394,41 @@ aprobadas; instalación congelada, TypeScript app/E2E, build y ESLint de archivo
 TypeScript modificados aprobados. Suite completa: 368/370; solo siguen fallando
 los dos fixtures incompletos de Bolivia/WE ROAD (T03–T04), sin omisiones.
 
+## T01k · Borrar plantillas y bloques, aprobar bloques · 17-10-2026 · en revisión
+
+Base `origin/main` en `ff9ee99`. Diagnóstico RLS/FK/aprobación, contratos y
+despliegue: [T01k_catalogo.md](T01k_catalogo.md).
+
+- Aprobación de bloques/plantillas seleccionados para Admin/Operación, con
+  previsualización de avisos y consentimiento `acceptWarnings`. Sin consentimiento,
+  los que tienen avisos quedan pendientes; con él se activan conservando motivos.
+- La aprobación global de importación conserva el permiso Admin y la simulación
+  con huella; permite aceptar avisos de plantillas sin saltar reglas de tarifas.
+- Borrado de plantillas con conteo previo/final de cotizaciones desvinculadas;
+  snapshots y totales intactos. FK a bloques RESTRICT; force renumera, ajusta
+  duración (3/3 en el caso pedido) y deja pendientes las plantillas afectadas.
+- Archivado mediante RPC (`inactivo`), API en `src/lib/catalog`, tipos regenerados.
+  Duplicar manualmente una plantilla conserva origen manual aunque la fuente sea
+  importada. Las acciones de pantalla se entregan como prompt para Lovable.
+
+**Migración:** `20261017000200_catalog_approval_actions.sql`, después de T01u
+`20261017000100_catalog_deletion.sql`. Espejo `0023_catalog_approval_actions.sql`:
+no aplicar ambas copias. No requiere seeds ni cambios en Edge Functions.
+
+**Pruebas de catálogo:** 43/43 con PGlite (18 nuevas), incluidas permisos de
+Vendedor, aceptación de avisos, simulación sin escrituras, rollback, renumeración
+y snapshots de cotizaciones en todos los estados. Nueve suites históricas de BD
+aprobadas. Suite completa: 386/388; los dos fallos existentes son los fixtures
+incompletos de Bolivia/WE ROAD. Instalación congelada, TypeScript app/E2E, build
+y ESLint de los archivos modificados aprobados. No se ejecutan cambios en Cloud.
+Entregar y detenerse.
+
 ## T01h · T01i · T01j — Bloques v2, reimportación y recálculo
 
 **En pausa por pedido de Andrea:** validar T01s antes de continuar. T13-fix está
 fusionada: PR #32, commit de merge `363781c`, comprobado en `origin/main`.
 
-Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g y antes de T02. T01i sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
+Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g/T01k y antes de T02. T01h referencia el borrado de T01k, no lo repite. T01i reutiliza la purga de T01u y sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
 
 ## T02 · Sacar quote-ops.ts y limpiar migración con placeholder
 

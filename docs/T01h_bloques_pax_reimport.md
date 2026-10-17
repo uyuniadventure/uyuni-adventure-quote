@@ -1,6 +1,6 @@
 # T01h · T01i · T01j — Bloques con opciones, reimportación y recálculo
 
-Especificación de Andrea, 16-10-2026. Estas tareas van después de T01g y antes de T02. T01d sigue siendo «Editor de textos del PDF». T01j absorbe T06; T01i reemplaza la parte de plantillas del importador de T04, que queda para fixtures de presupuestos. T13 se adelanta antes de T11/T12.
+Especificación de Andrea, 16-10-2026; separación de T01k confirmada el 17-10-2026. Estas tareas van después de T01g/T01k y antes de T02. T01d sigue siendo «Editor de textos del PDF». T01j absorbe T06; T01i reemplaza la parte de plantillas del importador de T04, que queda para fixtures de presupuestos. T13 se adelanta antes de T11/T12.
 
 ## Por qué
 
@@ -31,11 +31,12 @@ Lógica en `src/lib/quotes/selection.ts`:
 - `setRooming(quoteId, rows)`: RPC atómica; alojamiento toma cantidades desde rooming.
 - Avisos bloquean revisada, no edición: «Faltan n plazas en el transporte del día N» (pax + TC + staff); «La distribución suma n personas, la cotización tiene m»; hotel sin tipo elegido muestra disponibles.
 
-Borrado: FK quote_days.source_block_id ON DELETE SET NULL. `delete_day_blocks(ids uuid[], force bool)` y `deleteDayBlocks(ids, {force})`, solo Admin/Operación. Sin force devuelve plantillas afectadas sin borrar; con force quita sus enlaces y renumera. Cotizaciones conservan snapshots.
+Borrado, aprobación y selección masiva se resuelven antes en [T01k](T01k_catalogo.md).
+T01h reutiliza sus RPC, API y acciones de pantalla; no los vuelve a implementar.
 
 Módulos de actividad: ocultar menú y pestaña mediante flag en pricing_settings (D9). Traducción: diagnosticar nombre de Edge Function frente a supabase/functions/, secretos y despliegue; error en español con causa. Incluir despliegue en prompt Lovable.
 
-Tests: 7 pax con Leo 4x4 de 5 → 2 vehículos; Sprinter más barata disponible → Sprinter. Elección manual de un 4x4 Leo, luego 9 pax → conserva y avisa faltan 4 plazas. Rooming 2 DBL + 1 TPL para 7 cobra esas habitaciones; suma 6 avisa. Per_service 3 días cobra una vez; comida free 6 + 1 TC → costo 6 / proveedor 7; margen custom −10 % reduce línea. Borrar bloque usado sin force devuelve lista; cotización conserva días.
+Tests: 7 pax con Leo 4x4 de 5 → 2 vehículos; Sprinter más barata disponible → Sprinter. Elección manual de un 4x4 Leo, luego 9 pax → conserva y avisa faltan 4 plazas. Rooming 2 DBL + 1 TPL para 7 cobra esas habitaciones; suma 6 avisa. Per_service 3 días cobra una vez; comida free 6 + 1 TC → costo 6 / proveedor 7; margen custom −10 % reduce línea. Conservar en verde la suite de catálogo de T01k al migrar el modelo.
 
 Lovable:
 
@@ -43,7 +44,6 @@ Lovable:
 - Bloque / Servicios: puestos, alternativas con estrella predeterminada y «+ Alternativa». Columnas Servicio (Proveedor · Tipo de servicio · Tipo debajo), Cant., Unidad, Plazas/Ocupación, Precio USD, Incluido. Más opciones: Opcional, TC, Margen, Cubre n días.
 - Pasajeros: tabla Distribución de habitaciones SGL/DBL/TWN/MAT/TPL + TC, botón Proponer, suma vs pax verde/rojo.
 - Transporte por día: proveedor/vehículos, cantidades y costos, badge auto/elegido, Proponer cuando falten plazas.
-- Bloques diarios: selección múltiple, seleccionar todo, Eliminar (n), diálogo de plantillas afectadas.
 
 ## T01i · Reimportación de bloques e itinerarios — ALTO
 
@@ -58,7 +58,7 @@ Parser puro `src/lib/import/budget-tabs.ts`, fixture sintético:
 - Firma ruta + puestos/servicios normalizados + texto ES: idénticas firmas reutilizan un bloque.
 - D8: exportar traducciones antes de borrar por (SKU tour, día) y reasignar; sin encaje → Texto sin revisar.
 - Staging `import_batches`, `import_rows`, solo Admin: pestaña/día/puesto/servicio/proveedor/unidad/precio/estado ok-revisar-nuevo. Confirmación `commit_import_batch(batch_id)` atómica.
-- `purge_imported_catalog(confirm text)` exige BORRAR, elimina solo plantillas/bloques importados, conserva tarifario, cotizaciones y bloques manuales. Respaldo previo en docs/consultas/.
+- Reutilizar `purge_imported_catalog(confirm text)` de T01u, sin reimplementarlo: exige BORRAR, conserva tarifario, cotizaciones y bloques manuales. Respaldo previo `docs/consultas/respaldo_catalogo.sql`. Toda fila importada nueva debe escribir `catalog_origin='importacion'`.
 - Control: calcular cada plantilla con N. PAX, rooming y vehículos de su hoja; comparar COSTO (ejemplo UYUUYU-3D2N-KS = 901). Tabla SKU, costo hoja, costo app, diferencia, líneas explicativas.
 
 **ALTO:** entregar parser + pantalla + control con fixture. Andrea sube archivo real, revisa y responde **OK antes del commit de importación**. Aceptación: 100 % pestañas, diferencia ±1 USD o explicada, cero líneas Por grupo si tarifario indica por persona.

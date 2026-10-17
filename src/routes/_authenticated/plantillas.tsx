@@ -110,6 +110,7 @@ function TemplatesPage() {
         .from("itinerary_templates")
         .insert({
           ...rest,
+          catalog_origin: "manual",
           sku,
           name: `${t.name} (copia)`,
           created_by: user.id,
@@ -119,15 +120,13 @@ function TemplatesPage() {
         .single();
       if (e2) throw e2;
       if (template_days.length) {
-        const { error: e3 } = await db
-          .from("template_days")
-          .insert(
-            template_days.map((d) => ({
-              template_id: copy.id,
-              day_number: d.day_number,
-              block_id: d.block_id,
-            })),
-          );
+        const { error: e3 } = await db.from("template_days").insert(
+          template_days.map((d) => ({
+            template_id: copy.id,
+            day_number: d.day_number,
+            block_id: d.block_id,
+          })),
+        );
         if (e3) throw e3;
       }
       return copy.id;

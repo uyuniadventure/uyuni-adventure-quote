@@ -16,6 +16,7 @@ const group = z.object({
 });
 const resultSchema = z.object({
   dry_run: z.boolean(),
+  accept_warnings: z.boolean().default(false),
   review_date: z.string(),
   fingerprint: z.string().min(1),
   services: group,
@@ -24,11 +25,15 @@ const resultSchema = z.object({
 export type ImportApprovalResult = z.infer<typeof resultSchema>;
 
 /** No fingerprint means simulation. Applying always uses a reviewed snapshot. */
-export async function reviewImport(fingerprint?: string): Promise<ImportApprovalResult> {
+export async function reviewImport(
+  fingerprint?: string,
+  { acceptWarnings = false } = {},
+): Promise<ImportApprovalResult> {
   return resultSchema.parse(
     unwrap(
       await db.rpc("approve_valid_imports", {
         p_dry_run: fingerprint === undefined,
+        ...(acceptWarnings ? { p_accept_warnings: true } : {}),
         ...(fingerprint === undefined ? {} : { p_expected_fingerprint: fingerprint }),
       }),
     ),

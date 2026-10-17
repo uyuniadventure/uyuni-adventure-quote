@@ -7,7 +7,7 @@
     "import:presupuesto": "bun scripts/import-presupuesto.ts",
     "compare:presupuestos": "bun scripts/compare-presupuestos.ts",
     "test:references": "vitest run src/lib/pricing/real-cases.test.ts",
-    "test:db": "node scripts/db/test.mjs && node scripts/db/test-blocks.mjs && node scripts/db/test-workflows.mjs && node scripts/db/test-delivery.mjs && node scripts/db/test-rack.mjs && node scripts/db/test-template-recovery.mjs && node scripts/db/test-import-approval.mjs && node scripts/db/test-roles.mjs && node scripts/db/test-proposals.mjs && vitest run src/lib/catalog/catalog.test.ts src/lib/catalog/catalog-origin.test.ts --maxWorkers=1",
+    "test:db": "node scripts/db/test.mjs && node scripts/db/test-blocks.mjs && node scripts/db/test-workflows.mjs && node scripts/db/test-delivery.mjs && node scripts/db/test-rack.mjs && node scripts/db/test-template-recovery.mjs && node scripts/db/test-import-approval.mjs && node scripts/db/test-roles.mjs && node scripts/db/test-proposals.mjs && vitest run src/lib/catalog --maxWorkers=1",
     "test:roles": "node scripts/db/test-roles.mjs",
     "simulate:import-approval": "node scripts/db/simulate-import-approval.mjs",
     "typecheck": "tsc --noEmit",

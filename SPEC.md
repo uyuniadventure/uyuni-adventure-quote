@@ -68,6 +68,8 @@ La aprobación masiva de importación es exclusiva de **Admin** mediante `approv
 Primero simula sin escrituras, devuelve conteos y motivos, y requiere confirmación explícita
 con la misma revisión del catálogo antes de aplicar. Servicios y plantillas se actualizan
 en una sola transacción; si el catálogo cambia hay que repetir la simulación.
+La aprobación de bloques y plantillas seleccionados (T01k) está disponible para
+Admin/Operación, sin aprobar servicios. Vendedor no puede borrar ni aprobar padres.
 
 ---
 
@@ -145,20 +147,36 @@ ni borra los bloques anteriores que puedan estar compartidos.
 una tarifa vigente en la fecha de Santiago con costo neto o rack; cero explícito es válido.
 Una plantilla necesita todos sus días numerados del 1 a su duración, con servicios
 aprobados (incluidos hoteles y servicios dentro de módulos, también los aprobables en
-la misma operación). Días vacíos, módulos vacíos y bloques/módulos inactivos impiden
-aprobarla. Un ítem sin vínculo a un servicio del catálogo tampoco se considera
+la misma operación). Días vacíos, módulos vacíos y bloques/módulos inactivos generan
+avisos. Un ítem sin vínculo a un servicio del catálogo tampoco se considera
 aprobado, aunque tenga un snapshot con precio. Los motivos se guardan en
-`approval_issues` al aplicar, sin sustituir las
-advertencias de importación. Los registros activos o inactivos no se modifican.
+`approval_issues` al aplicar, sin sustituir las advertencias de importación.
+Desde T01k, las advertencias de importación también aparecen entre los motivos.
+Sin `accept_warnings`, las plantillas con avisos quedan pendientes. Con él se
+activan conservando los motivos; no se corrigen servicios ni tarifas ni se omiten
+los controles de cotización/PDF. El lote global solo procesa pendientes y conserva
+el permiso Admin; la aceptación forma parte de la huella de simulación.
 El vendedor puede leer los bloques y módulos de una plantilla activa sin cambiar
 el estado propio de esos bloques/módulos ni ganar permisos de edición.
 
-**Borrado de catálogo (T01u, Andrea, 17-10-2026):** solo Admin/Operación,
+**Acciones seleccionadas (T01k):** `approve_day_blocks` y `approve_templates`, solo
+Admin/Operación. Los bloques avisan por cero servicios, falta de título ES, texto
+ES sin revisar, servicios pendientes/inactivos o ítems sin vínculo. Sin aceptación
+quedan pendientes; con aceptación pasan a activos. La previsualización no escribe;
+la aprobación revalida en una transacción. No cambia textos ni aprueba servicios
+dependientes. `archive_catalog` usa el estado existente `inactivo`, conservando
+contenido y vínculos. Solo se modifican los IDs seleccionados.
+
+**Borrado de catálogo (T01u/T01k, Andrea, 17-10-2026):** solo Admin/Operación,
 mediante `delete_day_blocks`, `delete_templates` y `purge_imported_catalog`.
 Sin `force`, un bloque utilizado devuelve sus plantillas y no se elimina nada
 del lote. Con `force`, se quitan esos enlaces, se renumeran los días restantes
-y las plantillas quedan pendientes. Se conserva su duración comercial y SKU
-para revisión, incluso si quedan vacías. Borrar una plantilla conserva los
+y las plantillas quedan pendientes. La FK `template_days.block_id` es RESTRICT.
+El borrado ajusta `days` al número restante y limita
+`nights` a `days-1`; conserva el SKU. Si no quedan días, conserva la duración
+anterior (el esquema exige `days>0`) para revisión, sin crear días ficticios.
+Borrar una plantilla devuelve el número de cotizaciones desvinculadas, disponible
+también en una previsualización sin escrituras. Conserva los
 bloques; cotizaciones conservan sus días, ítems, cálculo y PDF, con `template_id`
 nulo. Al borrar un bloque, solo su referencia `source_block_id` queda nula en
 los días copiados, incluso en cotizaciones enviadas o archivadas.
@@ -173,7 +191,10 @@ reemplazadas desde una cotización), bloques importados y sus enlaces/traduccion
 Si un bloque importado está en una plantilla manual, esta se conserva pendiente
 con los días restantes renumerados. Antes se exportan los SELECT de
 `docs/consultas/respaldo_catalogo.sql`; la purga devuelve los conteos reales.
-Contrato de UI y despliegue: `docs/T01u_borrado_catalogo.md`.
+La purga reutiliza el borrado de bloques y ajusta también las plantillas manuales
+afectadas con días restantes.
+Contratos de UI y despliegue: `docs/T01k_catalogo.md` (acciones diarias) y
+`docs/T01u_borrado_catalogo.md` (purga y respaldo).
 
 ### 4.5 Clientes y condiciones
 - **`clients`**: `type` (`B2B | B2C`), nombre o agencia, contacto, email, país, `language` (es, it, en, …), `terms_id`.

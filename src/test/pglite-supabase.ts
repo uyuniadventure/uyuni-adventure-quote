@@ -97,6 +97,28 @@ export function pgliteSupabase(pg: PGlite) {
         ],
         delete_templates: [["ids", "uuid[]"]],
         purge_imported_catalog: [["confirm", "text"]],
+        review_catalog_approval: [
+          ["kind", "text"],
+          ["ids", "uuid[]"],
+        ],
+        approve_day_blocks: [
+          ["ids", "uuid[]"],
+          ["accept_warnings", "boolean"],
+        ],
+        approve_templates: [
+          ["ids", "uuid[]"],
+          ["accept_warnings", "boolean"],
+        ],
+        preview_template_deletion: [["ids", "uuid[]"]],
+        archive_catalog: [
+          ["kind", "text"],
+          ["ids", "uuid[]"],
+        ],
+        approve_valid_imports: [
+          ["p_dry_run", "boolean"],
+          ["p_expected_fingerprint", "text"],
+          ["p_accept_warnings", "boolean"],
+        ],
         prepare_quote_template: [
           ["p_id", "uuid"],
           ["p_route_from", "text"],
@@ -189,13 +211,17 @@ export function pgliteSupabase(pg: PGlite) {
           ["p_changes", "jsonb"],
         ],
       };
-      const signature = signatures[name];
-      if (!signature) throw new Error(`Unsupported RPC: ${name}`);
+      const knownSignature = signatures[name];
+      if (!knownSignature) throw new Error(`Unsupported RPC: ${name}`);
+      // Omitted named arguments use PostgreSQL defaults, exactly like PostgREST.
+      const signature = knownSignature.filter(([key]) => Object.hasOwn(args, key));
       try {
         const values = signature.map(([key, type]) =>
           args[key] == null ? null : type === "jsonb" ? JSON.stringify(args[key]) : args[key],
         );
-        const placeholders = signature.map(([, type], i) => `$${i + 1}::${type}`);
+        const placeholders = signature.map(
+          ([key, type], i) => `${ident(key)} => $${i + 1}::${type}`,
+        );
         const { rows } = await pg.query<{ data: unknown }>(
           `select to_jsonb(public.${ident(name)}(${placeholders.join(",")})) as data`,
           values,

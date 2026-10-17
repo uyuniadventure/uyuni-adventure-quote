@@ -10,6 +10,7 @@ vi.mock("@/lib/import-review", () => ({ reviewImport: vi.fn() }));
 const review = vi.mocked(reviewImport);
 const preview: ImportApprovalResult = {
   dry_run: true,
+  accept_warnings: false,
   review_date: "2026-10-11",
   fingerprint: "catalog-snapshot",
   services: {
