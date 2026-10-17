@@ -59,11 +59,11 @@ describe("Aprobación masiva", () => {
     fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
     expect(await screen.findByText("Se aprobarían")).toBeInTheDocument();
     expect(screen.getByText("Sin unidad de cobro.")).toBeInTheDocument();
-    expect(review.mock.calls).toEqual([[undefined]]);
+    expect(review.mock.calls).toEqual([[undefined, { acceptWarnings: false }]]);
     expect(invalidate).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Confirmar aprobación" }));
     expect(await screen.findByText("Resultado de la aprobación")).toBeInTheDocument();
-    expect(review.mock.calls).toEqual([[undefined], [preview.fingerprint]]);
+    expect(review.mock.calls).toEqual([[undefined, { acceptWarnings: false }], [preview.fingerprint, { acceptWarnings: false }]]);
     expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).not.toBeInTheDocument();
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["services"] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["itinerary_templates"] });
@@ -75,7 +75,7 @@ describe("Aprobación masiva", () => {
     await screen.findByText("Se aprobarían");
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
-    await waitFor(() => expect(review.mock.calls).toEqual([[undefined], [undefined]]));
+    await waitFor(() => expect(review.mock.calls).toEqual([[undefined, { acceptWarnings: false }], [undefined, { acceptWarnings: false }]]));
   });
   it("clears a rejected preview and requires another simulation", async () => {
     review
@@ -95,5 +95,17 @@ describe("Aprobación masiva", () => {
       screen.queryByRole("button", { name: "Aprobar todo lo válido" }),
     ).not.toBeInTheDocument();
     expect(review).not.toHaveBeenCalled();
+  });
+  it("changing warning consent discards the fingerprint and requires a matching simulation", async () => {
+    review.mockResolvedValueOnce(preview).mockResolvedValueOnce({ ...preview, accept_warnings: true, fingerprint: "accepted" }).mockResolvedValueOnce({ ...preview, dry_run: false, accept_warnings: true });
+    show();
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    await screen.findByRole("button", { name: "Confirmar aprobación" });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Aceptar avisos de plantillas" }));
+    expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).toBeNull();
+    expect(review).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Volver a simular" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar aprobación" }));
+    await waitFor(() => expect(review).toHaveBeenLastCalledWith("accepted", { acceptWarnings: true }));
   });
 });

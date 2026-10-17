@@ -142,6 +142,7 @@ export function sectionHead(section: SectionDef) {
       { property: "og:title", content: `${section.title} — Cotizador Uyuni Adventure` },
       { property: "og:description", content: section.description },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   };
 }

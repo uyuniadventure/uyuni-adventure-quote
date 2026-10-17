@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/select";
 import { STATUSES, StatusBadge, cap } from "./shared";
 import { BlockEditor } from "./block-editor";
+import { CatalogDeleteButton } from "./catalog-actions";
 import { TemplateQuoteLink } from "@/components/quote/template-quote-link";
 import {
   AlertDialog,
@@ -137,6 +138,7 @@ export function TemplateEditor({
             </TabsContent>
           </Tabs>
         )}
+        {row && <CatalogDeleteButton kind="templates" record={{ id: row.id, code: row.sku, name: row.name }} onDeleted={onClose} />}
       </SheetContent>
     </Sheet>
   );
