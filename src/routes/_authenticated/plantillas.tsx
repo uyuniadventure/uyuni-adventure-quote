@@ -30,6 +30,9 @@ import {
   useHotelCodes,
   useLocationCodes,
 } from "@/components/catalog/kit";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CatalogRowMenu, CatalogSelectionBar, useCatalogActions } from "@/components/catalog/catalog-actions";
+import { useCatalogSelection } from "@/components/catalog/catalog-selection";
 import { TemplateEditor } from "@/components/catalog/template-editor";
 import { TemplateQuoteLink } from "@/components/quote/template-quote-link";
 
@@ -56,17 +59,29 @@ function TemplatesPage() {
   const locs = useLocationCodes();
   const hotelCodes = useHotelCodes();
 
+  const filterKey = JSON.stringify({ search, from, to, days, category, hotels, status });
+  const applyFilters = <T extends ReturnType<typeof baseQuery>>(query: T) => {
+    if (term) query = query.ilike("sku", `%${ilikeTerm(term)}%`);
+    if (from !== ALL) query = query.eq("route_from", from);
+    if (to !== ALL) query = query.eq("route_to", to);
+    if (days !== ALL) query = query.eq("days", Number(days));
+    if (category !== ALL) query = query.eq("category", category as Enums<"tour_category">);
+    if (hotelTerm) query = query.like("hotel_combo", `%${ilikeTerm(hotelTerm)}%`);
+    if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
+    return query;
+  };
+  const baseQuery = () => db.from("itinerary_templates").select("id, sku, name");
+  const actions = useCatalogActions("templates", () => selection.clear());
+  const selection = useCatalogSelection(["itinerary_templates"], filterKey, canManageCatalog(role), async (offset, end) => {
+    const { data, error } = await applyFilters(baseQuery()).order("sku").order("id").range(offset, end);
+    if (error) throw error;
+    return data.map((r) => ({ id: r.id, code: r.sku, name: r.name }));
+  });
   const q = useQuery({
     queryKey: ["itinerary_templates", { term, from, to, days, category, hotelTerm, status }],
     placeholderData: keepPreviousData,
     queryFn: async () => {
-      let query = db
-        .from("itinerary_templates")
-        .select(
-          "id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, modality, status, template_days(count)",
-        )
-        .order("sku")
-        .limit(500);
+      let query = db.from("itinerary_templates").select("id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, modality, status, template_days(count)").order("sku").order("id").limit(500);
       if (term) query = query.ilike("sku", `%${ilikeTerm(term)}%`);
       if (from !== ALL) query = query.eq("route_from", from);
       if (to !== ALL) query = query.eq("route_to", to);
@@ -193,10 +208,14 @@ function TemplatesPage() {
           options={STATUSES.map((x) => [x, cap(x)])}
         />
       </div>
+      {actions.allowed && <label className="flex items-center gap-2 text-sm"><Checkbox aria-label="Seleccionar todo" checked={selection.all ? true : selection.records.length ? "indeterminate" : false} disabled={!selection.ready || actions.busy} onCheckedChange={(v) => selection.selectAll(v === true)} />Seleccionar todo ({selection.loading ? "…" : selection.records.length})</label>}
+      {selection.error && <p role="alert" className="text-sm text-destructive">No se pudo cargar la selección completa. Vuelve a intentar.</p>}
+      <CatalogSelectionBar records={selection.records} actions={actions} disabled={!selection.ready} />
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
+              {actions.allowed && <TableHead className="w-10" />}
               <TableHead>SKU</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Ruta</TableHead>
@@ -211,21 +230,21 @@ function TemplatesPage() {
           <TableBody>
             {q.isLoading && (
               <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-muted-foreground">
                   Cargando…
                 </TableCell>
               </TableRow>
             )}
             {q.isError && (
               <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center text-destructive">
+                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-destructive">
                   No se pudieron cargar las plantillas.
                 </TableCell>
               </TableRow>
             )}
             {q.data?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-muted-foreground">
                   No hay plantillas con estos filtros.
                 </TableCell>
               </TableRow>
@@ -238,6 +257,7 @@ function TemplatesPage() {
                   className="group cursor-pointer"
                   onClick={() => setOpenId(t.id)}
                 >
+                  {actions.allowed && <TableCell onClick={(e) => e.stopPropagation()}><Checkbox aria-label={`Seleccionar ${t.sku}`} checked={selection.ids.has(t.id)} disabled={!selection.ready || actions.busy} onCheckedChange={(v) => selection.toggle(t.id, v === true)} /></TableCell>}
                   <TableCell className="max-w-[220px] truncate font-mono text-xs">
                     {t.sku}
                   </TableCell>
@@ -266,6 +286,7 @@ function TemplatesPage() {
                     <StatusBadge status={t.status} />
                   </TableCell>
                   <TableCell>
+                    <CatalogRowMenu record={{ id: t.id, code: t.sku, name: t.name }} actions={actions} />
                     <TemplateQuoteLink
                       template={t}
                       className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
@@ -289,6 +310,7 @@ function TemplatesPage() {
           </TableBody>
         </Table>
       </div>
+      {actions.dialog}
       <TemplateEditor id={openId} onClose={() => setOpenId(null)} onCreated={setOpenId} />
     </div>
   );
