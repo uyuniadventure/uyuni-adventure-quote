@@ -5,5 +5,5 @@
 - [ ] Bloqueado (Codex): createQuoteFromBlocks, estimación precio plantilla, suggestRooming → rehacer /nueva-cotizacion en 3 pasos
 - [ ] Pendiente nombres del usuario: UI de ajustes (columna Ajuste %, Ajuste masivo, badge, fila Ajustes)
 
-- [ ] PR #36: migraciones T01u/T01k, tipos y acciones del catálogo
-- [ ] PR #36: pruebas de aprobación, dependencias, archivado y permisos
+- [ ] PR #36: aplicar T01u/T01k; bloqueado porque la herramienta rechaza BEGIN/COMMIT y el pedido exige SQL intacto; confirmar omisión exclusiva de esas envolturas.
+- [ ] PR #36: regenerar tipos, integrar acciones y verificar aprobación, dependencias, archivado y permisos después de las migraciones.
