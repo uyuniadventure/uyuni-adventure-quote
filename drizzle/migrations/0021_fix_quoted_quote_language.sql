@@ -1,0 +1,1 @@
+UPDATE public.quotes SET language = trim(both '"' from language) WHERE language LIKE '"%"';
