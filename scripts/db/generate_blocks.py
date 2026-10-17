@@ -67,7 +67,7 @@ def main():
             return bid
         blocks[bid] = True
         hotel_sku = next((i['sku'] for i in items if services[i['sku']]['type'] == 'alojamiento'), None)
-        emit('day_blocks', dict(id=bid, code='DAY_'+bid.replace('-','')[:20], route_from=route_from,
+        emit('day_blocks', dict(catalog_origin='importacion', id=bid, code='DAY_'+bid.replace('-','')[:20], route_from=route_from,
              route_to=route_to, hotel_service_id=uid('service',hotel_sku) if hotel_sku else None,
              default_day_position=n, status='pendiente'))
         description = candidate['desc'] + (f'\nAlojamiento: {hotel}' if hotel else '')
@@ -112,7 +112,7 @@ def main():
                     daily.setdefault(covered,[]).append(entry)
         tid = uid('template',sku)
         category = next((c for c in ['BUDGET','COMFORT','VIP'] if c in p['sku_raw']), 'MIXTO')
-        emit('itinerary_templates',dict(id=tid,sku=sku,name=p['title'],route_from=sku[:3],route_to=sku[3:6],
+        emit('itinerary_templates',dict(catalog_origin='importacion', id=tid,sku=sku,name=p['title'],route_from=sku[:3],route_to=sku[3:6],
              route_type='ROUNDTRIP' if sku[:3]==sku[3:6] else 'ONEWAY',days=len(p['days']),
              nights=int(re.search(r'D(\d+)N',sku)[1]),category=category,hotel_combo=sku.split('-')[2],status='pendiente',
              import_warnings=json.dumps(['Validar cantidades, variantes y servicios de origen antes de revisar.'] +

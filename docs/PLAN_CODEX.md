@@ -1,11 +1,11 @@
 # PLAN_CODEX — Cotizador Uyuni Adventure
 
 > Archivo de trabajo para Codex. Guardarlo en `docs/PLAN_CODEX.md`.
-> Estado del repo revisado: `main` en `f54c82a` (12-10-2026).
+> Estado del repo revisado: `main` en `071b16c` (17-10-2026).
 > Primera ejecución del plan: base `main` en `186740c` (12-10-2026); ver comprobación de T00.
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
-> Prioridad de Andrea, 16-10-2026: **T01s · Estabilizar el flujo básico**. Se detienen
-> T01h y las demás funciones nuevas hasta validar este flujo. Entregar T01s y parar.
+> Prioridad de Andrea, 17-10-2026: **T01u · Borrar bloques diarios y plantillas**,
+> antes de reimportar. Entregar T01u y parar. No iniciar T01h/T01i en esta entrega.
 
 ---
 
@@ -82,7 +82,8 @@ Reglas para ese prompt:
 | T01c | Crear cotización desde /plantillas | [x] | T01 | sí |
 | T01d | Editor de textos del PDF | [x] | T01b | sí |
 | T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
-| T01s | Estabilizar creación, tarifas, textos y adición de bloques | [~] | —; prioridad de Andrea | sí (migración) |
+| T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
+| T01u | Borrar bloques diarios, plantillas y catálogo importado | [~] | T01s; prioridad de Andrea | sí |
 | T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
@@ -354,6 +355,39 @@ El espejo `drizzle/migrations/0020_quote_flow_stabilization.sql` es idéntico:
 aplicar solo la copia de Supabase. Ninguna migración histórica fue editada.
 No se ejecutaron cambios en Cloud. **Entrega y parada:** T01h y el resto de
 funciones nuevas siguen detenidas hasta la validación del flujo en producción.
+
+## T01u · Borrar bloques diarios y plantillas · 17-10-2026 · en revisión
+
+Pedido explícito de Andrea; se entrega y se detiene antes de la reimportación.
+Base `origin/main` en `071b16c`. T01s pasa a `[x]` por PR #34, merge `1298324`,
+comprobado en `git log origin/main`; esto acredita integración, no validación Cloud.
+
+- RPC atómicas `delete_day_blocks`, `delete_templates`, `purge_imported_catalog`,
+  SECURITY DEFINER con rol Admin/Operación, permisos y `search_path` restringidos.
+  Sin force, devuelve dependencias sin borrar nada del lote; force quita enlaces,
+  renumera y marca pendiente. Borrar plantillas no borra bloques.
+- FK de cotizaciones a plantillas con SET NULL; FK de días de plantilla a bloques
+  conserva NO ACTION. Desvincular por FK mantiene los snapshots, cálculo, total,
+  PDF y timestamps de cotizaciones en todos los estados, incluso archivadas.
+- Origen explícito con backfill de los IDs históricos (42 plantillas/155 bloques
+  en los seeds completos) y marca en nuevas importaciones. Purga solo importados,
+  requiere BORRAR exacto, devuelve conteos y conserva tarifario/clientes/cotizaciones.
+  Respaldo previo: `docs/consultas/respaldo_catalogo.sql`, once SELECT exportables.
+- API `src/lib/catalog`, tipos regenerados y contrato de UI/despliegue en
+  [T01u_borrado_catalogo.md](T01u_borrado_catalogo.md). Pantallas entregadas mediante
+  prompt para Lovable; Operación ve solo la tarjeta de purga en Admin.
+
+**Migración:** aplicar `20261017000100_catalog_deletion.sql` después de las
+anteriores de Supabase y regenerar tipos. Espejo Drizzle `0022_catalog_deletion.sql`
+idéntico: no aplicar ambas copias. No hay seeds que ejecutar ni cambios en Cloud.
+
+**Pruebas:** 25/25 nuevas con PGlite. Se cubren bloqueo sin force, renumeración,
+cotizaciones borrador/revisada/enviada/vendida/perdida/cancelada/archivada,
+roles, confirmación, IDs vacíos/repetidos, conteos, rollback de la purga,
+origen histórico y respaldo READ ONLY. Nueve suites históricas de BD y las nuevas
+aprobadas; instalación congelada, TypeScript app/E2E, build y ESLint de archivos
+TypeScript modificados aprobados. Suite completa: 368/370; solo siguen fallando
+los dos fixtures incompletos de Bolivia/WE ROAD (T03–T04), sin omisiones.
 
 ## T01h · T01i · T01j — Bloques v2, reimportación y recálculo
 

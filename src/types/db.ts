@@ -476,6 +476,7 @@ export type Database = {
           end_point: string | null;
           name: string | null;
           content: Json;
+          catalog_origin: string;
         };
         Insert: {
           id?: string;
@@ -495,6 +496,7 @@ export type Database = {
           end_point?: string | null;
           name?: string | null;
           content?: Json;
+          catalog_origin?: string;
         };
         Update: {
           id?: string;
@@ -514,6 +516,7 @@ export type Database = {
           end_point?: string | null;
           name?: string | null;
           content?: Json;
+          catalog_origin?: string;
         };
         Relationships: [
           {
@@ -911,6 +914,7 @@ export type Database = {
           import_warnings: Json;
           quote_defaults: Json;
           approval_issues: string[];
+          catalog_origin: string;
         };
         Insert: {
           id?: string;
@@ -938,6 +942,7 @@ export type Database = {
           import_warnings?: Json;
           quote_defaults?: Json;
           approval_issues?: string[];
+          catalog_origin?: string;
         };
         Update: {
           id?: string;
@@ -965,6 +970,7 @@ export type Database = {
           import_warnings?: Json;
           quote_defaults?: Json;
           approval_issues?: string[];
+          catalog_origin?: string;
         };
         Relationships: [
           {
@@ -2786,6 +2792,8 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["app_role"];
       };
+      delete_day_blocks: { Args: { ids: string[]; force?: boolean }; Returns: Json };
+      delete_templates: { Args: { ids: string[] }; Returns: Json };
       edit_quote_days: {
         Args: {
           p_id: string;
@@ -2827,6 +2835,7 @@ export type Database = {
       };
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean };
+      purge_imported_catalog: { Args: { confirm: string }; Returns: Json };
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
       quote_payment_summary: { Args: { p_id: string }; Returns: Json };

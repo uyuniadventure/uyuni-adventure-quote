@@ -241,7 +241,7 @@ export async function budgetPlan(options: { file?: string; sku?: string; pax?: n
           `if not exists(select 1 from public.services where id=${literal(service.id)}::uuid and sku=${literal(service.sku)}) then raise exception 'Missing catalog service: ${service.sku}'; end if;`,
       ),
       ...oldDays.flatMap((d) => [
-        `insert into public.day_blocks(id,code,route_from,route_to,places,modality,hotel_service_id,default_day_position,status) select ${block(d.day_number)},${literal(`IMPORT_SPAUYU_MP_2PAX_D${d.day_number}`)},route_from,route_to,places,modality,${links.find((l) => l.line.day === d.day_number && l.item.pricing_unit === "per_room") ? literal(links.find((l) => l.line.day === d.day_number && l.item.pricing_unit === "per_room")!.service.id) + "::uuid" : "null"},${d.day_number},'pendiente' from public.day_blocks where id=${literal(d.block_id)}::uuid;`,
+        `insert into public.day_blocks(catalog_origin,id,code,route_from,route_to,places,modality,hotel_service_id,default_day_position,status) select 'importacion',${block(d.day_number)},${literal(`IMPORT_SPAUYU_MP_2PAX_D${d.day_number}`)},route_from,route_to,places,modality,${links.find((l) => l.line.day === d.day_number && l.item.pricing_unit === "per_room") ? literal(links.find((l) => l.line.day === d.day_number && l.item.pricing_unit === "per_room")!.service.id) + "::uuid" : "null"},${d.day_number},'pendiente' from public.day_blocks where id=${literal(d.block_id)}::uuid;`,
         `insert into public.day_block_translations(block_id,lang,title,description,includes,excludes,reviewed) select ${block(d.day_number)},lang,title,description,includes,excludes,false from public.day_block_translations where block_id=${literal(d.block_id)}::uuid;`,
       ]),
       ...links.map(
@@ -252,7 +252,7 @@ export async function budgetPlan(options: { file?: string; sku?: string; pax?: n
         (d) =>
           `update public.template_days set block_id=${block(d.day_number)} where template_id=(select id from public.itinerary_templates where sku=${literal(sku)}) and day_number=${d.day_number};`,
       ),
-      `update public.itinerary_templates set quote_defaults=${jsonSql(defaults)},status='pendiente' where sku=${literal(sku)};`,
+      `update public.itinerary_templates set catalog_origin='importacion',quote_defaults=${jsonSql(defaults)},status='pendiente' where sku=${literal(sku)};`,
       "end $budget$;",
       "commit;",
       "",
