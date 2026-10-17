@@ -1,11 +1,12 @@
 # PLAN_CODEX — Cotizador Uyuni Adventure
 
 > Archivo de trabajo para Codex. Guardarlo en `docs/PLAN_CODEX.md`.
-> Estado del repo revisado: `main` en `ff9ee99` (17-10-2026).
+> Estado del repo revisado: `main` en `f48f2a7` (17-10-2026).
 > Primera ejecución del plan: base `main` en `186740c` (12-10-2026); ver comprobación de T00.
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
-> Prioridad de Andrea, 17-10-2026: **T01k · Borrar plantillas y bloques, aprobar bloques**,
-> antes de T01h. Entregar T01k y parar. No iniciar T01h/T01i en esta entrega.
+> Corrección de Andrea, 17-10-2026: **el hotel identifica el bloque; la habitación
+> es una alternativa**. Aplicar el backend en T01h-1 y la UI en T01h-2.
+> Esta entrega actualiza la especificación; T01h/T01i continúan sin implementar.
 
 ---
 
@@ -84,8 +85,8 @@ Reglas para ese prompt:
 | T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
 | T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
 | T01u | Borrar bloques diarios, plantillas y catálogo importado | [x] | T01s; prioridad de Andrea | sí |
-| T01k | Borrar plantillas y bloques, aprobar bloques | [~] | T01u; antes de T01h | sí |
-| T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g, T01k | sí |
+| T01k | Borrar plantillas y bloques, aprobar bloques | [x] | T01u; antes de T01h | sí |
+| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [ ] | T01g, T01k | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
@@ -394,7 +395,11 @@ aprobadas; instalación congelada, TypeScript app/E2E, build y ESLint de archivo
 TypeScript modificados aprobados. Suite completa: 368/370; solo siguen fallando
 los dos fixtures incompletos de Bolivia/WE ROAD (T03–T04), sin omisiones.
 
-## T01k · Borrar plantillas y bloques, aprobar bloques · 17-10-2026 · en revisión
+## T01k · Borrar plantillas y bloques, aprobar bloques · 17-10-2026 · integrada
+
+Integración comprobada al registrar la corrección de hotel: PR #36, merge
+`220e807`, presente en `origin/main` (`f48f2a7`). Esto acredita código integrado,
+no migraciones ni acciones de pantalla aplicadas en Cloud.
 
 Base `origin/main` en `ff9ee99`. Diagnóstico RLS/FK/aprobación, contratos y
 despliegue: [T01k_catalogo.md](T01k_catalogo.md).
@@ -429,6 +434,27 @@ Entregar y detenerse.
 fusionada: PR #32, commit de merge `363781c`, comprobado en `origin/main`.
 
 Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g/T01k y antes de T02. T01h referencia el borrado de T01k, no lo repite. T01i reutiliza la purga de T01u y sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
+
+**Corrección de hotel (Andrea, 17-10-2026), pendiente de implementar:**
+
+- **T01h-1:** conservar el hotel del bloque mediante `day_blocks.hotel_id →
+  suppliers.id`. Migrarlo desde `services.supplier_id` del `hotel_service_id`
+  actual; convertir ese servicio en alternativa predeterminada de `ALOJAMIENTO`,
+  añadir habitaciones del mismo proveedor/lugar/régimen y solo entonces dejar
+  `hotel_service_id = null`. No crear otra tabla de hoteles.
+- Validar en servidor que todas las alternativas de alojamiento pertenecen al
+  hotel del bloque; rechazar mezclas con error en español. Cambiar hotel exige
+  otro bloque. `hotel_codes.supplier_id` aporta el código, no la identidad.
+- **T01i:** firma ruta + hotel_id + puestos/servicios + texto ES, sin tipo de
+  habitación ni su ID/SKU como discriminante indirecto. Igual hotel/otra habitación
+  reutiliza bloque; distinto hotel produce otro.
+- **T01h-2 / prompt Lovable:** mantener el campo «Hotel» como selector por proveedor;
+  Alojamiento ofrece solo sus habitaciones. Lista/filtro muestran nombre + código
+  («Tayka del Desierto · TD»); conservar «Sin hotel».
+- Pruebas exigidas: misma firma al cambiar solo habitación, distinta al cambiar
+  hotel, error al insertar/actualizar una habitación de otro hotel, backfill que
+  conserva la alternativa predeterminada. Diagnóstico reproducible y casos límite
+  documentados en la especificación enlazada.
 
 ## T02 · Sacar quote-ops.ts y limpiar migración con placeholder
 
