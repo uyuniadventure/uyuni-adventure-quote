@@ -9,7 +9,7 @@ const auth = vi.hoisted(() => ({ role: "admin" }));
 vi.mock("@/hooks/use-auth", () => ({ useCurrentUser: () => auth, canManageCatalog: (role: string) => role === "admin" || role === "operacion" }));
 vi.mock("@/lib/catalog", () => ({ previewCatalogApproval: vi.fn(), approveTemplates: vi.fn(), approveDayBlocks: vi.fn(), deleteTemplates: vi.fn(), deleteDayBlocks: vi.fn(), previewTemplateDeletion: vi.fn(), archiveTemplates: vi.fn(), archiveDayBlocks: vi.fn() }));
 const records: CatalogRecord[] = [{ id: "b1", code: "B1", name: "Día vacío" }];
-const preview = { items: [{ ...records[0], reasons: ["0 servicios vinculados al tarifario."] }], eligible: 0, with_warnings: 1 };
+const preview = { items: [{ id: "b1", code: "B1", name: "Día vacío", reasons: ["0 servicios vinculados al tarifario."] }], eligible: 0, with_warnings: 1 };
 function Harness({ kind = "day_blocks", saved = vi.fn() }: { kind?: "templates" | "day_blocks"; saved?: () => void }) {
   const actions = useCatalogActions(kind, saved);
   return <><CatalogSelectionBar records={records} actions={actions} />{actions.dialog}</>;
