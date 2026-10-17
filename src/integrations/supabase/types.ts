@@ -2844,6 +2844,7 @@ export type Database = {
     }
     Functions: {
       _doc_snapshot: { Args: { p_id: string }; Returns: Json }
+      _document_text_html: { Args: { p: string }; Returns: string }
       _editable_doc_quote: {
         Args: { p_id: string }
         Returns: {
@@ -2901,6 +2902,10 @@ export type Database = {
         }
       }
       _invalidate_proposal: { Args: { p_id: string }; Returns: undefined }
+      _migrate_quote_document_texts: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       _proposal_context: { Args: { p_id: string }; Returns: Json }
       admin_list_users: { Args: never; Returns: Json }
       apply_quote_adjustment_bulk: {
