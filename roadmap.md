@@ -4,3 +4,6 @@
 - [ ] Bloqueado (usuario): aplicar migraciones 20261011000100–20261011001000 → luego verificar aceptación (2→3 pax, borrador→revisada)
 - [ ] Bloqueado (Codex): createQuoteFromBlocks, estimación precio plantilla, suggestRooming → rehacer /nueva-cotizacion en 3 pasos
 - [ ] Pendiente nombres del usuario: UI de ajustes (columna Ajuste %, Ajuste masivo, badge, fila Ajustes)
+
+- [ ] PR #36: migraciones T01u/T01k, tipos y acciones del catálogo
+- [ ] PR #36: pruebas de aprobación, dependencias, archivado y permisos
