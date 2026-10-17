@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { reviewImport, type ImportApprovalResult } from "@/lib/import-review";
@@ -29,9 +29,12 @@ export function BulkImportApproval() {
   const [result, setResult] = useState<ImportApprovalResult | null>(null);
   const [error, setError] = useState("");
   const [acceptWarnings, setAcceptWarnings] = useState(false);
+  const locked = useRef(false);
   if (role !== "admin") return null;
 
   async function run(fingerprint?: string) {
+    if (locked.current) return;
+    locked.current = true;
     setBusy(true);
     setError("");
     setResult(null);
@@ -57,6 +60,7 @@ export function BulkImportApproval() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo revisar la importación.");
     } finally {
+      locked.current = false;
       setBusy(false);
     }
   }

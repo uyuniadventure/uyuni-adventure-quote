@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, renderHook, screen, waitFor, act } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import * as catalog from "@/lib/catalog";
 import { CatalogSelectionBar, useCatalogActions, type CatalogRecord } from "./catalog-actions";
-import { readFilteredCatalogRecords } from "./catalog-selection";
+import { readFilteredCatalogRecords, useCatalogSelection } from "./catalog-selection";
 
 const auth = vi.hoisted(() => ({ role: "admin" }));
 vi.mock("@/hooks/use-auth", () => ({ useCurrentUser: () => auth, canManageCatalog: (role: string) => role === "admin" || role === "operacion" }));
@@ -89,4 +89,29 @@ it("select-all pagination includes all 1201 filtered records beyond the 500 row 
   expect(result).toHaveLength(1201);
   expect(read.mock.calls).toEqual([[0, 499], [500, 999], [1000, 1499]]);
   expect(result[1200]?.id).toBe("1200");
+});
+it("changing filters clears selected IDs and a refreshed catalog removes vanished records", async () => {
+  let rows = records;
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const wrapper = ({ children }: { children: React.ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const { result, rerender } = renderHook(({ filter }) => useCatalogSelection(["test-catalog"], filter, true, async () => rows), { initialProps: { filter: "pending" }, wrapper });
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  act(() => result.current.selectAll(true));
+  expect(result.current.records.map((r) => r.id)).toEqual(["b1"]);
+  rerender({ filter: "active" });
+  expect(result.current.records).toEqual([]);
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  act(() => result.current.selectAll(true));
+  rows = [];
+  await act(async () => { await client.invalidateQueries({ queryKey: ["test-catalog"] }); });
+  await waitFor(() => expect(result.current.ids.size).toBe(0));
+});
+it("does not send a second deletion while the first request is pending", async () => {
+  let finish: ((value: catalog.BlockTemplateDependency[]) => void) | undefined;
+  vi.mocked(catalog.deleteDayBlocks).mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+  show(); fireEvent.click(screen.getByRole("button", { name: "Eliminar (1)" }));
+  const button = await screen.findByRole("button", { name: "Confirmar eliminación" });
+  fireEvent.click(button); fireEvent.click(button);
+  expect(catalog.deleteDayBlocks).toHaveBeenCalledTimes(1);
+  await act(async () => { finish?.([]); });
 });
