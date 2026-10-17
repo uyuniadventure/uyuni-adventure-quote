@@ -47,7 +47,7 @@ function BlocksPage() {
     },
   });
 
-  const filterKey = JSON.stringify({ search, from, to, place, hotel, status });
+  const filterKey = JSON.stringify({ search, term, from, to, place, placeTerm, hotel, status });
   const actions = useCatalogActions("day_blocks", () => selection.clear());
   const selection = useCatalogSelection(["day_blocks"], filterKey, canManageCatalog(role), async (offset, end) => {
     let query = db.from("day_blocks").select("id, code, name").order("code").order("id").range(offset, end);

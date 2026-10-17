@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 type Action = "approve" | "delete" | "archive";
 export interface CatalogRecord { id: string; code: string; name: string }
-const affectedKeys = ["itinerary_templates", "itinerary_template", "template_days", "day_blocks", "day_block", "day_block_preview", "day_block_items", "day_block_modules", "import-review", "picker", "quote-suggestions", "quotes", "quote", "quote-list", "quote-days"];
+const affectedKeys = ["itinerary_templates", "itinerary_template", "template_days", "day_blocks", "day_block", "day_block_preview", "day_block_items", "day_block_modules", "import-review", "picker", "quote-suggestions", "quotes", "quote", "quote-full", "quote-versions", "quote-list", "quote-days"];
 
 export function useCatalogActions(kind: CatalogKind, onSuccess?: (action: Action) => void) {
   const qc = useQueryClient();

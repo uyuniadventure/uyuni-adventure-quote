@@ -59,8 +59,8 @@ function TemplatesPage() {
   const locs = useLocationCodes();
   const hotelCodes = useHotelCodes();
 
-  const filterKey = JSON.stringify({ search, from, to, days, category, hotels, status });
-  const applyFilters = <T extends ReturnType<typeof baseQuery>>(query: T) => {
+  const filterKey = JSON.stringify({ search, term, from, to, days, category, hotels, hotelTerm, status });
+  const applyFilters = (query: ReturnType<typeof baseQuery>) => {
     if (term) query = query.ilike("sku", `%${ilikeTerm(term)}%`);
     if (from !== ALL) query = query.eq("route_from", from);
     if (to !== ALL) query = query.eq("route_to", to);
