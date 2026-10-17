@@ -469,6 +469,8 @@ export type Database = {
       }
       day_blocks: {
         Row: {
+          approval_issues: string[]
+          catalog_origin: string
           code: string
           content: Json
           created_at: string
@@ -488,6 +490,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_issues?: string[]
+          catalog_origin?: string
           code: string
           content?: Json
           created_at?: string
@@ -507,6 +511,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_issues?: string[]
+          catalog_origin?: string
           code?: string
           content?: Json
           created_at?: string
@@ -897,6 +903,7 @@ export type Database = {
       itinerary_templates: {
         Row: {
           approval_issues: string[]
+          catalog_origin: string
           category: Database["public"]["Enums"]["tour_category"]
           countries: string[]
           created_at: string
@@ -924,6 +931,7 @@ export type Database = {
         }
         Insert: {
           approval_issues?: string[]
+          catalog_origin?: string
           category: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -951,6 +959,7 @@ export type Database = {
         }
         Update: {
           approval_issues?: string[]
+          catalog_origin?: string
           category?: Database["public"]["Enums"]["tour_category"]
           countries?: string[]
           created_at?: string
@@ -2843,6 +2852,16 @@ export type Database = {
       }
     }
     Functions: {
+      _check_catalog_action: { Args: { ids: string[] }; Returns: undefined }
+      _day_block_approval_rows: {
+        Args: { ids: string[] }
+        Returns: {
+          code: string
+          id: string
+          name: string
+          reasons: string[]
+        }[]
+      }
       _doc_snapshot: { Args: { p_id: string }; Returns: Json }
       _document_text_html: { Args: { p: string }; Returns: string }
       _editable_doc_quote: {
@@ -2902,11 +2921,22 @@ export type Database = {
         }
       }
       _invalidate_proposal: { Args: { p_id: string }; Returns: undefined }
+      _lock_catalog_approval: { Args: never; Returns: undefined }
+      _lock_catalog_deletion: { Args: never; Returns: undefined }
       _migrate_quote_document_texts: {
         Args: { p_id: string }
         Returns: undefined
       }
       _proposal_context: { Args: { p_id: string }; Returns: Json }
+      _template_approval_rows: {
+        Args: { eligible_services?: string[]; ids: string[] }
+        Returns: {
+          code: string
+          id: string
+          name: string
+          reasons: string[]
+        }[]
+      }
       admin_list_users: { Args: never; Returns: Json }
       apply_quote_adjustment_bulk: {
         Args: {
@@ -2919,10 +2949,23 @@ export type Database = {
         }
         Returns: Json
       }
-      approve_valid_imports: {
-        Args: { p_dry_run?: boolean; p_expected_fingerprint?: string }
+      approve_day_blocks: {
+        Args: { accept_warnings?: boolean; ids: string[] }
         Returns: Json
       }
+      approve_templates: {
+        Args: { accept_warnings?: boolean; ids: string[] }
+        Returns: Json
+      }
+      approve_valid_imports: {
+        Args: {
+          p_accept_warnings?: boolean
+          p_dry_run?: boolean
+          p_expected_fingerprint?: string
+        }
+        Returns: Json
+      }
+      archive_catalog: { Args: { ids: string[]; kind: string }; Returns: Json }
       build_supplier_payables: {
         Args: { p_id: string }
         Returns: {
@@ -3133,6 +3176,11 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      delete_day_blocks: {
+        Args: { force?: boolean; ids: string[] }
+        Returns: Json
+      }
+      delete_templates: { Args: { ids: string[] }; Returns: Json }
       due_followups: { Args: never; Returns: Json }
       edit_quote_days: {
         Args: {
@@ -3250,8 +3298,10 @@ export type Database = {
         Args: { p_id: string; p_route_from?: string; p_route_to?: string }
         Returns: Json
       }
+      preview_template_deletion: { Args: { ids: string[] }; Returns: Json }
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean }
+      purge_imported_catalog: { Args: { confirm: string }; Returns: Json }
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
       quote_payment_summary: { Args: { p_id: string }; Returns: Json }
@@ -3274,6 +3324,10 @@ export type Database = {
       }
       resolve_day_content: {
         Args: { p_overrides: Json; p_snapshot: Json }
+        Returns: Json
+      }
+      review_catalog_approval: {
+        Args: { ids: string[]; kind: string }
         Returns: Json
       }
       review_quote_days: {
