@@ -8,7 +8,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { createRequire } from "node:module";
 
 const browserEvents = createRequire(import.meta.url).resolve("events/");
-const parse5Entry = createRequire(import.meta.url).resolve("parse5");
+// require.resolve picks parse5's CJS build ("exports.require"), which breaks Vite's
+// ESM module runner (`exports is not defined`). Use the package's ESM entry instead.
+const parse5Entry = createRequire(import.meta.url)
+  .resolve("parse5")
+  .replace(/[\\/]dist[\\/]cjs[\\/]index\.js$/, "/dist/index.js");
 
 export default defineConfig({
   vite: {
