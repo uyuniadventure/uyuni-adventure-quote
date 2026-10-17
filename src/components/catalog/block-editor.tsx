@@ -18,6 +18,7 @@ import {
   useLocationCodes, type PickOption,
 } from "./kit";
 import { TriState } from "./module-editor";
+import { CatalogDeleteButton } from "./catalog-actions";
 
 type Mut = () => PromiseLike<{ error: { message: string } | null }>;
 function useRun(key: unknown[]) {
@@ -77,6 +78,7 @@ export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onC
             <TabsContent value="servicios" className="mt-4"><BlockItems blockId={row.id} canEdit={canEdit} /></TabsContent>
           </Tabs>
         )}
+        {row && <CatalogDeleteButton kind="day_blocks" record={{ id: row.id, code: row.code, name: title || row.code }} onDeleted={onClose} />}
       </SheetContent>
     </Sheet>
   );

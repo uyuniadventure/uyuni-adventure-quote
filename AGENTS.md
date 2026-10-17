@@ -21,6 +21,7 @@
 - Las tablas de configuración simples (Admin, T&C) usan el CRUD genérico `src/components/admin/crud-table.tsx` (config de columnas, cliente sin tipar, RLS decide el acceso) para no duplicar formularios por tabla.
 - Media sube a un bucket privado de Storage `media` (rutas `places/<id>/…` y `hotels/<id>/…`) y muestra URLs firmadas.
 - Todos los colores van por tokens semánticos en `src/styles.css` (`@theme inline` + `:root`); nada de colores hardcodeados en componentes.
+- Selected catalog approval, deletion and archiving use shared catalog action dialogs backed only by `src/lib/catalog`; filtered selection reads every ID page so bulk actions cannot silently truncate the catalog.
 
 ## Reglas para Codex
 

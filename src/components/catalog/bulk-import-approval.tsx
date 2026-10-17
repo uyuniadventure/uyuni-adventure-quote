@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { reviewImport, type ImportApprovalResult } from "@/lib/import-review";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -27,15 +28,19 @@ export function BulkImportApproval() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImportApprovalResult | null>(null);
   const [error, setError] = useState("");
+  const [acceptWarnings, setAcceptWarnings] = useState(false);
+  const locked = useRef(false);
   if (role !== "admin") return null;
 
   async function run(fingerprint?: string) {
+    if (locked.current) return;
+    locked.current = true;
     setBusy(true);
     setError("");
     setResult(null);
     setOpen(true);
     try {
-      const next = await reviewImport(fingerprint);
+      const next = await reviewImport(fingerprint, { acceptWarnings });
       setResult(next);
       if (!next.dry_run) {
         await Promise.all(
@@ -55,6 +60,7 @@ export function BulkImportApproval() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo revisar la importación.");
     } finally {
+      locked.current = false;
       setBusy(false);
     }
   }
@@ -83,6 +89,14 @@ export function BulkImportApproval() {
                 : "Revisa los conteos y los motivos. No se guardará ningún cambio hasta que confirmes."}
             </DialogDescription>
           </DialogHeader>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox aria-label="Aceptar avisos de plantillas" checked={acceptWarnings} disabled={busy || !!(result && !result.dry_run)} onCheckedChange={(value) => {
+              setAcceptWarnings(value === true);
+              setResult(null);
+              setError("");
+            }} />
+            Aceptar avisos de plantillas
+          </label>
           {busy && <p role="status">{result ? "Procesando…" : "Revisando catálogo…"}</p>}
           {error && (
             <p role="alert" className="text-sm text-destructive">
@@ -154,7 +168,7 @@ export function BulkImportApproval() {
             <Button variant="outline" disabled={busy} onClick={() => setOpen(false)}>
               {result && !result.dry_run ? "Cerrar" : "Cancelar"}
             </Button>
-            {error && (
+            {(error || (!result && !busy)) && (
               <Button disabled={busy} onClick={() => void run()}>
                 Volver a simular
               </Button>
