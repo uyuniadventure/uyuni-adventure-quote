@@ -2997,6 +2997,7 @@ export type Database = {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
         Returns: Json;
       };
+      rooming_distribution: { Args: { p_rows: Json; p_night?: number }; Returns: Json };
       save_doc_section_as_block: {
         Args: { p_quote_id: string; p_section_id: string; p_code: string };
         Returns: string;

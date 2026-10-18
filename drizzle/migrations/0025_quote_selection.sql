@@ -36,7 +36,7 @@ begin
   end loop;
   q.rooming:=public.rooming_distribution(roomrows);
   select coalesce(jsonb_agg(case when x->>'pricing_unit'='per_room' then x||jsonb_build_object('room_distribution',
-   public.rooming_distribution(roomrows,(select (d->>'day_number')::int from jsonb_array_elements(dayrows) d where d->>'id'=x->>'quote_day_id'))) else x end),'[]')
+   public.rooming_distribution(roomrows,(select (day_json->>'day_number')::int from jsonb_array_elements(dayrows) day_json where day_json->>'id'=x->>'quote_day_id'))) else x end),'[]')
    into payload_items from jsonb_array_elements(payload_items) x;
  elsif p_operation='alternatives' then
   select * into strict d from public.quote_days where id=(p_payload->>'day_id')::uuid and quote_id=q.id;
@@ -85,8 +85,8 @@ begin
   insert into public.quote_rooming(quote_id,night,room_type,count,for_tc)
    select q.id,(x->>'night')::int,x->>'room_type',(x->>'count')::int,coalesce((x->>'for_tc')::boolean,false) from jsonb_array_elements(roomrows) x;
   update public.quote_items i set room_distribution=x->'room_distribution'
-   from jsonb_array_elements(payload_items) x,public.quote_days d
-   where i.id=(x->>'id')::uuid and i.quote_day_id=d.id and d.quote_id=q.id and i.pricing_unit='per_room';
+   from jsonb_array_elements(payload_items) x,public.quote_days day_row
+   where i.id=(x->>'id')::uuid and i.quote_day_id=day_row.id and day_row.quote_id=q.id and i.pricing_unit='per_room';
  else
   for row in select value from jsonb_array_elements(payload_items) loop
    i:=jsonb_populate_record(null::public.quote_items,row);

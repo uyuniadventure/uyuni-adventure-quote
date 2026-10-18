@@ -49,7 +49,7 @@ async function block(code, serviceId, status = "pendiente", hotel = null) {
   );
   if (hotel) {
     const supplier = await one(
-      "insert into public.suppliers(name) values('Hotel sintetico') returning id",
+      "insert into public.suppliers(name) values($1) returning id", ["Hotel sintetico " + code],
     );
     await db.query("update public.services set type='alojamiento',supplier_id=$1 where id=$2", [
       supplier.id,
