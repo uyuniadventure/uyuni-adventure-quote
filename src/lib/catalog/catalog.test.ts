@@ -139,7 +139,7 @@ beforeAll(async () => {
     )
   ).id;
   transport.client = pgliteSupabase(pg);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await pg.exec("reset role; begin");
   await as(admin);

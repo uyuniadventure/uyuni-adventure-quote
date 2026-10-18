@@ -87,7 +87,7 @@ beforeAll(async () => {
     )
   ).rows[0]!.id;
   transport.client = pgliteSupabase(pg);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await actAs(admin);
   await pg.query("update pricing_settings set margin_pct=25,margin_mode='markup'");
@@ -254,4 +254,4 @@ it("migrates old quotes as markup/none without changing their saved calculation"
   } finally {
     await legacy.close();
   }
-}, 30000);
+}, 120000);

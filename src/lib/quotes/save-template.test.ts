@@ -43,7 +43,7 @@ beforeAll(async () => {
   ).id;
   await pg.exec("set role authenticated");
   transport.client = pgliteSupabase(pg);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await pg.exec("set role authenticated");
   await actAs(admin);

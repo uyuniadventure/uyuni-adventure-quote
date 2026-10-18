@@ -6,7 +6,7 @@
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
 > Corrección de Andrea, 17-10-2026: **el hotel identifica el bloque; la habitación
 > es una alternativa**. Aplicar el backend en T01h-1 y la UI en T01h-2.
-> Esta entrega actualiza la especificación; T01h/T01i continúan sin implementar.
+> T01h se entrega para revisión; T01i queda reemplazada por el nuevo T01k importador.
 
 ---
 
@@ -86,9 +86,10 @@ Reglas para ese prompt:
 | T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
 | T01u | Borrar bloques diarios, plantillas y catálogo importado | [x] | T01s; prioridad de Andrea | sí |
 | T01k | Borrar plantillas y bloques, aprobar bloques | [x] | T01u; antes de T01h | sí |
-| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [ ] | T01g, T01k | sí |
-| T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
-| T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
+| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [~] | T01g, T01k | sí |
+| T01i | Reimportación de bloques e itinerarios (ALTO) | reemplazada por T01k | T01h | sí |
+| T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01k importador | sí |
+| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [ ] | T01h | sí (migraciones + pantalla) |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
 | T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
@@ -959,3 +960,19 @@ Terminado cuando: 0 tests fallando u omitidos · 0 plantillas aprobadas sin serv
 | D7 | Rooming y vehículo/transportista | Vendedor elige; la app propone y conserva elecciones manuales |
 | D8 | Textos actuales de los días | Reasignar por tour/día; lo no conciliado queda sin revisar |
 | D9 | Módulos de actividad | Ocultos mediante flag en T01h |
+
+
+### IMPORT · 18-10-2026 · Entrega de la dependencia T01h
+
+Comprobado `origin/main` en `e3fe1f5`: T01h aún no existe. El pedido IMPORT
+levanta la pausa anterior solo para implementar esta dependencia y detenerse.
+Se incorporan los documentos y el fixture sintético de PAQUETE_CODEX_T01k;
+T01i queda «reemplazada por T01k». El identificador T01k de catálogo se mantiene
+como registro histórico; la nueva fila T01k **Importador paquete v2** es distinta.
+La especificación de hotel de `551bdb7` se conserva mediante merge, sin reescribir historia.
+
+Contrato y prompt T01h: [T01h_entrega.md](T01h_entrega.md).
+Migraciones en orden: `20261018000100_block_options_v2.sql`,
+`20261018000200_quote_selection.sql`. Solo se aplican en la base local de pruebas.
+El parser, staging, commit de importación, costTemplate y /admin/importar son
+la próxima tarea T01k; **no se implementan antes de integrar T01h**.

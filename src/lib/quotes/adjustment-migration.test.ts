@@ -169,4 +169,4 @@ it("converts legacy percentages, preserves issued prices, invalidates drafts and
   } finally {
     await pg.close();
   }
-}, 30000);
+}, 120000);

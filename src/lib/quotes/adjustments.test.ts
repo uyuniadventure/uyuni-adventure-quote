@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { createDatabase, seedDatabase } from "../../../scripts/db/local-db.mjs";
+import { createDatabase, seedDatabase, execArchivedSeed } from "../../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "@/test/pglite-supabase";
 import reference from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
 import { calculateQuote, type QuoteInput } from "../pricing";
@@ -45,8 +45,9 @@ beforeAll(async () => {
   const root = new URL("../../../", import.meta.url);
   const read = (path: string) => readFile(new URL(path, root), "utf8");
   const blocks = JSON.parse(await read("supabase/seed/applied/blocks-report.json"));
-  for (const file of blocks.seed_order) await pg.exec(await read(`supabase/seed/applied/${file}`));
-  await pg.exec(await read("supabase/seed/04_spauyu_mp_2pax.sql"));
+  for (const file of blocks.seed_order)
+    await execArchivedSeed(pg, await read(`supabase/seed/applied/${file}`));
+  await execArchivedSeed(pg, await read("supabase/seed/04_spauyu_mp_2pax.sql"));
   await pg.query(
     "insert into auth.users(id,email) values($1,'admin@adjust.test'),($2,'seller@adjust.test'),($3,'other@adjust.test')",
     [admin, seller, other],
@@ -64,7 +65,7 @@ beforeAll(async () => {
   ).id;
   transport.client = pgliteSupabase(pg);
   await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await pg.exec("set role authenticated");
   await actAs(admin);

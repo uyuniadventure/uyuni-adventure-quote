@@ -124,7 +124,7 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
     servicio `hotel_service_id` por `hotel_id`, FK a `suppliers.id`. El hotel
     define la variante: mismo día con otro hotel es **otro bloque**; mismo hotel
     con otro tipo de habitación es **el mismo bloque**. `hotel_id = null` mantiene
-    «Sin hotel». Este es el contrato objetivo; la migración T01h-1 sigue pendiente.
+    «Sin hotel». Este es el contrato objetivo; la migración T01h-1 se entrega en `20261018000100_block_options_v2.sql`, pendiente de aplicar en Cloud.
   - `default_day_position` (sugerencia de orden: día 1, día 4, etc.).
   - `status` (`activo | pendiente`).
 - **`day_block_translations`**: block_id, `lang`, `title`, `description` (narrativa para el cliente), `includes`, `excludes`, `reviewed` (bool).

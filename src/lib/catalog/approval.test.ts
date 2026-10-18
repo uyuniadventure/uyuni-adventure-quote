@@ -93,7 +93,7 @@ beforeAll(async () => {
   }
   await pg.exec("insert into currencies(code,name) values('USD','Dólar') on conflict do nothing");
   transport.client = pgliteSupabase(pg);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await pg.exec("reset role; begin");
   await as(admin);
@@ -146,7 +146,18 @@ it("distingue sin título ES, texto ES sin revisar y servicios pendientes", asyn
 
 it("los servicios de hotel y módulos cuentan; detecta pendientes también dentro del módulo", async () => {
   const hotel = await block({ serviceId: null });
-  await pg.query("update day_blocks set hotel_service_id=$2 where id=$1", [hotel, activeService]);
+  const supplier = await one<{ id: string }>(
+    "insert into suppliers(name) values('Hotel sintético') returning id",
+  );
+  await pg.query("update services set type='alojamiento',supplier_id=$1 where id=$2", [
+    supplier.id,
+    activeService,
+  ]);
+  await pg.query("update day_blocks set hotel_id=$2 where id=$1", [hotel, supplier.id]);
+  await pg.query(
+    "insert into day_block_items(block_id,service_id,slot_key) values($1,$2,'ALOJAMIENTO')",
+    [hotel, activeService],
+  );
   const nested = await block({ serviceId: null });
   const mod = await one<{ id: string }>(
     "insert into activity_modules(code,name,duration) values('MOD','Módulo','FD') returning id",

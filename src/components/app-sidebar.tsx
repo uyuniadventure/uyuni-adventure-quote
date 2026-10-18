@@ -5,7 +5,8 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { getCatalogFeatures } from "@/lib/catalog/features";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Compass, LogOut, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-auth";
@@ -56,6 +57,7 @@ export function useCurrentSectionTitle() {
 }
 
 export function AppSidebar() {
+  const features = useQuery({ queryKey: ["catalog-features"], queryFn: getCatalogFeatures });
   const { collapsed, mobileOpen, closeMobile } = useSidebar();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -112,7 +114,7 @@ export function AppSidebar() {
                 <div className="mx-3 my-2 border-t border-sidebar-border" />
               )}
               <ul>
-                {group.items.map((item) => {
+                {group.items.filter(item => item.path !== "/modulos-actividad" || features.data?.activity_modules_enabled).map((item) => {
                   const active = pathname === item.path;
                   return (
                     <li key={item.path}>

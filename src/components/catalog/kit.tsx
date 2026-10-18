@@ -250,7 +250,9 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
         if (ctx && typeof ctx.json === "function") {
           try { msg = (await ctx.json()).error ?? msg; } catch { /* ignore */ }
         }
-        throw new Error(msg);
+        throw new Error(ctx?.status === 404
+          ? "No está desplegada la función translate-block. Solicita su despliegue en Lovable Cloud."
+          : `No se pudo traducir con translate-block. Causa: ${msg}. Revisa los registros de esa función si no hay más detalle.`);
       }
       return data as { warning?: string };
     },

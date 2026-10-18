@@ -1,0 +1,11 @@
+﻿sku,dia,bloque_texto_id,bloque_servicios_id,titulo,alojamiento,comidas,comidas_origen,nota_dia
+SPASPA-4D3N-AB,1,BD-T01,BD-T01/A,Día de frontera,Hotel A,Almuerzo · Cena,guía,
+SPASPA-4D3N-AB,2,BD-T02,BD-T02/A,Día de salar,Hotel B,Desayuno · Almuerzo · Cóctel,presupuesto,Nota de lluvia de prueba
+SPASPA-4D3N-AB,3,BD-T03,BD-T03/A,Día de lagunas,Hotel A,Desayuno · Almuerzo,guía,
+SPASPA-4D3N-AB,4,BD-T04,BD-T04/A,Regreso a San Pedro,No incluido,Desayuno,guía,
+UYUUYU-3D2N-AB,1,BD-T05,BD-T05/A,Salar completo,Hotel A,Almuerzo,guía,
+UYUUYU-3D2N-AB,2,BD-T02,BD-T02/B,Día de salar,Hotel B,Desayuno · Almuerzo,guía,
+UYUUYU-3D2N-AB,3,BD-T03,BD-T03/A,Día de lagunas,No incluido,Desayuno · Almuerzo,guía,
+UYUUYU-3D2N-SOLO-TEXTO,1,BD-T05,,Salar completo,Hotel A,,,
+UYUUYU-3D2N-SOLO-TEXTO,2,BD-T02,,Día de salar,Hotel B,,,
+UYUUYU-3D2N-SOLO-TEXTO,3,BD-T03,,Día de lagunas,No incluido,,,

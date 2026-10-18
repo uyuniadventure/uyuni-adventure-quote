@@ -1,5 +1,6 @@
 import { db, json, unwrap } from "../db";
-import { resolvePricingPolicy } from "../pricing";
+import { resolvePricingPolicy, dateForDay } from "../pricing";
+import { initialRoomAlternatives } from "./room-defaults";
 import { parsePricingConfig } from "../pricing/config";
 import type { Tables, Enums, Json } from "../../types/db";
 import {
@@ -21,6 +22,13 @@ export type TemplateQuoteBasics = Pick<
 
 export function serviceItem(
   row: {
+    slot_key?: string;
+    is_default?: boolean;
+    billing?: string;
+    span_days?: number;
+    tc_policy?: string;
+    margin_mode?: string;
+    margin_pct?: number | null;
     service_id: string | null;
     qty: number;
     applies_tc: boolean | null;
@@ -51,6 +59,8 @@ export function serviceItem(
     const config = { ...(frozen["pricing_config"] as object), ...override };
     return {
       ...saved,
+      is_default: row.is_default ?? saved.is_default,
+      selected: row.is_default ?? saved.selected,
       qty: row.qty,
       pricing_unit: unit,
       applies_tc: row.applies_tc ?? saved.applies_tc,
@@ -107,8 +117,21 @@ export function serviceItem(
       ),
     ),
   );
-  const span = row.multi_day_span ?? s.multi_day_span;
+  const span =
+    row.billing === "per_service" ? (row.span_days ?? 1) : (row.multi_day_span ?? s.multi_day_span);
   return {
+    ...(row.slot_key
+      ? {
+          slot_key: row.slot_key,
+          is_default: row.is_default ?? true,
+          selected: row.is_default ?? true,
+          billing: row.billing ?? "per_day",
+          span_days: span,
+          tc_policy: row.applies_tc === true ? "charged" : (row.tc_policy ?? "free"),
+          margin_mode: row.margin_mode ?? "inherit",
+          margin_pct: row.margin_pct ?? null,
+        }
+      : {}),
     service_id: s.id,
     sku: s.sku,
     description: config.description ?? s.name,
@@ -137,7 +160,8 @@ export function serviceItem(
       // A day→hotel link covers that day's night unless explicitly configured.
       nights: unit === "per_room" ? 1 : undefined,
       vehicle_segment: s.vehicle_type,
-      vehicle_max_pax: s.vehicle_max_pax,
+      vehicle_max_pax: s.capacity ?? s.vehicle_max_pax,
+      capacity: s.capacity,
       coverage_key: row.coverage_key ?? (span > 1 ? `${s.id}:${day}` : undefined),
       coverage_start_day: row.coverage_start_day ?? day,
       ...(typeof row.pricing_config === "object" ? row.pricing_config : {}),
@@ -201,7 +225,7 @@ export async function createQuoteFromTemplate(
     const frozenBlock = snapshotBlock(block, source);
     const text = prepareDayText(frozenBlock, basics.language);
     const rows = source.items.filter((i) => i.block_id === block.id);
-    const items = rows.map((i) => serviceItem(i, td.day_number, source));
+    const items = initialRoomAlternatives(rows.map((i) => serviceItem(i, td.day_number, source)),basics.rooming,basics.pax_paying,basics.tc_count,dateForDay(basics.start_date,td.day_number));
     const links = source.links
       .filter((l) => l.block_id === block.id)
       .sort((a, b) => a.order - b.order);
