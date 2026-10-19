@@ -990,3 +990,7 @@ Rama `codex/t01k-importador-paquete-v2`; contrato y prompt listos en
 `20261019000100_import_package_v2.sql`, `20261019000200_import_template_snapshot.sql`.
 No se confirma ningún lote real ni se aplican cambios en Cloud. El ALTO de
 importación real sigue vigente hasta que Andrea lo suba, revise y responda OK.
+
+T01k en revisión: PR #39 sobre la rama del PR #38. Pruebas nuevas 16/16 y
+`test:db` completo con 66/66 pruebas finales; TypeScript/build OK. Suite global
+con casos previos y suspensión local documentados en `docs/T01k_entrega.md`.

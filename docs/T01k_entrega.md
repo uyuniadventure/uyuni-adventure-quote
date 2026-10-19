@@ -2,7 +2,8 @@
 
 Andrea autorizó el 19-10-2026 continuar T01k sobre la implementación de T01h
 del PR #38, aunque todavía no estuviera integrada en main. Esta entrega va en
-`codex/t01k-importador-paquete-v2`, separada de esa dependencia. Integrar primero
+`codex/t01k-importador-paquete-v2`, PR #39 (https://github.com/uyuniadventure/uyuni-adventure-quote/pull/39),
+separada de esa dependencia. Integrar primero
 T01h y después el importador. No se ha importado el paquete real ni se han hecho
 escrituras en Cloud.
 
@@ -102,11 +103,30 @@ El SPEC pegado por Andrea contiene únicamente un conflicto editorial frente al
 SPEC del repositorio. Se conserva la versión resuelta: migración T01h entregada,
 todavía pendiente de aplicar en Cloud. No se copian marcadores de conflicto.
 
+## Verificación de entrega
+
+- 16/16 pruebas nuevas de T01k en verde. Incluyen las diez filas de costos,
+  la comparación de todas las filas persistidas con su vista previa, diez
+  cotizaciones creadas desde lo importado, repetición sin cambios, precio único,
+  fallo a mitad con rollback, catálogo cambiado, permisos, descarte y validación
+  independiente en servidor. Una vista previa incompleta no puede confirmarse.
+- `bun run test:db`: todas sus suites pasan; 66/66 pruebas Vitest finales.
+- TypeScript, build de producción y lint de los módulos nuevos: aprobados.
+- La suite general **no está toda verde**. Una ejecución completa registró
+  440/446 en verde, los dos casos previos de Bolivia/WE ROAD sin entradas y cuatro
+  pruebas antiguas omitidas. La repetición final, con una prueba nueva adicional,
+  sufrió suspensión del equipo: 436/447 en verde, los mismos dos casos fallidos,
+  nueve omitidos y un timeout de preparación en la suite de ajustes. No se
+  cambiaron costos ni se omitieron pruebas para ocultarlo.
+- Se corrigió el lockfile después de mover `fflate` a dependencia de ejecución.
+  CI debe verificar la instalación con Bun 1.3.11; el entorno local usa 1.4.2.
+- Ninguna migración, purga, importación real o confirmación remota ejecutada.
+
 ## PROMPT PARA LOVABLE
 
 ```text
 [Lovable] Después de integrar primero T01h (PR #38) y después el PR del
-importador en la rama codex/t01k-importador-paquete-v2.
+importador (PR #39, codex/t01k-importador-paquete-v2).
 
 PASO 1 · Base de datos
 Comprueba las dos migraciones de T01h. Después aplica en Lovable Cloud, en orden:
