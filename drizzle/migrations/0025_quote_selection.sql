@@ -84,9 +84,9 @@ begin
   delete from public.quote_rooming where quote_id=q.id;
   insert into public.quote_rooming(quote_id,night,room_type,count,for_tc)
    select q.id,(x->>'night')::int,x->>'room_type',(x->>'count')::int,coalesce((x->>'for_tc')::boolean,false) from jsonb_array_elements(roomrows) x;
-  update public.quote_items i set room_distribution=x->'room_distribution'
+  update public.quote_items target_item set room_distribution=x->'room_distribution'
    from jsonb_array_elements(payload_items) x,public.quote_days day_row
-   where i.id=(x->>'id')::uuid and i.quote_day_id=day_row.id and day_row.quote_id=q.id and i.pricing_unit='per_room';
+   where target_item.id=(x->>'id')::uuid and target_item.quote_day_id=day_row.id and day_row.quote_id=q.id and target_item.pricing_unit='per_room';
  else
   for row in select value from jsonb_array_elements(payload_items) loop
    i:=jsonb_populate_record(null::public.quote_items,row);
