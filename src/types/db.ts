@@ -313,6 +313,13 @@ export type Database = {
           coverage_start_day: number | null;
           pricing_config: Json;
           item_snapshot: Json | null;
+          slot_key: string;
+          is_default: boolean;
+          billing: string;
+          span_days: number;
+          tc_policy: string;
+          margin_mode: string;
+          margin_pct: number | null;
         };
         Insert: {
           id?: string;
@@ -330,6 +337,13 @@ export type Database = {
           coverage_start_day?: number | null;
           pricing_config?: Json;
           item_snapshot?: Json | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string;
+          margin_mode?: string;
+          margin_pct?: number | null;
         };
         Update: {
           id?: string;
@@ -347,6 +361,13 @@ export type Database = {
           coverage_start_day?: number | null;
           pricing_config?: Json;
           item_snapshot?: Json | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string;
+          margin_mode?: string;
+          margin_pct?: number | null;
         };
         Relationships: [
           {
@@ -478,6 +499,7 @@ export type Database = {
           content: Json;
           catalog_origin: string;
           approval_issues: string[];
+          hotel_id: string | null;
         };
         Insert: {
           id?: string;
@@ -499,6 +521,7 @@ export type Database = {
           content?: Json;
           catalog_origin?: string;
           approval_issues?: string[];
+          hotel_id?: string | null;
         };
         Update: {
           id?: string;
@@ -520,6 +543,7 @@ export type Database = {
           content?: Json;
           catalog_origin?: string;
           approval_issues?: string[];
+          hotel_id?: string | null;
         };
         Relationships: [
           {
@@ -527,6 +551,13 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "day_blocks_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
             referencedColumns: ["id"];
           },
           {
@@ -1477,6 +1508,7 @@ export type Database = {
           created_at: string;
           updated_at: string;
           deposit_pct: number;
+          activity_modules_enabled: boolean;
         };
         Insert: {
           id?: string;
@@ -1485,6 +1517,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           deposit_pct?: number;
+          activity_modules_enabled?: boolean;
         };
         Update: {
           id?: string;
@@ -1493,6 +1526,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           deposit_pct?: number;
+          activity_modules_enabled?: boolean;
         };
         Relationships: [];
       };
@@ -1828,6 +1862,18 @@ export type Database = {
           adjustment_pct: number;
           adjustment_note: string | null;
           source_block_service_id: string | null;
+          slot_key: string;
+          is_default: boolean;
+          billing: string;
+          span_days: number;
+          tc_policy: string | null;
+          margin_mode: string;
+          margin_pct: number | null;
+          selected: boolean;
+          selection_source: string;
+          qty_override: number | null;
+          qty_cost: number | null;
+          qty_supplier: number | null;
         };
         Insert: {
           id?: string;
@@ -1867,6 +1913,18 @@ export type Database = {
           adjustment_pct?: number;
           adjustment_note?: string | null;
           source_block_service_id?: string | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string | null;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          selected?: boolean;
+          selection_source?: string;
+          qty_override?: number | null;
+          qty_cost?: number | null;
+          qty_supplier?: number | null;
         };
         Update: {
           id?: string;
@@ -1906,6 +1964,18 @@ export type Database = {
           adjustment_pct?: number;
           adjustment_note?: string | null;
           source_block_service_id?: string | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string | null;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          selected?: boolean;
+          selection_source?: string;
+          qty_override?: number | null;
+          qty_cost?: number | null;
+          qty_supplier?: number | null;
         };
         Relationships: [
           {
@@ -2050,6 +2120,47 @@ export type Database = {
             foreignKeyName: "quote_proposals_quote_id_fkey";
             columns: ["quote_id"];
             isOneToOne: true;
+            referencedRelation: "quotes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      quote_rooming: {
+        Row: {
+          id: string;
+          quote_id: string;
+          night: number | null;
+          room_type: string;
+          count: number;
+          for_tc: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          quote_id: string;
+          night?: number | null;
+          room_type: string;
+          count: number;
+          for_tc?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          quote_id?: string;
+          night?: number | null;
+          room_type?: string;
+          count?: number;
+          for_tc?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "quote_rooming_quote_id_fkey";
+            columns: ["quote_id"];
+            isOneToOne: false;
             referencedRelation: "quotes";
             referencedColumns: ["id"];
           },
@@ -2492,6 +2603,8 @@ export type Database = {
           created_at: string;
           updated_at: string;
           approval_issues: string[];
+          capacity: number | null;
+          occupancy: number | null;
         };
         Insert: {
           id?: string;
@@ -2519,6 +2632,8 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           approval_issues?: string[];
+          capacity?: number | null;
+          occupancy?: number | null;
         };
         Update: {
           id?: string;
@@ -2546,6 +2661,8 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           approval_issues?: string[];
+          capacity?: number | null;
+          occupancy?: number | null;
         };
         Relationships: [
           {
@@ -2786,6 +2903,10 @@ export type Database = {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
       };
+      create_location: {
+        Args: { code: string; name: string; country: string };
+        Returns: Database["public"]["Tables"]["location_codes"]["Row"];
+      };
       create_quote_from_template: {
         Args: { p_template: string; p_quote: Json; p_days: Json; p_source: Json; p_result: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
@@ -2818,6 +2939,16 @@ export type Database = {
         Args: { p_id: string; p_changes: Json; p_add?: boolean; p_promote?: boolean };
         Returns: Json;
       };
+      edit_quote_selection: {
+        Args: {
+          p_id: string;
+          p_operation: string;
+          p_payload: Json;
+          p_updated_at?: string;
+          p_result?: Json;
+        };
+        Returns: Json;
+      };
       ensure_quote_doc_sections: {
         Args: { p_quote_id: string; p_layout_id?: string };
         Returns: undefined;
@@ -2843,6 +2974,7 @@ export type Database = {
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean };
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json };
+      quote_day_hotel: { Args: { p_day: string }; Returns: string };
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
       quote_payment_summary: { Args: { p_id: string }; Returns: Json };
@@ -2865,6 +2997,7 @@ export type Database = {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
         Returns: Json;
       };
+      rooming_distribution: { Args: { p_rows: Json; p_night?: number }; Returns: Json };
       save_doc_section_as_block: {
         Args: { p_quote_id: string; p_section_id: string; p_code: string };
         Returns: string;

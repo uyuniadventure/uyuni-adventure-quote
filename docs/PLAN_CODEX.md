@@ -1,11 +1,12 @@
 # PLAN_CODEX — Cotizador Uyuni Adventure
 
 > Archivo de trabajo para Codex. Guardarlo en `docs/PLAN_CODEX.md`.
-> Estado del repo revisado: `main` en `ff9ee99` (17-10-2026).
+> Estado del repo revisado: `main` en `f48f2a7` (17-10-2026).
 > Primera ejecución del plan: base `main` en `186740c` (12-10-2026); ver comprobación de T00.
 > Codex ejecuta **una tarea por vez, en orden**, y se detiene al final de cada una.
-> Prioridad de Andrea, 17-10-2026: **T01k · Borrar plantillas y bloques, aprobar bloques**,
-> antes de T01h. Entregar T01k y parar. No iniciar T01h/T01i en esta entrega.
+> Corrección de Andrea, 17-10-2026: **el hotel identifica el bloque; la habitación
+> es una alternativa**. Aplicar el backend en T01h-1 y la UI en T01h-2.
+> T01h se entrega para revisión; T01i queda reemplazada por el nuevo T01k importador.
 
 ---
 
@@ -84,10 +85,11 @@ Reglas para ese prompt:
 | T01g | Guardar como plantilla: SKU y duplicados | [x] | — | sí (migración) |
 | T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
 | T01u | Borrar bloques diarios, plantillas y catálogo importado | [x] | T01s; prioridad de Andrea | sí |
-| T01k | Borrar plantillas y bloques, aprobar bloques | [~] | T01u; antes de T01h | sí |
-| T01h | Modelo de bloque v2: puestos y alternativas | [ ] | T01g, T01k | sí |
-| T01i | Reimportación de bloques e itinerarios (ALTO) | [ ] | T01h | sí |
-| T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01i | sí |
+| T01k | Borrar plantillas y bloques, aprobar bloques | [x] | T01u; antes de T01h | sí |
+| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [~] | T01g, T01k | sí |
+| T01i | Reimportación de bloques e itinerarios (ALTO) | reemplazada por T01k | T01h | sí |
+| T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01k importador | sí |
+| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [ ] | T01h | sí (migraciones + pantalla) |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
 | T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
@@ -394,7 +396,11 @@ aprobadas; instalación congelada, TypeScript app/E2E, build y ESLint de archivo
 TypeScript modificados aprobados. Suite completa: 368/370; solo siguen fallando
 los dos fixtures incompletos de Bolivia/WE ROAD (T03–T04), sin omisiones.
 
-## T01k · Borrar plantillas y bloques, aprobar bloques · 17-10-2026 · en revisión
+## T01k · Borrar plantillas y bloques, aprobar bloques · 17-10-2026 · integrada
+
+Integración comprobada al registrar la corrección de hotel: PR #36, merge
+`220e807`, presente en `origin/main` (`f48f2a7`). Esto acredita código integrado,
+no migraciones ni acciones de pantalla aplicadas en Cloud.
 
 Base `origin/main` en `ff9ee99`. Diagnóstico RLS/FK/aprobación, contratos y
 despliegue: [T01k_catalogo.md](T01k_catalogo.md).
@@ -429,6 +435,27 @@ Entregar y detenerse.
 fusionada: PR #32, commit de merge `363781c`, comprobado en `origin/main`.
 
 Especificación y aceptación: [docs/T01h_bloques_pax_reimport.md](T01h_bloques_pax_reimport.md). Se ejecutan en ese orden después de T01g/T01k y antes de T02. T01h referencia el borrado de T01k, no lo repite. T01i reutiliza la purga de T01u y sustituye la importación de plantillas de T04; T04 queda para fixtures. T01j absorbe T06. D7: el vendedor elige y la app propone; D8: reasignar textos; D9: ocultar módulos. No se implementan con T13.
+
+**Corrección de hotel (Andrea, 17-10-2026), pendiente de implementar:**
+
+- **T01h-1:** conservar el hotel del bloque mediante `day_blocks.hotel_id →
+  suppliers.id`. Migrarlo desde `services.supplier_id` del `hotel_service_id`
+  actual; convertir ese servicio en alternativa predeterminada de `ALOJAMIENTO`,
+  añadir habitaciones del mismo proveedor/lugar/régimen y solo entonces dejar
+  `hotel_service_id = null`. No crear otra tabla de hoteles.
+- Validar en servidor que todas las alternativas de alojamiento pertenecen al
+  hotel del bloque; rechazar mezclas con error en español. Cambiar hotel exige
+  otro bloque. `hotel_codes.supplier_id` aporta el código, no la identidad.
+- **T01i:** firma ruta + hotel_id + puestos/servicios + texto ES, sin tipo de
+  habitación ni su ID/SKU como discriminante indirecto. Igual hotel/otra habitación
+  reutiliza bloque; distinto hotel produce otro.
+- **T01h-2 / prompt Lovable:** mantener el campo «Hotel» como selector por proveedor;
+  Alojamiento ofrece solo sus habitaciones. Lista/filtro muestran nombre + código
+  («Tayka del Desierto · TD»); conservar «Sin hotel».
+- Pruebas exigidas: misma firma al cambiar solo habitación, distinta al cambiar
+  hotel, error al insertar/actualizar una habitación de otro hotel, backfill que
+  conserva la alternativa predeterminada. Diagnóstico reproducible y casos límite
+  documentados en la especificación enlazada.
 
 ## T02 · Sacar quote-ops.ts y limpiar migración con placeholder
 
@@ -933,3 +960,21 @@ Terminado cuando: 0 tests fallando u omitidos · 0 plantillas aprobadas sin serv
 | D7 | Rooming y vehículo/transportista | Vendedor elige; la app propone y conserva elecciones manuales |
 | D8 | Textos actuales de los días | Reasignar por tour/día; lo no conciliado queda sin revisar |
 | D9 | Módulos de actividad | Ocultos mediante flag en T01h |
+
+
+### IMPORT · 18-10-2026 · Entrega de la dependencia T01h
+
+Comprobado `origin/main` en `e3fe1f5`: T01h aún no existe. El pedido IMPORT
+levanta la pausa anterior solo para implementar esta dependencia y detenerse.
+Se incorporan los documentos y el fixture sintético de PAQUETE_CODEX_T01k;
+T01i queda «reemplazada por T01k». El identificador T01k de catálogo se mantiene
+como registro histórico; la nueva fila T01k **Importador paquete v2** es distinta.
+La especificación de hotel de `551bdb7` se conserva mediante merge, sin reescribir historia.
+
+Contrato y prompt T01h: [T01h_entrega.md](T01h_entrega.md).
+Migraciones en orden: `20261018000100_block_options_v2.sql`,
+`20261018000200_quote_selection.sql`. Solo se aplican en la base local de pruebas.
+El parser, staging, commit de importación, costTemplate y /admin/importar son
+la próxima tarea T01k; **no se implementan antes de integrar T01h**.
+
+Entrega T01h: PR #38 (codex/t01h-bloques-v2), 31/31 pruebas específicas y test:db completo en verde. Ver docs/T01h_entrega.md para limitaciones de la suite general. ALTO antes del importador T01k.

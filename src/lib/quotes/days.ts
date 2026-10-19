@@ -1,3 +1,6 @@
+import { initialRoomAlternatives } from "./room-defaults";
+import { dateForDay } from "../pricing";
+import type { Rooming } from "../pricing";
 import { db, json, unwrap } from "../db";
 import { calculateSavedQuote, loadQuote } from "./index";
 import {
@@ -239,7 +242,7 @@ async function prepareBlockDays(
     const hotel = snapshot.block.hotel_service_id;
     // Coverage coordinates belong to the library until addBlockDays relocates them.
     const libraryDay = snapshot.block.default_day_position ?? dayNumber;
-    const frozen = rows.map((r) => serviceItem(r, libraryDay, source));
+    const frozen = initialRoomAlternatives(rows.map((r) => serviceItem(r, libraryDay, source)),{paying:{},tc:{},...(quote.rooming as object)} as Rooming,quote.pax_paying,quote.tc_count,dateForDay(quote.start_date,dayNumber));
     if (hotel && !frozen.some((i) => i.service_id === hotel))
       frozen.push(
         serviceItem(

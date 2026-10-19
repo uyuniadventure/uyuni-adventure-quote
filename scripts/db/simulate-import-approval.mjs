@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
-import { createDatabase, seedDatabase, root } from "./local-db.mjs";
+import { createDatabase, seedDatabase, root, execArchivedSeed } from "./local-db.mjs";
 
 // Isolated reconstruction only. Never connects to Cloud and has no apply flag.
 const db = await createDatabase();
@@ -10,7 +10,10 @@ try {
     await readFile(new URL("supabase/seed/applied/blocks-report.json", root), "utf8"),
   );
   for (const file of blocks.seed_order)
-    await db.exec(await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8"));
+    await execArchivedSeed(
+      db,
+      await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8"),
+    );
   const id = "20000000-0000-0000-0000-000000000001";
   await db.query("insert into auth.users(id,email) values($1,'simulation@test.invalid')", [id]);
   await db.query("update public.profiles set role='admin' where id=$1", [id]);

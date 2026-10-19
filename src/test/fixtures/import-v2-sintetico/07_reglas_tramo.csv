@@ -1,0 +1,3 @@
+﻿ruta,dias,slot,TariffCode,servicio,dia_desde,dia_hasta,fuente
+SPASPA,4,TRANSPORTE_4X4,T_4X4_4D,PAQUETE 4X4 4D3N,1,4,fixture
+UYUUYU,3,TRANSPORTE_4X4,T_4X4_3D,PAQUETE 4X4 3D2N,1,3,fixture

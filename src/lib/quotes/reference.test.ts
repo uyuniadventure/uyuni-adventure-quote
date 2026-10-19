@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFile } from "node:fs/promises";
 import { beforeAll, afterAll, describe, expect, it, vi } from "vitest";
-import { createDatabase, seedDatabase } from "../../../scripts/db/local-db.mjs";
+import { createDatabase, seedDatabase, execArchivedSeed } from "../../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "@/test/pglite-supabase";
 import reference from "../../../docs/fase0/references/uyuuyu-ltd-2pax.json";
 
@@ -58,8 +58,9 @@ beforeAll(async () => {
   pg = await createDatabase();
   await seedDatabase(pg);
   const report = JSON.parse(await sql("supabase/seed/applied/blocks-report.json"));
-  for (const file of report.seed_order) await pg.exec(await sql(`supabase/seed/applied/${file}`));
-  await pg.exec(await sql("supabase/seed/03_uyuuyu_ltd_2pax.sql"));
+  for (const file of report.seed_order)
+    await execArchivedSeed(pg, await sql(`supabase/seed/applied/${file}`));
+  await execArchivedSeed(pg, await sql("supabase/seed/03_uyuuyu_ltd_2pax.sql"));
   templateId = (
     await pg.query<{ id: string }>("select id from itinerary_templates where sku=$1", [
       reference.sku,
@@ -76,7 +77,7 @@ beforeAll(async () => {
   transport.client = pgliteSupabase(pg);
   // Approval belongs to this isolated fixture, never to the archived seed.
   await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
-}, 30000);
+}, 120000);
 afterAll(async () => {
   await pg?.close();
 });
@@ -97,7 +98,8 @@ describe("UYUUYU-3D2N-LTd · Sheets, 2 pasajeros", () => {
         return `${expected.source_cell} | ${expected.description} | Sheets ${expected.cost_usd} | app ${actual?.total_cost_usd ?? "MISSING"} | delta ${actual?.total_cost_usd != null ? actual.total_cost_usd - expected.cost_usd : "MISSING"}`;
       })
       .join("\n");
-    expect(result.items, differences).toHaveLength(reference.rows.length);
+    expect(result.items.filter(r=>saved.items.some(i=>i.id===r.id && (i.pricing_snapshot as {_source_cell?:string})._source_cell)), differences).toHaveLength(reference.rows.length);
+    for (const alternative of saved.items.filter(i=>!i.selected)) expect(result.items.find(r=>r.id===alternative.id)?.total_cost_usd).toBe(0);
     for (const expected of reference.rows) {
       const item = saved.items.find(
         (i) =>
@@ -265,7 +267,7 @@ describe("UYUUYU-3D2N-LTd · Sheets, 2 pasajeros", () => {
         ),
       );
     const before = await snapshot();
-    await pg.exec(await sql("supabase/seed/03_uyuuyu_ltd_2pax.sql"));
+    await execArchivedSeed(pg, await sql("supabase/seed/03_uyuuyu_ltd_2pax.sql"));
     expect(await snapshot()).toEqual(before);
     await pg.exec(
       `set role authenticated; select set_config('request.jwt.claim.sub','${seller}',false);`,

@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
+import { listHotels, eligibleHotelRooms } from "@/lib/catalog/hotels";
+import { getCatalogFeatures } from "@/lib/catalog/features";
 import type { Enums, Tables } from "@/types/db";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -37,12 +39,13 @@ function useRun(key: unknown[]) {
 
 export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onClose: () => void; onCreated: (id: string) => void }) {
   const isNew = id === "new";
+  const features = useQuery({ queryKey: ["catalog-features"], queryFn: getCatalogFeatures });
   const { user, role } = useCurrentUser();
   const q = useQuery({
     queryKey: ["day_block", id],
     enabled: !!id && !isNew,
     queryFn: async () => {
-      const { data, error } = await db.from("day_blocks").select("*, services(id, sku, name), day_block_translations(lang, title)").eq("id", id!).single();
+      const { data, error } = await db.from("day_blocks").select("*, suppliers(id, name), day_block_translations(lang, title)").eq("id", id!).single();
       if (error) throw error;
       return data;
     },
@@ -67,14 +70,14 @@ export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onC
             <TabsList>
               <TabsTrigger value="datos">Datos</TabsTrigger>
               <TabsTrigger value="textos">Textos</TabsTrigger>
-              <TabsTrigger value="modulos">Módulos</TabsTrigger>
+              {features.data?.activity_modules_enabled && <TabsTrigger value="modulos">Módulos</TabsTrigger>}
               <TabsTrigger value="servicios">Servicios sueltos</TabsTrigger>
             </TabsList>
             <TabsContent value="datos" className="mt-4">
-              <BlockForm key={row.updated_at} row={row} hotel={row.services ? { id: row.services.id, label: row.services.name, sub: row.services.sku } : null} canEdit={canEdit} onSaved={() => {}} />
+              <BlockForm key={row.updated_at} row={row} hotel={row.suppliers ? { id: row.suppliers.id, label: row.suppliers.name } : null} canEdit={canEdit} onSaved={() => {}} />
             </TabsContent>
             <TabsContent value="textos" className="mt-4"><TranslationsPanel kind="day_block" parentId={row.id} canEdit={canEdit} /></TabsContent>
-            <TabsContent value="modulos" className="mt-4"><BlockModules blockId={row.id} canEdit={canEdit} /></TabsContent>
+            {features.data?.activity_modules_enabled && <TabsContent value="modulos" className="mt-4"><BlockModules blockId={row.id} canEdit={canEdit} /></TabsContent>}
             <TabsContent value="servicios" className="mt-4"><BlockItems blockId={row.id} canEdit={canEdit} /></TabsContent>
           </Tabs>
         )}
@@ -110,7 +113,7 @@ function BlockForm({ row, hotel: hotel0, canEdit, onSaved }: {
       const values = {
         code: f.code.trim().toUpperCase(), route_from: f.route_from || null, route_to: f.route_to || null,
         places: f.places.split(",").map((p) => p.trim()).filter(Boolean), modality: f.modality,
-        hotel_service_id: hotel?.id ?? null, default_day_position: pos && pos > 0 ? pos : null,
+        hotel_id: hotel?.id ?? null, default_day_position: pos && pos > 0 ? pos : null,
         status: manager ? f.status : ("pendiente" as const),
       };
       if (row) {
@@ -151,7 +154,7 @@ function BlockForm({ row, hotel: hotel0, canEdit, onSaved }: {
         <Field label="Hasta">{locSelect("route_to")}</Field>
         <Field label="Lugares (separados por coma)" className="sm:col-span-2"><Input value={f.places} onChange={(e) => set("places", e.target.value)} placeholder="San Pedro de Atacama, Valle de la Luna" disabled={!canEdit} /></Field>
         <Field label="Hotel (define la variante)">
-          <SearchPicker placeholder="Sin hotel" value={hotel} onPick={setHotel} queryKey="hotels" fetcher={(t) => fetchServices(t, "alojamiento")} disabled={!canEdit} />
+          <SearchPicker placeholder="Sin hotel" value={hotel} onPick={setHotel} queryKey="hotels-v2" fetcher={async (term) => (await listHotels()).filter(h => h.label.toLowerCase().includes(term.toLowerCase())).map(h => ({id: h.id, label: h.label, ...(h.code_pending ? {sub: "Código pendiente"} : {})}))} disabled={!canEdit || !!row?.hotel_id} />
         </Field>
         <Field label="Modalidad">
           <Select value={f.modality} onValueChange={(v) => set("modality", v as Enums<"itinerary_modality">)} disabled={!canEdit}>
@@ -252,7 +255,13 @@ function BlockItems({ blockId, canEdit }: { blockId: string; canEdit: boolean })
     <div className="space-y-3">
       {canEdit && (
         <SearchPicker placeholder="Añadir servicio suelto (alojamiento, comida, traslado…)" queryKey="services" fetcher={(t) => fetchServices(t)}
-          onPick={(o) => o && run.mutate([() => db.from("day_block_items").insert({ block_id: blockId, service_id: o.id, qty: 1 })])} />
+          onPick={(o) => o && run.mutate([async () => {
+            const service = await db.from("services").select("type, pricing_unit").eq("id", o.id).single();
+            if (service.error) return service;
+            const room = service.data.type === "alojamiento" && service.data.pricing_unit === "per_room";
+            if (room && !(await eligibleHotelRooms(blockId)).some(r => r.id === o.id)) throw new Error("Elige una habitación del hotel del bloque.");
+            return db.from("day_block_items").insert({block_id: blockId, service_id: o.id, qty: 1, slot_key: room ? "ALOJAMIENTO" : `SERVICIO:${o.id}`});
+          }])} />
       )}
       <p className="text-xs text-muted-foreground">Los servicios marcados como “No incluido” aparecen en el “No incluye” del día (ej. cena libre).</p>
       <div className="rounded-md border">

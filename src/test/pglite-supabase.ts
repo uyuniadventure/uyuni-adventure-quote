@@ -91,6 +91,18 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        edit_quote_selection: [
+          ["p_id", "uuid"],
+          ["p_operation", "text"],
+          ["p_payload", "jsonb"],
+          ["p_updated_at", "timestamptz"],
+          ["p_result", "jsonb"],
+        ],
+        create_location: [
+          ["code", "text"],
+          ["name", "text"],
+          ["country", "text"],
+        ],
         delete_day_blocks: [
           ["ids", "uuid[]"],
           ["force", "boolean"],

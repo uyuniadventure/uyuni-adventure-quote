@@ -169,6 +169,20 @@
       "when": 1792278000001,
       "tag": "0023_catalog_approval_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792364400024,
+      "tag": "0024_block_options_v2",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792364400025,
+      "tag": "0025_quote_selection",
+      "breakpoints": true
     }
   ]
 }

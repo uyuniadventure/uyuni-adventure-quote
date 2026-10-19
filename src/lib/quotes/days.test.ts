@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { createDatabase, seedDatabase } from "../../../scripts/db/local-db.mjs";
+import { createDatabase, seedDatabase, execArchivedSeed } from "../../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "@/test/pglite-supabase";
 import fixture from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
 import type { QuoteResult } from "../pricing";
@@ -69,8 +69,9 @@ beforeAll(async () => {
   const root = new URL("../../../", import.meta.url);
   const read = (path: string) => readFile(new URL(path, root), "utf8");
   const blocks = JSON.parse(await read("supabase/seed/applied/blocks-report.json"));
-  for (const file of blocks.seed_order) await pg.exec(await read(`supabase/seed/applied/${file}`));
-  await pg.exec(await read("supabase/seed/04_spauyu_mp_2pax.sql"));
+  for (const file of blocks.seed_order)
+    await execArchivedSeed(pg, await read(`supabase/seed/applied/${file}`));
+  await execArchivedSeed(pg, await read("supabase/seed/04_spauyu_mp_2pax.sql"));
   templateId = (
     await one<{ id: string }>("select id from itinerary_templates where sku='SPAUYU-3D2N-MP'")
   ).id;

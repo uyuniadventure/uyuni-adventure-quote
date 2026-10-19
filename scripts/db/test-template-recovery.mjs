@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
-import { createDatabase, seedDatabase, root } from "./local-db.mjs";
+import { createDatabase, seedDatabase, root, execArchivedSeed } from "./local-db.mjs";
 
 // Explicit historical schema snapshot to verify the recovery's 40 -> 42 delta.
 // The general test:db suite separately replays the full current migration directory.
@@ -19,7 +19,8 @@ const auditSQL = await read("scripts/db/verify-template-import.sql");
 try {
   await seedDatabase(db);
   const report = JSON.parse(await read("supabase/seed/applied/blocks-report.json"));
-  for (const file of report.seed_order) await db.exec(await read("supabase/seed/applied/" + file));
+  for (const file of report.seed_order)
+    await execArchivedSeed(db, await read("supabase/seed/applied/" + file));
   const before = (await db.query(auditSQL)).rows;
   assert.equal(before.length, 40);
   const guide = JSON.parse(await read("docs/fase0/guia_productos_extraida.json"));
