@@ -1,6 +1,7 @@
 import { db, json, unwrap } from "../db";
 import { resolvePricingPolicy, dateForDay } from "../pricing";
 import { initialRoomAlternatives } from "./room-defaults";
+import { proposeRooming } from "./selection-model";
 import { parsePricingConfig } from "../pricing/config";
 import type { Tables, Enums, Json } from "../../types/db";
 import {
@@ -197,6 +198,13 @@ export async function createQuoteFromTemplate(
     template.quote_defaults,
   );
   const settings = source.settings[0];
+  if (template.import_v2_route && !input.rooming) {
+    basics.rooming = { paying: {}, tc: {} };
+    for (const r of proposeRooming(basics.pax_paying, basics.tc_count)) {
+      const group = r.for_tc ? basics.rooming.tc : basics.rooming.paying;
+      group[r.room_type] = (group[r.room_type] ?? 0) + r.count;
+    }
+  }
   if (!settings) throw new Error("Falta la configuración global de precios");
   const policy = resolvePricingPolicy({
     ...basics,
@@ -224,8 +232,74 @@ export async function createQuoteFromTemplate(
       throw new Error(`Día ${td.day_number}: bloque no disponible`);
     const frozenBlock = snapshotBlock(block, source);
     const text = prepareDayText(frozenBlock, basics.language);
-    const rows = source.items.filter((i) => i.block_id === block.id);
-    const items = initialRoomAlternatives(rows.map((i) => serviceItem(i, td.day_number, source)),basics.rooming,basics.pax_paying,basics.tc_count,dateForDay(basics.start_date,td.day_number));
+    const dayOverrides = {
+      ...text.overrides,
+      ...(td.import_title ? { title: { [basics.language]: td.import_title } } : {}),
+      ...(td.import_lodging
+        ? { accommodation_text: { [basics.language]: td.import_lodging } }
+        : {}),
+      ...(td.import_meals ? { meals: td.import_meals.split(/\s*·\s*/).filter(Boolean) } : {}),
+      ...(td.import_note ? { client_note: { [basics.language]: td.import_note } } : {}),
+    };
+    const rows = source.items.filter(
+      (i) => i.block_id === block.id && (i.variant_key == null || i.variant_key === td.variant_key),
+    );
+    const imported = source.importLinks.filter((i) => i.day_number === td.day_number);
+    const items = initialRoomAlternatives(
+      [...rows, ...imported].map((i) => serviceItem(i, td.day_number, source)),
+      basics.rooming,
+      basics.pax_paying,
+      basics.tc_count,
+      dateForDay(basics.start_date, td.day_number),
+    );
+    if (template.import_v2_route) {
+      const people =
+        basics.pax_paying +
+        basics.tc_count +
+        Number(quote.staff.drivers ?? 0) +
+        Number(quote.staff.guides ?? 0);
+      const segmentVehicles = Math.max(
+        1,
+        ...source.importLinks
+          .filter((l) => l.billing === "per_service")
+          .map((l) =>
+            Math.ceil(
+              people / (source.services.find((s) => s.id === l.service_id)?.capacity ?? people),
+            ),
+          ),
+      );
+      for (const i of items) {
+        if (i.pricing_unit === "per_vehicle") {
+          const s = source.services.find((s) => s.id === i.service_id);
+          i.qty_override = Math.ceil(people / (s?.capacity ?? people));
+        }
+        if (i.slot_key === "STAFF") i.qty_override = segmentVehicles;
+      }
+      const border = items.filter((i) => i.slot_key === "TRASLADO_FRONTERA");
+      const available = border.filter((i) => {
+        const snap = i.pricing_snapshot as unknown as {
+          rates: {
+            pax_min: number | null;
+            pax_max: number | null;
+            valid_from: string | null;
+            valid_to: string | null;
+          }[];
+        };
+        const date = dateForDay(basics.start_date, td.day_number);
+        return snap.rates.some(
+          (r) =>
+            (r.pax_min ?? 1) <= Math.max(2, people) &&
+            (r.pax_max ?? Infinity) >= Math.max(2, people) &&
+            (!r.valid_from || r.valid_from <= date) &&
+            (!r.valid_to || r.valid_to >= date),
+        );
+      });
+      const preferred = available.find((i) => i.is_default) ?? available[0];
+      border.forEach((i) => {
+        i.selected = i === preferred;
+        i.selection_source = "auto";
+      });
+    }
     const links = source.links
       .filter((l) => l.block_id === block.id)
       .sort((a, b) => a.order - b.order);
@@ -252,24 +326,28 @@ export async function createQuoteFromTemplate(
         ),
       );
     }
-    if (!items.length) throw new Error(`Día ${td.day_number}: sin servicios`);
+    if (!items.length && !template.import_v2_route)
+      throw new Error(`Día ${td.day_number}: sin servicios`);
     return {
       day_number: td.day_number,
       source_block_id: block.id,
       block_snapshot: json(frozenBlock),
-      overrides: json(text.overrides),
-      title: text.title,
+      overrides: json(dayOverrides),
+      title: td.import_title || text.title,
       description: text.description,
       includes: text.includes,
       excludes: text.excludes,
-      route_from: block.route_from,
-      route_to: block.route_to,
+      route_from: block.route_from ?? (td.day_number === 1 ? template.route_from : null),
+      route_to: block.route_to ?? (td.day_number === template.days ? template.route_to : null),
       snapshot: json({
         reviewed: text.reviewed,
         source_language: text.source_language,
         language: basics.language,
         places: block.places,
         hotel_service_id: block.hotel_service_id,
+        hotel_name: td.import_lodging,
+        meals: td.import_meals,
+        note: td.import_note,
         source_day: td,
         block,
         translation: text.translation,
@@ -285,6 +363,9 @@ export async function createQuoteFromTemplate(
   for (const day of days) {
     for (const item of [...day.items]) {
       if ((item.day_span ?? 1) <= 1) continue;
+      // Package segments are one purchase on day_from. Later days display a
+      // coverage label; no extra quote_item is persisted for those days.
+      if (template.import_v2_route && item.billing === "per_service") continue;
       const pricing = item.pricing_snapshot as { coverage_key: string; coverage_start_day: number };
       if (day.day_number !== pricing.coverage_start_day) continue;
       for (let n = day.day_number + 1; n < day.day_number + (item.day_span ?? 1); n++) {
