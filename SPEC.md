@@ -96,6 +96,8 @@ Admin/Operación, sin aprobar servicios. Vendedor no puede borrar ni aprobar pad
   - **Tramos por pax:** hoy un mismo servicio aparece en varias filas por rango de pax (ej. transfer 1-2 / 3-6 / 7-9 pax). En la app es **un servicio con varias tarifas** según `pax_min`–`pax_max`, y el motor elige el tramo automáticamente.
   - Si solo existe `price_rack`, ese valor se adopta como costo neto y se conserva el rack (decisión de Andrea, 2026-10-11). El aviso de falta de costo corresponde solo a tarifas sin neto y sin rack; no se asume un costo cero.
 - **`hotel_codes`**: letra o sigla de cada hotel según la hoja `INDEX HOTELS` actual (P = Palacio de Sal, Td = Tayka del Desierto, M = Mallku Cueva, L = Luna Salada, F = Los Flamencos, K = Kachi, J = Jardines de Uyuni, Ñ = Coscaña, S = Sky Dream…). Se usan para componer el SKU de plantilla (§5).
+  - `supplier_id` enlaza opcionalmente con `suppliers.id`; la identidad del hotel
+    es el proveedor, no el ID del código ni el servicio de una habitación.
 - **`service_change_requests`**: service_id o rate_id, valores propuestos, motivo, solicitante, estado (`pendiente | aprobado | rechazado`), aprobador.
 
 ### 4.2 Lugares y fotos
@@ -118,13 +120,33 @@ servicio (tarifario) → módulo de actividad → bloque diario → plantilla de
 **Bloques diarios:**
 - **`day_blocks`**:
   - `code` (único), `route_from`, `route_to`, `places[]`, `modality` (`privado | compartido | grupo`).
-  - `hotel_service_id`: el hotel define la variante. Un mismo día con distinto hotel es **otro bloque** (otra ruta u otra descripción).
+  - **Corrección para T01h-1 (Andrea, 17-10-2026):** sustituir la referencia de
+    servicio `hotel_service_id` por `hotel_id`, FK a `suppliers.id`. El hotel
+    define la variante: mismo día con otro hotel es **otro bloque**; mismo hotel
+    con otro tipo de habitación es **el mismo bloque**. `hotel_id = null` mantiene
+    «Sin hotel». Este es el contrato objetivo; la migración T01h-1 sigue pendiente.
   - `default_day_position` (sugerencia de orden: día 1, día 4, etc.).
   - `status` (`activo | pendiente`).
 - **`day_block_translations`**: block_id, `lang`, `title`, `description` (narrativa para el cliente), `includes`, `excludes`, `reviewed` (bool).
 - **`day_block_modules`**: block_id, module_id, `order`, `time`.
 - **`day_block_items`**: block_id, service_id, `qty` (por defecto 1), `applies_tc` (override), `margin_applicable` (override), `is_optional`, `included` (bool). Son los ítems sueltos del día: alojamiento, comidas, traslados. Los ítems con `included = false` alimentan el "no incluye" (ej. "Cena libre").
   - `pricing_config` se valida con Zod en `src/lib/pricing/config.ts`: habitación (`room_type`: SGL, DBL, TPL o MAT; `nights`), vehículo (`vehicle_segment` y tramo opcional `rate_band`: pax_min/pax_max), persona/grupo (`{}`). Los campos ausentes se resuelven al calcular y generan avisos; se conservan los metadatos de importación fuera de esa configuración. La misma validación se aplica a enlaces de módulos.
+
+**Hotel y alternativas (T01h-1):** migrar `hotel_id` desde el `supplier_id` del
+servicio referenciado por `hotel_service_id`. Ese servicio pasa a ser la alternativa
+predeterminada del puesto `ALOJAMIENTO`; las demás son tipos de habitación del
+mismo proveedor, lugar (`services.location`) y régimen (`services.meal_plan`).
+Solo después de conservar ese contenido, dejar `hotel_service_id = null`.
+Toda escritura de alternativas de alojamiento debe comprobar en servidor que
+pertenecen al hotel del bloque; si no, falla en español. Cambiar de hotel requiere
+otro bloque. Detalles de migración, controles y pruebas en
+`docs/T01h_bloques_pax_reimport.md`; no modificar snapshots de cotizaciones existentes.
+
+**Firma de bloques (T01i):** ruta + `hotel_id` + puestos/servicios normalizados +
+texto ES. El tipo de habitación no entra en la firma, tampoco indirectamente
+mediante el ID/SKU de su servicio o la elección predeterminada de habitación.
+Normalizar `ALOJAMIENTO` por hotel, lugar y régimen; conservar la identidad de los
+demás servicios. Cambiar solo habitación reutiliza bloque; cambiar hotel lo distingue.
 
 ### 4.4 Plantillas (biblioteca)
 - **`itinerary_templates`**:
@@ -520,7 +542,10 @@ la copiada; los bloques omitidos se devuelven con su motivo.
 4. Lista de cotizaciones con búsqueda (§5) y filtros.
 5. Detalle de cotización: editor, cálculo, versiones, pagos, seguimientos, emails, historial de estados.
 6. Biblioteca de plantillas: búsqueda, ver, duplicar, editar, crear.
-7. Bloques diarios: lista, editor con traducciones e ítems.
+7. Bloques diarios: lista, editor con traducciones e ítems. En T01h-2, columna y
+   filtro «Hotel» por nombre del proveedor más código de `hotel_codes` (por ejemplo,
+   «Tayka del Desierto · TD»), con opción «Sin hotel». En Datos, selector «Hotel»
+   por proveedor; en Servicios, Alojamiento solo ofrece habitaciones de ese hotel.
 8. Tarifario: servicios, tarifas por temporada, sugerencias de cambio, productos pendientes.
 9. Media: subir fotos y asignarlas a lugares u hoteles.
 10. Clientes y T&C.
