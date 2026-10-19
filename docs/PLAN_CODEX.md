@@ -976,3 +976,5 @@ Migraciones en orden: `20261018000100_block_options_v2.sql`,
 `20261018000200_quote_selection.sql`. Solo se aplican en la base local de pruebas.
 El parser, staging, commit de importación, costTemplate y /admin/importar son
 la próxima tarea T01k; **no se implementan antes de integrar T01h**.
+
+Entrega T01h: PR #38 (codex/t01h-bloques-v2), 31/31 pruebas específicas y test:db completo en verde. Ver docs/T01h_entrega.md para limitaciones de la suite general. ALTO antes del importador T01k.

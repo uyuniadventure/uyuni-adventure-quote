@@ -144,3 +144,13 @@ ALTO: detenerse aquí. El prompt de `/admin/importar`, parser, validación,
 staging, commit atómico y `costTemplate` se entregarán con T01k después de
 integrar T01h. Andrea subirá el paquete real y responderá «OK» antes de su commit
 de importación. En esta entrega solo se copia el fixture sintético al repositorio.
+
+## Verificación de entrega · PR #38
+
+Rama `codex/t01h-bloques-v2`, PR https://github.com/uyuniadventure/uyuni-adventure-quote/pull/38.
+Las 31 pruebas específicas de T01h pasan. `bun run test:db` pasa completo,
+incluidas sus 56 pruebas Vitest finales; TypeScript y build pasan.
+La ejecución general anterior tuvo interrupciones por suspensión del equipo,
+dos casos de referencia sin entradas completas y el umbral local de rendimiento;
+el mismo control de rendimiento pasa en CI. No se considera toda la suite verde.
+No se aplicaron migraciones en Cloud ni se ejecutó una importación real.
