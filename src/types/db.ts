@@ -320,6 +320,7 @@ export type Database = {
           tc_policy: string;
           margin_mode: string;
           margin_pct: number | null;
+          variant_key: string | null;
         };
         Insert: {
           id?: string;
@@ -344,6 +345,7 @@ export type Database = {
           tc_policy?: string;
           margin_mode?: string;
           margin_pct?: number | null;
+          variant_key?: string | null;
         };
         Update: {
           id?: string;
@@ -368,6 +370,7 @@ export type Database = {
           tc_policy?: string;
           margin_mode?: string;
           margin_pct?: number | null;
+          variant_key?: string | null;
         };
         Relationships: [
           {
@@ -653,6 +656,8 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          import_kind: string | null;
+          import_sort: number | null;
         };
         Insert: {
           id?: string;
@@ -665,6 +670,8 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_kind?: string | null;
+          import_sort?: number | null;
         };
         Update: {
           id?: string;
@@ -677,6 +684,8 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_kind?: string | null;
+          import_sort?: number | null;
         };
         Relationships: [
           {
@@ -888,6 +897,100 @@ export type Database = {
           },
         ];
       };
+      import_batches: {
+        Row: {
+          id: string;
+          kind: string;
+          status: string;
+          file_name: string;
+          created_by: string;
+          created_at: string;
+          summary: Json;
+          package: Json;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind?: string;
+          status?: string;
+          file_name: string;
+          created_by?: string;
+          created_at?: string;
+          summary?: Json;
+          package: Json;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          kind?: string;
+          status?: string;
+          file_name?: string;
+          created_by?: string;
+          created_at?: string;
+          summary?: Json;
+          package?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      import_rows: {
+        Row: {
+          id: string;
+          batch_id: string;
+          position: number;
+          table_name: string;
+          natural_key: string;
+          action: string;
+          payload: Json;
+          before: Json | null;
+          message: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          batch_id: string;
+          position: number;
+          table_name: string;
+          natural_key: string;
+          action: string;
+          payload: Json;
+          before?: Json | null;
+          message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          batch_id?: string;
+          position?: number;
+          table_name?: string;
+          natural_key?: string;
+          action?: string;
+          payload?: Json;
+          before?: Json | null;
+          message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_batch_id_fkey";
+            columns: ["batch_id"];
+            isOneToOne: false;
+            referencedRelation: "import_batches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       info_blocks: {
         Row: {
           id: string;
@@ -949,6 +1052,9 @@ export type Database = {
           quote_defaults: Json;
           approval_issues: string[];
           catalog_origin: string;
+          import_v2_route: string | null;
+          import_includes_id: string | null;
+          import_excludes_id: string | null;
         };
         Insert: {
           id?: string;
@@ -977,6 +1083,9 @@ export type Database = {
           quote_defaults?: Json;
           approval_issues?: string[];
           catalog_origin?: string;
+          import_v2_route?: string | null;
+          import_includes_id?: string | null;
+          import_excludes_id?: string | null;
         };
         Update: {
           id?: string;
@@ -1005,6 +1114,9 @@ export type Database = {
           quote_defaults?: Json;
           approval_issues?: string[];
           catalog_origin?: string;
+          import_v2_route?: string | null;
+          import_includes_id?: string | null;
+          import_excludes_id?: string | null;
         };
         Relationships: [
           {
@@ -1012,6 +1124,20 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_excludes_id_fkey";
+            columns: ["import_excludes_id"];
+            isOneToOne: false;
+            referencedRelation: "doc_blocks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_includes_id_fkey";
+            columns: ["import_includes_id"];
+            isOneToOne: false;
+            referencedRelation: "doc_blocks";
             referencedColumns: ["id"];
           },
           {
@@ -2414,6 +2540,50 @@ export type Database = {
           },
         ];
       };
+      segment_rules: {
+        Row: {
+          id: string;
+          route: string;
+          days: number;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          route: string;
+          days: number;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          route?: string;
+          days?: number;
+          slot_key?: string;
+          service_id?: string;
+          day_from?: number;
+          day_to?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "segment_rules_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       service_change_requests: {
         Row: {
           id: string;
@@ -2605,6 +2775,7 @@ export type Database = {
           approval_issues: string[];
           capacity: number | null;
           occupancy: number | null;
+          import_v2_route: string | null;
         };
         Insert: {
           id?: string;
@@ -2634,6 +2805,7 @@ export type Database = {
           approval_issues?: string[];
           capacity?: number | null;
           occupancy?: number | null;
+          import_v2_route?: string | null;
         };
         Update: {
           id?: string;
@@ -2663,6 +2835,7 @@ export type Database = {
           approval_issues?: string[];
           capacity?: number | null;
           occupancy?: number | null;
+          import_v2_route?: string | null;
         };
         Relationships: [
           {
@@ -2736,6 +2909,70 @@ export type Database = {
         };
         Relationships: [];
       };
+      template_day_items: {
+        Row: {
+          id: string;
+          template_id: string;
+          day_number: number;
+          slot_key: string;
+          service_id: string | null;
+          supplier_id: string | null;
+          tc_policy: string;
+          is_default: boolean;
+          sort: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          day_number: number;
+          slot_key: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          tc_policy?: string;
+          is_default?: boolean;
+          sort?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          template_id?: string;
+          day_number?: number;
+          slot_key?: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          tc_policy?: string;
+          is_default?: boolean;
+          sort?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "template_day_items_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_day_items_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_day_items_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "itinerary_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       template_days: {
         Row: {
           id: string;
@@ -2744,6 +2981,11 @@ export type Database = {
           block_id: string;
           created_at: string;
           updated_at: string;
+          variant_key: string | null;
+          import_title: string | null;
+          import_lodging: string | null;
+          import_meals: string | null;
+          import_note: string | null;
         };
         Insert: {
           id?: string;
@@ -2752,6 +2994,11 @@ export type Database = {
           block_id: string;
           created_at?: string;
           updated_at?: string;
+          variant_key?: string | null;
+          import_title?: string | null;
+          import_lodging?: string | null;
+          import_meals?: string | null;
+          import_note?: string | null;
         };
         Update: {
           id?: string;
@@ -2760,6 +3007,11 @@ export type Database = {
           block_id?: string;
           created_at?: string;
           updated_at?: string;
+          variant_key?: string | null;
+          import_title?: string | null;
+          import_lodging?: string | null;
+          import_meals?: string | null;
+          import_note?: string | null;
         };
         Relationships: [
           {
@@ -2771,6 +3023,54 @@ export type Database = {
           },
           {
             foreignKeyName: "template_days_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "itinerary_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      template_segment_items: {
+        Row: {
+          id: string;
+          template_id: string;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          template_id?: string;
+          slot_key?: string;
+          service_id?: string;
+          day_from?: number;
+          day_to?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "template_segment_items_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_segment_items_template_id_fkey";
             columns: ["template_id"];
             isOneToOne: false;
             referencedRelation: "itinerary_templates";
@@ -2899,6 +3199,7 @@ export type Database = {
         Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
         Returns: Database["public"]["Tables"]["quote_emails"]["Row"];
       };
+      commit_import_batch: { Args: { p_batch_id: string }; Returns: Json };
       compute_real_margin: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
@@ -2921,6 +3222,7 @@ export type Database = {
       };
       delete_day_blocks: { Args: { ids: string[]; force?: boolean }; Returns: Json };
       delete_templates: { Args: { ids: string[] }; Returns: Json };
+      discard_import_batch: { Args: { p_batch_id: string }; Returns: undefined };
       edit_quote_days: {
         Args: {
           p_id: string;
@@ -2957,6 +3259,7 @@ export type Database = {
         Args: { p_id: string; p_messages: Json };
         Returns: Database["public"]["Tables"]["ops_communications"]["Row"][];
       };
+      import_template_package: { Args: { p_template: string }; Returns: Json };
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean };
         Returns: Database["public"]["Tables"]["quote_items"]["Row"];
@@ -3033,6 +3336,11 @@ export type Database = {
         Returns: undefined;
       };
       snapshot_day_block: { Args: { p_id: string }; Returns: Json };
+      stage_import_package: {
+        Args: { p_file_name: string; p_package: Json; p_rows: Json; p_validation: Json };
+        Returns: string;
+      };
+      template_import_links: { Args: { p_template: string }; Returns: Json };
       transition_quote: {
         Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];

@@ -154,6 +154,19 @@ demás servicios. Cambiar solo habitación reutiliza bloque; cambiar hotel lo di
   - `status`, `source_quote_id` (si se promovió desde una cotización).
 - **`template_days`**: template_id, `day_number`, block_id.
 
+**Importador paquete v2 (T01k):** `template_days.block_id` conserva el texto
+reutilizable y `variant_key` elige sus servicios A/B. Los tramos de varios días
+viven en `template_segment_items`; alojamiento, cena y staff de cada noche viven
+en `template_day_items`, fuera del bloque reutilizable del paquete. El hotel de
+esa noche se identifica por proveedor. En la cotización, un tramo se copia una
+sola vez en su primer día, con `billing=per_service` y `span_days`; los demás días
+muestran su cobertura sin otro cargo. `segment_rules` guarda las propuestas por
+ruta/duración. Los textos fijos reutilizan `doc_blocks` y sus traducciones de T13.
+`import_batches`/`import_rows` son privados de Admin: preparar no escribe catálogo;
+confirmar revalida la vista previa y aplica todo en una transacción. Ante un error
+conserva el lote staged y revierte el catálogo completo. El paquete real se carga
+desde `/admin/importar`, nunca desde el repositorio, y Andrea confirma su importación.
+
 **Guardar una cotización como plantilla (T01g, Andrea, 16-10-2026):** el SKU toma
 el origen del primer día y el destino del último (`quote_days.route_from` y
 `route_to`); si falta alguno, el diálogo exige elegirlo de `location_codes`.

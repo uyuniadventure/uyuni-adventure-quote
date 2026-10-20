@@ -89,7 +89,7 @@ Reglas para ese prompt:
 | T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [~] | T01g, T01k | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | reemplazada por T01k | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01k importador | sí |
-| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [ ] | T01h | sí (migraciones + pantalla) |
+| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [~] | T01h | sí (migraciones + pantalla) |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
 | T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
@@ -978,3 +978,19 @@ El parser, staging, commit de importación, costTemplate y /admin/importar son
 la próxima tarea T01k; **no se implementan antes de integrar T01h**.
 
 Entrega T01h: PR #38 (codex/t01h-bloques-v2), 31/31 pruebas específicas y test:db completo en verde. Ver docs/T01h_entrega.md para limitaciones de la suite general. ALTO antes del importador T01k.
+
+
+### IMPORT · 19-10-2026 · T01k sobre T01h
+
+Andrea autorizó expresamente continuar el importador sobre el PR #38, aunque
+T01h no estuviera integrada en main, y mantener ambas entregas separadas. Esta
+autorización sustituye el ALTO anterior solo para implementar T01k.
+Rama `codex/t01k-importador-paquete-v2`; contrato y prompt listos en
+[docs/T01k_entrega.md](T01k_entrega.md). Nuevas migraciones, después de T01h:
+`20261019000100_import_package_v2.sql`, `20261019000200_import_template_snapshot.sql`.
+No se confirma ningún lote real ni se aplican cambios en Cloud. El ALTO de
+importación real sigue vigente hasta que Andrea lo suba, revise y responda OK.
+
+T01k en revisión: PR #39 sobre la rama del PR #38. Pruebas nuevas 16/16 y
+`test:db` completo con 66/66 pruebas finales; TypeScript/build OK. Suite global
+con casos previos y suspensión local documentados en `docs/T01k_entrega.md`.

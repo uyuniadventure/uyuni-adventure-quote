@@ -447,10 +447,11 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         Object.assign(item, config);
         const vehiclePax = input.pax_paying + (item.tc_policy === "excluded" ? 0 : input.tc_count) +
           count(input.staff?.drivers ?? 0,"drivers") + count(input.staff?.guides ?? 0,"guides");
-        const ratePax = item.pricing_unit === "per_vehicle"
+        const calculatedRatePax = item.pricing_unit === "per_vehicle"
           ? item.slot_key && (item.qty_override ?? item.qty) > 0
             ? Math.ceil(vehiclePax / (item.qty_override ?? item.qty)) : vehiclePax
           : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
+        const ratePax = item.slot_key === "TRASLADO_FRONTERA" ? Math.max(2,calculatedRatePax) : calculatedRatePax;
         let autoVehicleRate: Rate | undefined;
         let autoVehicle = false;
         if (

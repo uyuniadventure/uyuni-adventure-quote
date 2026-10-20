@@ -416,7 +416,7 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
       "utf8",
     );
     const result = await pg.exec(sql);
-    expect(result.filter((r) => r.fields.length > 0)).toHaveLength(11);
+    expect(result.filter((r) => r.fields.length > 0)).toHaveLength(15);
     expect(
       (await rows("select id from itinerary_templates where catalog_origin='importacion'")).length,
     ).toBe(2);

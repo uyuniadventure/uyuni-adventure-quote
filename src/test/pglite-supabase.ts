@@ -91,6 +91,11 @@ export function pgliteSupabase(pg: PGlite) {
     },
     async rpc(name: string, args: Record<string, unknown>) {
       const signatures: Record<string, [string, string][]> = {
+        template_import_links: [["p_template","uuid"]],
+        import_template_package: [["p_template","uuid"]],
+        stage_import_package: [["p_file_name","text"],["p_package","jsonb"],["p_rows","jsonb"],["p_validation","jsonb"]],
+        commit_import_batch: [["p_batch_id","uuid"]],
+        discard_import_batch: [["p_batch_id","uuid"]],
         edit_quote_selection: [
           ["p_id", "uuid"],
           ["p_operation", "text"],

@@ -118,19 +118,23 @@ export async function saveDayAsNewBlock(dayId: string, nombre: string) {
 }
 
 /** Append one library day with its translations, defaults and frozen tariffs. */
-export async function addBlockDay(quoteId: string, blockId: string) {
+export async function addBlockDay(quoteId: string, blockId: string, variantKey?: string) {
   const { quote, days } = await loadQuote(quoteId);
-  const bundle = (await prepareBlockDays(quote, [blockId], days.length + 1))[0]!;
+  const bundle = (await prepareBlockDays(quote, [blockId], days.length + 1, [variantKey]))[0]!;
   if (bundle.items.some((i) => (i.day_span ?? 1) > 1))
     throw new Error("Selecciona todos los bloques del tramo multi-día y añádelos juntos");
   return mutate(quoteId, "add_block", bundle);
 }
 
 /** Select the whole stretch before writing: no partial itinerary or duplicate purchase. */
-export async function addBlockDays(quoteId: string, blockIds: string[]) {
+export async function addBlockDays(
+  quoteId: string,
+  blockIds: string[],
+  variantKeys: (string | undefined)[] = [],
+) {
   if (!blockIds.length) throw new Error("Selecciona al menos un bloque");
   const { quote, days } = await loadQuote(quoteId);
-  const bundles = await prepareBlockDays(quote, blockIds, days.length + 1);
+  const bundles = await prepareBlockDays(quote, blockIds, days.length + 1, variantKeys);
   const purchasePrefix = crypto.randomUUID();
   for (const bundle of bundles)
     for (const item of bundle.items) {
@@ -209,6 +213,7 @@ async function prepareBlockDays(
   quote: Awaited<ReturnType<typeof loadQuote>>["quote"],
   blockIds: string[],
   firstDay: number,
+  variantKeys: (string | undefined)[] = [],
 ) {
   const { serviceItem } = await import("./from-template");
   const snapshots = await Promise.all(
@@ -238,11 +243,53 @@ async function prepareBlockDays(
     const blockId = blockIds[index]!;
     const dayNumber = firstDay + index;
     const text = prepareDayText(snapshot, quote.language);
-    const rows = [...snapshot.services, ...snapshot.modules.flatMap((m) => m.items)];
+    const variants = [
+      ...new Set(snapshot.services.map((i) => i.variant_key).filter((v): v is string => !!v)),
+    ].sort();
+    const variant = variantKeys[index] ?? variants[0];
+    if (variant && !variants.includes(variant))
+      throw new Error("Variante de servicios inexistente");
+    const rows = [
+      ...snapshot.services.filter((i) => i.variant_key == null || i.variant_key === variant),
+      ...snapshot.modules.flatMap((m) => m.items),
+    ];
     const hotel = snapshot.block.hotel_service_id;
     // Coverage coordinates belong to the library until addBlockDays relocates them.
     const libraryDay = snapshot.block.default_day_position ?? dayNumber;
-    const frozen = initialRoomAlternatives(rows.map((r) => serviceItem(r, libraryDay, source)),{paying:{},tc:{},...(quote.rooming as object)} as Rooming,quote.pax_paying,quote.tc_count,dateForDay(quote.start_date,dayNumber));
+    const frozen = initialRoomAlternatives(
+      rows.map((r) => serviceItem(r, libraryDay, source)),
+      { paying: {}, tc: {}, ...(quote.rooming as object) } as Rooming,
+      quote.pax_paying,
+      quote.tc_count,
+      dateForDay(quote.start_date, dayNumber),
+    );
+    if (variant) {
+      const people =
+        quote.pax_paying +
+        quote.tc_count +
+        Number((quote.staff as { drivers?: number }).drivers ?? 0) +
+        Number((quote.staff as { guides?: number }).guides ?? 0);
+      for (const i of frozen)
+        if (i.pricing_unit === "per_vehicle")
+          i.qty_override = Math.ceil(
+            people / (services.find((s) => s.id === i.service_id)?.capacity ?? people),
+          );
+      const border = frozen.filter((i) => i.slot_key === "TRASLADO_FRONTERA");
+      const date = dateForDay(quote.start_date, dayNumber);
+      const chosen = border.find((i) =>
+        rates.some(
+          (r) =>
+            r.service_id === i.service_id &&
+            (r.pax_min ?? 1) <= Math.max(2, people) &&
+            (r.pax_max ?? Infinity) >= Math.max(2, people) &&
+            (!r.valid_from || r.valid_from <= date) &&
+            (!r.valid_to || r.valid_to >= date),
+        ),
+      );
+      border.forEach((i) => {
+        i.selected = i === chosen;
+      });
+    }
     if (hotel && !frozen.some((i) => i.service_id === hotel))
       frozen.push(
         serviceItem(
@@ -282,6 +329,7 @@ async function prepareBlockDays(
         places: snapshot.block.places,
         hotel_service_id: hotel,
         block_id: blockId,
+        ...(variant ? { variant_key: variant } : {}),
       },
     };
     const items = frozen.map((i) => ({
