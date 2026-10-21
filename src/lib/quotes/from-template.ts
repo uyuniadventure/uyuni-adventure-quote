@@ -1,5 +1,7 @@
 import { db, json, unwrap } from "../db";
-import { resolvePricingPolicy } from "../pricing";
+import { resolvePricingPolicy, dateForDay } from "../pricing";
+import { initialRoomAlternatives } from "./room-defaults";
+import { proposeRooming } from "./selection-model";
 import { parsePricingConfig } from "../pricing/config";
 import type { Tables, Enums, Json } from "../../types/db";
 import {
@@ -21,6 +23,13 @@ export type TemplateQuoteBasics = Pick<
 
 export function serviceItem(
   row: {
+    slot_key?: string;
+    is_default?: boolean;
+    billing?: string;
+    span_days?: number;
+    tc_policy?: string;
+    margin_mode?: string;
+    margin_pct?: number | null;
     service_id: string | null;
     qty: number;
     applies_tc: boolean | null;
@@ -51,6 +60,8 @@ export function serviceItem(
     const config = { ...(frozen["pricing_config"] as object), ...override };
     return {
       ...saved,
+      is_default: row.is_default ?? saved.is_default,
+      selected: row.is_default ?? saved.selected,
       qty: row.qty,
       pricing_unit: unit,
       applies_tc: row.applies_tc ?? saved.applies_tc,
@@ -83,7 +94,9 @@ export function serviceItem(
   if (!["activo", "pendiente"].includes(s.status)) throw new Error(`Servicio inactivo: ${s.sku}`);
   if (!s.pricing_unit || !s.currency)
     throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
-  const rates = source.rates.filter((r) => r.service_id === s.id);
+  const rates = source.rates.filter(
+    (r) => r.service_id === s.id && r.pricing_enabled !== false,
+  );
   const config = (row.pricing_config ?? {}) as {
     pricing_unit?: Enums<"pricing_unit">;
     description?: string;
@@ -107,8 +120,21 @@ export function serviceItem(
       ),
     ),
   );
-  const span = row.multi_day_span ?? s.multi_day_span;
+  const span =
+    row.billing === "per_service" ? (row.span_days ?? 1) : (row.multi_day_span ?? s.multi_day_span);
   return {
+    ...(row.slot_key
+      ? {
+          slot_key: row.slot_key,
+          is_default: row.is_default ?? true,
+          selected: row.is_default ?? true,
+          billing: row.billing ?? "per_day",
+          span_days: span,
+          tc_policy: row.applies_tc === true ? "charged" : (row.tc_policy ?? "free"),
+          margin_mode: row.margin_mode ?? "inherit",
+          margin_pct: row.margin_pct ?? null,
+        }
+      : {}),
     service_id: s.id,
     sku: s.sku,
     description: config.description ?? s.name,
@@ -137,7 +163,8 @@ export function serviceItem(
       // A day→hotel link covers that day's night unless explicitly configured.
       nights: unit === "per_room" ? 1 : undefined,
       vehicle_segment: s.vehicle_type,
-      vehicle_max_pax: s.vehicle_max_pax,
+      vehicle_max_pax: s.capacity ?? s.vehicle_max_pax,
+      capacity: s.capacity,
       coverage_key: row.coverage_key ?? (span > 1 ? `${s.id}:${day}` : undefined),
       coverage_start_day: row.coverage_start_day ?? day,
       ...(typeof row.pricing_config === "object" ? row.pricing_config : {}),
@@ -154,15 +181,24 @@ export async function createQuoteFromTemplate(
 ): Promise<Tables<"quotes">> {
   const source = await loadTemplateSource(templateId, input.client_id);
   const { template, client } = source;
+  if (template.economic_status && template.economic_status !== "validated")
+    throw new Error(
+      template.economic_status === "blocked"
+        ? `Itinerario bloqueado: ${template.economic_issues.join("; ")}`
+        : "El itinerario todavía requiere validación económica",
+    );
   const fx: Record<string, number> = { USD: 1 };
   for (const rate of [...source.fx].sort((a, b) => a.valid_from.localeCompare(b.valid_from))) {
     if (rate.valid_from.slice(0, 10) <= input.start_date) fx[rate.currency] = rate.rate_to_usd;
   }
+  const category = input.category ?? template.category;
+  if (!category)
+    throw new Error("La categoría comercial de origen no tiene equivalencia autorizada");
   const basics = applyTemplateDefaults(
     {
       ...input,
       client_type: client.type,
-      category: template.category,
+      category,
       tour_sku: template.sku,
       tc_count: input.tc_count ?? 0,
       rooming: input.rooming ?? { paying: {}, tc: {} },
@@ -173,6 +209,13 @@ export async function createQuoteFromTemplate(
     template.quote_defaults,
   );
   const settings = source.settings[0];
+  if (template.import_v2_route && !input.rooming) {
+    basics.rooming = { paying: {}, tc: {} };
+    for (const r of proposeRooming(basics.pax_paying, basics.tc_count)) {
+      const group = r.for_tc ? basics.rooming.tc : basics.rooming.paying;
+      group[r.room_type] = (group[r.room_type] ?? 0) + r.count;
+    }
+  }
   if (!settings) throw new Error("Falta la configuración global de precios");
   const policy = resolvePricingPolicy({
     ...basics,
@@ -200,8 +243,76 @@ export async function createQuoteFromTemplate(
       throw new Error(`Día ${td.day_number}: bloque no disponible`);
     const frozenBlock = snapshotBlock(block, source);
     const text = prepareDayText(frozenBlock, basics.language);
-    const rows = source.items.filter((i) => i.block_id === block.id);
-    const items = rows.map((i) => serviceItem(i, td.day_number, source));
+    const dayOverrides = {
+      ...text.overrides,
+      ...(td.import_title ? { title: { [basics.language]: td.import_title } } : {}),
+      ...(td.import_lodging
+        ? { accommodation_text: { [basics.language]: td.import_lodging } }
+        : {}),
+      ...(td.import_meals ? { meals: td.import_meals.split(/\s*·\s*/).filter(Boolean) } : {}),
+      ...(td.import_note ? { client_note: { [basics.language]: td.import_note } } : {}),
+    };
+    const rows = source.items.filter(
+      (i) => i.block_id === block.id && (i.variant_key == null || i.variant_key === td.variant_key),
+    );
+    const imported = source.importLinks.filter((i) => i.day_number === td.day_number);
+    const items = initialRoomAlternatives(
+      [...rows, ...imported].map((i) => serviceItem(i, td.day_number, source)),
+      basics.rooming,
+      basics.pax_paying,
+      basics.tc_count,
+      dateForDay(basics.start_date, td.day_number),
+    );
+    if (template.import_v2_route) {
+      const people =
+        basics.pax_paying +
+        basics.tc_count +
+        Number(quote.staff.drivers ?? 0) +
+        Number(quote.staff.guides ?? 0);
+      const segmentVehicles = Math.max(
+        1,
+        ...source.importLinks
+          .filter((l) => l.billing === "per_service")
+          .map((l) =>
+            Math.ceil(
+              people / (source.services.find((s) => s.id === l.service_id)?.capacity ?? people),
+            ),
+          ),
+      );
+      for (const i of items) {
+        if (i.pricing_unit === "per_vehicle") {
+          const s = source.services.find((s) => s.id === i.service_id);
+          i.qty_override = Math.ceil(people / (s?.capacity ?? people));
+        }
+        if (i.slot_key === "STAFF") i.qty_override = segmentVehicles;
+      }
+      const border = items.filter((i) => i.slot_key === "TRASLADO_FRONTERA");
+      const available = border.filter((i) => {
+        const snap = i.pricing_snapshot as unknown as {
+          rates: {
+            pax_min: number | null;
+            pax_max: number | null;
+            valid_from: string | null;
+            valid_to: string | null;
+          }[];
+        };
+        const date = dateForDay(basics.start_date, td.day_number);
+        return snap.rates.some(
+          (r) =>
+            (r.pax_min ?? 1) <= people &&
+            (r.pax_max ?? Infinity) >= people &&
+            (!r.valid_from || r.valid_from <= date) &&
+            (!r.valid_to || r.valid_to >= date),
+        );
+      });
+      const preferred = available.find((i) => i.is_default) ?? available[0];
+      if (border.length && !preferred)
+        throw new Error(`Traslado frontera sin tarifa autorizada para ${people} pasajero(s)`);
+      border.forEach((i) => {
+        i.selected = i === preferred;
+        i.selection_source = "auto";
+      });
+    }
     const links = source.links
       .filter((l) => l.block_id === block.id)
       .sort((a, b) => a.order - b.order);
@@ -228,24 +339,28 @@ export async function createQuoteFromTemplate(
         ),
       );
     }
-    if (!items.length) throw new Error(`Día ${td.day_number}: sin servicios`);
+    if (!items.length && !template.import_v2_route)
+      throw new Error(`Día ${td.day_number}: sin servicios`);
     return {
       day_number: td.day_number,
       source_block_id: block.id,
       block_snapshot: json(frozenBlock),
-      overrides: json(text.overrides),
-      title: text.title,
+      overrides: json(dayOverrides),
+      title: td.import_title || text.title,
       description: text.description,
       includes: text.includes,
       excludes: text.excludes,
-      route_from: block.route_from,
-      route_to: block.route_to,
+      route_from: block.route_from ?? (td.day_number === 1 ? template.route_from : null),
+      route_to: block.route_to ?? (td.day_number === template.days ? template.route_to : null),
       snapshot: json({
         reviewed: text.reviewed,
         source_language: text.source_language,
         language: basics.language,
         places: block.places,
         hotel_service_id: block.hotel_service_id,
+        hotel_name: td.import_lodging,
+        meals: td.import_meals,
+        note: td.import_note,
         source_day: td,
         block,
         translation: text.translation,
@@ -261,6 +376,9 @@ export async function createQuoteFromTemplate(
   for (const day of days) {
     for (const item of [...day.items]) {
       if ((item.day_span ?? 1) <= 1) continue;
+      // Package segments are one purchase on day_from. Later days display a
+      // coverage label; no extra quote_item is persisted for those days.
+      if (template.import_v2_route && item.billing === "per_service") continue;
       const pricing = item.pricing_snapshot as { coverage_key: string; coverage_start_day: number };
       if (day.day_number !== pricing.coverage_start_day) continue;
       for (let n = day.day_number + 1; n < day.day_number + (item.day_span ?? 1); n++) {

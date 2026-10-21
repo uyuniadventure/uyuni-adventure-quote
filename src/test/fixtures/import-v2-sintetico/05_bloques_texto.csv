@@ -1,0 +1,9 @@
+﻿bloque_texto_id,tipo,idioma,titulo,texto,notas,veces_usado,usado_en
+BD-T01,dia_tour,es,Día de frontera,Texto de prueba del día de frontera.,,1,SPASPA-4D3N-AB D1
+BD-T02,dia_tour,es,Día de salar,"Texto de prueba del salar.
+
+Segundo párrafo con ""comillas"" y coma, para probar el CSV.",Nota de lluvia de prueba,3,"SPASPA-4D3N-AB D2, UYUUYU-3D2N-AB D2, UYUUYU-3D2N-SOLO-TEXTO D2"
+BD-T03,dia_tour,es,Día de lagunas,Texto de prueba de lagunas.,,3,"SPASPA-4D3N-AB D3, UYUUYU-3D2N-AB D3, UYUUYU-3D2N-SOLO-TEXTO D3"
+BD-T04,dia_tour,es,Regreso a San Pedro,Texto de prueba del regreso.,,1,SPASPA-4D3N-AB D4
+BD-T05,dia_tour,en,Full salt flat,Test text in English.,,2,"UYUUYU-3D2N-AB D1, UYUUYU-3D2N-SOLO-TEXTO D1"
+BA-T01,actividad,it,Attività di prova,Testo di prova.,Precio en la guía: $47 USD per persona,1,ACT-SPA-PRUEBA

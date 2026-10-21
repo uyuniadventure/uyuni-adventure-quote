@@ -43,10 +43,28 @@ async function rate(id, net, rack = null, from = null, to = null) {
 }
 async function block(code, serviceId, status = "pendiente", hotel = null) {
   const { id } = await one(
-    `insert into public.day_blocks(code,created_by,status,hotel_service_id)
-    values($1,$2,$3,$4) returning id`,
-    [code, admin, status, hotel],
+    `insert into public.day_blocks(code,created_by,status)
+    values($1,$2,$3) returning id`,
+    [code, admin, status],
   );
+  if (hotel) {
+    const supplier = await one(
+      "insert into public.suppliers(name) values($1) returning id", ["Hotel sintetico " + code],
+    );
+    await db.query("update public.services set type='alojamiento',supplier_id=$1 where id=$2", [
+      supplier.id,
+      hotel,
+    ]);
+    const hotelCode = await one(
+      "insert into public.hotel_codes(code,name,supplier_id) values($1,$2,$3) returning id",
+      [`SYN-${code}`, `Hotel sintetico ${code}`, supplier.id],
+    );
+    await db.query("update public.day_blocks set hotel_id=$1 where id=$2", [hotelCode.id, id]);
+    await db.query(
+      "insert into public.day_block_items(block_id,service_id,slot_key) values($1,$2,'ALOJAMIENTO')",
+      [id, hotel],
+    );
+  }
   if (serviceId)
     await db.query("insert into public.day_block_items(block_id,service_id) values($1,$2)", [
       id,

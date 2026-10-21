@@ -34,13 +34,56 @@ export async function createDatabase({ migrationFiles, throughMigration } = {}) 
     if (throughMigration && file > throughMigration) continue;
     try {
       await beforeMigration(db, file);
-      await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), "utf8"));
+      const sql = (await readFile(new URL(`supabase/migrations/${file}`, root), "utf8")).replaceAll(
+        "\r\n",
+        "\n",
+      );
+      await db.exec(sql);
       await afterMigration(db, file);
     } catch (error) {
       throw new Error(`${file}: ${error.message}`, { cause: error });
     }
   }
   return db;
+}
+
+/** Only archived fixture SQL: it predates T01h; replay its production backfill. */
+export async function execArchivedSeed(db, sql) {
+  const v2 =
+    (
+      await db.query(
+        "select 1 from information_schema.columns where table_schema='public' and table_name='day_blocks' and column_name='hotel_id'",
+      )
+    ).rows.length > 0;
+  if (!v2) return db.exec(sql);
+  await db.exec(`alter table public.services disable trigger vehicle_capacity;
+    alter table public.services disable trigger block_hotel_service;
+    alter table public.day_blocks disable trigger block_hotel_identity;
+    alter table public.day_block_items disable trigger block_hotel_items;`);
+  await db.exec(sql);
+  const countBefore = Number(
+    (await db.query("select count(*) n from public.day_block_items")).rows[0].n,
+  );
+  const migration = await readFile(
+    new URL("supabase/migrations/20261018000100_block_options_v2.sql", root),
+    "utf8",
+  );
+  await db.exec("update public.services set capacity=coalesce(capacity,vehicle_max_pax)");
+  await db.exec(
+    migration.slice(
+      migration.indexOf("-- Diagnose before"),
+      migration.indexOf("create function public.check_block_hotel"),
+    ),
+  );
+  await db.exec(`alter table public.services enable trigger vehicle_capacity;
+    alter table public.services enable trigger block_hotel_service;
+    alter table public.day_blocks enable trigger block_hotel_identity;
+    alter table public.day_block_items enable trigger block_hotel_items;`);
+  return {
+    addedBlockItems:
+      Number((await db.query("select count(*) n from public.day_block_items")).rows[0].n) -
+      countBefore,
+  };
 }
 
 export async function seedDatabase(db) {
@@ -52,7 +95,7 @@ export async function seedDatabase(db) {
     if ((sql.match(/^insert into /gm) || []).length > 300)
       throw new Error(`${file} exceeds 300 rows`);
     try {
-      await db.exec(sql);
+      await execArchivedSeed(db, sql);
     } catch (error) {
       throw new Error(`${file}: ${error.message}; ${error.detail || ""}`);
     }

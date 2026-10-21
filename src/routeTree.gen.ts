@@ -26,6 +26,7 @@ import { Route as AuthenticatedPlantillasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
 import { Route as AuthenticatedRevisionImportacionRouteImport } from './routes/_authenticated/revision-importacion'
 import { Route as AuthenticatedTarifarioRouteImport } from './routes/_authenticated/tarifario'
+import { Route as AuthenticatedAdminImportarRouteImport } from './routes/_authenticated/admin_.importar'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -118,6 +119,12 @@ const AuthenticatedTarifarioRoute = AuthenticatedTarifarioRouteImport.update({
   path: '/tarifario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminImportarRoute =
+  AuthenticatedAdminImportarRouteImport.update({
+    id: '/admin_/importar',
+    path: '/admin/importar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/revision-importacion': typeof AuthenticatedRevisionImportacionRoute
   '/tarifario': typeof AuthenticatedTarifarioRoute
+  '/admin/importar': typeof AuthenticatedAdminImportarRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
   '/revision-importacion': typeof AuthenticatedRevisionImportacionRoute
   '/tarifario': typeof AuthenticatedTarifarioRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/importar': typeof AuthenticatedAdminImportarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/revision-importacion': typeof AuthenticatedRevisionImportacionRoute
   '/_authenticated/tarifario': typeof AuthenticatedTarifarioRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin_/importar': typeof AuthenticatedAdminImportarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/revision-importacion'
     | '/tarifario'
+    | '/admin/importar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/revision-importacion'
     | '/tarifario'
     | '/'
+    | '/admin/importar'
   id:
     | '__root__'
     | '/_authenticated'
@@ -231,6 +243,7 @@ export interface FileRouteTypes {
     | '/_authenticated/revision-importacion'
     | '/_authenticated/tarifario'
     | '/_authenticated/'
+    | '/_authenticated/admin_/importar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTarifarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin_/importar': {
+      id: '/_authenticated/admin_/importar'
+      path: '/admin/importar'
+      fullPath: '/admin/importar'
+      preLoaderRoute: typeof AuthenticatedAdminImportarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -378,6 +398,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRevisionImportacionRoute: typeof AuthenticatedRevisionImportacionRoute
   AuthenticatedTarifarioRoute: typeof AuthenticatedTarifarioRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAdminImportarRoute: typeof AuthenticatedAdminImportarRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -395,6 +416,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRevisionImportacionRoute: AuthenticatedRevisionImportacionRoute,
   AuthenticatedTarifarioRoute: AuthenticatedTarifarioRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAdminImportarRoute: AuthenticatedAdminImportarRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

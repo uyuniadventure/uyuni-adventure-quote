@@ -153,7 +153,7 @@ describe("creación atómica desde plantilla", () => {
       ...basics(),
       pax_paying: Number(prefill.pax_paying),
       tc_count: Number(prefill.tc_count),
-      category: prefill.category,
+      ...(prefill.category ? { category: prefill.category } : {}),
     });
     expect(direct.total_price_usd).toBe(wizard.total_price_usd);
     expect(direct.total_cost_usd).toBe(wizard.total_cost_usd);

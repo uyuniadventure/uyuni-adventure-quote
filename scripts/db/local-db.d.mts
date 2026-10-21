@@ -5,3 +5,5 @@ export function createDatabase(options?: {
   throughMigration?: string;
 }): Promise<PGlite>;
 export function seedDatabase(db: PGlite): Promise<{ seed_order: string[] }>;
+
+export function execArchivedSeed(db: PGlite, sql: string): Promise<unknown>;

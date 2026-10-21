@@ -1,4 +1,4 @@
-import { createDatabase, seedDatabase, root } from "./local-db.mjs";
+import { createDatabase, seedDatabase, root, execArchivedSeed } from "./local-db.mjs";
 import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 const db = await createDatabase();
@@ -20,15 +20,19 @@ try {
   const report = JSON.parse(
     await readFile(new URL("supabase/seed/applied/blocks-report.json", root), "utf8"),
   );
+  let addedBlockItems = 0;
   for (let pass = 0; pass < 2; pass++)
     for (const file of report.seed_order) {
       const sql = await readFile(new URL("supabase/seed/applied/" + file, root), "utf8");
       if ((sql.match(/^insert into/gm) || []).length > 300) throw Error("Too many rows");
-      await db.exec(sql);
+      const result = await execArchivedSeed(db, sql);
+      if (pass === 0) addedBlockItems += result.addedBlockItems;
+      else assert.equal(result.addedBlockItems, 0, "T01h backfill must be repeatable");
     }
   const expectedCounts = Object.fromEntries(
     Object.entries(report.counts).map(([table, count]) => [table, count + recoveredCounts[table]]),
   );
+  expectedCounts.day_block_items += addedBlockItems;
   for (const [table, expected] of Object.entries(expectedCounts)) {
     const { rows } = await db.query(`select count(*)::int n from public.${table}`);
     if (rows[0].n !== expected) throw Error(table + ": count mismatch");

@@ -313,6 +313,14 @@ export type Database = {
           coverage_start_day: number | null;
           pricing_config: Json;
           item_snapshot: Json | null;
+          slot_key: string;
+          is_default: boolean;
+          billing: string;
+          span_days: number;
+          tc_policy: string;
+          margin_mode: string;
+          margin_pct: number | null;
+          variant_key: string | null;
         };
         Insert: {
           id?: string;
@@ -330,6 +338,14 @@ export type Database = {
           coverage_start_day?: number | null;
           pricing_config?: Json;
           item_snapshot?: Json | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          variant_key?: string | null;
         };
         Update: {
           id?: string;
@@ -347,6 +363,14 @@ export type Database = {
           coverage_start_day?: number | null;
           pricing_config?: Json;
           item_snapshot?: Json | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          variant_key?: string | null;
         };
         Relationships: [
           {
@@ -478,6 +502,7 @@ export type Database = {
           content: Json;
           catalog_origin: string;
           approval_issues: string[];
+          hotel_id: string | null;
         };
         Insert: {
           id?: string;
@@ -499,6 +524,7 @@ export type Database = {
           content?: Json;
           catalog_origin?: string;
           approval_issues?: string[];
+          hotel_id?: string | null;
         };
         Update: {
           id?: string;
@@ -520,6 +546,7 @@ export type Database = {
           content?: Json;
           catalog_origin?: string;
           approval_issues?: string[];
+          hotel_id?: string | null;
         };
         Relationships: [
           {
@@ -527,6 +554,13 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "day_blocks_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotel_codes";
             referencedColumns: ["id"];
           },
           {
@@ -622,6 +656,8 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          import_kind: string | null;
+          import_sort: number | null;
         };
         Insert: {
           id?: string;
@@ -634,6 +670,8 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_kind?: string | null;
+          import_sort?: number | null;
         };
         Update: {
           id?: string;
@@ -646,6 +684,8 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          import_kind?: string | null;
+          import_sort?: number | null;
         };
         Relationships: [
           {
@@ -857,6 +897,100 @@ export type Database = {
           },
         ];
       };
+      import_batches: {
+        Row: {
+          id: string;
+          kind: string;
+          status: string;
+          file_name: string;
+          created_by: string;
+          created_at: string;
+          summary: Json;
+          package: Json;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind?: string;
+          status?: string;
+          file_name: string;
+          created_by?: string;
+          created_at?: string;
+          summary?: Json;
+          package: Json;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          kind?: string;
+          status?: string;
+          file_name?: string;
+          created_by?: string;
+          created_at?: string;
+          summary?: Json;
+          package?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      import_rows: {
+        Row: {
+          id: string;
+          batch_id: string;
+          position: number;
+          table_name: string;
+          natural_key: string;
+          action: string;
+          payload: Json;
+          before: Json | null;
+          message: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          batch_id: string;
+          position: number;
+          table_name: string;
+          natural_key: string;
+          action: string;
+          payload: Json;
+          before?: Json | null;
+          message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          batch_id?: string;
+          position?: number;
+          table_name?: string;
+          natural_key?: string;
+          action?: string;
+          payload?: Json;
+          before?: Json | null;
+          message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_batch_id_fkey";
+            columns: ["batch_id"];
+            isOneToOne: false;
+            referencedRelation: "import_batches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       info_blocks: {
         Row: {
           id: string;
@@ -901,7 +1035,7 @@ export type Database = {
           days: number;
           nights: number;
           modality: Database["public"]["Enums"]["itinerary_modality"];
-          category: Database["public"]["Enums"]["tour_category"];
+          category: Database["public"]["Enums"]["tour_category"] | null;
           hotel_combo: string | null;
           countries: string[];
           main_places: string[];
@@ -918,6 +1052,13 @@ export type Database = {
           quote_defaults: Json;
           approval_issues: string[];
           catalog_origin: string;
+          import_v2_route: string | null;
+          import_includes_id: string | null;
+          import_excludes_id: string | null;
+          source_category: string | null;
+          source_season: string | null;
+          economic_status: string;
+          economic_issues: string[];
         };
         Insert: {
           id?: string;
@@ -929,7 +1070,7 @@ export type Database = {
           days: number;
           nights: number;
           modality?: Database["public"]["Enums"]["itinerary_modality"];
-          category: Database["public"]["Enums"]["tour_category"];
+          category?: Database["public"]["Enums"]["tour_category"] | null;
           hotel_combo?: string | null;
           countries?: string[];
           main_places?: string[];
@@ -946,6 +1087,13 @@ export type Database = {
           quote_defaults?: Json;
           approval_issues?: string[];
           catalog_origin?: string;
+          import_v2_route?: string | null;
+          import_includes_id?: string | null;
+          import_excludes_id?: string | null;
+          source_category?: string | null;
+          source_season?: string | null;
+          economic_status?: string;
+          economic_issues?: string[];
         };
         Update: {
           id?: string;
@@ -957,7 +1105,7 @@ export type Database = {
           days?: number;
           nights?: number;
           modality?: Database["public"]["Enums"]["itinerary_modality"];
-          category?: Database["public"]["Enums"]["tour_category"];
+          category?: Database["public"]["Enums"]["tour_category"] | null;
           hotel_combo?: string | null;
           countries?: string[];
           main_places?: string[];
@@ -974,6 +1122,13 @@ export type Database = {
           quote_defaults?: Json;
           approval_issues?: string[];
           catalog_origin?: string;
+          import_v2_route?: string | null;
+          import_includes_id?: string | null;
+          import_excludes_id?: string | null;
+          source_category?: string | null;
+          source_season?: string | null;
+          economic_status?: string;
+          economic_issues?: string[];
         };
         Relationships: [
           {
@@ -981,6 +1136,20 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_excludes_id_fkey";
+            columns: ["import_excludes_id"];
+            isOneToOne: false;
+            referencedRelation: "doc_blocks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_includes_id_fkey";
+            columns: ["import_includes_id"];
+            isOneToOne: false;
+            referencedRelation: "doc_blocks";
             referencedColumns: ["id"];
           },
           {
@@ -1477,6 +1646,7 @@ export type Database = {
           created_at: string;
           updated_at: string;
           deposit_pct: number;
+          activity_modules_enabled: boolean;
         };
         Insert: {
           id?: string;
@@ -1485,6 +1655,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           deposit_pct?: number;
+          activity_modules_enabled?: boolean;
         };
         Update: {
           id?: string;
@@ -1493,6 +1664,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           deposit_pct?: number;
+          activity_modules_enabled?: boolean;
         };
         Relationships: [];
       };
@@ -1828,6 +2000,18 @@ export type Database = {
           adjustment_pct: number;
           adjustment_note: string | null;
           source_block_service_id: string | null;
+          slot_key: string;
+          is_default: boolean;
+          billing: string;
+          span_days: number;
+          tc_policy: string | null;
+          margin_mode: string;
+          margin_pct: number | null;
+          selected: boolean;
+          selection_source: string;
+          qty_override: number | null;
+          qty_cost: number | null;
+          qty_supplier: number | null;
         };
         Insert: {
           id?: string;
@@ -1867,6 +2051,18 @@ export type Database = {
           adjustment_pct?: number;
           adjustment_note?: string | null;
           source_block_service_id?: string | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string | null;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          selected?: boolean;
+          selection_source?: string;
+          qty_override?: number | null;
+          qty_cost?: number | null;
+          qty_supplier?: number | null;
         };
         Update: {
           id?: string;
@@ -1906,6 +2102,18 @@ export type Database = {
           adjustment_pct?: number;
           adjustment_note?: string | null;
           source_block_service_id?: string | null;
+          slot_key?: string;
+          is_default?: boolean;
+          billing?: string;
+          span_days?: number;
+          tc_policy?: string | null;
+          margin_mode?: string;
+          margin_pct?: number | null;
+          selected?: boolean;
+          selection_source?: string;
+          qty_override?: number | null;
+          qty_cost?: number | null;
+          qty_supplier?: number | null;
         };
         Relationships: [
           {
@@ -2050,6 +2258,47 @@ export type Database = {
             foreignKeyName: "quote_proposals_quote_id_fkey";
             columns: ["quote_id"];
             isOneToOne: true;
+            referencedRelation: "quotes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      quote_rooming: {
+        Row: {
+          id: string;
+          quote_id: string;
+          night: number | null;
+          room_type: string;
+          count: number;
+          for_tc: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          quote_id: string;
+          night?: number | null;
+          room_type: string;
+          count: number;
+          for_tc?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          quote_id?: string;
+          night?: number | null;
+          room_type?: string;
+          count?: number;
+          for_tc?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "quote_rooming_quote_id_fkey";
+            columns: ["quote_id"];
+            isOneToOne: false;
             referencedRelation: "quotes";
             referencedColumns: ["id"];
           },
@@ -2303,6 +2552,50 @@ export type Database = {
           },
         ];
       };
+      segment_rules: {
+        Row: {
+          id: string;
+          route: string;
+          days: number;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          route: string;
+          days: number;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          route?: string;
+          days?: number;
+          slot_key?: string;
+          service_id?: string;
+          day_from?: number;
+          day_to?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "segment_rules_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       service_change_requests: {
         Row: {
           id: string;
@@ -2390,6 +2683,10 @@ export type Database = {
           source_row: number | null;
           created_at: string;
           updated_at: string;
+          import_source_season: string | null;
+          import_source_price_net: number | null;
+          import_source_price_rack: number | null;
+          pricing_enabled: boolean;
         };
         Insert: {
           id?: string;
@@ -2406,6 +2703,10 @@ export type Database = {
           source_row?: number | null;
           created_at?: string;
           updated_at?: string;
+          import_source_season?: string | null;
+          import_source_price_net?: number | null;
+          import_source_price_rack?: number | null;
+          pricing_enabled?: boolean;
         };
         Update: {
           id?: string;
@@ -2422,6 +2723,10 @@ export type Database = {
           source_row?: number | null;
           created_at?: string;
           updated_at?: string;
+          import_source_season?: string | null;
+          import_source_price_net?: number | null;
+          import_source_price_rack?: number | null;
+          pricing_enabled?: boolean;
         };
         Relationships: [
           {
@@ -2492,6 +2797,11 @@ export type Database = {
           created_at: string;
           updated_at: string;
           approval_issues: string[];
+          capacity: number | null;
+          occupancy: number | null;
+          import_v2_route: string | null;
+          import_source_currency: string | null;
+          import_source_unit: string | null;
         };
         Insert: {
           id?: string;
@@ -2519,6 +2829,11 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           approval_issues?: string[];
+          capacity?: number | null;
+          occupancy?: number | null;
+          import_v2_route?: string | null;
+          import_source_currency?: string | null;
+          import_source_unit?: string | null;
         };
         Update: {
           id?: string;
@@ -2546,6 +2861,11 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           approval_issues?: string[];
+          capacity?: number | null;
+          occupancy?: number | null;
+          import_v2_route?: string | null;
+          import_source_currency?: string | null;
+          import_source_unit?: string | null;
         };
         Relationships: [
           {
@@ -2619,6 +2939,92 @@ export type Database = {
         };
         Relationships: [];
       };
+      template_day_items: {
+        Row: {
+          id: string;
+          template_id: string;
+          day_number: number;
+          slot_key: string;
+          service_id: string | null;
+          supplier_id: string | null;
+          hotel_id: string | null;
+          source_hotel_name: string | null;
+          source_tariff_code: string | null;
+          source_row_key: string;
+          pricing_unit_override: Database["public"]["Enums"]["pricing_unit"] | null;
+          tc_policy: string;
+          is_default: boolean;
+          sort: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          day_number: number;
+          slot_key: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          hotel_id?: string | null;
+          source_hotel_name?: string | null;
+          source_tariff_code?: string | null;
+          source_row_key: string;
+          pricing_unit_override?: Database["public"]["Enums"]["pricing_unit"] | null;
+          tc_policy?: string;
+          is_default?: boolean;
+          sort?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          template_id?: string;
+          day_number?: number;
+          slot_key?: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          hotel_id?: string | null;
+          source_hotel_name?: string | null;
+          source_tariff_code?: string | null;
+          source_row_key?: string;
+          pricing_unit_override?: Database["public"]["Enums"]["pricing_unit"] | null;
+          tc_policy?: string;
+          is_default?: boolean;
+          sort?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "template_day_items_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotel_codes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_day_items_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_day_items_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_day_items_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "itinerary_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       template_days: {
         Row: {
           id: string;
@@ -2627,6 +3033,11 @@ export type Database = {
           block_id: string;
           created_at: string;
           updated_at: string;
+          variant_key: string | null;
+          import_title: string | null;
+          import_lodging: string | null;
+          import_meals: string | null;
+          import_note: string | null;
         };
         Insert: {
           id?: string;
@@ -2635,6 +3046,11 @@ export type Database = {
           block_id: string;
           created_at?: string;
           updated_at?: string;
+          variant_key?: string | null;
+          import_title?: string | null;
+          import_lodging?: string | null;
+          import_meals?: string | null;
+          import_note?: string | null;
         };
         Update: {
           id?: string;
@@ -2643,6 +3059,11 @@ export type Database = {
           block_id?: string;
           created_at?: string;
           updated_at?: string;
+          variant_key?: string | null;
+          import_title?: string | null;
+          import_lodging?: string | null;
+          import_meals?: string | null;
+          import_note?: string | null;
         };
         Relationships: [
           {
@@ -2654,6 +3075,60 @@ export type Database = {
           },
           {
             foreignKeyName: "template_days_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "itinerary_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      template_segment_items: {
+        Row: {
+          id: string;
+          template_id: string;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          pricing_unit_override: Database["public"]["Enums"]["pricing_unit"] | null;
+          vehicle_max_pax_override: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          slot_key: string;
+          service_id: string;
+          day_from: number;
+          day_to: number;
+          pricing_unit_override?: Database["public"]["Enums"]["pricing_unit"] | null;
+          vehicle_max_pax_override?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          template_id?: string;
+          slot_key?: string;
+          service_id?: string;
+          day_from?: number;
+          day_to?: number;
+          pricing_unit_override?: Database["public"]["Enums"]["pricing_unit"] | null;
+          vehicle_max_pax_override?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "template_segment_items_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "template_segment_items_template_id_fkey";
             columns: ["template_id"];
             isOneToOne: false;
             referencedRelation: "itinerary_templates";
@@ -2767,6 +3242,7 @@ export type Database = {
         Returns: Json;
       };
       approve_day_blocks: { Args: { ids: string[]; accept_warnings?: boolean }; Returns: Json };
+      approve_import_items: { Args: { kind: string; ids: string[] }; Returns: Json };
       approve_templates: { Args: { ids: string[]; accept_warnings?: boolean }; Returns: Json };
       approve_valid_imports: {
         Args: { p_dry_run?: boolean; p_expected_fingerprint?: string; p_accept_warnings?: boolean };
@@ -2782,9 +3258,14 @@ export type Database = {
         Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
         Returns: Database["public"]["Tables"]["quote_emails"]["Row"];
       };
+      commit_import_batch: { Args: { p_batch_id: string }; Returns: Json };
       compute_real_margin: {
         Args: { p_id: string };
         Returns: Database["public"]["Tables"]["ops_services"]["Row"];
+      };
+      create_location: {
+        Args: { code: string; name: string; country: string };
+        Returns: Database["public"]["Tables"]["location_codes"]["Row"];
       };
       create_quote_from_template: {
         Args: { p_template: string; p_quote: Json; p_days: Json; p_source: Json; p_result: Json };
@@ -2800,6 +3281,7 @@ export type Database = {
       };
       delete_day_blocks: { Args: { ids: string[]; force?: boolean }; Returns: Json };
       delete_templates: { Args: { ids: string[] }; Returns: Json };
+      discard_import_batch: { Args: { p_batch_id: string }; Returns: undefined };
       edit_quote_days: {
         Args: {
           p_id: string;
@@ -2818,6 +3300,16 @@ export type Database = {
         Args: { p_id: string; p_changes: Json; p_add?: boolean; p_promote?: boolean };
         Returns: Json;
       };
+      edit_quote_selection: {
+        Args: {
+          p_id: string;
+          p_operation: string;
+          p_payload: Json;
+          p_updated_at?: string;
+          p_result?: Json;
+        };
+        Returns: Json;
+      };
       ensure_quote_doc_sections: {
         Args: { p_quote_id: string; p_layout_id?: string };
         Returns: undefined;
@@ -2826,6 +3318,7 @@ export type Database = {
         Args: { p_id: string; p_messages: Json };
         Returns: Database["public"]["Tables"]["ops_communications"]["Row"][];
       };
+      import_template_package: { Args: { p_template: string }; Returns: Json };
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean };
         Returns: Database["public"]["Tables"]["quote_items"]["Row"];
@@ -2843,6 +3336,7 @@ export type Database = {
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean };
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json };
+      quote_day_hotel: { Args: { p_day: string }; Returns: string };
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
       quote_payment_summary: { Args: { p_id: string }; Returns: Json };
@@ -2861,10 +3355,12 @@ export type Database = {
       };
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       review_catalog_approval: { Args: { kind: string; ids: string[] }; Returns: Json };
+      review_import_items: { Args: { kind: string; ids: string[] }; Returns: Json };
       review_quote_days: {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
         Returns: Json;
       };
+      rooming_distribution: { Args: { p_rows: Json; p_night?: number }; Returns: Json };
       save_doc_section_as_block: {
         Args: { p_quote_id: string; p_section_id: string; p_code: string };
         Returns: string;
@@ -2900,6 +3396,11 @@ export type Database = {
         Returns: undefined;
       };
       snapshot_day_block: { Args: { p_id: string }; Returns: Json };
+      stage_import_package: {
+        Args: { p_file_name: string; p_package: Json; p_rows: Json; p_validation: Json };
+        Returns: string;
+      };
+      template_import_links: { Args: { p_template: string }; Returns: Json };
       transition_quote: {
         Args: { p_id: string; p_to: Database["public"]["Enums"]["quote_status"]; p_note?: string };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];

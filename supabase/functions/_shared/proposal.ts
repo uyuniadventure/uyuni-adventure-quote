@@ -62,6 +62,7 @@ export interface ProposalQuote {
   document_snapshot: DocumentContent & { valid_until?: string };
   calculation: {
     status?: string;
+    selection_issues?: string[];
     scenarios?: {
       status?: string;
       pax_paying: number;
@@ -248,6 +249,8 @@ export function renderProposalContent(
     issue("total", "Guarda el cálculo de la cotización antes de generar la propuesta.");
   if (q.calculation?.status === "error")
     issue("calculation", "El cálculo guardado tiene errores. Revisa la cotización.");
+  for (const message of q.calculation?.selection_issues ?? [])
+    issue("selection", message);
   const pending = ctx.days.filter((d) => d.snapshot?.reviewed !== true);
   if (pending.length)
     issue(

@@ -41,3 +41,6 @@ dist-ssr
 # Local validation artifacts
 tmp/
 __pycache__/
+
+.env
+.env.example

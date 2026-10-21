@@ -51,6 +51,13 @@ export async function approveTemplates(ids: string[], { acceptWarnings = false }
   ) as unknown as CatalogApprovalResult;
 }
 
+export type ImportReviewKind = "services" | "activity_modules";
+export async function approveImportReviewItems(kind: ImportReviewKind, ids: string[]) {
+  return unwrap(
+    await db.rpc("approve_import_items", { kind, ids }),
+  ) as unknown as { approved: number; pending: number };
+}
+
 /** Counts only; does not expose another seller's quote content to Operation.
  * The result of deleteTemplates is authoritative if the count changes later. */
 export async function previewTemplateDeletion(ids: string[]) {

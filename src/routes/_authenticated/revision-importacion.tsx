@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Check, CheckSquare, Pencil, Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
+import { approveDayBlocks, approveImportReviewItems, approveTemplates } from "@/lib/catalog";
 import type { Enums } from "@/types/db";
 import { SECTIONS, sectionHead } from "@/components/section";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
@@ -72,7 +73,7 @@ function usePending() {
         })),
         itinerary_templates: (tp.data ?? []).map((x) => ({
           id: x.id, code: x.sku, title: x.name,
-          facts: [`${x.route_from ?? "—"} → ${x.route_to ?? "—"}`, `${x.days}D${x.nights}N`, x.category, `${c(x.template_days)}/${x.days} días armados`],
+          facts: [`${x.route_from ?? "—"} → ${x.route_to ?? "—"}`, `${x.days}D${x.nights}N`, x.category ?? "Categoría pendiente", `${c(x.template_days)}/${x.days} días armados`],
           issues: [...x.approval_issues, ...warningsList(x.import_warnings), ...(c(x.template_days) !== x.days ? ["Los días armados no coinciden con la duración."] : [])],
         })),
       };
@@ -101,11 +102,8 @@ function ReviewPage() {
 
   const bulkApprove = useMutation({
     mutationFn: async ({ kind, ids }: { kind: Kind; ids: string[] }) => {
-      const results = await Promise.allSettled(
-        ids.map((id) => db.from(kind).update({ status: "activo" as Enums<"catalog_status"> }).eq("id", id).then((r) => { if (r.error) throw r.error; }))
-      );
-      const failed = results.filter((r) => r.status === "rejected").length;
-      return { ok: results.length - failed, failed };
+      const result = await approveImportReviewItems("activity_modules", ids);
+      return { ok: result.approved, failed: result.pending };
     },
     onSuccess: ({ ok, failed }) => {
       if (failed === 0) toast.success(`${ok} aprobados.`);
@@ -119,8 +117,14 @@ function ReviewPage() {
 
   const decide = useMutation({
     mutationFn: async ({ kind, id, status }: { kind: Kind; id: string; status: Enums<"catalog_status"> }) => {
+      if (status === "activo") {
+        if (kind === "day_blocks") return approveDayBlocks([id]);
+        if (kind === "itinerary_templates") return approveTemplates([id]);
+        return approveImportReviewItems(kind, [id]);
+      }
       const { error } = await db.from(kind).update({ status }).eq("id", id);
       if (error) throw error;
+      return;
     },
     onSuccess: (_d, v) => {
       toast.success(v.status === "activo" ? "Aprobado." : "Rechazado (marcado como inactivo).");

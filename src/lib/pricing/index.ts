@@ -1,3 +1,9 @@
+import {
+  roomingForNight,
+  roomingWarnings,
+  transportWarning,
+  type RoomRow,
+} from "../quotes/selection-model";
 import type { Enums } from "../../types/db";
 import { marginAmount, resolvePricingPolicy, type PricingPolicyInput } from "./policy";
 import { adjustedCost, adjustmentPctSchema } from "./adjustment";
@@ -23,6 +29,8 @@ export interface Rate {
   price_rack?: number | null;
   // Historical import flag; current availability is determined by the prices.
   net_cost_missing?: boolean;
+  /** False keeps the original tariff for audit but excludes it from quotation. */
+  pricing_enabled?: boolean;
   room_type?: string | null;
 }
 export interface Rooming {
@@ -30,6 +38,16 @@ export interface Rooming {
   tc: Record<string, number>;
 }
 export interface PricingItem {
+  selected?: boolean;
+  slot_key?: string;
+  billing?: "per_day" | "per_service";
+  span_days?: number;
+  tc_policy?: "charged" | "free" | "excluded" | null;
+  margin_mode?: "inherit" | "custom" | "none";
+  margin_pct?: number | null;
+  selection_source?: "auto" | "manual";
+  qty_override?: number | null;
+  capacity?: number | null;
   id: string;
   sku?: string;
   day_number?: number;
@@ -67,6 +85,7 @@ export interface PaxScenario {
   staff?: { drivers: number; guides: number };
 }
 export interface QuoteInput extends PaxScenario, PricingPolicyInput {
+  rooming_rows?: RoomRow[];
   start_date: string;
   fx_snapshot: Record<string, number>;
   rounding_rule: { increment: number; mode: "ceil" | "nearest" | "none"; per_pax?: boolean };
@@ -88,6 +107,8 @@ export interface ItemResult {
   day_number: number;
   date: string;
   quantity: number;
+  qty_cost?: number;
+  qty_supplier?: number;
   unit_cost_original?: number;
   unit_cost_usd: number | null;
   base_cost_usd: number | null;
@@ -122,6 +143,7 @@ export interface QuoteTotals {
 type NullableTotals = { [K in keyof QuoteTotals]: number | null };
 export interface QuoteResult extends NullableTotals {
   status: "ok" | "error";
+  selection_issues?: string[];
   pricing_policy: ReturnType<typeof resolvePricingPolicy>;
   effective_rooming?: Rooming;
   items: ItemResult[];
@@ -155,6 +177,7 @@ export function assertCompleteCalculation(
       (key) => key in totals && (totals[key] == null || !Number.isFinite(totals[key])),
     );
   if (
+    (result.selection_issues?.length ?? 0) > 0 ||
     result.status === "error" ||
     result.items.some((i) => i.status === "error") ||
     result.scenarios.some((s) => s.status === "error" || hasMissingTotal(s)) ||
@@ -241,6 +264,7 @@ export function selectRate(
     .map((s) => s.season);
   const candidates = item.rates.filter(
     (r) =>
+      r.pricing_enabled !== false &&
       (!r.valid_from || validDate(r.valid_from) <= date) &&
       (!r.valid_to || validDate(r.valid_to) >= date) &&
       (r.pax_min === null || pax >= r.pax_min) &&
@@ -297,13 +321,18 @@ function round(n: number, rule: QuoteInput["rounding_rule"]): number {
   const f = rule.mode === "ceil" ? Math.ceil : Math.round;
   return cents(f(n / rule.increment - 1e-10) * rule.increment);
 }
+function validCustomMargin(pct: number | null | undefined) {
+  if (pct == null || !Number.isFinite(pct) || pct <= -100 || pct >= 100)
+    throw new Error("Margen personalizado inválido");
+  return pct;
+}
 export function calculateQuote(input: QuoteInput): QuoteResult {
   if (count(input.pax_paying, "pax") < 1) throw new Error("Paying pax must be positive");
   count(input.tc_count, "TC");
   const policy = resolvePricingPolicy(input);
   validDate(input.start_date);
   const hasHotels = input.days.some((d) =>
-    d.items.some((i) => i.included && i.pricing_unit === "per_room"),
+    d.items.some((i) => i.included && i.selected !== false && i.pricing_unit === "per_room"),
   );
   const rooms = hasHotels
     ? resolveRooming(input.rooming, input.pax_paying, input.tc_count)
@@ -314,15 +343,20 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
     dayNumbers = new Set<number>(),
     coverages = new Map<string, string>();
   const items: ItemResult[] = [];
+  const missingRoomDays = new Set<number>();
+  const missingRoomWarnings: string[] = [];
   for (const day of [...input.days].sort((a, b) => a.day_number - b.day_number)) {
     if (dayNumbers.has(day.day_number)) throw new Error("Duplicate day number");
     dayNumbers.add(day.day_number);
     const date = dateForDay(input.start_date, day.day_number);
+    const dayInput = input.rooming_rows?.length
+      ? { ...configuredInput, rooming: roomingForNight(input.rooming_rows, day.day_number) }
+      : configuredInput;
     // A requested room variant must not silently disappear because a template
     // only linked DBL/SGL. Generic hotel rates can cover all requested types.
     const hotels = new Map<string, PricingItem[]>();
     for (const i of day.items.filter(
-      (i) => i.included && i.pricing_unit === "per_room" && i.lodging_key,
+      (i) => i.included && i.selected !== false && i.pricing_unit === "per_room" && i.lodging_key,
     )) {
       const group = hotels.get(i.lodging_key!) ?? [];
       group.push(i);
@@ -335,30 +369,37 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         ),
       );
       if (types.some((t) => !t)) continue;
-      const requested = { ...configuredInput.rooming.paying };
+      const requested = { ...dayInput.rooming.paying };
       if (hotel.some((i) => i.applies_tc))
-        for (const [type, n] of Object.entries(configuredInput.rooming.tc))
+        for (const [type, n] of Object.entries(dayInput.rooming.tc))
           requested[type] = (requested[type] ?? 0) + n;
       // Old pilot room keys also encode hotel/category; preserve those snapshots.
       if (Object.keys(requested).some((t) => !occupancyType(t))) continue;
-      for (const [type, n] of Object.entries(requested))
-        if (n > 0 && !types.includes(occupancyType(type)))
-          throw new Error(
-            `Falta tarifa de habitación ${type}: ${hotel[0]!.label ?? hotel[0]!.id} (día ${day.day_number})`,
-          );
+      for (const [type, n] of Object.entries(requested)) {
+        if (n <= 0 || types.includes(occupancyType(type))) continue;
+        const message = `Falta tarifa de habitación ${type}: ${hotel[0]!.label ?? hotel[0]!.id} (día ${day.day_number})`;
+        if (hotel.some((i) => i.slot_key === "ALOJAMIENTO")) {
+          missingRoomDays.add(day.day_number);
+          missingRoomWarnings.push(message);
+        } else throw new Error(message);
+      }
     }
     for (const original of day.items) {
       const item = {
         ...original,
+        applies_tc: original.tc_policy ? original.tc_policy === "charged" : original.applies_tc,
         adjustment_pct: adjustmentPctSchema.parse(original.adjustment_pct ?? 0),
         adjustment_note: original.adjustment_note ?? null,
       };
       if (ids.has(item.id)) throw new Error("Duplicate item ID");
       ids.add(item.id);
-      const span = item.day_span ?? 1;
+      const span =
+        item.billing === "per_service"
+          ? (item.span_days ?? item.day_span ?? 1)
+          : (item.day_span ?? 1);
       if (count(span, "day span") < 1) throw new Error("Invalid day span");
       let covered = false;
-      if (span > 1) {
+      if (span > 1 && item.selected !== false) {
         if (!item.coverage_key || !item.coverage_start_day)
           throw new Error(`Coverage required: ${item.id}`);
         if (
@@ -378,7 +419,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         coverages.set(item.coverage_key, signature);
         covered = day.day_number !== item.coverage_start_day;
       }
-      if (!item.included || covered) {
+      if (!item.included || item.selected === false || covered) {
         items.push({
           status: "ok",
           id: item.id,
@@ -407,16 +448,17 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
         const config = parsePricingConfig(item.pricing_unit, item.pricing_config);
         nonnegative(item.qty, "qty");
         Object.assign(item, config);
-        const ratePax =
-          item.pricing_unit === "per_vehicle"
-            ? input.pax_paying +
-              input.tc_count +
-              count(input.staff?.drivers ?? 0, "drivers") +
-              count(input.staff?.guides ?? 0, "guides")
-            : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
+        const vehiclePax = input.pax_paying + (item.tc_policy === "excluded" ? 0 : input.tc_count) +
+          count(input.staff?.drivers ?? 0,"drivers") + count(input.staff?.guides ?? 0,"guides");
+        const calculatedRatePax = item.pricing_unit === "per_vehicle"
+          ? item.slot_key && (item.qty_override ?? item.qty) > 0
+            ? Math.ceil(vehiclePax / (item.qty_override ?? item.qty)) : vehiclePax
+          : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
+        const ratePax = item.slot_key === "TRASLADO_FRONTERA" ? Math.max(2,calculatedRatePax) : calculatedRatePax;
         let autoVehicleRate: Rate | undefined;
         let autoVehicle = false;
         if (
+          !item.slot_key &&
           item.pricing_unit === "per_vehicle" &&
           (!item.vehicle_segment || input.vehicles[item.vehicle_segment] === undefined)
         ) {
@@ -449,22 +491,22 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           // in older rooming. Otherwise this service prices the selected rooms.
           const legacySelected =
             item.room_type &&
-            ((configuredInput.rooming.paying[item.room_type] ?? 0) > 0 ||
-              (configuredInput.rooming.tc[item.room_type] ?? 0) > 0);
+            ((dayInput.rooming.paying[item.room_type] ?? 0) > 0 ||
+              (dayInput.rooming.tc[item.room_type] ?? 0) > 0);
           if (type || legacySelected || item.room_type === "QUAD") {
             if (type) item.room_type = type;
-            roomParts = [{ type: item.room_type!, quantity: quantity(configuredInput, item) }];
+            roomParts = [{ type: item.room_type!, quantity: quantity(dayInput, item) }];
           } else {
             warnings.push(
               `${label}: sin tipo de ocupación; se usa la distribución de la cotización o DBL/SGL por defecto con las tarifas disponibles.`,
             );
             const types = new Set([
-              ...Object.keys(configuredInput.rooming.paying),
-              ...Object.keys(configuredInput.rooming.tc),
+              ...Object.keys(dayInput.rooming.paying),
+              ...Object.keys(dayInput.rooming.tc),
             ]);
             roomParts = [...types].map((type) => ({
               type,
-              quantity: quantity(configuredInput, { ...item, room_type: type }),
+              quantity: quantity(dayInput, { ...item, room_type: type }),
             }));
           }
           config.nights = item.nights;
@@ -473,11 +515,15 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           if (resolvedType && ["SGL", "DBL", "TPL", "MAT"].includes(resolvedType))
             config.room_type = resolvedType as NonNullable<PartialPricingConfig["room_type"]>;
         }
-        const qty = roomParts
-          ? roomParts.reduce((n, r) => n + r.quantity, 0)
-          : autoVehicle
-            ? 1
-            : quantity(configuredInput, item);
+        const qty =
+          item.qty_override ??
+          (item.slot_key && item.pricing_unit === "per_vehicle"
+            ? item.qty
+            : roomParts
+              ? roomParts.reduce((n, r) => n + r.quantity, 0)
+              : autoVehicle
+                ? 1
+                : quantity(dayInput, item));
         errorQuantity = qty;
         // An unused room variant has no cost and requires no matching rate.
         if (qty === 0) {
@@ -583,9 +629,14 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           costo_ajustado: cost,
           total_cost_usd: cost,
           // Andrea's revised rule: margin applies to adjusted cost (2026-10-11).
-          total_margin_usd: item.margin_applicable
-            ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
-            : 0,
+          total_margin_usd:
+            item.margin_mode === "none"
+              ? 0
+              : item.margin_mode === "custom"
+                ? marginAmount(cost, validCustomMargin(item.margin_pct), policy.margin_mode)
+                : item.margin_applicable
+                  ? marginAmount(cost, policy.margin_pct, policy.margin_mode)
+                  : 0,
           covered: false,
           ...(item.pricing_unit === "per_room" || item.pricing_unit === "per_vehicle"
             ? { pricing_config: config }
@@ -622,6 +673,79 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           },
         });
       }
+    }
+  }
+  for (const result of items) {
+    const day = input.days.find((d) => d.day_number === result.day_number)!;
+    const item = day.items.find((i) => i.id === result.id)!;
+    result.qty_cost = result.quantity;
+    result.qty_supplier = result.quantity;
+    if (!result.covered && item.included && item.selected !== false && item.tc_policy === "free") {
+      if (item.pricing_unit === "per_person")
+        result.qty_supplier = result.quantity + input.tc_count;
+      if (item.pricing_unit === "per_room") {
+        const rooming = input.rooming_rows?.length
+          ? roomingForNight(input.rooming_rows, day.day_number)
+          : configuredInput.rooming;
+        const type = occupancyType(item.room_type) ?? item.room_type;
+        result.qty_supplier += type
+          ? (rooming.tc[type] ?? 0) * (item.nights ?? 1)
+          : Object.values(rooming.tc).reduce((a, b) => a + b, 0) * (item.nights ?? 1);
+      }
+    }
+  }
+  for (const result of items) {
+    if (!missingRoomDays.has(result.day_number)) continue;
+    const item = input.days
+      .find((d) => d.day_number === result.day_number)!
+      .items.find((i) => i.id === result.id)!;
+    if (item.slot_key === "ALOJAMIENTO" && item.selected !== false) {
+      result.status = "error";
+      result.total_cost_usd = null;
+      result.total_margin_usd = null;
+      result.base_cost_usd = null;
+      result.costo_base = null;
+      result.costo_ajustado = null;
+      result.warning = missingRoomWarnings
+        .filter((w) => w.includes(`(día ${result.day_number})`))
+        .join("; ");
+    }
+  }
+  const selectionWarnings: string[] = [...missingRoomWarnings];
+  for (const day of input.days) {
+    if (
+      day.items.some((i) => i.slot_key === "ALOJAMIENTO") &&
+      !day.items.some((i) => i.slot_key === "ALOJAMIENTO" && i.selected !== false && i.included)
+    )
+      selectionWarnings.push(
+        `Hotel sin tipo elegido en el día ${day.day_number}; revisa las habitaciones disponibles.`,
+      );
+    if (input.rooming_rows?.length && day.items.some((i) => i.pricing_unit === "per_room"))
+      selectionWarnings.push(
+        ...roomingWarnings(input.rooming_rows, day.day_number, input.pax_paying, input.tc_count),
+      );
+    const slots = new Set(
+      day.items
+        .filter((i) => i.slot_key && i.pricing_unit === "per_vehicle")
+        .map((i) => i.slot_key!),
+    );
+    for (const slot of slots) {
+      const selected = day.items.filter(
+        (i) => i.slot_key === slot && i.included && i.selected !== false,
+      );
+      const capacity = selected.reduce(
+        (n, i) => n + (i.capacity ?? i.vehicle_max_pax ?? 0) * (i.qty_override ?? i.qty),
+        0,
+      );
+      const required =
+        input.pax_paying +
+        (selected.length && selected.every((i) => i.tc_policy === "excluded")
+          ? 0
+          : input.tc_count) +
+        (input.staff?.drivers ?? 0) +
+        (input.staff?.guides ?? 0);
+      const warning = transportWarning(capacity, required, day.day_number);
+      if (warning) selectionWarnings.push(warning);
     }
   }
   // Known amounts are used only when every billable item and scenario is valid.
@@ -666,6 +790,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
     items.some((i) => i.status === "error") || scenarios.some((s) => s.status === "error");
   return {
     status: failed ? "error" : "ok",
+    selection_issues: selectionWarnings,
     pricing_policy: policy,
     ...(rooms ? { effective_rooming: rooms.rooming } : {}),
     total_cost_usd: failed ? null : cents(cost),
@@ -695,6 +820,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
       };
     }),
     warnings: [
+      ...selectionWarnings,
       ...(rooms?.warnings ?? []),
       ...items.flatMap((i) => (i.warning ? [i.warning] : [])),
       ...scenarios.flatMap((s) =>

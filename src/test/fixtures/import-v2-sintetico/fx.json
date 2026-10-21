@@ -1,0 +1,8 @@
+{
+ "fx": {
+  "USD": 1.0,
+  "CLP": 900.0,
+  "BOB": 7.0
+ },
+ "nota": "Tipos de cambio de prueba: el test debe inyectarlos (no usar latestFx real)."
+}

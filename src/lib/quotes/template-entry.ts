@@ -37,7 +37,7 @@ export function templateQuotePrefill(
     route_from: template.route_from ?? "",
     route_to: template.route_to ?? "",
     days: String(template.days),
-    category: template.category,
+    ...(template.category ? { category: template.category } : {}),
     modality: template.modality,
     ...(reference.pax_paying !== undefined ? { pax_paying: String(reference.pax_paying) } : {}),
     ...(reference.tc_count !== undefined ? { tc_count: String(reference.tc_count) } : {}),
