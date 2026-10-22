@@ -183,7 +183,8 @@ declare d public.quote_days; suppliers uuid[]; hotel uuid; matches integer;begin
  if cardinality(suppliers)>1 then raise exception 'Para cambiar de hotel, usa otro bloque. No mezcles hoteles en un día.'; end if;
  hotel:=(d.block_snapshot#>>'{block,hotel_id}')::uuid;
  if hotel is not null then return hotel; end if;
- select min(id),count(*) into hotel,matches from public.hotel_codes where supplier_id=suppliers[1];
+ select (array_agg(id order by id))[1],count(*) into hotel,matches
+ from public.hotel_codes where supplier_id=suppliers[1];
  return case when matches=1 then hotel else null end;
 end; $$;
 revoke all on function public.quote_day_hotel(uuid) from public,anon;
