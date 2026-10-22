@@ -198,10 +198,12 @@ do $migration$ declare definition text;begin
   $new$'total_cost_local',null),case when exists(select 1 from public.services x where x.id=i.service_id and x.type='alojamiento' and i.pricing_unit='per_room') then 'ALOJAMIENTO' else i.slot_key end,i.selected,i.billing,i.span_days,coalesce(i.tc_policy,case when i.applies_tc then 'charged' else 'free' end),i.margin_mode,i.margin_pct);$new$);
  execute definition;
  definition:=replace(pg_get_functiondef('public.edit_quote_days(uuid,text,jsonb,timestamptz,jsonb)'::regprocedure),chr(13),'');
- definition:=replace(definition,'default_day_position,hotel_service_id)','default_day_position,hotel_id)');
+ definition:=replace(definition,'default_day_position,hotel_service_id)','default_day_position,hotel_id,hotel_service_id)');
  definition:=replace(definition,$old$(select (i->>'service_id')::uuid from jsonb_array_elements(its) i where i->>'quote_day_id'=selected->>'id'
           and i->>'service_id'=selected#>>'{block_snapshot,block,hotel_service_id}' limit 1)$old$,
-  $new$public.quote_day_hotel((selected->>'id')::uuid)$new$);
+  $new$public.quote_day_hotel((selected->>'id')::uuid),
+        (select (i->>'service_id')::uuid from jsonb_array_elements(its) i where i->>'quote_day_id'=selected->>'id'
+          and i->>'service_id'=selected#>>'{block_snapshot,block,hotel_service_id}' limit 1)$new$);
  definition:=replace(definition,'pricing_config,item_snapshot)','pricing_config,item_snapshot,slot_key,is_default,billing,span_days,tc_policy,margin_mode,margin_pct)');
  definition:=replace(definition,$old$'total_cost_local',null));$old$,
   $new$'total_cost_local',null),case when exists(select 1 from public.services x where x.id=(it->>'service_id')::uuid and x.type='alojamiento' and it->>'pricing_unit'='per_room') then 'ALOJAMIENTO' else coalesce(it->>'slot_key','SERVICIO') end,coalesce((it->>'selected')::boolean,true),coalesce(it->>'billing','per_day'),coalesce((it->>'span_days')::int,1),coalesce(it->>'tc_policy',case when (it->>'applies_tc')::boolean then 'charged' else 'free' end),coalesce(it->>'margin_mode','inherit'),(it->>'margin_pct')::numeric);$new$);
