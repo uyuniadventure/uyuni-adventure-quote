@@ -79,10 +79,16 @@ export function positiveIntegerCell(value: string | undefined): number | null {
   const n = numberCell(value);
   return n != null && Number.isInteger(n) && n > 0 ? n : null;
 }
+export function tariffVehicleCapacity(tariff: CsvRow): number | null {
+  const configured = tariff["VehicleMaxPax"];
+  return configured
+    ? positiveIntegerCell(configured)
+    : positiveIntegerCell(tariff["PaxMax"]);
+}
 /** Commercial exception authorized only for PER_VEHICLE itinerary transport links. */
 export function segmentVehicleCapacity(segment: CsvRow, tariff: CsvRow): number | null {
   if ((segment["unidad"] || tariff["UnitType"]) !== "PER_VEHICLE") return null;
-  return positiveIntegerCell(tariff["VehicleMaxPax"]) ?? positiveIntegerCell(tariff["PaxMax"]);
+  return tariffVehicleCapacity(tariff);
 }
 export const routeOf = (r: CsvRow) =>
   r["sku"]!.match(/^(.+?)-\d+D\d+N(?:-|$)/)?.[1] ?? r["sku"]!.split("-")[0]!;
@@ -155,7 +161,7 @@ export function validatePackageV2(pkg: PackageV2, catalog: { services?: { sku: s
     if (!r["Supplier"] || !r["ETIQUETA"])
       warnings.push({ key, message: "Servicio sin proveedor o nombre; queda pendiente" });
     try {
-      if (r["UnitType"] === "PER_VEHICLE" && !(numberCell(r["VehicleMaxPax"])! > 0))
+      if (r["UnitType"] === "PER_VEHICLE" && tariffVehicleCapacity(r) == null)
         err(key, "PER_VEHICLE sin capacidad");
       for (const col of ["VehicleMaxPax", "Occupancy", "PaxMin", "PaxMax"])
         if (r[col] && (!Number.isInteger(Number(r[col])) || Number(r[col]) <= 0))

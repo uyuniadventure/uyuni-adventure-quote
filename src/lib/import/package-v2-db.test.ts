@@ -174,8 +174,11 @@ describe.sequential("staging y commit reales con RLS", () => {
     ).rows[0]!.result;
     expect(selected).toMatchObject({ approved: 0, pending: 1 });
     expect(
-      (await pg.query<{ status: string }>("select status from itinerary_templates where id=$1", [template]))
-        .rows[0]!.status,
+      (
+        await pg.query<{ status: string }>("select status from itinerary_templates where id=$1", [
+          template,
+        ])
+      ).rows[0]!.status,
     ).toBe("pendiente");
     const bulk = (
       await pg.query<{ result: { fingerprint: string; templates: { eligible: number } } }>(
@@ -206,9 +209,7 @@ describe.sequential("staging y commit reales con RLS", () => {
       template,
     ]);
     // The preceding test changed the first segment to 801 USD.
-    expect(
-      (await costTemplate(template, { pax: 2 })).total_cost_usd,
-    ).toBe(1861);
+    expect((await costTemplate(template, { pax: 2 })).total_cost_usd).toBe(1861);
     await expect(costTemplate(template, { pax: 1 })).rejects.toThrow(/sin tramo de pasajeros/);
     const q = await createQuoteFromTemplate(template, {
       client_id: client,
@@ -335,6 +336,7 @@ describe.sequential("staging y commit reales con RLS", () => {
   it("valida en servidor aunque el cliente omita sus errores", async () => {
     const broken = structuredClone(pkg);
     broken.tariffs[0]!["VehicleMaxPax"] = "";
+    broken.tariffs[0]!["PaxMax"] = "";
     const id = (
       await pg.query<{ id: string }>(
         "select stage_import_package('invalid.zip',$1,'[]','{\"errors\":[]}') id",
@@ -345,6 +347,20 @@ describe.sequential("staging y commit reales con RLS", () => {
       status: "staged",
       error: "Hay errores de validación.",
     });
+  });
+  it("acepta en servidor PaxMax como capacidad y enteros decimales del CSV", async () => {
+    const withFallback = structuredClone(pkg);
+    withFallback.tariffs[0]!["VehicleMaxPax"] = "";
+    withFallback.tariffs[0]!["PaxMax"] = "6.0";
+    withFallback.tariffs[1]!["VehicleMaxPax"] = "6.0";
+    await pg.exec("reset role");
+    const errors = (
+      await pg.query<{ errors: unknown[] }>("select _validate_import_package($1) errors", [
+        JSON.stringify(withFallback),
+      ])
+    ).rows[0]!.errors;
+    await as(admin);
+    expect(errors).toEqual([]);
   });
   it("no confirma una vista previa vacía de un paquete válido", async () => {
     const id = (
@@ -385,5 +401,63 @@ describe.sequential("staging y commit reales con RLS", () => {
     const second = await stage(p);
     expect(second.changes.every((r) => r.action === "skip")).toBe(true);
     expect((await commit(second.id)).status).toBe("committed");
+  });
+  it("resuelve un TariffCode histórico por alias sin duplicar ni sobrescribir el servicio", async () => {
+    const primary = "HIST_PRIMARY_X";
+    const alias = "HIST_ALIAS_X";
+    const serviceId = (
+      await pg.query<{ id: string }>(
+        `insert into services(sku,name,type,pricing_unit,currency,source,status)
+         values($1,'Servicio histórico','extra','per_unit','USD','manual','pendiente') returning id`,
+        [primary],
+      )
+    ).rows[0]!.id;
+    await pg.query("insert into service_sku_aliases(sku,service_id) values($1,$2)", [
+      alias,
+      serviceId,
+    ]);
+    const p = structuredClone(pkg);
+    p.tariffs[0]!["PRECIO_USD"] = "801";
+    p.tariffs.push({ ...p.tariffs[1]!, TariffCode: alias, PRECIO_USD: "321.45" });
+    expect(validatePackageV2(p).errors).toEqual([]);
+    const first = await stage(p);
+    expect(
+      first.changes.some(
+        (r) => r.table_name === "services" && r.natural_key === alias && r.action !== "skip",
+      ),
+    ).toBe(false);
+    expect(
+      first.changes.filter(
+        (r) => r.table_name === "service_rates" && r.payload["service_id"] === serviceId,
+      ),
+    ).toHaveLength(1);
+    const firstResult = await commit(first.id);
+    expect(firstResult.status, JSON.stringify(firstResult)).toBe("committed");
+    expect((await pg.query("select id from services where sku=$1", [alias])).rows).toEqual([]);
+    expect(
+      (
+        await pg.query<{ n: number }>(
+          "select count(*)::int n from service_rates where service_id=$1 and price_net=321.45",
+          [serviceId],
+        )
+      ).rows[0]!.n,
+    ).toBe(1);
+    const before = (
+      await pg.query<{ n: number }>(
+        "select count(*)::int n from service_rates where service_id=$1",
+        [serviceId],
+      )
+    ).rows[0]!.n;
+    const second = await stage(p);
+    expect(second.changes.every((r) => r.action === "skip")).toBe(true);
+    expect((await commit(second.id)).status).toBe("committed");
+    expect(
+      (
+        await pg.query<{ n: number }>(
+          "select count(*)::int n from service_rates where service_id=$1",
+          [serviceId],
+        )
+      ).rows[0]!.n,
+    ).toBe(before);
   });
 });

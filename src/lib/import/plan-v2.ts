@@ -6,6 +6,7 @@ import {
   routeFamily,
   routeParts,
   segmentVehicleCapacity,
+  tariffVehicleCapacity,
   type PackageV2,
   type ImportCatalog,
   type CatalogRow,
@@ -17,6 +18,7 @@ export const importTables = [
   "location_codes",
   "suppliers",
   "services",
+  "service_sku_aliases",
   "service_rates",
   "day_blocks",
   "day_block_translations",
@@ -78,9 +80,7 @@ function splitHotelCombo(combo: string, nights: number, knownCodes: Set<string>)
   candidates.sort((a, b) => b.score - a.score || b.knownChars - a.knownChars);
   const best = candidates[0];
   if (!best) return null;
-  const tied = candidates.filter(
-    (c) => c.score === best.score && c.knownChars === best.knownChars,
-  );
+  const tied = candidates.filter((c) => c.score === best.score && c.knownChars === best.knownChars);
   return tied.length === 1 ? best.parts : null;
 }
 const escape = (s: string) =>
@@ -150,17 +150,20 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
     }
   }
   const suppliers = new Map<string, string>();
-  for (const t of pkg.tariffs) {
-    const key = t["Supplier"]?.toLowerCase();
+  for (const source of [
+    ...pkg.tariffs.map((row) => ({ name: row["Supplier"] })),
+    ...pkg.lodging.map((row) => ({ name: row["proveedor"] })),
+  ]) {
+    const key = source.name?.toLowerCase();
     if (!key) continue;
     if (suppliers.has(key)) continue;
     const row = add(
       "suppliers",
-      t["Supplier"]!,
+      source.name!,
       {
         name:
           catalog["suppliers"]?.find((s) => String(s["name"]).toLowerCase() === key)?.["name"] ??
-          t["Supplier"],
+          source.name,
       },
       (s) => String(s["name"]).toLowerCase() === key,
     );
@@ -168,58 +171,75 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
   }
   const services = new Map<string, string>();
   for (const t of pkg.tariffs) {
-    const row = add(
-      "services",
-      t["TariffCode"]!,
-      {
-        sku: t["TariffCode"],
-        name: t["ETIQUETA"],
-        supplier_id: t["Supplier"] ? suppliers.get(t["Supplier"].toLowerCase()) ?? null : null,
-        type: type[t["ServiceType"]!] ?? "extra",
-        pricing_unit: unit[t["UnitType"]!],
-        currency: "USD",
-        import_source_currency: t["Currency"] || null,
-        import_source_unit: t["UnitType"] || null,
-        location: t["Location"] || null,
-        country: t["Pais"] || null,
-        capacity: numberCell(t["VehicleMaxPax"]),
-        vehicle_max_pax: numberCell(t["VehicleMaxPax"]),
-        room_type: t["RoomType"] || null,
-        occupancy: numberCell(t["Occupancy"]),
-        meal_plan: ["NONE", "BB", "HB", "FB"].includes(t["IncludesMeals"]!)
-          ? t["IncludesMeals"]
-          : null,
-        source: "paquete_v2",
-        notes:
-          [t["Notes"], t["RoomDetail"], t["LINK TARIFARIO"]].filter(Boolean).join("\n") || null,
-        multi_day_span: 1,
-        status: "pendiente",
-        import_v2_route: routeFamily(t),
-      },
-      (s) => s["sku"] === t["TariffCode"],
-    );
-    services.set(t["TariffCode"]!, String(row["id"]));
+    const tariffCode = t["TariffCode"]!;
+    const primary = (known["services"] ?? []).filter((s) => s["sku"] === tariffCode);
+    const alias = (known["service_sku_aliases"] ?? []).filter((a) => a["sku"] === tariffCode);
+    if (primary.length > 1 || alias.length > 1)
+      throw new Error(`Identidad ambigua para TariffCode ${tariffCode}`);
+    const aliasService = alias[0]
+      ? (known["services"] ?? []).find((s) => s["id"] === alias[0]!["service_id"])
+      : undefined;
+    if (alias[0] && !aliasService) throw new Error(`Alias huérfano para TariffCode ${tariffCode}`);
+    if (primary[0] && aliasService && primary[0]["id"] !== aliasService["id"])
+      throw new Error(`TariffCode ${tariffCode} apunta a dos servicios distintos`);
+
+    const managedService = {
+      sku: tariffCode,
+      name: t["ETIQUETA"],
+      supplier_id: t["Supplier"] ? (suppliers.get(t["Supplier"].toLowerCase()) ?? null) : null,
+      type: type[t["ServiceType"]!] ?? "extra",
+      pricing_unit: unit[t["UnitType"]!],
+      currency: "USD",
+      import_source_currency: t["Currency"] || null,
+      import_source_unit: t["UnitType"] || null,
+      location: t["Location"] || null,
+      country: t["Pais"] || null,
+      capacity: t["UnitType"] === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
+      vehicle_max_pax: t["UnitType"] === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
+      room_type: t["RoomType"] || null,
+      occupancy: numberCell(t["Occupancy"]),
+      meal_plan: ["NONE", "BB", "HB", "FB"].includes(t["IncludesMeals"]!)
+        ? t["IncludesMeals"]
+        : null,
+      source: "paquete_v2",
+      notes: [t["Notes"], t["RoomDetail"], t["LINK TARIFARIO"]].filter(Boolean).join("\n") || null,
+      multi_day_span: 1,
+      status: "pendiente",
+      import_v2_route: routeFamily(t),
+    };
+    // An alias is historical identity, not permission to rewrite its primary service.
+    // Likewise a manually-owned primary SKU is preserved; only paquete_v2 rows are managed.
+    const protectedService =
+      aliasService ?? (primary[0]?.["source"] !== "paquete_v2" ? primary[0] : undefined);
+    const row =
+      protectedService ??
+      add("services", tariffCode, managedService, (s) => s["sku"] === tariffCode);
+    if (protectedService)
+      records.push({
+        table_name: "services",
+        natural_key: tariffCode,
+        payload: { id: protectedService["id"] },
+      });
+    services.set(tariffCode, String(row["id"]));
     const dates = {
       valid_from: t["ValidFrom"] || `${t["Year"]}-01-01`,
       valid_to: t["ValidTo"] || `${t["Year"]}-12-31`,
     };
-    add(
-      "service_rates",
-      t["TariffCode"]!,
-      {
-        service_id: row["id"],
-        ...dates,
-        season: pricingSeasons.has(t["Season"]!) ? t["Season"] : "ALL",
-        import_source_season: t["Season"] || null,
-        pax_min: numberCell(t["PaxMin"]),
-        pax_max: numberCell(t["PaxMax"]),
-        price_net: numberCell(t["PRECIO_USD"]),
-        price_rack: null,
-        net_cost_missing: numberCell(t["PRECIO_USD"]) == null,
-        import_source_price_net: numberCell(t["Price NETO"]),
-        import_source_price_rack: numberCell(t["Valor RACK"]),
-        pricing_enabled: pricingSeasons.has(t["Season"]!),
-      },
+    const managedRate = {
+      service_id: row["id"],
+      ...dates,
+      season: pricingSeasons.has(t["Season"]!) ? t["Season"] : "ALL",
+      import_source_season: t["Season"] || null,
+      pax_min: numberCell(t["PaxMin"]),
+      pax_max: numberCell(t["PaxMax"]),
+      price_net: numberCell(t["PRECIO_USD"]),
+      price_rack: null,
+      net_cost_missing: numberCell(t["PRECIO_USD"]) == null,
+      import_source_price_net: numberCell(t["Price NETO"]),
+      import_source_price_rack: numberCell(t["Valor RACK"]),
+      pricing_enabled: pricingSeasons.has(t["Season"]!),
+    };
+    const matchingRate = (known["service_rates"] ?? []).filter(
       (r) =>
         r["service_id"] === row["id"] &&
         r["valid_from"] === dates["valid_from"] &&
@@ -228,6 +248,23 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         (r["pax_min"] ?? null) === numberCell(t["PaxMin"]) &&
         (r["pax_max"] ?? null) === numberCell(t["PaxMax"]),
     );
+    if (matchingRate.length > 1) throw new Error(`Tarifa ambigua para TariffCode ${tariffCode}`);
+    if (protectedService && matchingRate[0]) {
+      const existing = matchingRate[0];
+      if (
+        (existing["price_net"] == null ? null : Number(existing["price_net"])) !==
+          managedRate.price_net ||
+        existing["price_rack"] != null
+      )
+        throw new Error(`Tarifa protegida en conflicto para TariffCode ${tariffCode}`);
+      records.push({
+        table_name: "service_rates",
+        natural_key: tariffCode,
+        payload: { id: existing["id"] },
+      });
+    } else {
+      add("service_rates", tariffCode, managedRate, (r) => r === matchingRate[0]);
+    }
   }
   const blocks = new Map<string, string>();
   for (const t of pkg.texts) {
@@ -272,7 +309,13 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
     add(
       "day_block_translations",
       `V2:TEXTLESS:${sourceId}:es`,
-      { block_id: id, lang: "es", title: b["titulo"] || sourceId, description: "", reviewed: false },
+      {
+        block_id: id,
+        lang: "es",
+        title: b["titulo"] || sourceId,
+        description: "",
+        reviewed: false,
+      },
       (r) => r["block_id"] === id && r["lang"] === "es",
     );
   }
@@ -471,8 +514,9 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         day_number: +n["noche"]!,
         slot_key: n["slot"],
         service_id: services.get(n["TariffCode"]!) ?? null,
-        supplier_id: n["proveedor"] ? suppliers.get(n["proveedor"].toLowerCase()) ?? null : null,
-        hotel_id: n["slot"] === "ALOJAMIENTO" && hotelCode ? hotelCodes.get(hotelCode) ?? null : null,
+        supplier_id: n["proveedor"] ? (suppliers.get(n["proveedor"].toLowerCase()) ?? null) : null,
+        hotel_id:
+          n["slot"] === "ALOJAMIENTO" && hotelCode ? (hotelCodes.get(hotelCode) ?? null) : null,
         source_hotel_name: n["slot"] === "ALOJAMIENTO" ? n["hotel"] || null : null,
         source_tariff_code: n["TariffCode"] || null,
         source_row_key: sourceRowKey,

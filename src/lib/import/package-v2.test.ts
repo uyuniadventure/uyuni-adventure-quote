@@ -2,7 +2,14 @@
 import { readFile } from "node:fs/promises";
 import Papa from "papaparse";
 import { describe, it, expect, beforeAll } from "vitest";
-import { packageFiles, parsePackageV2, validatePackageV2, type PackageV2 } from "./package-v2";
+import {
+  diffPackageV2,
+  numberCell,
+  packageFiles,
+  parsePackageV2,
+  validatePackageV2,
+  type PackageV2,
+} from "./package-v2";
 import { costPackageTemplate } from "../pricing/template-cost";
 let pkg: PackageV2;
 const root = new URL("../../test/fixtures/import-v2-sintetico/", import.meta.url);
@@ -45,8 +52,132 @@ describe("paquete v2", () => {
     const p = structuredClone(pkg);
     p.tariffs.push({ ...p.tariffs[0]! });
     p.tariffs[0]!["VehicleMaxPax"] = "";
+    p.tariffs[0]!["PaxMax"] = "";
     expect(validatePackageV2(p).errors.some((e) => e.message.includes("repetida"))).toBe(true);
     expect(validatePackageV2(p).errors.some((e) => e.message.includes("capacidad"))).toBe(true);
+  });
+  it("usa PaxMax sólo cuando falta VehicleMaxPax y acepta enteros decimales del CSV", () => {
+    const p = structuredClone(pkg);
+    p.tariffs[0]!["VehicleMaxPax"] = "";
+    p.tariffs[0]!["PaxMax"] = "6.0";
+    expect(validatePackageV2(p).errors).toEqual([]);
+
+    p.tariffs[0]!["VehicleMaxPax"] = "6.0";
+    p.tariffs[0]!["PaxMax"] = "";
+    expect(validatePackageV2(p).errors).toEqual([]);
+
+    p.tariffs[0]!["VehicleMaxPax"] = "6.5";
+    p.tariffs[0]!["PaxMax"] = "9";
+    expect(validatePackageV2(p).errors.some((e) => e.message.includes("capacidad"))).toBe(true);
+  });
+  it("conserva el proveedor de un alojamiento bloqueado aunque no tenga tarifa", () => {
+    const p = structuredClone(pkg);
+    const unresolved = p.lodging.find((row) => row["slot"] === "ALOJAMIENTO")!;
+    unresolved["TariffCode"] = "";
+    unresolved["proveedor"] = "HOTEL SIN TARIFA";
+    unresolved["hotel"] = "HOTEL SIN TARIFA";
+    const changes = diffPackageV2(p, {});
+    expect(
+      changes.some(
+        (change) =>
+          change.table_name === "suppliers" && change.payload["name"] === "HOTEL SIN TARIFA",
+      ),
+    ).toBe(true);
+    expect(
+      changes.some(
+        (change) =>
+          change.table_name === "template_day_items" &&
+          change.payload["source_hotel_name"] === "HOTEL SIN TARIFA" &&
+          change.payload["service_id"] === null &&
+          change.payload["supplier_id"] != null,
+      ),
+    ).toBe(true);
+  });
+  it("resuelve un TariffCode existente como alias sin duplicar ni reescribir el servicio", () => {
+    const p = structuredClone(pkg);
+    const tariff = p.tariffs[0]!;
+    const serviceId = crypto.randomUUID();
+    const supplierId = crypto.randomUUID();
+    const changes = diffPackageV2(p, {
+      suppliers: [{ id: supplierId, name: tariff["Supplier"] }],
+      services: [
+        {
+          id: serviceId,
+          sku: "SKU_PRIMARIO_HISTORICO",
+          source: "importacion_anterior",
+          supplier_id: supplierId,
+        },
+      ],
+      service_sku_aliases: [
+        { id: crypto.randomUUID(), sku: tariff["TariffCode"], service_id: serviceId },
+      ],
+      service_rates: [],
+    });
+    expect(
+      changes.find(
+        (change) => change.table_name === "services" && change.natural_key === tariff["TariffCode"],
+      ),
+    ).toMatchObject({ action: "skip", payload: { id: serviceId } });
+    expect(
+      changes.find(
+        (change) =>
+          change.table_name === "service_rates" && change.natural_key === tariff["TariffCode"],
+      )?.payload["service_id"],
+    ).toBe(serviceId);
+  });
+  it("rechaza un TariffCode que es SKU y alias de servicios distintos", () => {
+    const p = structuredClone(pkg);
+    const code = p.tariffs[0]!["TariffCode"]!;
+    expect(() =>
+      diffPackageV2(p, {
+        services: [
+          { id: crypto.randomUUID(), sku: code, source: "manual" },
+          { id: "22000000-0000-0000-0000-000000000002", sku: "OTRO", source: "manual" },
+        ],
+        service_sku_aliases: [
+          {
+            id: crypto.randomUUID(),
+            sku: code,
+            service_id: "22000000-0000-0000-0000-000000000002",
+          },
+        ],
+      }),
+    ).toThrow(/apunta a dos servicios distintos/);
+  });
+  it("rechaza sobrescribir una tarifa protegida encontrada por alias", () => {
+    const p = structuredClone(pkg);
+    const tariff = p.tariffs[0]!;
+    const serviceId = crypto.randomUUID();
+    const supplierId = crypto.randomUUID();
+    expect(() =>
+      diffPackageV2(p, {
+        suppliers: [{ id: supplierId, name: tariff["Supplier"] }],
+        services: [
+          {
+            id: serviceId,
+            sku: "SKU_PRIMARIO_HISTORICO",
+            source: "manual",
+            supplier_id: supplierId,
+          },
+        ],
+        service_sku_aliases: [
+          { id: crypto.randomUUID(), sku: tariff["TariffCode"], service_id: serviceId },
+        ],
+        service_rates: [
+          {
+            id: crypto.randomUUID(),
+            service_id: serviceId,
+            valid_from: tariff["ValidFrom"] || `${tariff["Year"]}-01-01`,
+            valid_to: tariff["ValidTo"] || `${tariff["Year"]}-12-31`,
+            season: tariff["Season"],
+            pax_min: numberCell(tariff["PaxMin"]),
+            pax_max: numberCell(tariff["PaxMax"]),
+            price_net: 999999,
+            price_rack: null,
+          },
+        ],
+      }),
+    ).toThrow(/Tarifa protegida en conflicto/);
   });
   it("rechaza relaciones rotas, moneda y tramos invertidos", () => {
     const p = structuredClone(pkg);
@@ -67,9 +198,9 @@ describe("paquete v2", () => {
           .total_cost_usd,
         c["sku"] + " pax " + c["pax"],
       ).toBeCloseTo(+c["costo_esperado_usd"]!, 2);
-    expect(() =>
-      costPackageTemplate({ pkg, sku: "SPASPA-4D3N-AB" }, { pax: 1 }),
-    ).toThrow(/sin tramo de pasajeros/);
+    expect(() => costPackageTemplate({ pkg, sku: "SPASPA-4D3N-AB" }, { pax: 1 })).toThrow(
+      /sin tramo de pasajeros/,
+    );
   });
   it("cobra el 4x4 una vez y marca días cubiertos", () => {
     const r = costPackageTemplate({ pkg, sku: "SPASPA-4D3N-AB" }, { pax: 2 });
@@ -84,7 +215,9 @@ describe("paquete v2", () => {
     lunch["Valor RACK"] = "999999";
     lunch["Currency"] = "CLP";
     const result = costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2 });
-    expect(result.lines.filter((l) => l.sku === "T_ALM").every((l) => l.cost_usd === 30)).toBe(true);
+    expect(result.lines.filter((l) => l.sku === "T_ALM").every((l) => l.cost_usd === 30)).toBe(
+      true,
+    );
   });
   it("aplica unidades de enlace para tramos y STAFF sin alterar el SKU de tarifa", () => {
     const p = structuredClone(pkg);
@@ -99,10 +232,7 @@ describe("paquete v2", () => {
       [7, 0, 2],
       [9, 4, 3],
     ] as const) {
-      const result = costPackageTemplate(
-        { pkg: p, sku: "SPASPA-4D3N-AB" },
-        { pax, staff },
-      );
+      const result = costPackageTemplate({ pkg: p, sku: "SPASPA-4D3N-AB" }, { pax, staff });
       const segment = result.lines.find((l) => l.sku === "T_4X4_4D")!;
       expect(segment.qty, `pax ${pax}`).toBe(vehicles);
       expect(segment.cost_usd, `pax ${pax}`).toBe(800 * vehicles);
@@ -126,10 +256,9 @@ describe("paquete v2", () => {
     expect(validatePackageV2(p).errors).toEqual([]);
     const before = costPackageTemplate({ pkg, sku: "SPASPA-4D3N-AB" }, { pax: 7 });
     const result = costPackageTemplate({ pkg: p, sku: "SPASPA-4D3N-AB" }, { pax: 7 });
-    expect(result.lines.filter((l) => l.day === 1 && l.slot === "STAFF").map((l) => l.sku)).toEqual([
-      "H_A_STAFF",
-      "H_A_STAFF_DINNER",
-    ]);
+    expect(result.lines.filter((l) => l.day === 1 && l.slot === "STAFF").map((l) => l.sku)).toEqual(
+      ["H_A_STAFF", "H_A_STAFF_DINNER"],
+    );
     expect(result.total_cost_usd - before.total_cost_usd).toBe(10);
   });
   it("conserva bloques KV sin texto como pendientes sin romper sus servicios", () => {
@@ -149,5 +278,35 @@ describe("paquete v2", () => {
     expect(() => costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2 })).toThrow(
       /Temporada excluida/,
     );
+  });
+  it.each([
+    ["2026-06-01", "DRY"],
+    ["2026-12-01", "RAIN"],
+  ] as const)("aplica %s como fecha de temporada %s usando PRECIO_USD", (date, season) => {
+    const p = structuredClone(pkg);
+    const lunch = p.tariffs.find((t) => t["TariffCode"] === "T_ALM")!;
+    lunch["Season"] = season;
+    lunch["Year"] = date.slice(0, 4);
+    lunch["ValidFrom"] = `${date.slice(0, 4)}-01-01`;
+    lunch["ValidTo"] = `${date.slice(0, 4)}-12-31`;
+    lunch["Price NETO"] = "999999";
+    lunch["Valor RACK"] = "999999";
+    const result = costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2, date });
+    expect(result.lines.filter((l) => l.sku === "T_ALM").every((l) => l.cost_usd === 30)).toBe(
+      true,
+    );
+  });
+  it("exige fecha y respeta la vigencia de una tarifa DRY/RAIN", () => {
+    const p = structuredClone(pkg);
+    const lunch = p.tariffs.find((t) => t["TariffCode"] === "T_ALM")!;
+    lunch["Season"] = "DRY";
+    lunch["ValidFrom"] = "2026-07-01";
+    lunch["ValidTo"] = "2026-11-30";
+    expect(() => costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2 })).toThrow(
+      /Fecha requerida/,
+    );
+    expect(() =>
+      costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2, date: "2026-06-01" }),
+    ).toThrow(/fuera de temporada o vigencia/);
   });
 });

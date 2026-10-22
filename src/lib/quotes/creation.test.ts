@@ -396,8 +396,8 @@ describe("creación atómica desde plantilla", () => {
     await pg.query(
       `insert into service_rates(service_id,season,valid_from,valid_to,pax_min,pax_max,price_net) values
       ($1,'ALL','2026-01-01','2026-12-31',1,2,10),($1,'ALL','2026-01-01','2026-12-31',3,4,15),
-      ($1,'ALL','2027-01-01','2027-12-31',1,4,20),($1,'DRY','2027-01-01','2027-12-31',1,2,30),
-      ($1,'DRY','2027-01-01','2027-12-31',3,4,40)`,
+      ($1,'ALL','2027-01-01','2027-12-31',1,4,20),($1,'RAIN','2027-01-01','2027-12-31',1,2,30),
+      ($1,'RAIN','2027-01-01','2027-12-31',3,4,40)`,
       [service],
     );
     const template = (
@@ -432,7 +432,7 @@ describe("creación atómica desde plantilla", () => {
       tc_count: 1,
       staff: { drivers: 1, guides: 1 },
       rooming: { paying: { DBL: 1 }, tc: { SGL: 1 } },
-      seasons: [{ from: "2027-01-01", to: "2027-01-31", season: "DRY" }],
+      seasons: [{ from: "2027-01-01", to: "2027-01-31", season: "RAIN" }],
     });
     const data = await loadQuote(q.id);
     expect(data.days.map((d) => d.date)).toEqual(["2026-12-31", "2027-01-01"]);

@@ -1,4 +1,34 @@
 begin;
+do $compatibility$
+declare definition text;
+begin
+  definition:=replace(pg_get_functiondef('public.save_quote_calculation(uuid,timestamptz,jsonb)'::regprocedure),chr(13),'');
+  if strpos(definition,'unit_cost_original=case')=0 then raise exception 'save_quote_calculation incompatible con T01h-2.';end if;
+  definition:=replace(pg_get_functiondef('public.guard_quote_state()'::regprocedure),chr(13),'');
+  if strpos(definition,E'begin\n')=0 then raise exception 'guard_quote_state incompatible con T01h-2.';end if;
+  definition:=replace(pg_get_functiondef('public.version_quote(uuid)'::regprocedure),chr(13),'');
+  if strpos(definition,'return next_id;')=0 then raise exception 'version_quote incompatible con T01h-2.';end if;
+  definition:=replace(pg_get_functiondef('public.edit_quote_item(uuid,jsonb,boolean,boolean)'::regprocedure),chr(13),'');
+  if strpos(definition,'set sku=old_item.sku')=0 or strpos(definition,'set pricing_unit=i.pricing_unit')=0 then
+    raise exception 'edit_quote_item incompatible con T01h-2.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.create_quote_from_template(uuid,jsonb,jsonb,jsonb,jsonb)'::regprocedure),chr(13),'');
+  if strpos(definition,'(p_result->>total_name)::numeric>=0 and')=0 then raise exception 'create_quote_from_template incompatible con T01h-2.';end if;
+  definition:=replace(pg_get_functiondef('public.quote_sold_operations()'::regprocedure),chr(13),'');
+  if strpos(definition,'to_jsonb(i),d.date')=0 or strpos(definition,'(r->>''quantity'')::numeric>0')=0 then
+    raise exception 'quote_sold_operations incompatible con T01h-2.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.save_quote_as_template(uuid,text,text,text,text,timestamptz,uuid,timestamptz)'::regprocedure),chr(13),'');
+  if strpos(definition,'end_point,content,created_by)')=0 or strpos(definition,'pricing_config,item_snapshot)')=0 then
+    raise exception 'save_quote_as_template incompatible con T01h-2.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.edit_quote_days(uuid,text,jsonb,timestamptz,jsonb)'::regprocedure),chr(13),'');
+  if strpos(definition,'default_day_position,hotel_service_id)')=0 or strpos(definition,'pricing_config,item_snapshot)')=0 then
+    raise exception 'edit_quote_days incompatible con T01h-2.';
+  end if;
+end;
+$compatibility$;
+
 -- One JSON shape for legacy document/operation readers and the new nightly rows.
 create function public.rooming_distribution(p_rows jsonb,p_night integer default null) returns jsonb
 language sql immutable set search_path='' as $$

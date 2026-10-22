@@ -3302,6 +3302,18 @@ export type Database = {
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean }
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json }
+      review_imported_service_cleanup: {
+        Args: { ids: string[] }
+        Returns: Json
+      }
+      cleanup_imported_services: {
+        Args: {
+          ids: string[]
+          p_expected_fingerprint: string
+          p_confirm: string
+        }
+        Returns: Json
+      }
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
       quote_payment_summary: { Args: { p_id: string }; Returns: Json }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertCompleteCalculation,
   calculateQuote,
+  climateSeasonForDate,
   dateForDay,
   type PricingItem,
   type QuoteInput,
@@ -39,6 +40,71 @@ const base: QuoteInput = {
   days: [{ day_number: 1, items: [item] }],
 };
 describe("pricing", () => {
+  it.each([
+    ["2026-01-01", "RAIN"],
+    ["2026-05-31", "RAIN"],
+    ["2026-06-01", "DRY"],
+    ["2026-11-30", "DRY"],
+    ["2026-12-01", "RAIN"],
+    ["2027-01-01", "RAIN"],
+    ["2027-05-31", "RAIN"],
+    ["2027-06-01", "DRY"],
+  ] as const)("maps %s to the confirmed %s season", (date, season) => {
+    expect(climateSeasonForDate(date)).toBe(season);
+  });
+  it.each([
+    ["2026-05-31", "RAIN", "DRY"],
+    ["2026-11-30", "DRY", "RAIN"],
+    ["2026-12-31", "RAIN", "RAIN"],
+  ] as const)("selects the season on both sides of %s", (start_date, first, second) => {
+    const rates = [
+      { ...rate, season: "DRY" as const, valid_from: "2026-01-01", valid_to: "2027-12-31", price_net: 200 },
+      { ...rate, season: "RAIN" as const, valid_from: "2026-01-01", valid_to: "2027-12-31", price_net: 100 },
+    ];
+    const result = calculateQuote({
+      ...base,
+      start_date,
+      days: [1, 2].map((day_number) => ({
+        day_number,
+        items: [{ ...item, id: String(day_number), rates }],
+      })),
+    });
+    const expected = { DRY: 600, RAIN: 300 } as const;
+    expect(result.items.map((x) => x.base_cost_usd)).toEqual([expected[first], expected[second]]);
+  });
+  it("respects validity even when the climate season matches", () => {
+    const result = calculateQuote({
+      ...base,
+      start_date: "2026-06-01",
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          rates: [{ ...rate, season: "DRY", valid_from: "2026-07-01", valid_to: "2026-11-30" }],
+        }],
+      }],
+    });
+    expect(result.items[0]?.status).toBe("error");
+    expect(() => assertCompleteCalculation(result)).toThrow(/errores de cálculo/);
+  });
+  it("does not let an explicit itinerary calendar override DRY/RAIN", () => {
+    const result = calculateQuote({
+      ...base,
+      start_date: "2026-01-15",
+      seasons: [{ from: "2026-01-01", to: "2026-01-31", season: "DRY" }],
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          rates: [
+            { ...rate, season: "DRY", price_net: 200 },
+            { ...rate, season: "RAIN", price_net: 100 },
+          ],
+        }],
+      }],
+    });
+    expect(result.items[0]?.base_cost_usd).toBe(300);
+  });
   it("selects dated seasonal rates without inventing a climate calendar", () => {
     expect(
       calculateQuote({

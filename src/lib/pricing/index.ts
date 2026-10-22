@@ -7,6 +7,7 @@ import {
 import type { Enums } from "../../types/db";
 import { marginAmount, resolvePricingPolicy, type PricingPolicyInput } from "./policy";
 import { adjustedCost, adjustmentPctSchema } from "./adjustment";
+import { climateSeasonForDate } from "./seasons";
 import {
   normalizeRooms,
   occupancyType,
@@ -16,6 +17,7 @@ import {
 } from "./config";
 export { pricingConfigSchema, pricingConfigSchemas, parsePricingConfig } from "./config";
 export { DEFAULT_PRICING, resolvePricingPolicy } from "./policy";
+export { climateSeasonForDate } from "./seasons";
 export type { MarginMode, CommissionMode, ClientPricing, AdminPricing } from "./policy";
 
 export interface Rate {
@@ -90,7 +92,7 @@ export interface QuoteInput extends PaxScenario, PricingPolicyInput {
   fx_snapshot: Record<string, number>;
   rounding_rule: { increment: number; mode: "ceil" | "nearest" | "none"; per_pax?: boolean };
   days: { day_number: number; items: PricingItem[] }[];
-  // Seasons are configured per itinerary; do not invent DRY/RAIN dates.
+  // Explicit itinerary seasons remain available for non-climate commercial calendars.
   seasons?: { from: string; to: string; season: Enums<"season"> }[];
   single_supplements?: {
     single_cost: number;
@@ -262,6 +264,7 @@ export function selectRate(
   const active = seasons
     .filter((s) => validDate(s.from) <= date && validDate(s.to) >= date)
     .map((s) => s.season);
+  const climateSeason = climateSeasonForDate(date);
   const candidates = item.rates.filter(
     (r) =>
       r.pricing_enabled !== false &&
@@ -275,8 +278,13 @@ export function selectRate(
       (!item.rate_band ||
         (r.pax_min === item.rate_band.pax_min && r.pax_max === item.rate_band.pax_max)) &&
       (r.season === "ALL" ||
-        active.includes(r.season) ||
-        (seasons.length === 0 && !!r.valid_from && !!r.valid_to)),
+        (r.season !== "DRY" && r.season !== "RAIN" && active.includes(r.season)) ||
+        r.season === climateSeason ||
+        (seasons.length === 0 &&
+          r.season !== "DRY" &&
+          r.season !== "RAIN" &&
+          !!r.valid_from &&
+          !!r.valid_to)),
   );
   const seasonal = candidates.filter((r) => r.season !== "ALL");
   const chosen = seasonal.length ? seasonal : candidates;

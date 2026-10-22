@@ -19,6 +19,35 @@ export interface PurgeCatalogCounts extends Omit<DeleteTemplatesCounts, "quotes_
   templates_updated: number;
 }
 
+export interface ImportedServiceCleanupPreview {
+  service_ids: string[];
+  services: number;
+  rates: number;
+  aliases: number;
+  change_requests: number;
+  providers_retained: string[];
+  clients_deleted: 0;
+  quotes_deleted: 0;
+  dependencies: {
+    media: number;
+    activity_modules: number;
+    legacy_hotels: number;
+    catalog_items: number;
+    quote_items: number;
+    template_segments: number;
+    template_day_items: number;
+    segment_rules: number;
+  };
+  issues: string[];
+  can_delete: boolean;
+  fingerprint: string;
+}
+
+export interface ImportedServiceCleanupResult extends ImportedServiceCleanupPreview {
+  deleted_services: number;
+  status: "deleted";
+}
+
 export type CatalogKind = "day_blocks" | "templates";
 export interface CatalogApprovalPreview {
   items: { id: string; code: string; name: string; reasons: string[] }[];
@@ -53,9 +82,10 @@ export async function approveTemplates(ids: string[], { acceptWarnings = false }
 
 export type ImportReviewKind = "services" | "activity_modules";
 export async function approveImportReviewItems(kind: ImportReviewKind, ids: string[]) {
-  return unwrap(
-    await db.rpc("approve_import_items", { kind, ids }),
-  ) as unknown as { approved: number; pending: number };
+  return unwrap(await db.rpc("approve_import_items", { kind, ids })) as unknown as {
+    approved: number;
+    pending: number;
+  };
 }
 
 /** Counts only; does not expose another seller's quote content to Operation.
@@ -98,4 +128,26 @@ export async function purgeImportedCatalog(confirm: string) {
   return unwrap(
     await db.rpc("purge_imported_catalog", { confirm }),
   ) as unknown as PurgeCatalogCounts;
+}
+
+/** Read-only preflight for an explicit set of legacy-import service IDs. */
+export async function reviewImportedServiceCleanup(ids: string[]) {
+  return unwrap(
+    await db.rpc("review_imported_service_cleanup", { ids }),
+  ) as unknown as ImportedServiceCleanupPreview;
+}
+
+/** Deletes only the exact preflighted services; providers and quoted services are retained. */
+export async function cleanupImportedServices(
+  ids: string[],
+  expectedFingerprint: string,
+  confirm: string,
+) {
+  return unwrap(
+    await db.rpc("cleanup_imported_services", {
+      ids,
+      p_expected_fingerprint: expectedFingerprint,
+      p_confirm: confirm,
+    }),
+  ) as unknown as ImportedServiceCleanupResult;
 }

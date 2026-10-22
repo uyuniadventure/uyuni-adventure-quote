@@ -16,9 +16,11 @@ vi.mock("../db", () => ({
   },
 }));
 import {
+  cleanupImportedServices,
   deleteDayBlocks,
   deleteTemplates,
   purgeImportedCatalog,
+  reviewImportedServiceCleanup,
   previewTemplateDeletion,
 } from "./index";
 
@@ -153,6 +155,103 @@ afterEach(async () => {
 afterAll(async () => pg?.close());
 
 describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
+  it("previsualiza y elimina solo servicios importados explícitos, conservando proveedor y cliente", async () => {
+    const supplier = (
+      await one<{ id: string }>(
+        "insert into suppliers(name) values('Proveedor conservado') returning id",
+      )
+    ).id;
+    const imported = (
+      await one<{ id: string }>(
+        `insert into services(sku,name,supplier_id,type,pricing_unit,currency,source)
+         values('IMPORT-CLEAN','Importado',$1,'extra','per_unit','USD','paquete_v2') returning id`,
+        [supplier],
+      )
+    ).id;
+    await pg.query(
+      "insert into service_rates(service_id,price_net,source_row) values($1,25,900001)",
+      [imported],
+    );
+    await pg.query(
+      "insert into service_sku_aliases(sku,service_id) values('IMPORT-CLEAN-OLD',$1)",
+      [imported],
+    );
+    const beforeClients = await one<{ count: number }>("select count(*)::int count from clients");
+    const preview = await reviewImportedServiceCleanup([imported]);
+    expect(preview).toMatchObject({
+      service_ids: [imported],
+      services: 1,
+      rates: 1,
+      aliases: 1,
+      providers_retained: [supplier],
+      clients_deleted: 0,
+      quotes_deleted: 0,
+      issues: [],
+      can_delete: true,
+    });
+    await pg.exec("savepoint bad_confirmation");
+    await expect(
+      cleanupImportedServices([imported], preview.fingerprint, "BORRAR"),
+    ).rejects.toThrow(/BORRAR TARIFARIO IMPORTADO/);
+    await pg.exec("rollback to savepoint bad_confirmation");
+    await pg.exec("savepoint stale_preview");
+    await expect(
+      cleanupImportedServices([imported], "huella-obsoleta", "BORRAR TARIFARIO IMPORTADO"),
+    ).rejects.toThrow(/catálogo cambió/i);
+    await pg.exec("rollback to savepoint stale_preview");
+    expect(
+      await cleanupImportedServices([imported], preview.fingerprint, "BORRAR TARIFARIO IMPORTADO"),
+    ).toMatchObject({ deleted_services: 1, status: "deleted" });
+    expect(await rows("select id from services where id=$1", [imported])).toEqual([]);
+    expect(await rows("select id from service_rates where service_id=$1", [imported])).toEqual([]);
+    expect(
+      await rows("select id from service_sku_aliases where service_id=$1", [imported]),
+    ).toEqual([]);
+    expect(await one("select id from suppliers where id=$1", [supplier])).toEqual({ id: supplier });
+    expect(await one("select count(*)::int count from clients")).toEqual(beforeClients);
+  });
+
+  it("bloquea la limpieza si una cotización referencia el servicio y conserva todo", async () => {
+    const imported = (
+      await one<{ id: string }>(
+        `insert into services(sku,name,type,pricing_unit,currency,source)
+         values('IMPORT-QUOTED','Cotizado','extra','per_unit','USD','paquete_v2') returning id`,
+      )
+    ).id;
+    const quoteId = await quote();
+    await pg.exec("reset role");
+    await pg.query(
+      `update quote_items set service_id=$2 where quote_day_id in
+       (select id from quote_days where quote_id=$1)`,
+      [quoteId, imported],
+    );
+    await as(admin);
+    const preview = await reviewImportedServiceCleanup([imported]);
+    expect(preview.can_delete).toBe(false);
+    expect(preview.dependencies.quote_items).toBe(1);
+    expect(preview.issues.join(" ")).toMatch(/cotizaciones/);
+    await pg.exec("savepoint quoted_cleanup");
+    await expect(
+      cleanupImportedServices([imported], preview.fingerprint, "BORRAR TARIFARIO IMPORTADO"),
+    ).rejects.toThrow(/dependencias/);
+    await pg.exec("rollback to savepoint quoted_cleanup");
+    expect(await one("select id from services where id=$1", [imported])).toEqual({ id: imported });
+    expect(await one("select id from quotes where id=$1", [quoteId])).toEqual({ id: quoteId });
+    expect(await one("select id from clients where id=$1", [client])).toEqual({ id: client });
+  });
+
+  it("rechaza previsualización y limpieza para vendedores", async () => {
+    await as(seller);
+    for (const sql of [
+      "review_imported_service_cleanup('{}'::uuid[])",
+      "cleanup_imported_services('{}'::uuid[],'x','BORRAR TARIFARIO IMPORTADO')",
+    ]) {
+      await pg.exec("savepoint denied_cleanup");
+      await expect(pg.query(`select public.${sql}`)).rejects.toMatchObject({ code: "42501" });
+      await pg.exec("rollback to savepoint denied_cleanup");
+    }
+  });
+
   it("sin force devuelve plantillas únicas por bloque y no elimina ninguna fila del lote", async () => {
     const free = await makeBlock();
     const other = await makeTemplate([blocks[1]!, blocks[1]!]);

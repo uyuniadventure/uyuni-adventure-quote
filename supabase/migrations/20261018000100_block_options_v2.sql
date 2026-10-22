@@ -1,5 +1,65 @@
 -- T01h. Apply in Lovable Cloud after 20261017000200. No remote writes here.
 begin;
+do $reconcile$
+declare
+  missing text;
+  signature text;
+  definition text;
+begin
+  select string_agg(object_name, ', ' order by object_name) into missing
+  from (values
+    ('pricing_settings'),('doc_blocks'),('quote_doc_sections')
+  ) required(object_name)
+  where to_regclass('public.'||object_name) is null;
+  if missing is not null then
+    raise exception 'Esquema no reconciliado: faltan tablas históricas: %.',missing;
+  end if;
+
+  select string_agg(table_name||'.'||column_name, ', ' order by table_name,column_name) into missing
+  from (values
+    ('itinerary_templates','quote_defaults'),('services','approval_issues'),
+    ('itinerary_templates','approval_issues'),('quote_items','adjustment_pct'),
+    ('quote_days','block_snapshot'),('quotes','cancel_reason'),
+    ('quote_payments','fx_rate'),('day_blocks','catalog_origin'),
+    ('day_blocks','approval_issues')
+  ) required(table_name,column_name)
+  where not exists(select 1 from information_schema.columns c
+    where c.table_schema='public' and c.table_name=required.table_name and c.column_name=required.column_name);
+  if missing is not null then
+    raise exception 'Esquema no reconciliado: faltan columnas históricas: %.',missing;
+  end if;
+
+  foreach signature in array array[
+    'public.insert_quote_item(uuid,jsonb,boolean)',
+    'public.guard_quote_child()','public.set_updated_at()',
+    'public.save_quote_calculation(uuid,timestamptz,jsonb)',
+    'public.guard_quote_state()','public.version_quote(uuid)',
+    'public.edit_quote_item(uuid,jsonb,boolean,boolean)',
+    'public.create_quote_from_template(uuid,jsonb,jsonb,jsonb,jsonb)',
+    'public.quote_sold_operations()',
+    'public.save_quote_as_template(uuid,text,text,text,text,timestamptz,uuid,timestamptz)',
+    'public.edit_quote_days(uuid,text,jsonb,timestamptz,jsonb)',
+    'public.quote_template_source(uuid,uuid)',
+    'public._template_approval_rows(uuid[],uuid[])',
+    'public._lock_catalog_approval()',
+    'public.approve_valid_imports(boolean,text,boolean)'
+  ] loop
+    if to_regprocedure(signature) is null then
+      raise exception 'Esquema no reconciliado: falta la función %.',signature;
+    end if;
+  end loop;
+
+  definition:=replace(pg_get_functiondef('public.insert_quote_item(uuid,jsonb,boolean)'::regprocedure),chr(13),'');
+  if strpos(definition,'{"qty":1,')=0 then
+    raise exception 'Esquema no reconciliado: insert_quote_item no contiene los defaults esperados; compara su definición remota.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.guard_quote_child()'::regprocedure),chr(13),'');
+  if strpos(definition,'qid:=case when tg_op=''DELETE'' then old.quote_id else new.quote_id end;')=0 then
+    raise exception 'Esquema no reconciliado: guard_quote_child no admite hijos con quote_id; compara su definición remota.';
+  end if;
+end;
+$reconcile$;
+
 alter table public.services add column capacity integer check(capacity>0), add column occupancy integer check(occupancy>0);
 update public.services set capacity=vehicle_max_pax,occupancy=case upper(room_type) when 'SGL' then 1 when 'DBL_TWN' then 2 when 'DBL_MAT' then 2 when 'DBL' then 2 when 'TWN' then 2 when 'MAT' then 2 when 'TPL' then 3 when 'QUAD' then 4 end;
 create function public.check_vehicle_capacity() returns trigger language plpgsql set search_path='' as $$ begin

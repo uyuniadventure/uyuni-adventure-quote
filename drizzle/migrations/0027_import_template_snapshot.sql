@@ -1,13 +1,45 @@
 begin;
+do $compatibility$
+declare definition text;
+begin
+  if to_regprocedure('public.quote_template_source_before_v2(uuid,uuid)') is not null
+    or to_regprocedure('public._template_approval_rows_before_v2(uuid[],uuid[])') is not null then
+    raise exception 'T01k snapshot parece aplicado parcialmente; no se renombrarán funciones otra vez.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.create_quote_from_template(uuid,jsonb,jsonb,jsonb,jsonb)'::regprocedure),chr(13),'');
+  if strpos(definition,'lock table public.itinerary_templates,')=0
+    or strpos(definition,'return public.save_quote_calculation(q.id,q.updated_at,p_result);')=0 then
+    raise exception 'create_quote_from_template incompatible con T01k snapshot.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.save_quote_as_template(uuid,text,text,text,text,timestamptz,uuid,timestamptz)'::regprocedure),chr(13),'');
+  if strpos(definition,'delete from public.template_days where template_id=tid;')=0 then
+    raise exception 'save_quote_as_template incompatible con T01k snapshot.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.edit_quote_selection(uuid,text,jsonb,timestamptz,jsonb)'::regprocedure),chr(13),'');
+  if strpos(definition,'''selection_source'',''manual'',''qty'',')=0
+    or strpos(definition,'set selected=i.selected,selection_source=i.selection_source,qty=i.qty')=0 then
+    raise exception 'edit_quote_selection incompatible con T01k snapshot.';
+  end if;
+  definition:=replace(pg_get_functiondef('public._lock_catalog_approval()'::regprocedure),chr(13),'');
+  if strpos(definition,'public.template_days,public.day_blocks')=0 then
+    raise exception '_lock_catalog_approval incompatible con T01k snapshot.';
+  end if;
+  definition:=replace(pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure),chr(13),'');
+  if strpos(definition,'(select jsonb_agg(t order by t.id) from public.itinerary_templates t),')=0 then
+    raise exception 'approve_valid_imports incompatible con T01k snapshot.';
+  end if;
+end;
+$compatibility$;
+
 -- These links belong to the TEMPLATE. They are never inserted into day_block_items.
 create function public.template_import_links(p_template uuid) returns jsonb language sql stable set search_path='' as $$
 with segments as(
  select x.id,x.template_id,x.day_from day_number,x.slot_key,x.service_id,1::numeric qty,true is_default,
  'per_service'::text billing,x.day_to-x.day_from+1 span_days,'charged'::text tc_policy,
-  (case when x.pricing_unit_override is null then '{}'::jsonb else
-   jsonb_build_object('pricing_unit',x.pricing_unit_override::text)||
-  case when x.pricing_unit_override='per_vehicle' then '{"vehicle_segment":"tour"}'::jsonb else '{}'::jsonb end end)||
-  case when x.vehicle_max_pax_override is null then '{}'::jsonb else jsonb_build_object('vehicle_max_pax',x.vehicle_max_pax_override) end pricing_config,
+   (case when x.pricing_unit_override is null then '{}'::jsonb else
+    jsonb_build_object('pricing_unit',x.pricing_unit_override::text)||
+   case when x.pricing_unit_override='per_vehicle' then '{"vehicle_segment":"tour"}'::jsonb else '{}'::jsonb end end)||
+   case when x.vehicle_max_pax_override is null then '{}'::jsonb else jsonb_build_object('vehicle_max_pax',x.vehicle_max_pax_override) end pricing_config,
  'segment:'||x.id::text coverage_key,x.day_from coverage_start_day
  from public.template_segment_items x where x.template_id=p_template
 ),nights as(

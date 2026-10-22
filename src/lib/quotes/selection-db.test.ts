@@ -177,8 +177,12 @@ describe("atomic selections and rooming", () => {
     await setRooming(quote, [{ room_type: "SGL", count: 3, for_tc: false }]);
     const data = await loadQuote(quote);
     expect(data.roomingRows).toHaveLength(1);
-    expect(data.quote.rooming).toEqual({paying:{SGL:3},tc:{}});
-    expect(data.items.every(i=>JSON.stringify(i.room_distribution)===JSON.stringify(data.quote.rooming))).toBe(true);
+    expect(data.quote.rooming).toEqual({ paying: { SGL: 3 }, tc: {} });
+    expect(
+      data.items.every(
+        (i) => JSON.stringify(i.room_distribution) === JSON.stringify(data.quote.rooming),
+      ),
+    ).toBe(true);
     expect(data.quote.total_cost_usd).toBe(150);
   });
   it("a seller cannot read or select another owner quote", async () => {
@@ -216,6 +220,20 @@ it("migration preserves hotel/default link and limits room alternatives", async 
     throughMigration: "20261017000200_catalog_approval_actions.sql",
   });
   try {
+    const migration = await readFile(
+      "supabase/migrations/20261018000100_block_options_v2.sql",
+      "utf8",
+    );
+    await legacy.exec(
+      "alter function public.insert_quote_item(uuid,jsonb,boolean) rename to incompatible_insert_quote_item",
+    );
+    await expect(legacy.exec(migration)).rejects.toThrow(
+      /falta la función public\.insert_quote_item/,
+    );
+    await legacy.exec("rollback");
+    await legacy.exec(
+      "alter function public.incompatible_insert_quote_item(uuid,jsonb,boolean) rename to insert_quote_item",
+    );
     await legacy.exec(`insert into suppliers(id,name) values('82000000-0000-0000-0000-000000000001','Hotel sintético');
    insert into hotel_codes(id,code,name,supplier_id) values('82000000-0000-0000-0000-000000000007','SYN-H','Hotel sintético','82000000-0000-0000-0000-000000000001');
    insert into services(id,sku,name,type,pricing_unit,supplier_id,location,meal_plan,room_type) values
@@ -227,10 +245,6 @@ it("migration preserves hotel/default link and limits room alternatives", async 
     await legacy.exec(`insert into day_blocks(code) values('SYN-NO-HOTEL');
     insert into services(id,sku,name,type,pricing_unit) values('82000000-0000-0000-0000-000000000006','SYN-MISSING-SUPPLIER','Sin proveedor','alojamiento','per_room');
     insert into day_blocks(code,hotel_service_id) values('SYN-BAD-HOTEL','82000000-0000-0000-0000-000000000006');`);
-    const migration = await readFile(
-      "supabase/migrations/20261018000100_block_options_v2.sql",
-      "utf8",
-    );
     await expect(legacy.exec(migration)).rejects.toThrow("Falta proveedor del hotel");
     await legacy.exec("rollback");
     expect(

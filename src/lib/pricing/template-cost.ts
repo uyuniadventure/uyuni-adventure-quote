@@ -6,6 +6,7 @@ import {
   type CsvRow,
   type PackageV2,
 } from "../import/package-v2";
+import { climateSeasonForDate } from "./seasons";
 
 export interface TemplateCostOptions {
   pax: number;
@@ -50,15 +51,37 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
     if (!s) throw new Error(`Tarifa inexistente: ${code}`);
     return s;
   };
-  const rate = (s: CsvRow) => {
-    if (+s["Year"]! !== year) throw new Error(`Tarifa no vigente en ${year}: ${s["TariffCode"]}`);
+  const dateForDay = (day: number) => {
+    if (!options.date) return null;
+    const date = new Date(`${options.date}T00:00:00Z`);
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== options.date)
+      throw new Error(`Fecha inválida: ${options.date}`);
+    date.setUTCDate(date.getUTCDate() + day - 1);
+    return date.toISOString().slice(0, 10);
+  };
+  const applicable = (s: CsvRow, day: number) => {
+    const serviceDate = dateForDay(day);
+    const serviceYear = serviceDate ? Number(serviceDate.slice(0, 4)) : year;
+    if (+s["Year"]! !== serviceYear)
+      return false;
     const sourceSeason = s["Season"] || "";
     if (/EXCLUYE|EXCEPT|NO V[ÁA]LID/i.test(sourceSeason))
       throw new Error(`Temporada excluida: ${s["TariffCode"]}`);
-    if (sourceSeason && sourceSeason !== "ALL" && sourceSeason !== template["temporada"])
+    if (sourceSeason === "DRY" || sourceSeason === "RAIN") {
+      if (!serviceDate) throw new Error(`Fecha requerida para temporada: ${s["TariffCode"]}`);
+      if (climateSeasonForDate(serviceDate) !== sourceSeason) return false;
+    } else if (sourceSeason && sourceSeason !== "ALL" && sourceSeason !== template["temporada"])
       throw new Error(`Temporada no autorizada: ${s["TariffCode"]}`);
-    if (options.date && ((s["ValidFrom"] && options.date < s["ValidFrom"]!) || (s["ValidTo"] && options.date > s["ValidTo"]!)))
-      throw new Error(`Tarifa fuera de vigencia: ${s["TariffCode"]}`);
+    if (
+      serviceDate &&
+      ((s["ValidFrom"] && serviceDate < s["ValidFrom"]!) ||
+        (s["ValidTo"] && serviceDate > s["ValidTo"]!))
+    )
+      return false;
+    return true;
+  };
+  const rate = (s: CsvRow, day: number) => {
+    if (!applicable(s, day)) throw new Error(`Tarifa fuera de temporada o vigencia: ${s["TariffCode"]}`);
     const price = numberCell(s["PRECIO_USD"]);
     if (price == null) throw new Error(`PRECIO_USD ausente: ${s["TariffCode"]}`);
     return price;
@@ -70,7 +93,7 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
       day,
       slot,
       qty,
-      cost_usd: rate(s) * qty,
+      cost_usd: rate(s, day) * qty,
       span_days: span,
       billing: span > 1 ? "per_service" : "per_day",
     });
@@ -111,8 +134,8 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
           (v) =>
             v["Supplier"] === s["Supplier"] &&
             routeFamily(v) === routeFamily(s) &&
-            +v["Year"]! === year &&
-            v["UnitType"] === s["UnitType"],
+            v["UnitType"] === s["UnitType"] &&
+            applicable(v, +d["dia"]!),
         );
         const match = candidates
           .filter(
@@ -120,7 +143,7 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
               (numberCell(v["PaxMin"]) ?? 1) <= pax + tc &&
               (numberCell(v["PaxMax"]) ?? Infinity) >= pax + tc,
           )
-          .sort((a, b) => rate(a) - rate(b));
+          .sort((a, b) => rate(a, +d["dia"]!) - rate(b, +d["dia"]!));
         if (!match[0]) throw new Error("Traslado sin tramo de pasajeros");
         s = match[0];
       }
@@ -133,12 +156,12 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
           (s) =>
             s["Supplier"]?.toLowerCase() === n["proveedor"]?.toLowerCase() &&
             s["UnitType"] === "PER_ROOM_PER_NIGHT" &&
-            +s["Year"]! === year &&
             (room.room_type === "DBL"
               ? ["DBL", "MAT", "TWN"].includes(s["RoomType"]!)
-              : s["RoomType"] === room.room_type),
+              : s["RoomType"] === room.room_type) &&
+            applicable(s, +n["noche"]!),
         );
-        rooms.sort((a, b) => rate(a) - rate(b));
+        rooms.sort((a, b) => rate(a, +n["noche"]!) - rate(b, +n["noche"]!));
         if (!rooms[0]) throw new Error(`Hotel sin ${room.room_type} en ${year}`);
         add(rooms[0], +n["noche"]!, n["slot"]!, room.count);
       }
