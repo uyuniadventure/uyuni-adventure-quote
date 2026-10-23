@@ -1,13 +1,8 @@
 import { db } from "../db";
-import type { Enums, Json } from "@/types/db";
+import type { Json } from "@/types/db";
+import { filterAndRankTemplateSuggestions, type TemplateSearchBasics } from "./suggestion-ranking";
 
-export interface TemplateSearchBasics {
-  route_from?: string;
-  route_to?: string;
-  days?: string | number;
-  category?: Enums<"tour_category">;
-  modality?: Enums<"itinerary_modality">;
-}
+export type { TemplateSearchBasics } from "./suggestion-ranking";
 
 export function templateSuggestionError(error: { code?: string; message: string }): Error {
   if (error.code === "42703" || error.code === "PGRST204") {
@@ -29,8 +24,8 @@ export function templateImportWarnings(raw: Json): string[] {
   return values.map((value) => (typeof value === "string" ? value : JSON.stringify(value)));
 }
 
-/** RLS defines the same catalogue visibility as /plantillas. Ranking never
- * excludes a visible active/pending template, even when its score is zero. */
+/** RLS defines the same catalogue visibility as /plantillas. A requested route
+ * is mandatory; duration, category and modality only rank compatible rows. */
 export async function suggestTemplates(basics: TemplateSearchBasics) {
   const pageSize = 500;
   const page = (offset: number) =>
@@ -50,23 +45,6 @@ export async function suggestTemplates(basics: TemplateSearchBasics) {
     if (result.error) throw templateSuggestionError(result.error);
     templates.push(...(result.data ?? []));
   }
-  const wanted = Number(basics.days);
-  return templates
-    .map((t) => ({
-      ...t,
-      score:
-        (basics.route_from && t.route_from === basics.route_from ? 3 : 0) +
-        (basics.route_to && t.route_to === basics.route_to ? 3 : 0) +
-        (wanted > 0 ? (t.days === wanted ? 2 : Math.abs(t.days - wanted) === 1 ? 1 : 0) : 0) +
-        (basics.category && t.category === basics.category ? 2 : 0) +
-        (basics.modality && t.modality === basics.modality ? 1 : 0),
-    }))
-    .sort(
-      (a, b) =>
-        Number(a.status === "pendiente") - Number(b.status === "pendiente") ||
-        b.score - a.score ||
-        a.sku.localeCompare(b.sku) ||
-        a.id.localeCompare(b.id),
-    );
+  return filterAndRankTemplateSuggestions(templates, basics);
 }
 export type TemplateSuggestion = Awaited<ReturnType<typeof suggestTemplates>>[number];

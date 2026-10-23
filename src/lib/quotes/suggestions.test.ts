@@ -58,7 +58,7 @@ it("returns three pending templates when none are active, excluding archived/ina
   await add("ARCHIVED", "inactivo");
   expect((await suggestTemplates({})).map((t) => t.sku).sort()).toEqual(["ONE", "THREE", "TWO"]);
 });
-it("ranks route, +/- one day, category and modality without excluding alternatives", async () => {
+it("filters the route and ranks duration, category and modality among compatible templates", async () => {
   await add("UYUSPA-4D3N", "activo", 4);
   await add("EXACT", "activo");
   await add("OTHER", "activo", 10, admin, "LPB", "VIP", "grupo");
@@ -75,12 +75,10 @@ it("ranks route, +/- one day, category and modality without excluding alternativ
   expect(rows.map((t) => [t.sku, t.score])).toEqual([
     ["EXACT", 11],
     ["UYUSPA-4D3N", 10],
-    ["OTHER", 3],
-    ["ZERO", 0],
     ["PENDING", 11],
   ]);
 });
-it("returns all visible templates even when all scores are zero", async () => {
+it("returns no templates when the requested route has no compatible rows", async () => {
   await add("ONE");
   await add("TWO");
   const rows = await suggestTemplates({
@@ -90,8 +88,7 @@ it("returns all visible templates even when all scores are zero", async () => {
     category: "VIP",
     modality: "grupo",
   });
-  expect(rows).toHaveLength(2);
-  expect(rows.every((t) => t.score === 0)).toBe(true);
+  expect(rows).toEqual([]);
 });
 it("does not truncate at the former 60 limit or the database page size", async () => {
   await pg.exec(
