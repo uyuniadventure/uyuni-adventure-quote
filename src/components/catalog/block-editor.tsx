@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,11 +14,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUSES, StatusBadge, cap } from "./shared";
 import {
-  Field, IT_MODALITIES, SearchPicker, TranslationsPanel, canEditCatalogRow, fetchModules, fetchServices,
+  Field, IT_MODALITIES, SaveStateIndicator, SearchPicker, TranslationsPanel, canEditCatalogRow, catalogWriteErrorMessage, fetchModules, fetchServices,
+  type SaveState,
   useLocationCodes, type PickOption,
 } from "./kit";
 import { TriState } from "./module-editor";
 import { CatalogDeleteButton } from "./catalog-actions";
+import { parseSuggestedPosition } from "./block-editor-utils";
+import { eligibleHotelRooms, listHotels } from "@/lib/catalog/hotels";
+
+type HotelOption = PickOption & { supplierId: string | null; unavailable?: boolean };
+
+const hotelOption = (hotel: Awaited<ReturnType<typeof listHotels>>[number]): HotelOption => ({
+  id: hotel.id,
+  label: hotel.label,
+  ...(hotel.code ? { sub: hotel.code } : {}),
+  supplierId: hotel.supplier_id,
+});
+
+async function fetchHotels(term: string): Promise<HotelOption[]> {
+  const normalized = term.trim().toLocaleLowerCase();
+  const hotels = await listHotels();
+  return hotels
+    .map(hotelOption)
+    .filter((hotel) => !normalized || `${hotel.label} ${hotel.sub ?? ""}`.toLocaleLowerCase().includes(normalized));
+}
 
 type Mut = () => PromiseLike<{ error: { message: string } | null }>;
 function useRun(key: unknown[]) {
@@ -37,45 +57,104 @@ function useRun(key: unknown[]) {
 
 export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onClose: () => void; onCreated: (id: string) => void }) {
   const isNew = id === "new";
+  const [activeTab, setActiveTab] = useState("datos");
+  const [dirty, setDirty] = useState(false);
   const { user, role } = useCurrentUser();
   const q = useQuery({
     queryKey: ["day_block", id],
     enabled: !!id && !isNew,
     queryFn: async () => {
-      const { data, error } = await db.from("day_blocks").select("*, services(id, sku, name), day_block_translations(lang, title)").eq("id", id!).single();
+      const [{ data, error }, hotels] = await Promise.all([
+        db.from("day_blocks").select("*, services(id, sku, name), day_block_translations(lang, title)").eq("id", id!).single(),
+        listHotels(),
+      ]);
       if (error) throw error;
-      return data;
+      const modernHotel = hotels.find((hotel) => hotel.id === data.hotel_id);
+      return {
+        ...data,
+        modernHotel: modernHotel ? hotelOption(modernHotel) : data.hotel_id ? { id: data.hotel_id, label: "Hotel no disponible", supplierId: null, unavailable: true } : null,
+      };
     },
   });
   const row = isNew ? null : q.data;
   const canEdit = canEditCatalogRow(role, user.id, row);
   const title = row ? (row.day_block_translations.find((t) => t.lang === "es") ?? row.day_block_translations[0])?.title : null;
+  useEffect(() => {
+    setActiveTab("datos");
+    setDirty(false);
+  }, [id]);
+  const requestClose = () => {
+    if (dirty && !window.confirm("Hay cambios sin guardar. ¿Quieres descartarlos y cerrar?")) return;
+    setDirty(false);
+    onClose();
+  };
+  const changeTab = (value: string) => {
+    if (dirty && !window.confirm("Hay cambios sin guardar. ¿Quieres descartarlos?")) return;
+    setDirty(false);
+    setActiveTab(value);
+  };
 
   return (
-    <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-4xl">
+    <Sheet open={!!id} onOpenChange={(o) => !o && requestClose()}>
+      <SheetContent
+        className="w-full overflow-y-auto sm:max-w-4xl"
+        onEscapeKeyDown={(e) => {
+          if (dirty) {
+            e.preventDefault();
+            requestClose();
+          }
+        }}
+        onPointerDownOutside={(e) => {
+          if (dirty) {
+            e.preventDefault();
+            requestClose();
+          }
+        }}
+      >
         <SheetHeader>
           <SheetTitle>{isNew ? "Nuevo bloque diario" : title || row?.code || "Bloque"}</SheetTitle>
           <SheetDescription className="font-mono text-xs">{row?.code ?? "Un día de itinerario: módulos, servicios sueltos y textos."}</SheetDescription>
         </SheetHeader>
         {isNew ? (
-          <div className="mt-4"><BlockForm row={null} hotel={null} canEdit={canEdit} onSaved={onCreated} /></div>
+          <div className="mt-4">
+            <BlockForm row={null} hotel={null} legacyHotel={null} canEdit={canEdit} onDirtyChange={setDirty} onSaved={onCreated} />
+          </div>
         ) : !row ? (
           <p className="mt-6 text-sm text-muted-foreground">{q.isError ? "No se pudo cargar el bloque." : "Cargando…"}</p>
         ) : (
-          <Tabs defaultValue="datos" className="mt-4">
+          <Tabs value={activeTab} onValueChange={changeTab} className="mt-4">
             <TabsList>
               <TabsTrigger value="datos">Datos</TabsTrigger>
               <TabsTrigger value="textos">Textos</TabsTrigger>
-              <TabsTrigger value="modulos">Módulos</TabsTrigger>
               <TabsTrigger value="servicios">Servicios sueltos</TabsTrigger>
             </TabsList>
             <TabsContent value="datos" className="mt-4">
-              <BlockForm key={row.updated_at} row={row} hotel={row.services ? { id: row.services.id, label: row.services.name, sub: row.services.sku } : null} canEdit={canEdit} onSaved={() => {}} />
+              <BlockForm
+                key={row.id}
+                row={row}
+                hotel={row.modernHotel}
+                legacyHotel={row.services ? { id: row.services.id, label: row.services.name, sub: row.services.sku } : null}
+                canEdit={canEdit}
+                onDirtyChange={setDirty}
+                onSaved={() => {}}
+              />
             </TabsContent>
-            <TabsContent value="textos" className="mt-4"><TranslationsPanel kind="day_block" parentId={row.id} canEdit={canEdit} /></TabsContent>
-            <TabsContent value="modulos" className="mt-4"><BlockModules blockId={row.id} canEdit={canEdit} /></TabsContent>
-            <TabsContent value="servicios" className="mt-4"><BlockItems blockId={row.id} canEdit={canEdit} /></TabsContent>
+            <TabsContent value="textos" className="mt-4">
+              <TranslationsPanel kind="day_block" parentId={row.id} canEdit={canEdit} onDirtyChange={setDirty} />
+            </TabsContent>
+            <TabsContent value="modulos" className="mt-4">
+              <BlockModules blockId={row.id} canEdit={canEdit} />
+            </TabsContent>
+            <TabsContent value="servicios" className="mt-4">
+              <BlockItems
+                blockId={row.id}
+                hotelId={row.hotel_id}
+                hotelSupplierId={row.modernHotel?.supplierId ?? null}
+                hotelUnavailable={row.modernHotel?.unavailable ?? false}
+                legacyHotelServiceId={row.hotel_service_id}
+                canEdit={canEdit}
+              />
+            </TabsContent>
           </Tabs>
         )}
         {row && <CatalogDeleteButton kind="day_blocks" record={{ id: row.id, code: row.code, name: title || row.code }} onDeleted={onClose} />}
@@ -84,14 +163,27 @@ export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onC
   );
 }
 
-function BlockForm({ row, hotel: hotel0, canEdit, onSaved }: {
-  row: Tables<"day_blocks"> | null; hotel: PickOption | null; canEdit: boolean; onSaved: (id: string) => void;
+function BlockForm({
+  row,
+  hotel: hotel0,
+  legacyHotel,
+  canEdit,
+  onSaved,
+  onDirtyChange,
+}: {
+  row: Tables<"day_blocks"> | null;
+  hotel: HotelOption | null;
+  legacyHotel: PickOption | null;
+  canEdit: boolean;
+  onSaved: (id: string) => void;
+  onDirtyChange: (dirty: boolean) => void;
 }) {
   const { user, role } = useCurrentUser();
   const manager = canManageCatalog(role);
   const qc = useQueryClient();
   const locs = useLocationCodes();
-  const [hotel, setHotel] = useState<PickOption | null>(hotel0);
+  const savingRef = useRef(false);
+  const [hotel, setHotel] = useState<HotelOption | null>(hotel0);
   const [f, setF] = useState({
     code: row?.code ?? "",
     route_from: row?.route_from ?? "",
@@ -101,43 +193,106 @@ function BlockForm({ row, hotel: hotel0, canEdit, onSaved }: {
     default_day_position: row?.default_day_position?.toString() ?? "",
     status: row?.status ?? ("pendiente" as Enums<"catalog_status">),
   });
-  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
+  const snapshot = (values: typeof f, selectedHotel: HotelOption | null) => JSON.stringify({ ...values, hotel: selectedHotel?.id ?? null });
+  const [baseline, setBaseline] = useState(() => snapshot(f, hotel0));
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const dirty = snapshot(f, hotel) !== baseline;
+  useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
+  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => {
+    setF((p) => ({ ...p, [k]: v }));
+    onDirtyChange(true);
+    setSaveState("dirty");
+    setSaveError(null);
+  };
+  const selectHotel = (value: HotelOption | null) => {
+    setHotel(value);
+    onDirtyChange(true);
+    setSaveState("dirty");
+    setSaveError(null);
+  };
 
   const save = useMutation({
     mutationFn: async () => {
       if (!f.code.trim()) throw new Error("El código es obligatorio.");
-      const pos = f.default_day_position ? Number(f.default_day_position) : null;
+      const pos = parseSuggestedPosition(f.default_day_position);
       const values = {
-        code: f.code.trim().toUpperCase(), route_from: f.route_from || null, route_to: f.route_to || null,
-        places: f.places.split(",").map((p) => p.trim()).filter(Boolean), modality: f.modality,
-        hotel_service_id: hotel?.id ?? null, default_day_position: pos && pos > 0 ? pos : null,
+        code: f.code.trim().toUpperCase(),
+        route_from: f.route_from || null,
+        route_to: f.route_to || null,
+        places: f.places
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean),
+        modality: f.modality,
+        default_day_position: pos,
         status: manager ? f.status : ("pendiente" as const),
       };
       if (row) {
-        const { error } = await db.from("day_blocks").update(values).eq("id", row.id);
+        const hotelAssignment = row.hotel_id === null && row.hotel_service_id === null && hotel
+          ? { hotel_id: hotel.id }
+          : {};
+        const { error } = await db.from("day_blocks").update({ ...values, ...hotelAssignment }).eq("id", row.id);
         if (error) throw error;
         return row.id;
       }
-      const { data, error } = await db.from("day_blocks").insert({ ...values, created_by: user.id }).select("id").single();
+      const { data, error } = await db
+        .from("day_blocks")
+        .insert({ ...values, hotel_id: hotel?.id ?? null, created_by: user.id })
+        .select("id")
+        .single();
       if (error) throw error;
       return data.id;
     },
     onSuccess: (id) => {
+      const normalized = {
+        ...f,
+        code: f.code.trim().toUpperCase(),
+        default_day_position: parseSuggestedPosition(f.default_day_position)?.toString() ?? "",
+      };
+      setF(normalized);
+      setBaseline(snapshot(normalized, hotel));
+      onDirtyChange(false);
+      setSaveState("saved");
+      setSaveError(null);
       toast.success("Bloque guardado.");
       qc.invalidateQueries({ queryKey: ["day_blocks"] });
       qc.invalidateQueries({ queryKey: ["day_block", id] });
       qc.invalidateQueries({ queryKey: ["import-review"] });
       onSaved(id);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: unknown) => {
+      const message = catalogWriteErrorMessage(error, "Ya existe un bloque con ese código.");
+      setSaveState("error");
+      setSaveError(message);
+      toast.error(message);
+    },
   });
+
+  const submit = () => {
+    if (savingRef.current || save.isPending) return;
+    savingRef.current = true;
+    setSaveState("saving");
+    setSaveError(null);
+    save.mutate(undefined, {
+      onSettled: () => {
+        savingRef.current = false;
+      },
+    });
+  };
 
   const locSelect = (k: "route_from" | "route_to") => (
     <Select value={f[k] || "none"} onValueChange={(v) => set(k, v === "none" ? "" : v)} disabled={!canEdit}>
-      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="none">—</SelectItem>
-        {locs.data?.map((l) => <SelectItem key={l.code} value={l.code}>{l.code} · {l.name}</SelectItem>)}
+        {locs.data?.map((l) => (
+          <SelectItem key={l.code} value={l.code}>
+            {l.code} · {l.name}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
@@ -145,30 +300,88 @@ function BlockForm({ row, hotel: hotel0, canEdit, onSaved }: {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Código"><Input value={f.code} onChange={(e) => set("code", e.target.value)} disabled={!canEdit} /></Field>
-        <Field label="Posición sugerida (día)"><Input type="number" min={1} value={f.default_day_position} onChange={(e) => set("default_day_position", e.target.value)} disabled={!canEdit} /></Field>
+        <Field label="Código">
+          <Input aria-label="Código" value={f.code} onChange={(e) => set("code", e.target.value)} disabled={!canEdit} />
+        </Field>
+        <Field label="Posición sugerida (día)">
+          <Input aria-label="Posición sugerida (día)" inputMode="numeric" value={f.default_day_position} onChange={(e) => set("default_day_position", e.target.value)} disabled={!canEdit} />
+        </Field>
         <Field label="Desde">{locSelect("route_from")}</Field>
         <Field label="Hasta">{locSelect("route_to")}</Field>
-        <Field label="Lugares (separados por coma)" className="sm:col-span-2"><Input value={f.places} onChange={(e) => set("places", e.target.value)} placeholder="San Pedro de Atacama, Valle de la Luna" disabled={!canEdit} /></Field>
+        <Field label="Lugares (separados por coma)" className="sm:col-span-2">
+          <Input value={f.places} onChange={(e) => set("places", e.target.value)} placeholder="San Pedro de Atacama, Valle de la Luna" disabled={!canEdit} />
+        </Field>
         <Field label="Hotel (define la variante)">
-          <SearchPicker placeholder="Sin hotel" value={hotel} onPick={setHotel} queryKey="hotels" fetcher={(t) => fetchServices(t, "alojamiento")} disabled={!canEdit} />
+          {row?.hotel_service_id && !row.hotel_id ? (
+            <div className="space-y-1">
+              <div className="rounded-md border px-3 py-2 text-sm">
+                <div>{legacyHotel?.label ?? "Servicio de hotel no disponible"}</div>
+                {legacyHotel?.sub && <div className="font-mono text-xs text-muted-foreground">{legacyHotel.sub}</div>}
+              </div>
+              <p className="text-xs text-muted-foreground">Asociación heredada. Se conservará sin convertirla automáticamente.</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <SearchPicker
+                placeholder="Sin hotel"
+                value={hotel}
+                onPick={(option) => selectHotel(option as HotelOption | null)}
+                queryKey="hotel-codes"
+                fetcher={fetchHotels}
+                disabled={!canEdit || !!row?.hotel_id}
+              />
+              {row?.hotel_id && <p className="text-xs text-muted-foreground">Para cambiar de hotel, crea otro bloque diario.</p>}
+              {hotel?.unavailable ? (
+                <p role="alert" className="text-xs text-brand-orange-deep">No se pudo cargar la información de este hotel. La asociación se conservará sin cambios.</p>
+              ) : hotel && !hotel.supplierId ? (
+                <p role="alert" className="text-xs text-brand-orange-deep">Este hotel no tiene proveedor asociado. No se podrán añadir habitaciones hasta completar su configuración.</p>
+              ) : null}
+            </div>
+          )}
         </Field>
         <Field label="Modalidad">
           <Select value={f.modality} onValueChange={(v) => set("modality", v as Enums<"itinerary_modality">)} disabled={!canEdit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{IT_MODALITIES.map((m) => <SelectItem key={m} value={m}>{cap(m)}</SelectItem>)}</SelectContent>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {IT_MODALITIES.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {cap(m)}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </Field>
         <Field label="Estado">
           {manager ? (
             <Select value={f.status} onValueChange={(v) => set("status", v as Enums<"catalog_status">)} disabled={!canEdit}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{cap(s)}</SelectItem>)}</SelectContent>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {cap(s)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-          ) : <div className="pt-1"><StatusBadge status={f.status} /></div>}
+          ) : (
+            <div className="pt-1">
+              <StatusBadge status={f.status} />
+            </div>
+          )}
         </Field>
       </div>
-      {canEdit && <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Guardando…" : row ? "Guardar cambios" : "Crear bloque"}</Button>}
+      {canEdit && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button onClick={submit} disabled={save.isPending}>
+            {save.isPending ? "Guardando…" : row ? "Guardar cambios" : "Crear bloque"}
+          </Button>
+          <SaveStateIndicator state={saveState === "dirty" && !dirty ? "idle" : saveState === "idle" && dirty ? "dirty" : saveState} error={saveError} />
+        </div>
+      )}
     </div>
   );
 }
@@ -235,9 +448,25 @@ function BlockModules({ blockId, canEdit }: { blockId: string; canEdit: boolean 
   );
 }
 
-function BlockItems({ blockId, canEdit }: { blockId: string; canEdit: boolean }) {
+function BlockItems({
+  blockId,
+  hotelId,
+  hotelSupplierId,
+  hotelUnavailable,
+  legacyHotelServiceId,
+  canEdit,
+}: {
+  blockId: string;
+  hotelId: string | null;
+  hotelSupplierId: string | null;
+  hotelUnavailable: boolean;
+  legacyHotelServiceId: string | null;
+  canEdit: boolean;
+}) {
   const key = ["day_block_items", blockId];
   const run = useRun(key);
+  const modernHotel = !!hotelId;
+  const legacyHotel = !hotelId && !!legacyHotelServiceId;
   const q = useQuery({
     queryKey: key,
     queryFn: async () => {
@@ -247,12 +476,44 @@ function BlockItems({ blockId, canEdit }: { blockId: string; canEdit: boolean })
     },
   });
   const upd = (id: string, v: Partial<Tables<"day_block_items">>) => run.mutate([() => db.from("day_block_items").update(v).eq("id", id)]);
+  const fetchRooms = async (term: string): Promise<PickOption[]> => {
+    const normalized = term.trim().toLocaleLowerCase();
+    const rooms = await eligibleHotelRooms(blockId);
+    return rooms
+      .filter((room) => room.status !== "inactivo")
+      .filter((room) => !normalized || `${room.name} ${room.sku}`.toLocaleLowerCase().includes(normalized))
+      .map((room) => ({ id: room.id, label: room.name, sub: room.sku }));
+  };
+  const addRoom = async (option: PickOption | null) => {
+    if (!option) return;
+    try {
+      const rooms = await eligibleHotelRooms(blockId);
+      if (!rooms.some((room) => room.id === option.id && room.status !== "inactivo")) {
+        toast.error("La habitación ya no es compatible con el hotel del bloque.");
+        return;
+      }
+      run.mutate([() => db.from("day_block_items").insert({ block_id: blockId, service_id: option.id, qty: 1, slot_key: "ALOJAMIENTO" })]);
+    } catch (error) {
+      toast.error(catalogWriteErrorMessage(error));
+    }
+  };
 
   return (
     <div className="space-y-3">
       {canEdit && (
-        <SearchPicker placeholder="Añadir servicio suelto (alojamiento, comida, traslado…)" queryKey="services" fetcher={(t) => fetchServices(t)}
+        <SearchPicker placeholder={legacyHotel ? "Añadir servicio suelto (alojamiento, comida, traslado…)" : "Añadir servicio suelto (comida, traslado, entrada…)"} queryKey={legacyHotel ? "services" : "non-hotel-services"} fetcher={(t) => fetchServices(t, undefined, legacyHotel ? undefined : "alojamiento")}
           onPick={(o) => o && run.mutate([() => db.from("day_block_items").insert({ block_id: blockId, service_id: o.id, qty: 1 })])} />
+      )}
+      {canEdit && modernHotel && hotelSupplierId && (
+        <SearchPicker placeholder="Añadir habitación compatible…" queryKey={`hotel-rooms-${blockId}`} fetcher={fetchRooms} onPick={addRoom} />
+      )}
+      {modernHotel && !hotelSupplierId && (
+        <p role="alert" className="text-xs text-brand-orange-deep">
+          {hotelUnavailable ? "No se pudo verificar el hotel asociado. La asociación se conservará sin cambios." : "El hotel no tiene proveedor asociado. No es posible seleccionar habitaciones compatibles."}
+        </p>
+      )}
+      {!modernHotel && !legacyHotel && (
+        <p className="text-xs text-muted-foreground">Asigna primero un hotel en Datos para poder añadir habitaciones.</p>
       )}
       <p className="text-xs text-muted-foreground">Los servicios marcados como “No incluido” aparecen en el “No incluye” del día (ej. cena libre).</p>
       <div className="rounded-md border">

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, Languages, Loader2 } from "lucide-react";
@@ -25,6 +25,31 @@ export const LANGS = [
   ["it", "Italiano"],
 ] as const;
 export type Lang = (typeof LANGS)[number][0];
+export type SaveState = "idle" | "dirty" | "saving" | "saved" | "error";
+
+export function catalogWriteErrorMessage(error: unknown, duplicateMessage = "Ya existe un registro con esos datos.") {
+  const value = error as { code?: string; message?: string; status?: number } | null;
+  const code = value?.code;
+  const message = value?.message ?? (error instanceof Error ? error.message : "");
+  if (code === "23505") return duplicateMessage;
+  if (code === "23503") return "Una de las referencias seleccionadas ya no existe. Actualiza las opciones e inténtalo de nuevo.";
+  if (code === "42501" || /permission denied|row-level security|rls/i.test(message)) return "No tienes permisos para guardar estos cambios.";
+  if (value?.status === 0 || /failed to fetch|network|fetch failed|connection/i.test(message)) return "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.";
+  return message || "No se pudieron guardar los cambios.";
+}
+
+export function SaveStateIndicator({ state, error }: { state: SaveState; error?: string | null }) {
+  if (state === "idle") return null;
+  if (state === "dirty") return <span className="text-xs text-brand-orange-deep">Cambios sin guardar</span>;
+  if (state === "saving") return <span className="text-xs text-muted-foreground">Guardando…</span>;
+  if (state === "saved") return <span className="text-xs text-muted-foreground">Guardado</span>;
+  return (
+    <span role="alert" className="text-xs text-destructive">
+      {error || "No se guardó"}
+    </span>
+  );
+}
+
 
 export const DURATIONS: Enums<"activity_duration">[] = ["HD_AM", "HD_PM", "FD", "NOCHE", "TRASLADO"];
 export const DURATION_LABELS: Record<Enums<"activity_duration">, string> = {
@@ -184,10 +209,11 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
   );
 }
 
-export async function fetchServices(term: string, type?: Enums<"service_type">): Promise<PickOption[]> {
+export async function fetchServices(term: string, type?: Enums<"service_type">, excludeType?: Enums<"service_type">): Promise<PickOption[]> {
   let q = db.from("services").select("id, sku, name").neq("status", "inactivo").order("sku").limit(30);
   if (term) q = q.or(`sku.ilike.%${ilikeTerm(term)}%,name.ilike.%${ilikeTerm(term)}%`);
   if (type) q = q.eq("type", type);
+  if (excludeType) q = q.neq("type", excludeType);
   const { data, error } = await q;
   if (error) throw error;
   return data.map((s) => ({ id: s.id, label: s.name, sub: s.sku }));
@@ -227,11 +253,25 @@ interface TrRow {
   includes?: string | null; excludes?: string | null; reviewed: boolean;
 }
 
-export function TranslationsPanel({ kind, parentId, canEdit }: { kind: TranslationKind; parentId: string; canEdit: boolean }) {
+export function TranslationsPanel({
+  kind,
+  parentId,
+  canEdit,
+  onDirtyChange,
+  onSaved,
+}: {
+  kind: TranslationKind;
+  parentId: string;
+  canEdit: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  onSaved?: () => void;
+}) {
   const table = kind === "day_block" ? "day_block_translations" : "activity_module_translations";
   const fk = kind === "day_block" ? "block_id" : "module_id";
   const qc = useQueryClient();
   const key = [table, parentId];
+  const [activeLang, setActiveLang] = useState<Lang>("es");
+  const [dirty, setDirty] = useState(false);
   const q = useQuery({
     queryKey: key,
     queryFn: async () => {
@@ -243,12 +283,18 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
 
   const translate = useMutation({
     mutationFn: async (language: Lang) => {
-      const { data, error } = await db.functions.invoke("translate-block", { body: { kind, id: parentId, language } });
+      const { data, error } = await db.functions.invoke("translate-block", {
+        body: { kind, id: parentId, language },
+      });
       if (error) {
         let msg = error.message;
         const ctx = (error as { context?: Response }).context;
         if (ctx && typeof ctx.json === "function") {
-          try { msg = (await ctx.json()).error ?? msg; } catch { /* ignore */ }
+          try {
+            msg = (await ctx.json()).error ?? msg;
+          } catch {
+            /* ignore */
+          }
         }
         throw new Error(msg);
       }
@@ -262,14 +308,22 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
   });
 
   return (
-    <Tabs defaultValue="es">
+    <Tabs
+      value={activeLang}
+      onValueChange={(value) => {
+        if (dirty && !window.confirm("Hay cambios sin guardar. ¿Quieres descartarlos?")) return;
+        setDirty(false);
+        onDirtyChange?.(false);
+        setActiveLang(value as Lang);
+      }}
+    >
       <TabsList>
         {LANGS.map(([l, label]) => {
           const row = q.data?.find((r) => r.lang === l);
           return (
             <TabsTrigger key={l} value={l} className="gap-1.5">
               {label}
-              {row ? (!row.reviewed && <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" title="Sin revisar" />) : <span className="text-muted-foreground">·</span>}
+              {row ? !row.reviewed && <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" title="Sin revisar" /> : <span className="text-muted-foreground">·</span>}
             </TabsTrigger>
           );
         })}
@@ -280,7 +334,7 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
             <p className="text-sm text-muted-foreground">Cargando…</p>
           ) : (
             <TranslationForm
-              key={`${l}-${q.dataUpdatedAt}`}
+              key={l}
               kind={kind}
               lang={l}
               row={q.data?.find((r) => r.lang === l) ?? null}
@@ -288,10 +342,23 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
               canEdit={canEdit}
               translating={translate.isPending && translate.variables === l}
               onTranslate={() => translate.mutate(l)}
+              onDirtyChange={(value) => {
+                setDirty(value);
+                onDirtyChange?.(value);
+              }}
               onSave={async (values) => {
                 const { error } = await loose.from(table).upsert({ [fk]: parentId, lang: l, ...values }, { onConflict: `${fk},lang` });
                 if (error) throw error;
-                await qc.invalidateQueries({ queryKey: key });
+                const invalidations = [qc.invalidateQueries({ queryKey: key })];
+                if (kind === "day_block") {
+                  invalidations.push(
+                    qc.invalidateQueries({ queryKey: ["day_block", parentId] }),
+                    qc.invalidateQueries({ queryKey: ["day_blocks"] }),
+                    qc.invalidateQueries({ queryKey: ["import-review"] }),
+                  );
+                }
+                await Promise.all(invalidations);
+                onSaved?.();
               }}
             />
           )}
@@ -301,30 +368,112 @@ export function TranslationsPanel({ kind, parentId, canEdit }: { kind: Translati
   );
 }
 
-function TranslationForm({ kind, lang, row, hasSource, canEdit, translating, onTranslate, onSave }: {
-  kind: TranslationKind; lang: Lang; row: TrRow | null; hasSource: boolean; canEdit: boolean;
-  translating: boolean; onTranslate: () => void; onSave: (v: Omit<TrRow, "id" | "lang">) => Promise<void>;
+function TranslationForm({
+  kind,
+  lang,
+  row,
+  hasSource,
+  canEdit,
+  translating,
+  onTranslate,
+  onSave,
+  onDirtyChange,
+}: {
+  kind: TranslationKind;
+  lang: Lang;
+  row: TrRow | null;
+  hasSource: boolean;
+  canEdit: boolean;
+  translating: boolean;
+  onTranslate: () => void;
+  onSave: (v: Omit<TrRow, "id" | "lang">) => Promise<void>;
+  onDirtyChange: (dirty: boolean) => void;
 }) {
   const [title, setTitle] = useState(row?.title ?? "");
   const [description, setDescription] = useState(row?.description ?? "");
   const [includes, setIncludes] = useState(row?.includes ?? "");
   const [excludes, setExcludes] = useState(row?.excludes ?? "");
   const [reviewed, setReviewed] = useState(row?.reviewed ?? lang === "es");
-  const [saving, setSaving] = useState(false);
+  const [baseline, setBaseline] = useState(() =>
+    JSON.stringify({
+      title: row?.title ?? "",
+      description: row?.description ?? "",
+      includes: row?.includes ?? "",
+      excludes: row?.excludes ?? "",
+      reviewed: row?.reviewed ?? lang === "es",
+    }),
+  );
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const current = JSON.stringify({ title, description, includes, excludes, reviewed });
+  const dirty = current !== baseline;
+  const rowSignature = JSON.stringify({
+    title: row?.title ?? "", description: row?.description ?? "", includes: row?.includes ?? "", excludes: row?.excludes ?? "",
+    reviewed: row?.reviewed ?? lang === "es",
+  });
+  const lastRowSignature = useRef(rowSignature);
+
+  useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
+  useEffect(() => {
+    if (rowSignature === lastRowSignature.current) return;
+    lastRowSignature.current = rowSignature;
+    if (dirty || saveState === "saving") return;
+    const next = JSON.parse(rowSignature) as {
+      title: string; description: string; includes: string; excludes: string; reviewed: boolean;
+    };
+    setTitle(next.title);
+    setDescription(next.description);
+    setIncludes(next.includes);
+    setExcludes(next.excludes);
+    setReviewed(next.reviewed);
+    setBaseline(JSON.stringify(next));
+  }, [rowSignature, dirty, saveState]);
+
+  const change = <T,>(setter: (value: T) => void, value: T) => {
+    setter(value);
+    onDirtyChange(true);
+    setSaveState("dirty");
+    setSaveError(null);
+  };
 
   const save = async (): Promise<void> => {
-    if (!title.trim() || !description.trim()) { toast.error("Título y descripción son obligatorios."); return; }
-    setSaving(true);
+    if (!title.trim() || !description.trim()) {
+      const message = "Título y descripción son obligatorios.";
+      setSaveState("error");
+      setSaveError(message);
+      toast.error(message);
+      return;
+    }
+    setSaveState("saving");
+    setSaveError(null);
     try {
-      await onSave({
-        title: title.trim(), description: description.trim(), reviewed,
+      const values = {
+        title: title.trim(),
+        description: description.trim(),
+        reviewed,
         ...(kind === "day_block" ? { includes: includes.trim() || null, excludes: excludes.trim() || null } : {}),
-      });
+      };
+      await onSave(values);
+      const next = {
+        title: values.title,
+        description: values.description,
+        includes: values.includes ?? "",
+        excludes: values.excludes ?? "",
+        reviewed,
+      };
+      setTitle(next.title);
+      setDescription(next.description);
+      setIncludes(next.includes);
+      setExcludes(next.excludes);
+      setBaseline(JSON.stringify(next));
+      onDirtyChange(false);
+      setSaveState("saved");
       toast.success("Texto guardado.");
     } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setSaving(false);
+      const message = catalogWriteErrorMessage(e);
+      setSaveState("error");
+      setSaveError(message);
+      toast.error(message);
     }
   };
 
@@ -335,28 +484,45 @@ function TranslationForm({ kind, lang, row, hasSource, canEdit, translating, onT
           <span>Aún no hay texto en este idioma.</span>
           {lang !== "es" && hasSource && (
             <Button size="sm" variant="outline" onClick={onTranslate} disabled={translating || !canEdit}>
-              {translating ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Languages className="mr-1 h-4 w-4" />}Traducir
+              {translating ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Languages className="mr-1 h-4 w-4" />}
+              Traducir
             </Button>
           )}
         </div>
       )}
-      {row && !row.reviewed && <Badge variant="outline" className="border-brand-orange/40 text-brand-orange-deep">Pendiente de revisión</Badge>}
-      <Field label="Título"><Input value={title} onChange={(e) => setTitle(e.target.value)} disabled={!canEdit} /></Field>
+      {row && !row.reviewed && (
+        <Badge variant="outline" className="border-brand-orange/40 text-brand-orange-deep">
+          Pendiente de revisión
+        </Badge>
+      )}
+      <Field label="Título">
+        <Input aria-label={`Título ${lang}`} value={title} onChange={(e) => change(setTitle, e.target.value)} disabled={!canEdit} />
+      </Field>
       <Field label="Descripción para el cliente">
-        <Textarea rows={6} value={description} onChange={(e) => setDescription(e.target.value)} disabled={!canEdit} />
+        <Textarea aria-label={`Descripción ${lang}`} rows={6} value={description} onChange={(e) => change(setDescription, e.target.value)} disabled={!canEdit} />
       </Field>
       {kind === "day_block" && (
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Incluye"><Textarea rows={3} value={includes} onChange={(e) => setIncludes(e.target.value)} disabled={!canEdit} /></Field>
-          <Field label="No incluye"><Textarea rows={3} value={excludes} onChange={(e) => setExcludes(e.target.value)} disabled={!canEdit} /></Field>
+          <Field label="Incluye">
+            <Textarea rows={3} value={includes} onChange={(e) => change(setIncludes, e.target.value)} disabled={!canEdit} />
+          </Field>
+          <Field label="No incluye">
+            <Textarea rows={3} value={excludes} onChange={(e) => change(setExcludes, e.target.value)} disabled={!canEdit} />
+          </Field>
         </div>
       )}
       {canEdit && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={reviewed} onCheckedChange={(v) => setReviewed(v === true)} />Revisado
+            <Checkbox checked={reviewed} onCheckedChange={(v) => change(setReviewed, v === true)} />
+            Revisado
           </label>
-          <Button size="sm" onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar texto"}</Button>
+          <div className="flex items-center gap-3">
+            <SaveStateIndicator state={saveState === "dirty" && !dirty ? "idle" : saveState === "idle" && dirty ? "dirty" : saveState} error={saveError} />
+            <Button size="sm" onClick={save} disabled={saveState === "saving"}>
+              {saveState === "saving" ? "Guardando…" : "Guardar texto"}
+            </Button>
+          </div>
         </div>
       )}
     </div>
