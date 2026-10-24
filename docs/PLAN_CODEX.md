@@ -86,10 +86,11 @@ Reglas para ese prompt:
 | T01s | Estabilizar creación, tarifas, textos y adición de bloques | [x] | —; prioridad de Andrea | sí (migración) |
 | T01u | Borrar bloques diarios, plantillas y catálogo importado | [x] | T01s; prioridad de Andrea | sí |
 | T01k | Borrar plantillas y bloques, aprobar bloques | [x] | T01u; antes de T01h | sí |
-| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [~] | T01g, T01k | sí |
+| T01h | Modelo de bloque v2: puestos y alternativas (T01h-1 backend; T01h-2 UI) | [x] | T01g, T01k | sí |
 | T01i | Reimportación de bloques e itinerarios (ALTO) | reemplazada por T01k | T01h | sí |
 | T01j | Recálculo al cambiar pax o TC (absorbe T06) | [ ] | T01h, T01k importador | sí |
-| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [~] | T01h | sí (migraciones + pantalla) |
+| T01k | Importador paquete v2 (tarifario + plantillas + bloques + textos PDF) (ALTO) | [x] | T01h | sí (migraciones + pantalla) |
+| T01l | [Día desde cero, búsqueda de bloques y alojamiento con rooming mixto](T01l_dia_libre_busqueda_hotel.md) | [ ] | T01h; comparte reglas de T01j | sí |
 | T13 | Plantilla de propuesta B2C y B2B (PDF + email) | [x] | T01g; T11/T12 completan después | sí |
 | T13-fix | Validación JSON y textos en el constructor | [x] | T13 | sí |
 | T13-build | Compatibilidad del alias parse5 en app, tests y build | [x] | T13-fix | no |
@@ -575,6 +576,10 @@ En el catálogo, cada tipo de habitación es un servicio distinto (`room_type` S
 
 ## T09 · Crear cotización desde bloques de día
 
+**Alcance absorbido por T01l:** el día libre (`null` = día independiente sin bloque)
+se implementa en [T01l_dia_libre_busqueda_hotel.md](T01l_dia_libre_busqueda_hotel.md).
+Reutilizar su lógica y buscador; no crear una segunda implementación.
+
 1. RPC atómica `create_quote_from_blocks` (patrón de `create_quote_snapshot` / creación desde plantilla) + `createQuoteFromBlocks(basics, blockIds: (string|null)[])` en `src/lib/quotes`.
 2. Cada bloque → día con snapshot (`source_block_id`, `link_type = chained`, servicios por defecto con tarifas congeladas, igual que `addBlockDay`). `null` = día libre (`independent`, sin servicios).
 3. Bloques consecutivos que comparten un servicio que se cobra una vez (ej. 4x4 3D/2N) se agrupan con `groupDays`.
@@ -588,6 +593,11 @@ En el catálogo, cada tipo de habitación es un servicio distinto (`room_type` S
 ---
 
 ## T10 · Editor de días: ajuste masivo, enlaces, grupos, guardar bloque
+
+**Alcance absorbido por T01l:** «Guardar como nuevo bloque» reutiliza
+`saveDayAsNewBlock` con las reglas de ítems libres de
+[T01l_dia_libre_busqueda_hotel.md](T01l_dia_libre_busqueda_hotel.md).
+El resto de esta tarea mantiene su alcance.
 
 La lógica existe en `src/lib/quotes` (`applyAdjustmentBulk`, `setDayLinkType`, `groupDays`, `ungroup`, `updateDayContent`, `saveDayAsNewBlock`) pero ninguna pantalla la usa.
 
@@ -960,6 +970,7 @@ Terminado cuando: 0 tests fallando u omitidos · 0 plantillas aprobadas sin serv
 | D7 | Rooming y vehículo/transportista | Vendedor elige; la app propone y conserva elecciones manuales |
 | D8 | Textos actuales de los días | Reasignar por tour/día; lo no conciliado queda sin revisar |
 | D9 | Módulos de actividad | Ocultos mediante flag en T01h |
+| D10 | Vendedor guarda un ítem libre en el tarifario | Sí puede; servicio y tarifa inicial pendientes de aprobación (T01l) |
 
 
 ### IMPORT · 18-10-2026 · Entrega de la dependencia T01h
@@ -994,3 +1005,24 @@ importación real sigue vigente hasta que Andrea lo suba, revise y responda OK.
 T01k en revisión: PR #39 sobre la rama del PR #38. Pruebas nuevas 16/16 y
 `test:db` completo con 66/66 pruebas finales; TypeScript/build OK. Suite global
 con casos previos y suspensión local documentados en `docs/T01k_entrega.md`.
+
+
+### T01l · Registro y diagnóstico · 24-10-2026
+
+Andrea solicita guardar la especificación y confirmó ejecutar también la implementación.
+T01l estaba libre y se inserta después de T01k importador. Contrato, pruebas,
+inventario y plantilla de Lovable: [T01l_dia_libre_busqueda_hotel.md](T01l_dia_libre_busqueda_hotel.md).
+
+Comprobación remota: main `5bde7dd4b3145ea83f5add3cef79c4f109ecfd04` contiene
+PR #38 (T01h) y PR #39 (T01k, merge `660f812` en la rama de T01h). Se marcan
+ambos [x] por código integrado; no certifica despliegue Cloud.
+
+T01l absorbe únicamente el día libre/null de T09 y «Guardar como nuevo bloque»
+de T10; ambos apartados deben reutilizar las API de T01l al implementarse.
+T01j y el resto de T02/T09/T10 siguen pendientes. D10 usa el default indicado.
+
+**Entrega actual documental:** entorno local desconectado durante la implementación.
+La tarea T01l permanece [ ] hasta completar código y pruebas; no se presenta
+como implementada. Los cambios locales parciales deben inspeccionarse antes de
+reanudar. No hay migraciones nuevas entregadas en este PR ni instrucciones de
+aplicación en Cloud. El prompt de Lovable es una plantilla pendiente de completar.
