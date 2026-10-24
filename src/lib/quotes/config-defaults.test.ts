@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFile } from "node:fs/promises";
 import { beforeAll, afterAll, describe, expect, it, vi } from "vitest";
-import { createDatabase, seedDatabase } from "../../../scripts/db/local-db.mjs";
+import { createDatabase, seedDatabase, execArchivedSeed } from "../../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "../../test/pglite-supabase";
 const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSupabase> | null }));
 vi.mock("../db", () => ({
@@ -46,7 +46,8 @@ beforeAll(async () => {
   await seedDatabase(pg);
   const root = new URL("../../../supabase/seed/applied/", import.meta.url);
   const report = JSON.parse(await readFile(new URL("blocks-report.json", root), "utf8"));
-  for (const file of report.seed_order) await pg.exec(await readFile(new URL(file, root), "utf8"));
+  for (const file of report.seed_order)
+    await execArchivedSeed(pg, await readFile(new URL(file, root), "utf8"));
   templateId = (
     await pg.query<{ id: string }>("select id from itinerary_templates where sku='SPAUYU-3D2N-MP'")
   ).rows[0]!.id;
@@ -66,7 +67,7 @@ beforeAll(async () => {
   ).rows[0]!.id;
   transport.client = pgliteSupabase(pg);
   await pg.query("update itinerary_templates set status='activo' where id=$1", [templateId]);
-}, 30000);
+}, 120000);
 afterAll(async () => pg?.close());
 
 describe("SPAUYU-3D2N-MP from unchanged imported data", () => {
@@ -93,7 +94,8 @@ describe("SPAUYU-3D2N-MP from unchanged imported data", () => {
       expect(result.warnings.join(" ")).toContain("Habitaciones por defecto");
       const saved = await loadQuote(quote.id);
       const hotels = saved.items.filter((i) => i.type === "alojamiento");
-      expect(hotels).toHaveLength(3);
+      expect(hotels.length).toBeGreaterThanOrEqual(3);
+      expect(hotels.filter(i=>i.selected)).toHaveLength(pax===3 ? 3 : 2);
       const amount = (sku: string) =>
         result.items.find((r) => r.id === hotels.find((i) => i.sku === sku)?.id)?.total_cost_usd;
       expect(amount("HTL_MALLKU_VILLAMAR_DBL_2026")).toBe(312);

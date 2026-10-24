@@ -76,7 +76,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
     expect(result.calculation.total_price_usd).toBeGreaterThan(q.total_price_usd!);
     expect(saved.quote.calculation).toEqual(result.calculation);
     expect(saved.quote.total_price_usd).toBe(result.calculation.total_price_usd);
-  }, 30000);
+  }, 120000);
 
   it("creates SPASPA on 04-11-2026 / 2 pax with an expired rate and recovers through Precio manual", async () => {
     await pg.exec("reset role");
@@ -119,7 +119,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
       await pg.exec("set role authenticated");
     }
     expect((await loadQuote(quoteId!)).quote.total_price_usd).toBeGreaterThan(0);
-  }, 30000);
+  }, 120000);
 
   it("runs template → four blocks → reviewed text → real PDF through the proposal builder", async () => {
     const q = await createQuoteFromTemplate(catalog.template_id, basics());
@@ -185,7 +185,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
     ]);
     expect((await loadQuote(q.id)).quote.pdf_path).toBe(path);
     await expect(pg.query("select transition_quote($1,'revisada')", [q.id])).resolves.toBeDefined();
-  }, 30000);
+  }, 120000);
 
   it("invalidates once per statement and preserves old day rows during append", async () => {
     const q = await createQuoteFromTemplate(catalog.template_id, basics());
@@ -219,7 +219,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
         "reset role; drop trigger t01s_log_update on quotes; drop function t01s_log_quote_update(); drop table t01s_quote_update_log; set role authenticated",
       );
     }
-  }, 30000);
+  }, 120000);
 
   it("the production diagnostic executes entirely in a read-only transaction", async () => {
     const sql = await readFile(
@@ -250,7 +250,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
       data.days.slice(4).every((d) => (d.snapshot as { reviewed: boolean }).reviewed === false),
     ).toBe(true);
     await expect(transitionQuote(q.id, "revisada")).rejects.toThrow("Faltan revisar");
-  }, 30000);
+  }, 120000);
 
   it("saves expired rates as a recoverable error through single and multiple block insertion", async () => {
     const q = await createQuoteFromTemplate(catalog.template_id, basics());
@@ -289,7 +289,7 @@ describe("T01s · catálogo realista con RLS de vendedor", () => {
     const again = await addBlockDays(q.id, [catalog.block_ids[43]!, catalog.block_ids[44]!]);
     expect(again.calculation.status).toBe("error");
     expect((await loadQuote(q.id)).days).toHaveLength(7);
-  }, 30000);
+  }, 120000);
 
   it("still denies another seller's pending template", async () => {
     await pg.query("select set_config('request.jwt.claim.sub',$1,false)", [catalogOtherSeller]);

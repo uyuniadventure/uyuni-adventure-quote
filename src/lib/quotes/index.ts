@@ -119,7 +119,10 @@ export async function loadQuote(quoteId: string) {
         ((b.pricing_snapshot as { _creation_order?: number })._creation_order ?? 0) ||
       a.id.localeCompare(b.id),
   );
-  return { quote, days, items };
+  const roomingRows = unwrap(
+    await db.from("quote_rooming").select("*").eq("quote_id", quoteId).order("id"),
+  );
+  return { quote, days, items, roomingRows };
 }
 export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): QuoteInput {
   const { quote: q, days, items } = data;
@@ -128,7 +131,8 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
     start_date: q.start_date,
     pax_paying: q.pax_paying,
     tc_count: q.tc_count,
-    rooming: q.rooming,
+    rooming: { paying: {}, tc: {}, ...(q.rooming as object) },
+    rooming_rows: data.roomingRows ?? [],
     vehicles: q.vehicles,
     staff: q.staff,
     margin_pct: q.margin_pct,
@@ -157,6 +161,15 @@ export function quotePricingInput(data: Awaited<ReturnType<typeof loadQuote>>): 
               pricing_unit: i.pricing_unit,
               currency: i.currency,
               qty: i.qty,
+              slot_key: i.slot_key === "SERVICIO" ? undefined : i.slot_key,
+              selected: i.selected,
+              billing: i.billing,
+              span_days: i.span_days,
+              tc_policy: i.tc_policy,
+              margin_mode: i.margin_mode,
+              margin_pct: i.margin_pct,
+              selection_source: i.selection_source,
+              qty_override: i.qty_override,
               applies_tc: i.applies_tc,
               margin_applicable: i.margin_applicable,
               included: i.included,

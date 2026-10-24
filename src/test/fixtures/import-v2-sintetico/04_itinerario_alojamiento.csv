@@ -1,0 +1,16 @@
+﻿sku,noche,slot,hotel,proveedor,TariffCode,servicio,unidad,tc_policy,regla
+SPASPA-4D3N-AB,1,ALOJAMIENTO,Hotel A,HOTEL A,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+SPASPA-4D3N-AB,1,CENA,Hotel A,HOTEL A,H_A_CENA,CENA,PER_PERSON,free,por pasajero
+SPASPA-4D3N-AB,1,STAFF,Hotel A,HOTEL A,H_A_STAFF,HAB COMPARTIDA CHOFER,PER_VEHICLE,excluded,1 por vehículo (conductor)
+SPASPA-4D3N-AB,2,ALOJAMIENTO,Hotel B,HOTEL B,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+SPASPA-4D3N-AB,2,CENA,Hotel B,HOTEL B,H_B_CENA,CENA,PER_PERSON,free,por pasajero
+SPASPA-4D3N-AB,3,ALOJAMIENTO,Hotel A,HOTEL A,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+SPASPA-4D3N-AB,3,CENA,Hotel A,HOTEL A,H_A_CENA,CENA,PER_PERSON,free,por pasajero
+SPASPA-4D3N-AB,3,STAFF,Hotel A,HOTEL A,H_A_STAFF,HAB COMPARTIDA CHOFER,PER_VEHICLE,excluded,1 por vehículo (conductor)
+UYUUYU-3D2N-AB,1,ALOJAMIENTO,Hotel A,HOTEL A,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+UYUUYU-3D2N-AB,1,CENA,Hotel A,HOTEL A,H_A_CENA,CENA,PER_PERSON,free,por pasajero
+UYUUYU-3D2N-AB,1,STAFF,Hotel A,HOTEL A,H_A_STAFF,HAB COMPARTIDA CHOFER,PER_VEHICLE,excluded,1 por vehículo (conductor)
+UYUUYU-3D2N-AB,2,ALOJAMIENTO,Hotel B,HOTEL B,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+UYUUYU-3D2N-AB,2,CENA,Hotel B,HOTEL B,H_B_CENA,CENA,PER_PERSON,free,por pasajero
+UYUUYU-3D2N-SOLO-TEXTO,1,ALOJAMIENTO,Hotel A,HOTEL A,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming
+UYUUYU-3D2N-SOLO-TEXTO,2,ALOJAMIENTO,Hotel B,HOTEL B,,Habitación según distribución de la cotización,PER_ROOM_PER_NIGHT,charged,tipo y cantidad de habitaciones desde el rooming

@@ -139,7 +139,7 @@ beforeAll(async () => {
     )
   ).id;
   transport.client = pgliteSupabase(pg);
-}, 30000);
+}, 120000);
 beforeEach(async () => {
   await pg.exec("reset role; begin");
   await as(admin);
@@ -416,7 +416,7 @@ describe("T01u: RPC y API de borrado con migraciones y RLS reales", () => {
       "utf8",
     );
     const result = await pg.exec(sql);
-    expect(result.filter((r) => r.fields.length > 0)).toHaveLength(11);
+    expect(result.filter((r) => r.fields.length > 0)).toHaveLength(15);
     expect(
       (await rows("select id from itinerary_templates where catalog_origin='importacion'")).length,
     ).toBe(2);

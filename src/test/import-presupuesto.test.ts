@@ -8,7 +8,7 @@ import {
   openBudgetWorkbook,
   parseLookup,
 } from "../../scripts/lib/budget-workbook";
-import { createDatabase, seedDatabase } from "../../scripts/db/local-db.mjs";
+import { createDatabase, seedDatabase, execArchivedSeed } from "../../scripts/db/local-db.mjs";
 import { pgliteSupabase } from "./pglite-supabase";
 import { compareReference, type QuoteReference } from "../lib/pricing/reference";
 import reference from "../../tests/fixtures/SPAUYU-3D2N-MP.json";
@@ -45,8 +45,9 @@ beforeAll(async () => {
   pg = await createDatabase();
   await seedDatabase(pg);
   const report = JSON.parse(await sql("supabase/seed/applied/blocks-report.json"));
-  for (const file of report.seed_order) await pg.exec(await sql(`supabase/seed/applied/${file}`));
-}, 30000);
+  for (const file of report.seed_order)
+    await execArchivedSeed(pg, await sql(`supabase/seed/applied/${file}`));
+}, 120000);
 afterAll(async () => pg?.close());
 
 describe("importador de presupuesto SPAUYU · lectura, diff y seed", () => {

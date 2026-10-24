@@ -52,4 +52,13 @@ select d.id as quote_day_id,d.source_block_id from public.quote_days d join publ
 where b.catalog_origin='importacion' order by d.id;
 select d.id as block_id,d.parent_block_id from public.day_blocks d join public.day_blocks b on b.id=d.parent_block_id
 where d.catalog_origin<>'importacion' and b.catalog_origin='importacion' order by d.id;
+-- T01k: vínculos de plantilla que también se eliminan por CASCADE.
+select i.* from public.template_segment_items i join public.itinerary_templates t on t.id=i.template_id
+where t.catalog_origin='importacion' and t.source_quote_id is null order by i.template_id,i.day_from;
+select i.* from public.template_day_items i join public.itinerary_templates t on t.id=i.template_id
+where t.catalog_origin='importacion' and t.source_quote_id is null order by i.template_id,i.day_number,i.sort;
+-- Reglas y textos T13 se conservan en la purga existente; exportarlos como respaldo.
+select * from public.segment_rules order by route,days,slot_key;
+select b.*,tr.lang,tr.title,tr.body_html from public.doc_blocks b
+join public.doc_block_translations tr on tr.block_id=b.id where b.import_kind is not null order by b.code,tr.lang;
 commit;

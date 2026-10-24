@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { db } from "@/lib/db";
+import { listHotels } from "@/lib/catalog/hotels";
 import type { Enums } from "@/types/db";
 import { SECTIONS, sectionHead } from "@/components/section";
 import { Button } from "@/components/ui/button";
@@ -38,13 +39,7 @@ function BlocksPage() {
 
   const hotels = useQuery({
     queryKey: ["day_blocks", "hotels"],
-    queryFn: async () => {
-      const { data, error } = await db.from("day_blocks").select("services(id, name)").not("hotel_service_id", "is", null).limit(2000);
-      if (error) throw error;
-      const m = new Map<string, string>();
-      data.forEach((r) => r.services && m.set(r.services.id, r.services.name));
-      return [...m].sort((a, b) => a[1].localeCompare(b[1]));
-    },
+    queryFn: async () => (await listHotels()).map(h => [h.id, h.label] as [string, string]),
   });
 
   const filterKey = JSON.stringify({ search, term, from, to, place, placeTerm, hotel, status });
@@ -55,7 +50,7 @@ function BlocksPage() {
       if (from !== ALL) query = query.eq("route_from", from);
       if (to !== ALL) query = query.eq("route_to", to);
       if (placeTerm) query = query.contains("places", [placeTerm]);
-      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_service_id", null) : query.eq("hotel_service_id", hotel);
+      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_id", null) : query.eq("hotel_id", hotel);
       if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
     const { data, error } = await query;
     if (error) throw error;
@@ -66,13 +61,13 @@ function BlocksPage() {
     placeholderData: keepPreviousData,
     queryFn: async () => {
       let query = db.from("day_blocks")
-        .select("id, code, route_from, route_to, places, modality, default_day_position, status, services(name), day_block_translations(lang, title), day_block_modules(count), day_block_items(count)")
+        .select("id, code, route_from, route_to, places, modality, default_day_position, status, hotel_id, suppliers(name), day_block_translations(lang, title), day_block_modules(count), day_block_items(count)")
         .order("code").order("id").limit(500);
       if (term) query = query.ilike("code", `%${ilikeTerm(term)}%`);
       if (from !== ALL) query = query.eq("route_from", from);
       if (to !== ALL) query = query.eq("route_to", to);
       if (placeTerm) query = query.contains("places", [placeTerm]);
-      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_service_id", null) : query.eq("hotel_service_id", hotel);
+      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_id", null) : query.eq("hotel_id", hotel);
       if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
       const { data, error } = await query;
       if (error) throw error;
@@ -118,7 +113,7 @@ function BlocksPage() {
                 <TableCell className="max-w-[260px] truncate font-medium text-foreground">{blockTitle(b)}</TableCell>
                 <TableCell className="whitespace-nowrap font-mono text-xs">{b.route_from ?? "—"} → {b.route_to ?? "—"}</TableCell>
                 <TableCell className="max-w-[200px] truncate text-xs">{b.places.join(", ") || "—"}</TableCell>
-                <TableCell className="max-w-[180px] truncate">{b.services?.name ?? "—"}</TableCell>
+                <TableCell className="max-w-[180px] truncate">{hotels.data?.find(h => h[0] === b.hotel_id)?.[1] ?? b.suppliers?.name ?? "Sin hotel"}</TableCell>
                 <TableCell className="text-right">{b.default_day_position ?? "—"}</TableCell>
                 <TableCell className="text-right">{count(b.day_block_modules)}</TableCell>
                 <TableCell className="text-right">{count(b.day_block_items)}</TableCell>

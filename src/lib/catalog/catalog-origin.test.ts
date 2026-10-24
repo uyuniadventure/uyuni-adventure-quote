@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { createDatabase, seedDatabase, root } from "../../../scripts/db/local-db.mjs";
+import {
+  createDatabase,
+  seedDatabase,
+  root,
+  execArchivedSeed,
+} from "../../../scripts/db/local-db.mjs";
 
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 const migration = "20261017000100_catalog_deletion.sql";
@@ -12,9 +17,12 @@ beforeAll(async () => {
     await readFile(new URL("supabase/seed/applied/blocks-report.json", root), "utf8"),
   ) as { seed_order: string[] };
   for (const file of report.seed_order)
-    await pg.exec(await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8"));
+    await execArchivedSeed(
+      pg,
+      await readFile(new URL(`supabase/seed/applied/${file}`, root), "utf8"),
+    );
   for (const file of ["03_uyuuyu_ltd_2pax.sql", "04_spauyu_mp_2pax.sql"])
-    await pg.exec(await readFile(new URL(`supabase/seed/${file}`, root), "utf8"));
+    await execArchivedSeed(pg, await readFile(new URL(`supabase/seed/${file}`, root), "utf8"));
   // An unknown manual record with no creator and an import-looking code must survive.
   await pg.exec("insert into day_blocks(code) values('DAY_MANUAL_SIN_AUTOR')");
   await pg.exec(await readFile(new URL(`supabase/migrations/${migration}`, root), "utf8"));

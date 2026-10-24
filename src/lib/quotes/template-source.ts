@@ -1,4 +1,22 @@
 import { db, unwrap } from "../db";
+import type { Json } from "../../types/db";
+export interface TemplateImportLink {
+  id: string;
+  template_id: string;
+  day_number: number;
+  slot_key: string;
+  service_id: string;
+  qty: number;
+  is_default: boolean;
+  billing: string;
+  span_days: number;
+  tc_policy: string;
+  pricing_config: Json;
+  coverage_key: string | null;
+  coverage_start_day: number;
+  applies_tc: null;
+  margin_applicable: null;
+}
 
 /** Read only. The commit RPC checks this complete source again under locks. */
 export async function loadTemplateSource(templateId: string, clientId: string) {
@@ -34,12 +52,18 @@ export async function loadTemplateSource(templateId: string, clientId: string) {
       .order("id")
       .then(unwrap),
   ]);
+  const importLinks = template.import_v2_route
+    ? (unwrap(
+        await db.rpc("template_import_links", { p_template: templateId }),
+      ) as unknown as TemplateImportLink[])
+    : [];
   const serviceIds = [
     ...new Set(
       [
         ...items.map((i) => i.service_id),
         ...moduleItems.map((i) => i.service_id),
         ...blocks.map((b) => b.hotel_service_id),
+        ...importLinks.map((i) => i.service_id),
       ].filter((id): id is string => id !== null),
     ),
   ];
@@ -62,6 +86,7 @@ export async function loadTemplateSource(templateId: string, clientId: string) {
     moduleItems,
     services,
     rates,
+    importLinks,
   };
 }
 export type TemplateSource = Awaited<ReturnType<typeof loadTemplateSource>>;
