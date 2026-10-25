@@ -14,7 +14,7 @@ import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import type { Enums } from "@/types/db";
 import { money } from "@/components/catalog/shared";
 import { QuoteWorkspace } from "./quote-workspace";
-import { updateDayContent } from "@/lib/quotes/days";
+import { addBlockDay, updateDayContent } from "@/lib/quotes/days";
 
 vi.mock("@/lib/quotes", async (original) => ({
   ...(await original<typeof import("@/lib/quotes")>()),
@@ -29,8 +29,32 @@ vi.mock("@/hooks/use-auth", () => ({
 vi.mock("@/lib/states", () => ({ beginQuoteEdit: vi.fn(), transitionQuote: vi.fn() }));
 vi.mock("@/lib/quotes/days", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/days")>()),
+  addBlockDay: vi.fn(),
   validateContinuity: vi.fn().mockResolvedValue([]),
   updateDayContent: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/components/catalog/block-editor", () => ({
+  BlockEditor: ({
+    id,
+    onClose,
+    onCreated,
+    completeAction,
+  }: {
+    id: string | null;
+    onClose: () => void;
+    onCreated: (id: string) => void;
+    completeAction: { label: string; onComplete: (id: string) => Promise<boolean> };
+  }) =>
+    id ? (
+      <div role="dialog" aria-label="Editor de bloque diario">
+        {id === "new" ? (
+          <button onClick={() => onCreated("created-block")}>Crear bloque simulado</button>
+        ) : (
+          <button onClick={() => void completeAction.onComplete(id)}>{completeAction.label}</button>
+        )}
+        <button onClick={onClose}>Cancelar editor de bloque</button>
+      </div>
+    ) : null,
 }));
 vi.mock("@/lib/db", async (original) => ({
   ...(await original<typeof import("@/lib/db")>()),
@@ -214,6 +238,28 @@ it("does not offer a manual sale to a seller", async () => {
   renderQuote();
   await screen.findByText("Buffet guardado");
   expect(screen.queryByRole("button", { name: "Marcar vendida" })).not.toBeInTheDocument();
+});
+
+it("creates a catalog block from the quote and incorporates it without searching again", async () => {
+  const data = savedQuote("borrador");
+  data.days = [];
+  data.items = [];
+  vi.mocked(addBlockDay).mockResolvedValue({ calculation: data.quote.calculation } as never);
+  renderQuote(data);
+
+  const open = await screen.findByRole("button", { name: "Nuevo bloque diario" });
+  fireEvent.click(open);
+  expect(screen.getByRole("dialog", { name: "Editor de bloque diario" })).toBeInTheDocument();
+  expect(addBlockDay).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar editor de bloque" }));
+  expect(screen.queryByRole("dialog", { name: "Editor de bloque diario" })).not.toBeInTheDocument();
+  expect(addBlockDay).not.toHaveBeenCalled();
+
+  fireEvent.click(open);
+  fireEvent.click(screen.getByRole("button", { name: "Crear bloque simulado" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Incorporar al día 1" }));
+  await waitFor(() => expect(addBlockDay).toHaveBeenCalledExactlyOnceWith("quote", "created-block"));
 });
 
 it.each([

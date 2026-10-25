@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import type { Enums, Tables } from "@/types/db";
@@ -55,10 +55,30 @@ function useRun(key: unknown[]) {
   });
 }
 
-export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onClose: () => void; onCreated: (id: string) => void }) {
+type CompleteAction = {
+  label: string;
+  pendingLabel?: string;
+  disabled?: boolean;
+  onComplete: (id: string) => Promise<boolean>;
+};
+
+export function BlockEditor({
+  id,
+  onClose,
+  onCreated,
+  completeAction,
+}: {
+  id: string | null;
+  onClose: () => void;
+  onCreated: (id: string) => void;
+  completeAction?: CompleteAction;
+}) {
   const isNew = id === "new";
   const [activeTab, setActiveTab] = useState("datos");
   const [dirty, setDirty] = useState(false);
+  const [childPending, setChildPending] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const completingRef = useRef(false);
   const { user, role } = useCurrentUser();
   const q = useQuery({
     queryKey: ["day_block", id],
@@ -82,16 +102,38 @@ export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onC
   useEffect(() => {
     setActiveTab("datos");
     setDirty(false);
+    setChildPending(false);
+    setCompleting(false);
+    completingRef.current = false;
   }, [id]);
   const requestClose = () => {
+    if (childPending) {
+      toast.info("Espera a que terminen de guardarse los servicios.");
+      return;
+    }
     if (dirty && !window.confirm("Hay cambios sin guardar. ¿Quieres descartarlos y cerrar?")) return;
     setDirty(false);
     onClose();
   };
   const changeTab = (value: string) => {
+    if (childPending) {
+      toast.info("Espera a que terminen de guardarse los servicios.");
+      return;
+    }
     if (dirty && !window.confirm("Hay cambios sin guardar. ¿Quieres descartarlos?")) return;
     setDirty(false);
     setActiveTab(value);
+  };
+  const complete = async () => {
+    if (!row || !completeAction || dirty || childPending || completingRef.current) return;
+    completingRef.current = true;
+    setCompleting(true);
+    try {
+      if (await completeAction.onComplete(row.id)) onClose();
+    } finally {
+      completingRef.current = false;
+      setCompleting(false);
+    }
   };
 
   return (
@@ -153,9 +195,25 @@ export function BlockEditor({ id, onClose, onCreated }: { id: string | null; onC
                 hotelUnavailable={row.modernHotel?.unavailable ?? false}
                 legacyHotelServiceId={row.hotel_service_id}
                 canEdit={canEdit}
+                onPendingChange={setChildPending}
               />
             </TabsContent>
           </Tabs>
+        )}
+        {row && completeAction && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+              {dirty
+                ? "Guarda o descarta los cambios antes de incorporar el bloque."
+                : childPending
+                  ? "Espera a que terminen de guardarse los servicios."
+                  : "Cuando termines los textos y servicios, incorpora este bloque al itinerario."}
+            </p>
+            <Button disabled={dirty || childPending || completing || completeAction.disabled} onClick={() => void complete()}>
+              {completing && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+              {completing ? completeAction.pendingLabel ?? "Incorporando…" : completeAction.label}
+            </Button>
+          </div>
         )}
         {row && <CatalogDeleteButton kind="day_blocks" record={{ id: row.id, code: row.code, name: title || row.code }} onDeleted={onClose} />}
       </SheetContent>
@@ -455,6 +513,7 @@ function BlockItems({
   hotelUnavailable,
   legacyHotelServiceId,
   canEdit,
+  onPendingChange,
 }: {
   blockId: string;
   hotelId: string | null;
@@ -462,9 +521,16 @@ function BlockItems({
   hotelUnavailable: boolean;
   legacyHotelServiceId: string | null;
   canEdit: boolean;
+  onPendingChange: (pending: boolean) => void;
 }) {
   const key = ["day_block_items", blockId];
   const run = useRun(key);
+  const [checkingRoom, setCheckingRoom] = useState(false);
+  const pending = run.isPending || checkingRoom;
+  useEffect(() => {
+    onPendingChange(pending);
+    return () => onPendingChange(false);
+  }, [onPendingChange, pending]);
   const modernHotel = !!hotelId;
   const legacyHotel = !hotelId && !!legacyHotelServiceId;
   const q = useQuery({
@@ -486,6 +552,7 @@ function BlockItems({
   };
   const addRoom = async (option: PickOption | null) => {
     if (!option) return;
+    setCheckingRoom(true);
     try {
       const rooms = await eligibleHotelRooms(blockId);
       if (!rooms.some((room) => room.id === option.id && room.status !== "inactivo")) {
@@ -495,6 +562,8 @@ function BlockItems({
       run.mutate([() => db.from("day_block_items").insert({ block_id: blockId, service_id: option.id, qty: 1, slot_key: "ALOJAMIENTO" })]);
     } catch (error) {
       toast.error(catalogWriteErrorMessage(error));
+    } finally {
+      setCheckingRoom(false);
     }
   };
 

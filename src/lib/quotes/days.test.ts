@@ -115,6 +115,37 @@ async function freeBlock() {
   return b.id;
 }
 describe("días congelados, grupos y operaciones atómicas", () => {
+  it("reuses one catalog block in separate quotes and persists both snapshots on reload", async () => {
+    const blockId = await freeBlock();
+    const quoteBasics = (sku: string): QuoteBasics =>
+      ({
+        ...basics(),
+        client_type: "B2C",
+        category: "COMFORT",
+        tour_sku: sku,
+        rooming: { paying: {}, tc: {} },
+        vehicles: {},
+        rounding_rule: { mode: "none", increment: 1 },
+      }) as QuoteBasics;
+    const first = await createEmptyQuote(quoteBasics("E09-REUSE-1"));
+    const second = await createEmptyQuote(quoteBasics("E09-REUSE-2"));
+
+    await addBlockDay(first.id, blockId);
+    await addBlockDay(second.id, blockId);
+
+    const [savedFirst, savedSecond] = await Promise.all([
+      loadQuote(first.id),
+      loadQuote(second.id),
+    ]);
+    expect(savedFirst.days).toHaveLength(1);
+    expect(savedSecond.days).toHaveLength(1);
+    expect(savedFirst.days[0]?.source_block_id).toBe(blockId);
+    expect(savedSecond.days[0]?.source_block_id).toBe(blockId);
+    expect(await one("select count(*)::int count from day_blocks where id=$1", [blockId])).toEqual({
+      count: 1,
+    });
+  });
+
   it("adds the SPA block sequence as seller, at the fixture total, and separates repeated purchases", async () => {
     const source = await loadTemplateSource(templateId, clientId);
     const ids = source.templateDays

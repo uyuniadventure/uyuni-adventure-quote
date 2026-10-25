@@ -58,13 +58,19 @@ vi.mock("./kit", async (load) => {
 });
 vi.mock("./catalog-actions", () => ({ CatalogDeleteButton: () => null }));
 
-function show(id: string | null = "new") {
+function show(
+  id: string | null = "new",
+  completeAction?: {
+    label: string;
+    onComplete: (id: string) => Promise<boolean>;
+  },
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const onClose = vi.fn();
   const onCreated = vi.fn();
   render(
     <QueryClientProvider client={client}>
-      <BlockEditor id={id} onClose={onClose} onCreated={onCreated} />
+      <BlockEditor id={id} onClose={onClose} onCreated={onCreated} {...(completeAction ? { completeAction } : {})} />
     </QueryClientProvider>,
   );
   return { onClose, onCreated };
@@ -190,6 +196,68 @@ it("protects closing and tab changes while data has unsaved changes", async () =
   vi.mocked(window.confirm).mockReturnValue(true);
   fireEvent.mouseDown(screen.getByRole("tab", { name: "Textos" }), { button: 0, ctrlKey: false });
   expect(await screen.findByText("Panel de textos")).toBeInTheDocument();
+});
+
+it("incorporates only a saved block, prevents repeated clicks and permits retry after failure", async () => {
+  let finish: ((value: boolean) => void) | undefined;
+  const onComplete = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise<boolean>((resolve) => {
+          finish = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(true);
+  const { onClose } = show("block-1", { label: "Incorporar al día 2", onComplete });
+  const button = await screen.findByRole("button", { name: "Incorporar al día 2" });
+
+  fireEvent.click(button);
+  fireEvent.click(button);
+  expect(onComplete).toHaveBeenCalledTimes(1);
+  expect(onComplete).toHaveBeenCalledWith("block-1");
+  expect(onClose).not.toHaveBeenCalled();
+
+  await act(async () => finish?.(false));
+  expect(onClose).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Incorporar al día 2" }));
+  await waitFor(() => expect(onComplete).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+});
+
+it("requires saving pending editor changes before incorporation", async () => {
+  const onComplete = vi.fn().mockResolvedValue(true);
+  show("block-1", { label: "Incorporar al día 1", onComplete });
+  const button = await screen.findByRole("button", { name: "Incorporar al día 1" });
+  expect(button).toBeEnabled();
+  fireEvent.change(screen.getByLabelText("Código"), { target: { value: "BD-EDIT" } });
+  expect(button).toBeDisabled();
+  expect(screen.getByText("Guarda o descarta los cambios antes de incorporar el bloque.")).toBeInTheDocument();
+  expect(onComplete).not.toHaveBeenCalled();
+});
+
+it("waits for a service write before allowing incorporation", async () => {
+  let finish: ((value: { error: null }) => void) | undefined;
+  mocks.fetchServices.mockResolvedValue([{ id: "meal-1", label: "Almuerzo", sub: "MEAL-1" }]);
+  mocks.itemInsert.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const onComplete = vi.fn().mockResolvedValue(true);
+  show("block-1", { label: "Incorporar al día 1", onComplete });
+  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios sueltos" }), { button: 0, ctrlKey: false });
+  fireEvent.click(screen.getByRole("combobox", { name: "Añadir servicio suelto (comida, traslado, entrada…)" }));
+  fireEvent.click(await screen.findByText("Almuerzo"));
+
+  const complete = screen.getByRole("button", { name: "Incorporar al día 1" });
+  await waitFor(() => expect(complete).toBeDisabled());
+  expect(screen.getByText("Espera a que terminen de guardarse los servicios.")).toBeInTheDocument();
+  expect(onComplete).not.toHaveBeenCalled();
+
+  await act(async () => finish?.({ error: null }));
+  await waitFor(() => expect(complete).toBeEnabled());
 });
 
 it("edits an imported block without converting its origin", async () => {

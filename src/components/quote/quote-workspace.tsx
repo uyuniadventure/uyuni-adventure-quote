@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Field, SearchPicker, fetchBlocks, fetchServices, type PickOption } from "@/components/catalog/kit";
+import { BlockEditor } from "@/components/catalog/block-editor";
 import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, money, paxRange, validity } from "@/components/catalog/shared";
 import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToItem } from "./quote-ops";
 import { QuotePanel, type Alert } from "./quote-panel";
@@ -266,6 +267,7 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   const { quote, days, items } = data;
   const { act } = actions;
   const [selectedBlocks, setSelectedBlocks] = useState<PickOption[]>([]);
+  const [newBlockId, setNewBlockId] = useState<string | null>(null);
   const pending = unreviewedDays(days);
   const pendingIds = new Set(pending.map((d) => d.id));
   const canReview = quote.status === "borrador" && !quote.archived_at;
@@ -305,6 +307,9 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
           <span className="text-sm text-muted-foreground">Agregar día {days.length + 1}:</span>
           <SearchPicker className="w-full sm:w-[420px]" placeholder="Buscar bloque diario…" queryKey="blocks" fetcher={fetchBlocks}
             disabled={actions.busy} onPick={(o) => o && setSelectedBlocks(current => [...current, o])} />
+          <Button variant="outline" disabled={actions.busy} onClick={() => setNewBlockId("new")}>
+            <Plus className="mr-1 h-4 w-4" />Nuevo bloque diario
+          </Button>
           {selectedBlocks.length > 0 && <div className="w-full space-y-2">
             <ol className="space-y-1 text-sm">{selectedBlocks.map((block, i) => <li key={`${block.id}-${i}`} className="flex items-center gap-2">
               <span>Día {days.length + i + 1}: {block.label}</span>
@@ -315,6 +320,16 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
               if (await act(() => addBlockDays(quote.id, selectedBlocks.map(b => b.id)), "Bloques agregados.")) setSelectedBlocks([]);
             }}>Añadir bloques</Button>
           </div>}
+          <BlockEditor
+            id={newBlockId}
+            onClose={() => setNewBlockId(null)}
+            onCreated={setNewBlockId}
+            completeAction={{
+              label: `Incorporar al día ${days.length + 1}`,
+              disabled: actions.busy,
+              onComplete: (blockId) => act(() => addBlockDay(quote.id, blockId), "Bloque creado e incorporado."),
+            }}
+          />
         </Card>
       )}
     </div>
