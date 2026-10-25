@@ -1,12 +1,16 @@
 import { proposeRooming } from "../quotes/selection-model";
 import {
   numberCell,
+  packageUnitType,
+  resolvePackageLodgingTariffs,
   routeFamily,
   segmentVehicleCapacity,
   type CsvRow,
   type PackageV2,
 } from "../import/package-v2";
 import { climateSeasonForDate } from "./seasons";
+
+const supportedSeasons = new Set(["ALL", "DRY", "RAIN", "BAJA", "MEDIA", "ALTA", "FESTIVO"]);
 
 export interface TemplateCostOptions {
   pax: number;
@@ -62,14 +66,16 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
   const applicable = (s: CsvRow, day: number) => {
     const serviceDate = dateForDay(day);
     const serviceYear = serviceDate ? Number(serviceDate.slice(0, 4)) : year;
-    if (+s["Year"]! !== serviceYear)
-      return false;
+    if (+s["Year"]! !== serviceYear) return false;
     const sourceSeason = s["Season"] || "";
     if (/EXCLUYE|EXCEPT|NO V[ÁA]LID/i.test(sourceSeason))
       throw new Error(`Temporada excluida: ${s["TariffCode"]}`);
+    if (!sourceSeason || !supportedSeasons.has(sourceSeason))
+      throw new Error(`Temporada no autorizada: ${s["TariffCode"]}`);
+    if (sourceSeason !== "ALL" && !serviceDate)
+      throw new Error(`Fecha requerida para temporada: ${s["TariffCode"]}`);
     if (sourceSeason === "DRY" || sourceSeason === "RAIN") {
-      if (!serviceDate) throw new Error(`Fecha requerida para temporada: ${s["TariffCode"]}`);
-      if (climateSeasonForDate(serviceDate) !== sourceSeason) return false;
+      if (climateSeasonForDate(serviceDate!) !== sourceSeason) return false;
     } else if (sourceSeason && sourceSeason !== "ALL" && sourceSeason !== template["temporada"])
       throw new Error(`Temporada no autorizada: ${s["TariffCode"]}`);
     if (
@@ -81,7 +87,8 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
     return true;
   };
   const rate = (s: CsvRow, day: number) => {
-    if (!applicable(s, day)) throw new Error(`Tarifa fuera de temporada o vigencia: ${s["TariffCode"]}`);
+    if (!applicable(s, day))
+      throw new Error(`Tarifa fuera de temporada o vigencia: ${s["TariffCode"]}`);
     const price = numberCell(s["PRECIO_USD"]);
     if (price == null) throw new Error(`PRECIO_USD ausente: ${s["TariffCode"]}`);
     return price;
@@ -103,9 +110,7 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
     const effectiveUnit = seg["unidad"] || s["UnitType"];
     const capacity = segmentVehicleCapacity(seg, s);
     const count =
-      effectiveUnit === "PER_VEHICLE"
-        ? Math.ceil((pax + tc + staff) / Number(capacity))
-        : 1;
+      effectiveUnit === "PER_VEHICLE" ? Math.ceil((pax + tc + staff) / Number(capacity)) : 1;
     if (!Number.isFinite(count) || count < 1) throw new Error("Tramo sin capacidad");
     vehicles = Math.max(vehicles, count);
     add(s, +seg["dia_desde"]!, seg["slot"]!, count, +seg["dia_hasta"]! - +seg["dia_desde"]! + 1);
@@ -151,19 +156,31 @@ export function costPackageTemplate({ pkg, sku }: PackageTemplate, options: Temp
     }
   for (const n of pkg.lodging.filter((n) => n["sku"] === sku)) {
     if (n["slot"] === "ALOJAMIENTO") {
-      for (const room of proposeRooming(pax, n["tc_policy"] === "charged" ? tc : 0)) {
-        const rooms = pkg.tariffs.filter(
-          (s) =>
-            s["Supplier"]?.toLowerCase() === n["proveedor"]?.toLowerCase() &&
-            s["UnitType"] === "PER_ROOM_PER_NIGHT" &&
-            (room.room_type === "DBL"
-              ? ["DBL", "MAT", "TWN"].includes(s["RoomType"]!)
-              : s["RoomType"] === room.room_type) &&
-            applicable(s, +n["noche"]!),
+      const resolution = resolvePackageLodgingTariffs(pkg, n);
+      if (resolution.issue) throw new Error(resolution.issue);
+      const lodgingUnit = resolution.unit;
+      const candidates = resolution.candidates.filter((s) => applicable(s, +n["noche"]!));
+      if (lodgingUnit === "PER_PERSON_PER_NIGHT") {
+        if (candidates.length !== 1) throw new Error(`Hotel sin tarifa por persona en ${year}`);
+        add(
+          candidates[0]!,
+          +n["noche"]!,
+          n["slot"]!,
+          quantity(candidates[0]!, n["tc_policy"], "PER_PERSON"),
         );
-        rooms.sort((a, b) => rate(a, +n["noche"]!) - rate(b, +n["noche"]!));
-        if (!rooms[0]) throw new Error(`Hotel sin ${room.room_type} en ${year}`);
-        add(rooms[0], +n["noche"]!, n["slot"]!, room.count);
+      } else if (lodgingUnit === "PER_ROOM_PER_NIGHT") {
+        for (const room of proposeRooming(pax, n["tc_policy"] === "charged" ? tc : 0)) {
+          const rooms = candidates.filter((s) =>
+            room.room_type === "DBL"
+              ? ["DBL", "MAT", "TWN"].includes(s["RoomType"]!)
+              : s["RoomType"] === room.room_type,
+          );
+          rooms.sort((a, b) => rate(a, +n["noche"]!) - rate(b, +n["noche"]!));
+          if (!rooms[0]) throw new Error(`Hotel sin ${room.room_type} en ${year}`);
+          add(rooms[0], +n["noche"]!, n["slot"]!, room.count);
+        }
+      } else {
+        throw new Error(`Unidad de alojamiento no admitida: ${n["unidad"] || "vacía"}`);
       }
     } else {
       const s = tariff(n["TariffCode"]!);

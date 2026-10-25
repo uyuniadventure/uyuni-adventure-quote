@@ -3,6 +3,8 @@ import {
   blockVariantKey,
   lodgingSourceKey,
   numberCell,
+  packageUnitType,
+  resolvePackageLodgingTariffs,
   routeFamily,
   routeParts,
   segmentVehicleCapacity,
@@ -57,6 +59,13 @@ const type: Record<string, string> = {
 const pricingSeasons = new Set(["ALL", "DRY", "RAIN", "BAJA", "MEDIA", "ALTA", "FESTIVO"]);
 const exactCategories = new Set(["BUDGET", "COMFORT", "VIP", "MIXTO"]);
 
+export interface TemplateEconomicAssessment {
+  sku: string;
+  status: "validated" | "pending" | "blocked";
+  reasons: string[];
+  controls: number;
+}
+
 function splitHotelCombo(combo: string, nights: number, knownCodes: Set<string>) {
   if (!combo || nights < 1) return null;
   const candidates: { parts: string[]; score: number; knownChars: number }[] = [];
@@ -109,8 +118,13 @@ export function markdownHtml(text: string) {
     .join("");
 }
 /** IDs resolve natural keys against the current catalogue; existing IDs survive updates. */
-export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
+export function diffPackageV2(
+  pkg: PackageV2,
+  catalog: ImportCatalog = {},
+  assessments: readonly TemplateEconomicAssessment[] = [],
+) {
   const warnings = validatePackageV2(pkg).warnings;
+  const economicBySku = new Map(assessments.map((assessment) => [assessment.sku, assessment]));
   const records: { table_name: string; natural_key: string; payload: CatalogRow }[] = [];
   const known: ImportCatalog = Object.fromEntries(
     Object.entries(catalog).map(([k, v]) => [k, [...v]]),
@@ -188,14 +202,15 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
       name: t["ETIQUETA"],
       supplier_id: t["Supplier"] ? (suppliers.get(t["Supplier"].toLowerCase()) ?? null) : null,
       type: type[t["ServiceType"]!] ?? "extra",
-      pricing_unit: unit[t["UnitType"]!],
+      pricing_unit: unit[packageUnitType(t["UnitType"])],
       currency: "USD",
       import_source_currency: t["Currency"] || null,
       import_source_unit: t["UnitType"] || null,
       location: t["Location"] || null,
       country: t["Pais"] || null,
-      capacity: t["UnitType"] === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
-      vehicle_max_pax: t["UnitType"] === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
+      capacity: packageUnitType(t["UnitType"]) === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
+      vehicle_max_pax:
+        packageUnitType(t["UnitType"]) === "PER_VEHICLE" ? tariffVehicleCapacity(t) : null,
       room_type: t["RoomType"] || null,
       occupancy: numberCell(t["Occupancy"]),
       meal_plan: ["NONE", "BB", "HB", "FB"].includes(t["IncludesMeals"]!)
@@ -329,7 +344,7 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         (t) =>
           t["Supplier"] === s["Supplier"] &&
           routeFamily(t) === routeFamily(s) &&
-          t["UnitType"] === s["UnitType"],
+          packageUnitType(t["UnitType"]) === packageUnitType(s["UnitType"]),
       );
     }
     for (const t of candidates)
@@ -395,6 +410,7 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
   );
   const templateHotelCodes = new Map<string, string[] | null>();
   for (const t of pkg.templates) {
+    const economic = economicBySku.get(t["sku"]!);
     const route = routeParts(t);
     const from = route?.from ?? null,
       to = route?.to ?? null;
@@ -413,12 +429,16 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         source_category: t["categoria"] || null,
         source_season: t["temporada"] || null,
         status: "pendiente",
-        economic_status: warnings.some(
-          (w) => w.key === t["sku"] && w.message.startsWith("BLOQUEADO:"),
-        )
-          ? "blocked"
-          : "pending",
-        economic_issues: warnings.filter((w) => w.key === t["sku"]).map((w) => w.message),
+        economic_status:
+          economic?.status ??
+          (warnings.some((w) => w.key === t["sku"] && w.message.startsWith("BLOQUEADO:"))
+            ? "blocked"
+            : "pending"),
+        economic_issues:
+          economic?.reasons ??
+          warnings
+            .filter((w) => w.key === t["sku"] && w.message.startsWith("BLOQUEADO:"))
+            .map((w) => w.message),
         catalog_origin: "importacion",
         hotel_combo: t["hoteles_codigo"] || null,
         import_v2_route: route?.route ?? null,
@@ -490,7 +510,7 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         service_id: services.get(s["TariffCode"]!),
         day_from: +s["dia_desde"]!,
         day_to: +s["dia_hasta"]!,
-        pricing_unit_override: unit[s["unidad"]!] ?? null,
+        pricing_unit_override: unit[packageUnitType(s["unidad"])] ?? null,
         vehicle_max_pax_override: segmentVehicleCapacity(
           s,
           pkg.tariffs.find((t) => t["TariffCode"] === s["TariffCode"])!,
@@ -504,6 +524,8 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
   }
   for (const n of pkg.lodging) {
     const tid = templates.get(n["sku"]!)!;
+    const lodging = n["slot"] === "ALOJAMIENTO" ? resolvePackageLodgingTariffs(pkg, n) : null;
+    const resolvedTariffCode = lodging?.tariffCode ?? n["TariffCode"] ?? null;
     const hotelCode = templateHotelCodes.get(n["sku"]!)?.[+n["noche"]! - 1];
     const sourceRowKey = lodgingSourceKey(n);
     add(
@@ -513,14 +535,14 @@ export function diffPackageV2(pkg: PackageV2, catalog: ImportCatalog = {}) {
         template_id: tid,
         day_number: +n["noche"]!,
         slot_key: n["slot"],
-        service_id: services.get(n["TariffCode"]!) ?? null,
+        service_id: resolvedTariffCode ? (services.get(resolvedTariffCode) ?? null) : null,
         supplier_id: n["proveedor"] ? (suppliers.get(n["proveedor"].toLowerCase()) ?? null) : null,
         hotel_id:
           n["slot"] === "ALOJAMIENTO" && hotelCode ? (hotelCodes.get(hotelCode) ?? null) : null,
         source_hotel_name: n["slot"] === "ALOJAMIENTO" ? n["hotel"] || null : null,
-        source_tariff_code: n["TariffCode"] || null,
+        source_tariff_code: resolvedTariffCode,
         source_row_key: sourceRowKey,
-        pricing_unit_override: unit[n["unidad"]!] ?? null,
+        pricing_unit_override: unit[lodging?.unit || packageUnitType(n["unidad"])] ?? null,
         tc_policy: n["tc_policy"] || "free",
         is_default: true,
         sort: n["slot"] === "ALOJAMIENTO" ? 0 : n["slot"] === "CENA" ? 1 : 2,

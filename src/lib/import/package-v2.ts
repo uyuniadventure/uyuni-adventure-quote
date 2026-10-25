@@ -75,15 +75,21 @@ export function numberCell(value: string | undefined): number | null {
   if (!Number.isFinite(n)) throw new Error(`Número inválido: ${value}`);
   return n;
 }
+/**
+ * The source workbooks use PAX as a synonym for PERSON in nightly hotel rates.
+ * Both labels mean one charge per applicable guest and night; neither represents
+ * a room or an occupancy distribution.
+ */
+export function packageUnitType(value: string | undefined): string {
+  return value === "PER_PAX_PER_NIGHT" ? "PER_PERSON_PER_NIGHT" : (value ?? "");
+}
 export function positiveIntegerCell(value: string | undefined): number | null {
   const n = numberCell(value);
   return n != null && Number.isInteger(n) && n > 0 ? n : null;
 }
 export function tariffVehicleCapacity(tariff: CsvRow): number | null {
   const configured = tariff["VehicleMaxPax"];
-  return configured
-    ? positiveIntegerCell(configured)
-    : positiveIntegerCell(tariff["PaxMax"]);
+  return configured ? positiveIntegerCell(configured) : positiveIntegerCell(tariff["PaxMax"]);
 }
 /** Commercial exception authorized only for PER_VEHICLE itinerary transport links. */
 export function segmentVehicleCapacity(segment: CsvRow, tariff: CsvRow): number | null {
@@ -107,6 +113,92 @@ export const lodgingSourceKey = (r: CsvRow) =>
   [r["TariffCode"], r["proveedor"], r["hotel"], r["servicio"], r["unidad"], r["tc_policy"]]
     .map((v) => v ?? "")
     .join("|");
+
+const normalizedExactName = (value: string | undefined) =>
+  (value ?? "").trim().replace(/\s+/g, " ").toUpperCase();
+
+/**
+ * Confirmed equivalences from the historical migration source. These are exact
+ * aliases, not fuzzy hotel-name matches. The source lodging rows have no
+ * TariffCode and incorrectly describe Sky Dream as a room rate.
+ */
+const confirmedHistoricalLodgingTariffs = new Map([
+  ["SKY DREAM|SKY DREAM (DON CALIXTO)", "HTL_SKYDREAM_POLQUES_PP_2026"],
+]);
+
+export interface LodgingTariffResolution {
+  candidates: CsvRow[];
+  unit: string;
+  tariffCode: string | null;
+  issue: string | null;
+}
+
+/** Resolve lodging without ever treating another per-person supplier service as a hotel rate. */
+export function resolvePackageLodgingTariffs(pkg: PackageV2, row: CsvRow): LodgingTariffResolution {
+  const supported = new Set(["PER_ROOM_PER_NIGHT", "PER_PERSON_PER_NIGHT"]);
+  const confirmedCode = confirmedHistoricalLodgingTariffs.get(
+    `${normalizedExactName(row["hotel"])}|${normalizedExactName(row["proveedor"])}`,
+  );
+  const requestedCode = row["TariffCode"] || confirmedCode;
+  const label = row["hotel"] || row["proveedor"] || "Alojamiento";
+  const isHotel = (tariff: CsvRow) => tariff["ServiceType"]?.toLowerCase() === "hotel";
+
+  if (requestedCode) {
+    const matches = pkg.tariffs.filter((tariff) => tariff["TariffCode"] === requestedCode);
+    if (matches.length !== 1)
+      return {
+        candidates: [],
+        unit: "",
+        tariffCode: requestedCode,
+        issue: `BLOQUEADO: ${label} requiere TariffCode exacto ${requestedCode}, pero no existe una única tarifa`,
+      };
+    const tariff = matches[0]!;
+    const unit = packageUnitType(tariff["UnitType"]);
+    if (!isHotel(tariff))
+      return {
+        candidates: [],
+        unit,
+        tariffCode: requestedCode,
+        issue: `BLOQUEADO: TariffCode ${requestedCode} no corresponde a un servicio de alojamiento`,
+      };
+    if (!supported.has(unit))
+      return {
+        candidates: [],
+        unit,
+        tariffCode: requestedCode,
+        issue: `BLOQUEADO: TariffCode ${requestedCode} usa una unidad de alojamiento no compatible`,
+      };
+    return { candidates: [tariff], unit, tariffCode: requestedCode, issue: null };
+  }
+
+  const requestedUnit = packageUnitType(row["unidad"]);
+  const candidates = pkg.tariffs.filter(
+    (tariff) =>
+      tariff["Supplier"]?.toLowerCase() === row["proveedor"]?.toLowerCase() &&
+      isHotel(tariff) &&
+      packageUnitType(tariff["UnitType"]) === requestedUnit,
+  );
+  if (!supported.has(requestedUnit) || candidates.length === 0)
+    return {
+      candidates: [],
+      unit: requestedUnit,
+      tariffCode: null,
+      issue: `BLOQUEADO: ${label} sin tarifas USD de alojamiento compatibles`,
+    };
+  if (requestedUnit === "PER_PERSON_PER_NIGHT" && candidates.length !== 1)
+    return {
+      candidates: [],
+      unit: requestedUnit,
+      tariffCode: null,
+      issue: `BLOQUEADO: ${label} tiene ${candidates.length} tarifas de alojamiento por persona; falta TariffCode exacto`,
+    };
+  return {
+    candidates,
+    unit: requestedUnit,
+    tariffCode: requestedUnit === "PER_PERSON_PER_NIGHT" ? candidates[0]!["TariffCode"]! : null,
+    issue: null,
+  };
+}
 export const routeFamily = (r: CsvRow) =>
   r["ETIQUETA"]!.replace(/\([^)]*PAX[^)]*\)/gi, "")
     .trim()
@@ -132,10 +224,7 @@ export function validatePackageV2(pkg: PackageV2, catalog: { services?: { sku: s
   duplicate(pkg.days, (r) => `${r["sku"]}:${r["dia"]}`);
   duplicate(pkg.texts, (r) => `${r["bloque_texto_id"]}:${r["idioma"]?.toLowerCase()}`);
   duplicate(pkg.blockItems, (r) => `${r["bloque_servicios_id"]}:${r["slot"]}`);
-  duplicate(
-    pkg.lodging,
-    (r) => `${r["sku"]}:${r["noche"]}:${r["slot"]}:${lodgingSourceKey(r)}`,
-  );
+  duplicate(pkg.lodging, (r) => `${r["sku"]}:${r["noche"]}:${r["slot"]}:${lodgingSourceKey(r)}`);
   duplicate(pkg.segments, (r) => `${r["sku"]}:${r["slot"]}:${r["dia_desde"]}`);
   duplicate(pkg.rules, (r) => `${r["ruta"]}:${r["dias"]}:${r["slot"]}`);
   duplicate(pkg.pdf, (r) => `${r["id"]}:${r["idioma"]?.toLowerCase()}`);
@@ -154,14 +243,15 @@ export function validatePackageV2(pkg: PackageV2, catalog: { services?: { sku: s
   ];
   for (const r of pkg.tariffs) {
     const key = r["TariffCode"]!;
+    const unitType = packageUnitType(r["UnitType"]);
     if (!["USD", "CLP", "BOB"].includes(r["Currency"]!)) err(key, "Moneda inválida");
-    if (!units.includes(r["UnitType"]!)) err(key, "Unidad inválida");
+    if (!units.includes(unitType)) err(key, "Unidad inválida");
     if (!r["Season"])
       warnings.push({ key, message: "Tarifa sin temporada de origen; queda fuera de pricing" });
     if (!r["Supplier"] || !r["ETIQUETA"])
       warnings.push({ key, message: "Servicio sin proveedor o nombre; queda pendiente" });
     try {
-      if (r["UnitType"] === "PER_VEHICLE" && tariffVehicleCapacity(r) == null)
+      if (unitType === "PER_VEHICLE" && tariffVehicleCapacity(r) == null)
         err(key, "PER_VEHICLE sin capacidad");
       for (const col of ["VehicleMaxPax", "Occupancy", "PaxMin", "PaxMax"])
         if (r[col] && (!Number.isInteger(Number(r[col])) || Number(r[col]) <= 0))
@@ -259,15 +349,14 @@ export function validatePackageV2(pkg: PackageV2, catalog: { services?: { sku: s
       err(r["sku"]!, "Noche fuera de plantilla");
     if (!["ALOJAMIENTO", "CENA", "STAFF"].includes(r["slot"]!))
       err(r["sku"]!, "Puesto de noche inválido");
-    if (
-      r["slot"] === "ALOJAMIENTO" &&
-      !pkg.tariffs.some(
-        (s) =>
-          s["Supplier"]?.toLowerCase() === r["proveedor"]?.toLowerCase() &&
-          s["UnitType"] === "PER_ROOM_PER_NIGHT",
-      )
-    )
-      warnings.push({ key: r["sku"]!, message: `BLOQUEADO: ${r["hotel"] || r["proveedor"]} sin tarifas USD de habitación` });
+    if (r["slot"] === "ALOJAMIENTO") {
+      const resolution = resolvePackageLodgingTariffs(pkg, r);
+      if (resolution.issue)
+        warnings.push({
+          key: r["sku"]!,
+          message: resolution.issue,
+        });
+    }
     if (r["slot"] !== "ALOJAMIENTO" && !r["TariffCode"])
       err(r["sku"]!, "Falta TariffCode de noche");
   }
@@ -280,7 +369,10 @@ export function validatePackageV2(pkg: PackageV2, catalog: { services?: { sku: s
     if (!Number.isInteger(+t["noches"]!) || +t["noches"]! < 0 || +t["noches"]! > +t["dias"]!)
       err(t["sku"]!, "Noches inválidas");
     if (!t["categoria"] || !["BUDGET", "COMFORT", "VIP", "MIXTO"].includes(t["categoria"]))
-      warnings.push({ key: t["sku"]!, message: `Categoría de origen pendiente: ${t["categoria"] || "vacía"}` });
+      warnings.push({
+        key: t["sku"]!,
+        message: `Categoría de origen pendiente: ${t["categoria"] || "vacía"}`,
+      });
     const days = pkg.days
       .filter((r) => r["sku"] === t["sku"])
       .map((r) => +r["dia"]!)

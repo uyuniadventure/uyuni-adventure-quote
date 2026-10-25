@@ -11,6 +11,7 @@ import {
   type PackageV2,
 } from "./package-v2";
 import { costPackageTemplate } from "../pricing/template-cost";
+import { assessPackageTemplates } from "./index";
 let pkg: PackageV2;
 const root = new URL("../../test/fixtures/import-v2-sintetico/", import.meta.url);
 beforeAll(async () => {
@@ -202,6 +203,62 @@ describe("paquete v2", () => {
       /sin tramo de pasajeros/,
     );
   });
+  it.each([1, 2, 3, 5])(
+    "calcula Sky Dream a USD 43,42 por persona/noche para %i pasajeros",
+    (pax) => {
+      const p = structuredClone(pkg);
+      const lodging = p.lodging.find(
+        (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+      )!;
+      const base = p.tariffs.find((row) => row["TariffCode"] === "H_A_DBL")!;
+      p.tariffs.push({
+        ...base,
+        TariffCode: "HTL_SKYDREAM_POLQUES_PP_2026",
+        Supplier: "SKY DREAM (DON CALIXTO)",
+        ServiceName: "Sky Dream",
+        UnitType: "PER_PAX_PER_NIGHT",
+        RoomType: "STD",
+        PRECIO_USD: "43.42",
+      });
+      p.tariffs.push({
+        ...base,
+        TariffCode: "MEAL_SKYDREAM_BREAKFAST_2026",
+        Supplier: "SKY DREAM (DON CALIXTO)",
+        ServiceType: "meal",
+        UnitType: "PER_PERSON_PER_NIGHT",
+        PRECIO_USD: "1",
+      });
+      lodging["TariffCode"] = "";
+      lodging["proveedor"] = "SKY DREAM (DON CALIXTO)";
+      lodging["hotel"] = "Sky Dream";
+      lodging["unidad"] = "PER_ROOM_PER_NIGHT";
+      lodging["tc_policy"] = "free";
+
+      expect(validatePackageV2(p).errors).toEqual([]);
+      const result = costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax, tc: 2 });
+      const sky = result.lines.find((line) => line.sku === "HTL_SKYDREAM_POLQUES_PP_2026")!;
+      expect(sky.qty).toBe(pax);
+      expect(sky.cost_usd).toBeCloseTo(43.42 * pax, 2);
+      expect(result.lines.some((line) => line.sku === "MEAL_SKYDREAM_BREAKFAST_2026")).toBe(false);
+    },
+  );
+  it("incluye al TC en Sky Dream sólo cuando la política lo cobra", () => {
+    const p = structuredClone(pkg);
+    const lodging = p.lodging.find(
+      (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+    )!;
+    const tariff = p.tariffs.find((row) => row["TariffCode"] === "H_A_DBL")!;
+    tariff["UnitType"] = "PER_PERSON_PER_NIGHT";
+    tariff["RoomType"] = "STD";
+    tariff["PRECIO_USD"] = "43.42";
+    lodging["TariffCode"] = tariff["TariffCode"]!;
+    lodging["unidad"] = "PER_PAX_PER_NIGHT";
+    lodging["tc_policy"] = "charged";
+    const result = costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 3, tc: 2 });
+    const line = result.lines.find((candidate) => candidate.sku === tariff["TariffCode"])!;
+    expect(line.qty).toBe(5);
+    expect(line.cost_usd).toBeCloseTo(217.1, 2);
+  });
   it("cobra el 4x4 una vez y marca días cubiertos", () => {
     const r = costPackageTemplate({ pkg, sku: "SPASPA-4D3N-AB" }, { pax: 2 });
     expect(r.lines.filter((l) => l["sku"] === "T_4X4_4D")).toHaveLength(1);
@@ -308,5 +365,76 @@ describe("paquete v2", () => {
     expect(() =>
       costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2, date: "2026-06-01" }),
     ).toThrow(/fuera de temporada o vigencia/);
+  });
+  it("separa avisos comerciales del estado económico y conserva diferencias pendientes", () => {
+    const assessment = assessPackageTemplates(pkg);
+    expect(assessment.find((row) => row.sku === "UYUUYU-3D2N-AB")).toMatchObject({
+      status: "validated",
+      reasons: [],
+    });
+    expect(assessment.find((row) => row.sku === "SPASPA-4D3N-AB")).toMatchObject({
+      status: "pending",
+    });
+    expect(
+      assessment
+        .find((row) => row.sku === "SPASPA-4D3N-AB")!
+        .reasons.some((reason) => reason.includes("diferencia económica")),
+    ).toBe(true);
+  });
+  it("mantiene pendiente un control cuya temporada requiere una fecha ausente", () => {
+    const p = structuredClone(pkg);
+    p.tariffs.find((row) => row["TariffCode"] === "T_ALM")!["Season"] = "DRY";
+    const assessment = assessPackageTemplates(p).find((row) => row.sku === "UYUUYU-3D2N-AB")!;
+    expect(assessment.status).toBe("pending");
+    expect(assessment.reasons.some((reason) => reason.includes("Fecha requerida"))).toBe(true);
+  });
+  it("mantiene bloqueado un alojamiento sin tarifa compatible", () => {
+    const p = structuredClone(pkg);
+    const lodging = p.lodging.find(
+      (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+    )!;
+    lodging["TariffCode"] = "";
+    lodging["proveedor"] = "HOTEL SIN TARIFA";
+    lodging["hotel"] = "HOTEL SIN TARIFA";
+    const assessment = assessPackageTemplates(p).find((row) => row.sku === "UYUUYU-3D2N-AB")!;
+    expect(assessment.status).toBe("blocked");
+    expect(assessment.reasons.some((reason) => reason.startsWith("BLOQUEADO:"))).toBe(true);
+  });
+  it("bloquea dos tarifas por persona del mismo hotel sin TariffCode exacto", () => {
+    const p = structuredClone(pkg);
+    const lodging = p.lodging.find(
+      (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+    )!;
+    const base = p.tariffs.find((row) => row["TariffCode"] === "H_A_DBL")!;
+    p.tariffs.push(
+      { ...base, TariffCode: "HOTEL_PERSON_1", UnitType: "PER_PERSON_PER_NIGHT" },
+      { ...base, TariffCode: "HOTEL_PERSON_2", UnitType: "PER_PERSON_PER_NIGHT" },
+    );
+    lodging["TariffCode"] = "";
+    lodging["unidad"] = "PER_PERSON_PER_NIGHT";
+    const assessment = assessPackageTemplates(p).find((row) => row.sku === "UYUUYU-3D2N-AB")!;
+    expect(assessment.status).toBe("blocked");
+    expect(assessment.reasons).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/Hotel A tiene \d+ tarifas.*falta TariffCode exacto/),
+      ]),
+    );
+    expect(() => costPackageTemplate({ pkg: p, sku: "UYUUYU-3D2N-AB" }, { pax: 2 })).toThrow(
+      /falta TariffCode exacto/,
+    );
+  });
+  it("un único control coincidente no basta para validar", () => {
+    const p = structuredClone(pkg);
+    p.controls = p.controls.filter((row) => row["sku"] !== "UYUUYU-3D2N-AB" || row["pax"] === "2");
+    const assessment = assessPackageTemplates(p).find((row) => row.sku === "UYUUYU-3D2N-AB")!;
+    expect(assessment.status).toBe("pending");
+    expect(assessment.reasons).toEqual(
+      expect.arrayContaining([
+        "Falta control económico independiente para pax 1",
+        "Falta control económico independiente para pax 3",
+        "Falta control económico independiente para pax 4",
+        "Falta control económico independiente para pax 5",
+      ]),
+    );
   });
 });

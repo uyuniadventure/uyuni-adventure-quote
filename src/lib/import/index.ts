@@ -8,7 +8,7 @@ import {
   type PackageV2,
   type CatalogRow,
 } from "./package-v2";
-import { importTables } from "./plan-v2";
+import { importTables, type TemplateEconomicAssessment } from "./plan-v2";
 import { costPackageTemplate, type TemplateCostOptions } from "../pricing/template-cost";
 
 /** Files are read locally; the real ZIP is never checked into source control. */
@@ -54,9 +54,15 @@ export async function loadImportCatalog(): Promise<ImportCatalog> {
 export function controlPackageCosts(pkg: PackageV2) {
   return pkg.controls.map((r) => {
     try {
+      const date = r["start_date"] || r["fecha_inicio"] || undefined;
       const app = costPackageTemplate(
         { pkg, sku: r["sku"]! },
-        { pax: Number(r["pax"]) },
+        {
+          pax: Number(r["pax"]),
+          tc: Number(r["tc"] || 0),
+          staff: Number(r["staff"] || 0),
+          ...(date ? { date, year: Number(date.slice(0, 4)) } : {}),
+        },
       ).total_cost_usd;
       const delta = app - Number(r["costo_hoja"]);
       return {
@@ -81,27 +87,30 @@ export function controlPackageCosts(pkg: PackageV2) {
     }
   });
 }
-export interface TemplateImportAssessment {
-  sku: string;
-  status: "validated" | "pending" | "blocked";
-  reasons: string[];
-  controls: number;
-}
+export type TemplateImportAssessment = TemplateEconomicAssessment;
+/** The historical cost control was supplied as a five-scenario matrix per covered itinerary. */
+export const requiredImportControlPax = [1, 2, 3, 4, 5] as const;
 export function assessPackageTemplates(pkg: PackageV2): TemplateImportAssessment[] {
   const validation = validatePackageV2(pkg);
   const control = controlPackageCosts(pkg);
   return pkg.templates.map((template) => {
     const sku = template["sku"]!;
     const rows = control.filter((r) => r.sku === sku);
-    const reasons = validation.warnings
+    const reasons: string[] = validation.warnings
       .filter((w) => w.key === sku)
       .map((w) => w.message)
-      .filter((message) => !message.startsWith("BLOQUEADO:"));
+      .filter((message) => message === "Plantilla sin servicios");
     const blocked = validation.warnings
       .filter((w) => w.key === sku)
       .map((w) => w.message)
       .filter((message) => message.startsWith("BLOQUEADO:"));
-    if (!rows.length) reasons.push("Sin control económico independiente en 09_control_costos");
+    for (const pax of requiredImportControlPax) {
+      const scenario = rows.filter((row) => row.pax === pax);
+      if (scenario.length === 0)
+        reasons.push(`Falta control económico independiente para pax ${pax}`);
+      else if (scenario.length > 1)
+        reasons.push(`Control económico ambiguo para pax ${pax}: ${scenario.length} filas`);
+    }
     for (const row of rows) {
       if (row.error) reasons.push(`Pax ${row.pax}: ${row.error}`);
       else if (Math.abs(row.delta ?? Infinity) > 1)
@@ -122,15 +131,15 @@ export async function stageImportPackage(file: File) {
   const validation = validatePackageV2(pkg, {
     services: (catalog["services"] ?? []).map((s) => ({ sku: String(s["sku"]) })),
   });
+  const control = validation.errors.length ? [] : controlPackageCosts(pkg);
+  const templates = validation.errors.length ? [] : assessPackageTemplates(pkg);
   let rows: ReturnType<typeof diffPackageV2> = [];
   if (!validation.errors.length)
     try {
-      rows = diffPackageV2(pkg, catalog);
+      rows = diffPackageV2(pkg, catalog, templates);
     } catch (e) {
       validation.errors.push({ key: "catalog", message: String(e) });
     }
-  const control = validation.errors.length ? [] : controlPackageCosts(pkg);
-  const templates = validation.errors.length ? [] : assessPackageTemplates(pkg);
   const batchId = unwrap(
     await db.rpc("stage_import_package", {
       p_file_name: file.name,
@@ -140,7 +149,13 @@ export async function stageImportPackage(file: File) {
     }),
   );
   const saved = unwrap(await db.from("import_batches").select("*").eq("id", batchId).single());
-  return { batchId, validation: saved.summary as unknown as typeof validation, rows, control, templates };
+  return {
+    batchId,
+    validation: saved.summary as unknown as typeof validation,
+    rows,
+    control,
+    templates,
+  };
 }
 export async function commitImportBatch(batchId: string) {
   return unwrap(await db.rpc("commit_import_batch", { p_batch_id: batchId }));

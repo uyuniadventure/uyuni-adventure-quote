@@ -7,7 +7,7 @@ import {
   templateSuggestionError,
   type TemplateSuggestion,
 } from "@/lib/quotes/suggestions";
-import { createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
+import { createEmptyQuote, createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -119,6 +119,19 @@ it("shows pending status and warnings, and creates through the library", async (
     "template",
     expect.objectContaining({ pax_paying: 2, tc_count: 0 }),
   );
+});
+it("starts a Spanish quote from scratch without requiring a template translation", async () => {
+  vi.mocked(suggestTemplates).mockResolvedValue([]);
+  vi.mocked(createEmptyQuote).mockResolvedValue({ id: "empty-quote" } as Awaited<
+    ReturnType<typeof createEmptyQuote>
+  >);
+  const { onCreated } = show();
+  fireEvent.click(screen.getByRole("button", { name: "Empezar desde cero" }));
+  await waitFor(() => expect(onCreated).toHaveBeenCalledWith("empty-quote"));
+  expect(createEmptyQuote).toHaveBeenCalledWith(
+    expect.objectContaining({ language: "es", client_id: "client" }),
+  );
+  expect(createQuoteFromTemplate).not.toHaveBeenCalled();
 });
 it("shows the missing migration after one retry and allows a successful manual retry", async () => {
   vi.mocked(suggestTemplates).mockRejectedValue(

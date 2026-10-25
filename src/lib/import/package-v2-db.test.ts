@@ -16,8 +16,14 @@ vi.mock("../db", () => ({
   },
 }));
 import { createQuoteFromTemplate, loadQuote } from "../quotes";
-import { costTemplate } from "../pricing/template-cost";
-import { stageImportPackage, discardImportBatch, loadImportBatch } from "./index";
+import { costPackageTemplate, costTemplate } from "../pricing/template-cost";
+import {
+  assessPackageTemplates,
+  controlPackageCosts,
+  stageImportPackage,
+  discardImportBatch,
+  loadImportBatch,
+} from "./index";
 import { includedSegmentsForDay, proposeSegmentForBlocks } from "../quotes/import-segments";
 import { resolveDay } from "../quotes/day-content";
 import { readFile } from "node:fs/promises";
@@ -50,13 +56,31 @@ async function catalog(): Promise<ImportCatalog> {
 }
 async function stage(p = pkg) {
   const c = await catalog();
-  const changes = diffPackageV2(p, c);
   const v = validatePackageV2(p);
+  const templates = assessPackageTemplates(p);
+  const control = controlPackageCosts(p);
+  const changes = diffPackageV2(p, c, templates);
   const r = await pg.query<{ id: string }>(
     "select public.stage_import_package('fixture.zip',$1,$2,$3) id",
-    [JSON.stringify(p), JSON.stringify(changes), JSON.stringify(v)],
+    [JSON.stringify(p), JSON.stringify(changes), JSON.stringify({ ...v, templates, control })],
   );
   return { id: r.rows[0]!.id, changes };
+}
+function packageWithValidatedControls() {
+  const p = structuredClone(pkg);
+  p.tariffs[0]!["PRECIO_USD"] = "801";
+  p.controls = p.controls
+    .filter((row) => !(row["sku"] === "SPASPA-4D3N-AB" && row["pax"] === "1"))
+    .map((row) => ({
+      ...row,
+      costo_hoja: String(
+        costPackageTemplate(
+          { pkg: p, sku: row["sku"]! },
+          { pax: Number(row["pax"]), tc: Number(row["tc"] || 0) },
+        ).total_cost_usd,
+      ),
+    }));
+  return p;
 }
 async function commit(id: string) {
   return (
@@ -69,6 +93,40 @@ async function commit(id: string) {
 async function as(user: string) {
   await pg.exec("reset role;set role authenticated");
   await pg.query("select set_config('request.jwt.claim.sub',$1,false)", [user]);
+}
+function bulkLocationRows(count: number, existing: Set<string>, idOffset = 0) {
+  const rows: Array<{
+    table_name: string;
+    natural_key: string;
+    action: "insert";
+    payload: { id: string; code: string; name: string; country: string };
+    before: null;
+  }> = [];
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (const a of alphabet) {
+    for (const b of alphabet) {
+      for (const c of alphabet) {
+        const code = `${a}${b}${c}`;
+        if (existing.has(code)) continue;
+        const serial = (idOffset + rows.length + 1).toString(16).padStart(12, "0");
+        rows.push({
+          table_name: "location_codes",
+          natural_key: code,
+          action: "insert",
+          payload: {
+            id: `92000000-0000-4000-8000-${serial}`,
+            code,
+            name: `Ubicación de carga ${idOffset + rows.length + 1}`,
+            country: "BOLIVIA",
+          },
+          before: null,
+        });
+        existing.add(code);
+        if (rows.length === count) return rows;
+      }
+    }
+  }
+  throw new Error(`No hay ${count} códigos de ubicación disponibles`);
 }
 beforeAll(async () => {
   pg = await createDatabase();
@@ -146,6 +204,21 @@ describe.sequential("staging y commit reales con RLS", () => {
     expect(
       (await pg.query<{ n: number }>("select count(*)::int n from template_day_items")).rows[0]!.n,
     ).toBe(pkg.lodging.length);
+    expect(
+      (
+        await pg.query<{ sku: string; economic_status: string; economic_issues: string[] }>(
+          "select sku,economic_status,economic_issues from itinerary_templates where import_v2_route is not null order by sku",
+        )
+      ).rows,
+    ).toEqual([
+      expect.objectContaining({ sku: "SPASPA-4D3N-AB", economic_status: "pending" }),
+      expect.objectContaining({
+        sku: "UYUUYU-3D2N-AB",
+        economic_status: "validated",
+        economic_issues: [],
+      }),
+      expect.objectContaining({ sku: "UYUUYU-3D2N-SOLO-TEXTO", economic_status: "pending" }),
+    ]);
   });
   it("repetir el zip es todo skip y cambiar un precio es un update", async () => {
     const s = await stage();
@@ -157,7 +230,9 @@ describe.sequential("staging y commit reales con RLS", () => {
     const p = structuredClone(pkg);
     p.tariffs[0]!["PRECIO_USD"] = "801";
     const changed = await stage(p);
-    expect(changed.changes.filter((r) => r.action === "update")).toHaveLength(1);
+    expect(
+      changed.changes.filter((r) => r.table_name === "service_rates" && r.action === "update"),
+    ).toHaveLength(1);
     expect((await commit(changed.id)).status).toBe("committed");
   });
   it("aceptar avisos no activa plantillas sin validación económica", async () => {
@@ -192,12 +267,14 @@ describe.sequential("staging y commit reales con RLS", () => {
           "select count(*)::int n from itinerary_templates where import_v2_route is not null and economic_status<>'validated' and status='pendiente'",
         )
       ).rows[0]!.n,
-    ).toBe(3);
+    ).toBe(2);
   });
   it("crea la cotización con habitaciones fuera de bloques y un solo cargo de tramo", async () => {
+    const staged = await stage(pkg);
+    expect((await commit(staged.id)).status).toBe("committed");
     const template = (
       await pg.query<{ id: string }>(
-        "select id from itinerary_templates where sku='SPASPA-4D3N-AB'",
+        "select id from itinerary_templates where sku='UYUUYU-3D2N-AB'",
       )
     ).rows[0]!.id;
     const client = (
@@ -205,49 +282,53 @@ describe.sequential("staging y commit reales con RLS", () => {
         "insert into clients(type,name) values('B2C','Import sintético') returning id",
       )
     ).rows[0]!.id;
-    await pg.query("update itinerary_templates set economic_status='validated' where id=$1", [
-      template,
-    ]);
-    // The preceding test changed the first segment to 801 USD.
-    expect((await costTemplate(template, { pax: 2 })).total_cost_usd).toBe(1861);
-    await expect(costTemplate(template, { pax: 1 })).rejects.toThrow(/sin tramo de pasajeros/);
+    expect(
+      (
+        await pg.query<{ economic_status: string }>(
+          "select economic_status from itinerary_templates where id=$1",
+          [template],
+        )
+      ).rows[0]!.economic_status,
+    ).toBe("validated");
+    expect((await costTemplate(template, { pax: 2 })).total_cost_usd).toBe(1230);
     const q = await createQuoteFromTemplate(template, {
       client_id: client,
       language: "es",
       start_date: "2026-11-01",
       pax_paying: 2,
+      category: "COMFORT",
       fx_snapshot: { USD: 1, CLP: 900, BOB: 7 },
     });
-    expect(Number(q.total_cost_usd)).toBeCloseTo(1861, 2);
+    expect(Number(q.total_cost_usd)).toBeCloseTo(1230, 2);
     const saved = await loadQuote(q.id);
-    expect(resolveDay(saved.days[1]!).client_note?.["es"]).toContain("lluvia");
     expect(resolveDay(saved.days[0]!).accommodation_text?.["es"]).toBe("Hotel A");
-    const segment = saved.items.filter((i) => i.sku === "T_4X4_4D");
+    const segment = saved.items.filter((i) => i.sku === "T_4X4_3D");
     expect(segment).toHaveLength(1);
     expect(includedSegmentsForDay(saved.items, 2)[0]?.label).toBe("incluido en Día 1");
     expect((await proposeSegmentForBlocks("SPASPA", 4, 7))[0]?.qty).toBe(2);
-    expect(segment.every((i) => i.billing === "per_service" && i.span_days === 4)).toBe(true);
+    expect(segment.every((i) => i.billing === "per_service" && i.span_days === 3)).toBe(true);
     expect(segment.filter((i) => Number(i.total_cost_usd) > 0)).toHaveLength(1);
     expect(saved.items.filter((i) => i.slot_key === "ALOJAMIENTO").length).toBeGreaterThan(0);
   });
-  it("las diez cotizaciones importadas reproducen el control, incluido el tramo 5–9", async () => {
+  it("crea los cinco escenarios validados y rechaza la plantilla pendiente", async () => {
     const client = (
       await pg.query<{ id: string }>(
         "insert into clients(type,name) values('B2C','Control de importación') returning id",
       )
     ).rows[0]!.id;
-    for (const sku of ["SPASPA-4D3N-AB", "UYUUYU-3D2N-AB"]) {
+    for (const sku of ["UYUUYU-3D2N-AB"]) {
       const template = (
         await pg.query<{ id: string }>("select id from itinerary_templates where sku=$1", [sku])
       ).rows[0]!.id;
-      await pg.query("update itinerary_templates set economic_status='validated' where id=$1", [
-        template,
-      ]);
+      expect(
+        (
+          await pg.query<{ economic_status: string }>(
+            "select economic_status from itinerary_templates where id=$1",
+            [template],
+          )
+        ).rows[0]!.economic_status,
+      ).toBe("validated");
       for (let pax = 1; pax <= 5; pax++) {
-        if (sku === "SPASPA-4D3N-AB" && pax === 1) {
-          await expect(costTemplate(template, { pax })).rejects.toThrow(/sin tramo de pasajeros/);
-          continue;
-        }
         const expected = (await costTemplate(template, { pax })).total_cost_usd;
         const q = await createQuoteFromTemplate(template, {
           client_id: client,
@@ -261,6 +342,151 @@ describe.sequential("staging y commit reales con RLS", () => {
         expect((await loadQuote(q.id)).roomingRows.length).toBeGreaterThan(0);
       }
     }
+    const pending = (
+      await pg.query<{ id: string; economic_status: string }>(
+        "select id,economic_status from itinerary_templates where sku='SPASPA-4D3N-AB'",
+      )
+    ).rows[0]!;
+    expect(pending.economic_status).toBe("pending");
+    await expect(
+      createQuoteFromTemplate(pending.id, {
+        client_id: client,
+        language: "es",
+        start_date: "2026-11-01",
+        pax_paying: 2,
+        category: "COMFORT",
+        fx_snapshot: { USD: 1, CLP: 900, BOB: 7 },
+      }),
+    ).rejects.toThrow(/validación económica/);
+  });
+  it("mantiene Sky Dream por persona al pasar de staging a commit", async () => {
+    const p = packageWithValidatedControls();
+    const lodging = p.lodging.find(
+      (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+    )!;
+    const base = p.tariffs.find((row) => row["TariffCode"] === "H_A_DBL")!;
+    p.tariffs.push({
+      ...base,
+      TariffCode: "HTL_SKYDREAM_POLQUES_PP_2026",
+      Supplier: "SKY DREAM (DON CALIXTO)",
+      ServiceName: "Sky Dream",
+      UnitType: "PER_PAX_PER_NIGHT",
+      RoomType: "STD",
+      PRECIO_USD: "43.42",
+    });
+    p.tariffs.push({
+      ...base,
+      TariffCode: "MEAL_SKYDREAM_DINNER_2026",
+      Supplier: "SKY DREAM (DON CALIXTO)",
+      ServiceType: "meal",
+      UnitType: "PER_PERSON_PER_NIGHT",
+      PRECIO_USD: "1",
+    });
+    lodging["TariffCode"] = "";
+    lodging["proveedor"] = "SKY DREAM (DON CALIXTO)";
+    lodging["hotel"] = "Sky Dream";
+    lodging["unidad"] = "PER_ROOM_PER_NIGHT";
+    p.controls = p.controls
+      .filter((row) => row["sku"] === "UYUUYU-3D2N-AB")
+      .map((row) => ({
+        ...row,
+        costo_hoja: String(
+          costPackageTemplate(
+            { pkg: p, sku: row["sku"]! },
+            { pax: Number(row["pax"]), tc: Number(row["tc"] || 0) },
+          ).total_cost_usd,
+        ),
+      }));
+    const staged = await stage(p);
+    expect((await commit(staged.id)).status).toBe("committed");
+    const template = (
+      await pg.query<{ id: string; economic_status: string }>(
+        "select id,economic_status from itinerary_templates where sku='UYUUYU-3D2N-AB'",
+      )
+    ).rows[0]!;
+    expect(template.economic_status).toBe("validated");
+    for (const pax of [1, 2, 3, 5]) {
+      const result = await costTemplate(template.id, { pax });
+      const sky = result.lines.find((line) => line.sku === "HTL_SKYDREAM_POLQUES_PP_2026")!;
+      expect(sky.qty).toBe(pax);
+      expect(sky.cost_usd).toBeCloseTo(43.42 * pax, 2);
+      expect(result.lines.some((line) => line.sku === "MEAL_SKYDREAM_DINNER_2026")).toBe(false);
+    }
+  });
+  it("protege el estado económico importado y no restringe plantillas manuales", async () => {
+    const imported = (
+      await pg.query<{ id: string }>(
+        "select id from itinerary_templates where sku='UYUUYU-3D2N-AB'",
+      )
+    ).rows[0]!.id;
+    await expect(
+      pg.query(
+        "update itinerary_templates set economic_status='pending',economic_issues=array['forzado'] where id=$1",
+        [imported],
+      ),
+    ).rejects.toThrow(/solo puede cambiar mediante una importación validada/);
+    const manual = (
+      await pg.query<{ id: string }>(
+        "insert into itinerary_templates(sku,name,route_type,days,nights,status,catalog_origin) values('MANUAL-ECON','Manual','ROUNDTRIP',1,0,'pendiente','manual') returning id",
+      )
+    ).rows[0]!.id;
+    await pg.query(
+      "update itinerary_templates set economic_status='pending',economic_issues=array['revisión manual'] where id=$1",
+      [manual],
+    );
+    expect(
+      (
+        await pg.query<{ economic_status: string }>(
+          "select economic_status from itinerary_templates where id=$1",
+          [manual],
+        )
+      ).rows[0]!.economic_status,
+    ).toBe("pending");
+  });
+  it("el servidor rechaza validated si falta un escenario económico evaluado", async () => {
+    const c = await catalog();
+    const validation = validatePackageV2(pkg);
+    const templates = assessPackageTemplates(pkg);
+    const changes = diffPackageV2(pkg, c, templates);
+    const control = controlPackageCosts(pkg).filter(
+      (row) => !(row.sku === "UYUUYU-3D2N-AB" && row.pax === 5),
+    );
+    const id = (
+      await pg.query<{ id: string }>(
+        "select stage_import_package('economic-forgery.zip',$1,$2,$3) id",
+        [
+          JSON.stringify(pkg),
+          JSON.stringify(changes),
+          JSON.stringify({ ...validation, templates, control }),
+        ],
+      )
+    ).rows[0]!.id;
+    expect(await commit(id)).toMatchObject({
+      status: "staged",
+      error: "Hay errores de validación.",
+    });
+  });
+  it("persiste blocked cuando el alojamiento no puede resolverse", async () => {
+    const p = structuredClone(pkg);
+    p.tariffs[0]!["PRECIO_USD"] = "801";
+    const lodging = p.lodging.find(
+      (row) => row["sku"] === "UYUUYU-3D2N-AB" && row["slot"] === "ALOJAMIENTO",
+    )!;
+    lodging["TariffCode"] = "";
+    lodging["proveedor"] = "HOTEL SIN TARIFA";
+    lodging["hotel"] = "HOTEL SIN TARIFA";
+    const staged = await stage(p);
+    expect((await commit(staged.id)).status).toBe("committed");
+    expect(
+      (
+        await pg.query<{ economic_status: string; economic_issues: string[] }>(
+          "select economic_status,economic_issues from itinerary_templates where sku='UYUUYU-3D2N-AB'",
+        )
+      ).rows[0],
+    ).toMatchObject({
+      economic_status: "blocked",
+      economic_issues: expect.arrayContaining([expect.stringMatching(/^BLOQUEADO:/)]),
+    });
   });
   it("error a mitad revierte todo y conserva el lote staged con diagnóstico", async () => {
     const p = structuredClone(pkg);
@@ -460,4 +686,73 @@ describe.sequential("staging y commit reales con RLS", () => {
       ).rows[0]!.n,
     ).toBe(before);
   });
+  it("procesa miles de filas bajo el timeout real y revierte íntegro un lote masivo inválido", async () => {
+    const existing = new Set(
+      (await pg.query<{ code: string }>("select code from location_codes")).rows.map(
+        (row) => row.code,
+      ),
+    );
+    const c = await catalog();
+    const validation = validatePackageV2(pkg);
+    const templates = assessPackageTemplates(pkg);
+    const control = controlPackageCosts(pkg);
+    const base = diffPackageV2(pkg, c, templates);
+    const bulk = bulkLocationRows(3340, existing);
+    await pg.exec("set statement_timeout='10s'");
+    try {
+      const staged = (
+        await pg.query<{ id: string }>("select stage_import_package('bulk-3340.zip',$1,$2,$3) id", [
+          JSON.stringify(pkg),
+          JSON.stringify([...base, ...bulk]),
+          JSON.stringify({ ...validation, templates, control }),
+        ])
+      ).rows[0]!.id;
+      expect(await commit(staged)).toMatchObject({ status: "committed" });
+      expect(
+        (
+          await pg.query<{ n: number }>(
+            "select count(*)::int n from location_codes where id::text like '92000000-0000-4000-8000-%'",
+          )
+        ).rows[0]!.n,
+      ).toBe(3340);
+
+      const rollbackRows = bulkLocationRows(2000, existing, 10000);
+      const rollbackBatch = (
+        await pg.query<{ id: string }>(
+          "select stage_import_package('bulk-rollback.zip',$1,$2,$3) id",
+          [
+            JSON.stringify(pkg),
+            JSON.stringify([...diffPackageV2(pkg, await catalog(), templates), ...rollbackRows]),
+            JSON.stringify({ ...validation, templates, control }),
+          ],
+        )
+      ).rows[0]!.id;
+      await pg.exec("reset role");
+      await pg.query(
+        `update import_rows set payload=jsonb_set(payload,'{code}','"INVALID"')
+         where batch_id=$1 and table_name='location_codes' and natural_key=$2`,
+        [rollbackBatch, rollbackRows.at(-1)!.natural_key],
+      );
+      await as(admin);
+      expect(await commit(rollbackBatch)).toMatchObject({ status: "staged" });
+      expect(
+        (
+          await pg.query<{ n: number }>(
+            "select count(*)::int n from location_codes where id::text like '92000000-0000-4000-8000-%'",
+          )
+        ).rows[0]!.n,
+      ).toBe(3340);
+      expect(
+        (
+          await pg.query<{ n: number }>(
+            "select count(*)::int n from location_codes where id=any($1::uuid[])",
+            [rollbackRows.map((row) => row.payload.id)],
+          )
+        ).rows[0]!.n,
+      ).toBe(0);
+    } finally {
+      await pg.exec("set statement_timeout=0");
+      await as(admin);
+    }
+  }, 120000);
 });
