@@ -11,6 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MODALITIES, STATUSES, StatusBadge, cap } from "@/components/catalog/shared";
 import { ALL, DURATIONS, DURATION_LABELS, Filter, PageHeader, ilikeTerm, primaryBtn, useDebounced, usePlaces } from "@/components/catalog/kit";
 import { ModuleEditor } from "@/components/catalog/module-editor";
+import { Checkbox } from "@/components/ui/checkbox";
+import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
+import { useCatalogSelection } from "@/components/catalog/catalog-selection";
+import { BulkStatusBar } from "@/components/catalog/bulk-status-bar";
 
 const s = SECTIONS["modulos-actividad"];
 
@@ -28,6 +32,21 @@ function ModulesPage() {
   const [status, setStatus] = useState(ALL);
   const term = useDebounced(search.trim());
   const places = usePlaces();
+  const { role } = useCurrentUser();
+  const manager = canManageCatalog(role);
+  const filterKey = JSON.stringify({ search, term, place, duration, modality, status });
+  const selection = useCatalogSelection(["activity_modules"], filterKey, manager, async (offset, end) => {
+    let query = db.from("activity_modules").select("id, code, name").order("code").order("id").range(offset, end);
+    if (term) query = query.or(`code.ilike.%${ilikeTerm(term)}%,name.ilike.%${ilikeTerm(term)}%`);
+    if (place !== ALL) query = place === "none" ? query.is("place_id", null) : query.eq("place_id", place);
+    if (duration !== ALL) query = query.eq("duration", duration as Enums<"activity_duration">);
+    if (modality !== ALL) query = query.eq("modality", modality as Enums<"service_modality">);
+    if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data.map((r) => ({ id: r.id, code: r.code, name: r.name }));
+  });
+  const cols = manager ? 10 : 9;
 
   const q = useQuery({
     queryKey: ["activity_modules", { term, place, duration, modality, status }],
@@ -61,18 +80,21 @@ function ModulesPage() {
         <Filter value={modality} onChange={setModality} placeholder="Modalidad" options={MODALITIES.map((m) => [m, cap(m)])} />
         <Filter value={status} onChange={setStatus} placeholder="Estado" options={STATUSES.map((x) => [x, cap(x)])} />
       </div>
+      {manager && <BulkStatusBar kind="activity_modules" selection={selection} invalidate={["activity_modules"]} />}
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader><TableRow>
+            {manager && <TableHead className="w-10" />}
             <TableHead>Código</TableHead><TableHead>Nombre</TableHead><TableHead>Lugar</TableHead><TableHead>Duración</TableHead>
             <TableHead>Hora</TableHead><TableHead>Modalidad</TableHead><TableHead className="text-right">Servicios</TableHead><TableHead>Idiomas</TableHead><TableHead>Estado</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {q.isLoading && <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
-            {q.isError && <TableRow><TableCell colSpan={9} className="py-10 text-center text-destructive">No se pudieron cargar los módulos.</TableCell></TableRow>}
-            {q.data?.length === 0 && <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">No hay módulos con estos filtros.</TableCell></TableRow>}
+            {q.isLoading && <TableRow><TableCell colSpan={cols} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
+            {q.isError && <TableRow><TableCell colSpan={cols} className="py-10 text-center text-destructive">No se pudieron cargar los módulos.</TableCell></TableRow>}
+            {q.data?.length === 0 && <TableRow><TableCell colSpan={cols} className="py-10 text-center text-muted-foreground">No hay módulos con estos filtros.</TableCell></TableRow>}
             {q.data?.map((m) => (
               <TableRow key={m.id} className="cursor-pointer" onClick={() => setOpenId(m.id)}>
+                {manager && <TableCell onClick={(e) => e.stopPropagation()}><Checkbox aria-label={`Seleccionar ${m.code}`} checked={selection.ids.has(m.id)} disabled={!selection.ready} onCheckedChange={(v) => selection.toggle(m.id, v === true)} /></TableCell>}
                 <TableCell className="max-w-[220px] truncate font-mono text-xs">{m.code}</TableCell>
                 <TableCell className="max-w-[260px] truncate font-medium text-foreground">{m.name}</TableCell>
                 <TableCell>{m.places?.name ?? "—"}</TableCell>
