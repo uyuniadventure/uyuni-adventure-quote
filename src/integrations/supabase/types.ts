@@ -309,54 +309,78 @@ export type Database = {
       day_block_items: {
         Row: {
           applies_tc: boolean | null
+          billing: string
           block_id: string
           coverage_key: string | null
           coverage_start_day: number | null
           created_at: string
           id: string
           included: boolean
+          is_default: boolean
           is_optional: boolean
           item_snapshot: Json | null
           margin_applicable: boolean | null
+          margin_mode: string
+          margin_pct: number | null
           multi_day_span: number
           pricing_config: Json
           qty: number
           service_id: string | null
+          slot_key: string
+          span_days: number
+          tc_policy: string
           updated_at: string
+          variant_key: string | null
         }
         Insert: {
           applies_tc?: boolean | null
+          billing?: string
           block_id: string
           coverage_key?: string | null
           coverage_start_day?: number | null
           created_at?: string
           id?: string
           included?: boolean
+          is_default?: boolean
           is_optional?: boolean
           item_snapshot?: Json | null
           margin_applicable?: boolean | null
+          margin_mode?: string
+          margin_pct?: number | null
           multi_day_span?: number
           pricing_config?: Json
           qty?: number
           service_id?: string | null
+          slot_key?: string
+          span_days?: number
+          tc_policy?: string
           updated_at?: string
+          variant_key?: string | null
         }
         Update: {
           applies_tc?: boolean | null
+          billing?: string
           block_id?: string
           coverage_key?: string | null
           coverage_start_day?: number | null
           created_at?: string
           id?: string
           included?: boolean
+          is_default?: boolean
           is_optional?: boolean
           item_snapshot?: Json | null
           margin_applicable?: boolean | null
+          margin_mode?: string
+          margin_pct?: number | null
           multi_day_span?: number
           pricing_config?: Json
           qty?: number
           service_id?: string | null
+          slot_key?: string
+          span_days?: number
+          tc_policy?: string
           updated_at?: string
+          variant_key?: string | null
         }
         Relationships: [
           {
@@ -477,6 +501,7 @@ export type Database = {
           created_by: string | null
           default_day_position: number | null
           end_point: string | null
+          hotel_id: string | null
           hotel_service_id: string | null
           id: string
           modality: Database["public"]["Enums"]["itinerary_modality"]
@@ -498,6 +523,7 @@ export type Database = {
           created_by?: string | null
           default_day_position?: number | null
           end_point?: string | null
+          hotel_id?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
@@ -519,6 +545,7 @@ export type Database = {
           created_by?: string | null
           default_day_position?: number | null
           end_point?: string | null
+          hotel_id?: string | null
           hotel_service_id?: string | null
           id?: string
           modality?: Database["public"]["Enums"]["itinerary_modality"]
@@ -537,6 +564,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "day_blocks_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_codes"
             referencedColumns: ["id"]
           },
           {
@@ -628,6 +662,8 @@ export type Database = {
           created_by: string | null
           data_key: string | null
           id: string
+          import_kind: string | null
+          import_sort: number | null
           kind: string
           required: boolean
           status: string
@@ -640,6 +676,8 @@ export type Database = {
           created_by?: string | null
           data_key?: string | null
           id?: string
+          import_kind?: string | null
+          import_sort?: number | null
           kind: string
           required?: boolean
           status?: string
@@ -652,6 +690,8 @@ export type Database = {
           created_by?: string | null
           data_key?: string | null
           id?: string
+          import_kind?: string | null
+          import_sort?: number | null
           kind?: string
           required?: boolean
           status?: string
@@ -867,6 +907,100 @@ export type Database = {
           },
         ]
       }
+      import_batches: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_name: string
+          id: string
+          kind: string
+          package: Json
+          status: string
+          summary: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          file_name: string
+          id?: string
+          kind?: string
+          package: Json
+          status?: string
+          summary?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_name?: string
+          id?: string
+          kind?: string
+          package?: Json
+          status?: string
+          summary?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_rows: {
+        Row: {
+          action: string
+          batch_id: string
+          before: Json | null
+          created_at: string
+          id: string
+          message: string | null
+          natural_key: string
+          payload: Json
+          position: number
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          batch_id: string
+          before?: Json | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          natural_key: string
+          payload: Json
+          position: number
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          batch_id?: string
+          before?: Json | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          natural_key?: string
+          payload?: Json
+          position?: number
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       info_blocks: {
         Row: {
           content: string
@@ -904,14 +1038,19 @@ export type Database = {
         Row: {
           approval_issues: string[]
           catalog_origin: string
-          category: Database["public"]["Enums"]["tour_category"]
+          category: Database["public"]["Enums"]["tour_category"] | null
           countries: string[]
           created_at: string
           created_by: string | null
           days: number
+          economic_issues: string[]
+          economic_status: string
           guide_language: string | null
           hotel_combo: string | null
           id: string
+          import_excludes_id: string | null
+          import_includes_id: string | null
+          import_v2_route: string | null
           import_warnings: Json
           includes_guide: boolean
           includes_staff_lodging_meals: boolean
@@ -925,21 +1064,28 @@ export type Database = {
           route_to: string | null
           route_type: Database["public"]["Enums"]["route_type"]
           sku: string
+          source_category: string | null
           source_quote_id: string | null
+          source_season: string | null
           status: Database["public"]["Enums"]["catalog_status"]
           updated_at: string
         }
         Insert: {
           approval_issues?: string[]
           catalog_origin?: string
-          category: Database["public"]["Enums"]["tour_category"]
+          category?: Database["public"]["Enums"]["tour_category"] | null
           countries?: string[]
           created_at?: string
           created_by?: string | null
           days: number
+          economic_issues?: string[]
+          economic_status?: string
           guide_language?: string | null
           hotel_combo?: string | null
           id?: string
+          import_excludes_id?: string | null
+          import_includes_id?: string | null
+          import_v2_route?: string | null
           import_warnings?: Json
           includes_guide?: boolean
           includes_staff_lodging_meals?: boolean
@@ -953,21 +1099,28 @@ export type Database = {
           route_to?: string | null
           route_type: Database["public"]["Enums"]["route_type"]
           sku: string
+          source_category?: string | null
           source_quote_id?: string | null
+          source_season?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
         Update: {
           approval_issues?: string[]
           catalog_origin?: string
-          category?: Database["public"]["Enums"]["tour_category"]
+          category?: Database["public"]["Enums"]["tour_category"] | null
           countries?: string[]
           created_at?: string
           created_by?: string | null
           days?: number
+          economic_issues?: string[]
+          economic_status?: string
           guide_language?: string | null
           hotel_combo?: string | null
           id?: string
+          import_excludes_id?: string | null
+          import_includes_id?: string | null
+          import_v2_route?: string | null
           import_warnings?: Json
           includes_guide?: boolean
           includes_staff_lodging_meals?: boolean
@@ -981,7 +1134,9 @@ export type Database = {
           route_to?: string | null
           route_type?: Database["public"]["Enums"]["route_type"]
           sku?: string
+          source_category?: string | null
           source_quote_id?: string | null
+          source_season?: string | null
           status?: Database["public"]["Enums"]["catalog_status"]
           updated_at?: string
         }
@@ -991,6 +1146,20 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_excludes_id_fkey"
+            columns: ["import_excludes_id"]
+            isOneToOne: false
+            referencedRelation: "doc_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itinerary_templates_import_includes_id_fkey"
+            columns: ["import_includes_id"]
+            isOneToOne: false
+            referencedRelation: "doc_blocks"
             referencedColumns: ["id"]
           },
           {
@@ -1509,6 +1678,7 @@ export type Database = {
       }
       pricing_settings: {
         Row: {
+          activity_modules_enabled: boolean
           created_at: string
           deposit_pct: number
           id: string
@@ -1517,6 +1687,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activity_modules_enabled?: boolean
           created_at?: string
           deposit_pct?: number
           id?: string
@@ -1525,6 +1696,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activity_modules_enabled?: boolean
           created_at?: string
           deposit_pct?: number
           id?: string
@@ -1826,6 +1998,7 @@ export type Database = {
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
+          billing: string
           check_in: string | null
           check_out: string | null
           created_at: string
@@ -1837,7 +2010,10 @@ export type Database = {
           flight_no: string | null
           id: string
           included: boolean
+          is_default: boolean
           margin_applicable: boolean
+          margin_mode: string
+          margin_pct: number | null
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null
           override_note: string | null
           price_overridden: boolean
@@ -1845,13 +2021,21 @@ export type Database = {
           pricing_unit: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master: boolean
           qty: number
+          qty_cost: number | null
+          qty_override: number | null
+          qty_supplier: number | null
           quote_day_id: string
           room_distribution: Json | null
           route: string | null
+          selected: boolean
+          selection_source: string
           service_id: string | null
           sku: string | null
+          slot_key: string
           source_block_service_id: string | null
+          span_days: number
           supplier_id: string | null
+          tc_policy: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
           type: Database["public"]["Enums"]["service_type"]
@@ -1865,6 +2049,7 @@ export type Database = {
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
+          billing?: string
           check_in?: string | null
           check_out?: string | null
           created_at?: string
@@ -1876,7 +2061,10 @@ export type Database = {
           flight_no?: string | null
           id?: string
           included?: boolean
+          is_default?: boolean
           margin_applicable?: boolean
+          margin_mode?: string
+          margin_pct?: number | null
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
           override_note?: string | null
           price_overridden?: boolean
@@ -1884,13 +2072,21 @@ export type Database = {
           pricing_unit: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master?: boolean
           qty?: number
+          qty_cost?: number | null
+          qty_override?: number | null
+          qty_supplier?: number | null
           quote_day_id: string
           room_distribution?: Json | null
           route?: string | null
+          selected?: boolean
+          selection_source?: string
           service_id?: string | null
           sku?: string | null
+          slot_key?: string
           source_block_service_id?: string | null
+          span_days?: number
           supplier_id?: string | null
+          tc_policy?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
           type: Database["public"]["Enums"]["service_type"]
@@ -1904,6 +2100,7 @@ export type Database = {
           airline?: string | null
           applies_tc?: boolean
           arr_time?: string | null
+          billing?: string
           check_in?: string | null
           check_out?: string | null
           created_at?: string
@@ -1915,7 +2112,10 @@ export type Database = {
           flight_no?: string | null
           id?: string
           included?: boolean
+          is_default?: boolean
           margin_applicable?: boolean
+          margin_mode?: string
+          margin_pct?: number | null
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
           override_note?: string | null
           price_overridden?: boolean
@@ -1923,13 +2123,21 @@ export type Database = {
           pricing_unit?: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master?: boolean
           qty?: number
+          qty_cost?: number | null
+          qty_override?: number | null
+          qty_supplier?: number | null
           quote_day_id?: string
           room_distribution?: Json | null
           route?: string | null
+          selected?: boolean
+          selection_source?: string
           service_id?: string | null
           sku?: string | null
+          slot_key?: string
           source_block_service_id?: string | null
+          span_days?: number
           supplier_id?: string | null
+          tc_policy?: string | null
           total_cost_local?: number | null
           total_cost_usd?: number | null
           type?: Database["public"]["Enums"]["service_type"]
@@ -2080,6 +2288,47 @@ export type Database = {
             foreignKeyName: "quote_proposals_quote_id_fkey"
             columns: ["quote_id"]
             isOneToOne: true
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_rooming: {
+        Row: {
+          count: number
+          created_at: string
+          for_tc: boolean
+          id: string
+          night: number | null
+          quote_id: string
+          room_type: string
+          updated_at: string
+        }
+        Insert: {
+          count: number
+          created_at?: string
+          for_tc?: boolean
+          id?: string
+          night?: number | null
+          quote_id: string
+          room_type: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          for_tc?: boolean
+          id?: string
+          night?: number | null
+          quote_id?: string
+          room_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_rooming_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
             referencedRelation: "quotes"
             referencedColumns: ["id"]
           },
@@ -2333,6 +2582,50 @@ export type Database = {
           },
         ]
       }
+      segment_rules: {
+        Row: {
+          created_at: string
+          day_from: number
+          day_to: number
+          days: number
+          id: string
+          route: string
+          service_id: string
+          slot_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_from: number
+          day_to: number
+          days: number
+          id?: string
+          route: string
+          service_id: string
+          slot_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_from?: number
+          day_to?: number
+          days?: number
+          id?: string
+          route?: string
+          service_id?: string
+          slot_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "segment_rules_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_change_requests: {
         Row: {
           approved_by: string | null
@@ -2408,12 +2701,16 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          import_source_price_net: number | null
+          import_source_price_rack: number | null
+          import_source_season: string | null
           net_cost_missing: boolean
           notes: string | null
           pax_max: number | null
           pax_min: number | null
           price_net: number | null
           price_rack: number | null
+          pricing_enabled: boolean
           season: Database["public"]["Enums"]["season"]
           service_id: string
           source_row: number | null
@@ -2424,12 +2721,16 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          import_source_price_net?: number | null
+          import_source_price_rack?: number | null
+          import_source_season?: string | null
           net_cost_missing?: boolean
           notes?: string | null
           pax_max?: number | null
           pax_min?: number | null
           price_net?: number | null
           price_rack?: number | null
+          pricing_enabled?: boolean
           season?: Database["public"]["Enums"]["season"]
           service_id: string
           source_row?: number | null
@@ -2440,12 +2741,16 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          import_source_price_net?: number | null
+          import_source_price_rack?: number | null
+          import_source_season?: string | null
           net_cost_missing?: boolean
           notes?: string | null
           pax_max?: number | null
           pax_min?: number | null
           price_net?: number | null
           price_rack?: number | null
+          pricing_enabled?: boolean
           season?: Database["public"]["Enums"]["season"]
           service_id?: string
           source_row?: number | null
@@ -2499,12 +2804,16 @@ export type Database = {
         Row: {
           applies_tc_default: boolean
           approval_issues: string[]
+          capacity: number | null
           country: string | null
           created_at: string
           created_by: string | null
           currency: string | null
           id: string
           import_issues: string | null
+          import_source_currency: string | null
+          import_source_unit: string | null
+          import_v2_route: string | null
           location: string | null
           margin_applicable_default: boolean
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null
@@ -2512,6 +2821,7 @@ export type Database = {
           multi_day_span: number
           name: string
           notes: string | null
+          occupancy: number | null
           pricing_unit: Database["public"]["Enums"]["pricing_unit"] | null
           room_type: string | null
           sku: string
@@ -2526,12 +2836,16 @@ export type Database = {
         Insert: {
           applies_tc_default?: boolean
           approval_issues?: string[]
+          capacity?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
           id?: string
           import_issues?: string | null
+          import_source_currency?: string | null
+          import_source_unit?: string | null
+          import_v2_route?: string | null
           location?: string | null
           margin_applicable_default?: boolean
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
@@ -2539,6 +2853,7 @@ export type Database = {
           multi_day_span?: number
           name: string
           notes?: string | null
+          occupancy?: number | null
           pricing_unit?: Database["public"]["Enums"]["pricing_unit"] | null
           room_type?: string | null
           sku: string
@@ -2553,12 +2868,16 @@ export type Database = {
         Update: {
           applies_tc_default?: boolean
           approval_issues?: string[]
+          capacity?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
           id?: string
           import_issues?: string | null
+          import_source_currency?: string | null
+          import_source_unit?: string | null
+          import_v2_route?: string | null
           location?: string | null
           margin_applicable_default?: boolean
           meal_plan?: Database["public"]["Enums"]["meal_plan"] | null
@@ -2566,6 +2885,7 @@ export type Database = {
           multi_day_span?: number
           name?: string
           notes?: string | null
+          occupancy?: number | null
           pricing_unit?: Database["public"]["Enums"]["pricing_unit"] | null
           room_type?: string | null
           sku?: string
@@ -2649,30 +2969,137 @@ export type Database = {
         }
         Relationships: []
       }
+      template_day_items: {
+        Row: {
+          created_at: string
+          day_number: number
+          hotel_id: string | null
+          id: string
+          is_default: boolean
+          pricing_unit_override:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id: string | null
+          slot_key: string
+          sort: number
+          source_hotel_name: string | null
+          source_row_key: string
+          source_tariff_code: string | null
+          supplier_id: string | null
+          tc_policy: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_number: number
+          hotel_id?: string | null
+          id?: string
+          is_default?: boolean
+          pricing_unit_override?:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id?: string | null
+          slot_key: string
+          sort?: number
+          source_hotel_name?: string | null
+          source_row_key: string
+          source_tariff_code?: string | null
+          supplier_id?: string | null
+          tc_policy?: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_number?: number
+          hotel_id?: string | null
+          id?: string
+          is_default?: boolean
+          pricing_unit_override?:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id?: string | null
+          slot_key?: string
+          sort?: number
+          source_hotel_name?: string | null
+          source_row_key?: string
+          source_tariff_code?: string | null
+          supplier_id?: string | null
+          tc_policy?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_day_items_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_day_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_day_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_day_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "itinerary_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_days: {
         Row: {
           block_id: string
           created_at: string
           day_number: number
           id: string
+          import_lodging: string | null
+          import_meals: string | null
+          import_note: string | null
+          import_title: string | null
           template_id: string
           updated_at: string
+          variant_key: string | null
         }
         Insert: {
           block_id: string
           created_at?: string
           day_number: number
           id?: string
+          import_lodging?: string | null
+          import_meals?: string | null
+          import_note?: string | null
+          import_title?: string | null
           template_id: string
           updated_at?: string
+          variant_key?: string | null
         }
         Update: {
           block_id?: string
           created_at?: string
           day_number?: number
           id?: string
+          import_lodging?: string | null
+          import_meals?: string | null
+          import_note?: string | null
+          import_title?: string | null
           template_id?: string
           updated_at?: string
+          variant_key?: string | null
         }
         Relationships: [
           {
@@ -2684,6 +3111,66 @@ export type Database = {
           },
           {
             foreignKeyName: "template_days_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "itinerary_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_segment_items: {
+        Row: {
+          created_at: string
+          day_from: number
+          day_to: number
+          id: string
+          pricing_unit_override:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id: string
+          slot_key: string
+          template_id: string
+          updated_at: string
+          vehicle_max_pax_override: number | null
+        }
+        Insert: {
+          created_at?: string
+          day_from: number
+          day_to: number
+          id?: string
+          pricing_unit_override?:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id: string
+          slot_key: string
+          template_id: string
+          updated_at?: string
+          vehicle_max_pax_override?: number | null
+        }
+        Update: {
+          created_at?: string
+          day_from?: number
+          day_to?: number
+          id?: string
+          pricing_unit_override?:
+            | Database["public"]["Enums"]["pricing_unit"]
+            | null
+          service_id?: string
+          slot_key?: string
+          template_id?: string
+          updated_at?: string
+          vehicle_max_pax_override?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_segment_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_segment_items_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "itinerary_templates"
@@ -2920,6 +3407,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _import_current: {
+        Args: { p_payload: Json; p_table: string }
+        Returns: Json
+      }
+      _import_current_rows: {
+        Args: { p_rows: Json; p_table: string }
+        Returns: {
+          current_row: Json
+          row_position: number
+        }[]
+      }
+      _import_tables: { Args: never; Returns: string[] }
       _invalidate_proposal: { Args: { p_id: string }; Returns: undefined }
       _lock_catalog_approval: { Args: never; Returns: undefined }
       _lock_catalog_deletion: { Args: never; Returns: undefined }
@@ -2928,6 +3427,10 @@ export type Database = {
         Returns: undefined
       }
       _proposal_context: { Args: { p_id: string }; Returns: Json }
+      _review_imported_service_cleanup: {
+        Args: { ids: string[] }
+        Returns: Json
+      }
       _template_approval_rows: {
         Args: { eligible_services?: string[]; ids: string[] }
         Returns: {
@@ -2937,6 +3440,20 @@ export type Database = {
           reasons: string[]
         }[]
       }
+      _template_approval_rows_before_v2: {
+        Args: { eligible_services?: string[]; ids: string[] }
+        Returns: {
+          code: string
+          id: string
+          name: string
+          reasons: string[]
+        }[]
+      }
+      _validate_import_economics: {
+        Args: { p_package: Json; p_rows: Json; p_validation: Json }
+        Returns: Json
+      }
+      _validate_import_package: { Args: { p: Json }; Returns: Json }
       admin_list_users: { Args: never; Returns: Json }
       apply_quote_adjustment_bulk: {
         Args: {
@@ -2951,6 +3468,10 @@ export type Database = {
       }
       approve_day_blocks: {
         Args: { accept_warnings?: boolean; ids: string[] }
+        Returns: Json
+      }
+      approve_import_items: {
+        Args: { ids: string[]; kind: string }
         Returns: Json
       }
       approve_templates: {
@@ -3023,6 +3544,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cleanup_imported_services: {
+        Args: {
+          ids: string[]
+          p_confirm: string
+          p_expected_fingerprint: string
+        }
+        Returns: Json
+      }
+      commit_import_batch: { Args: { p_batch_id: string }; Returns: Json }
+      commit_import_batch_before_economic_guard: {
+        Args: { p_batch_id: string }
+        Returns: Json
+      }
       compute_real_margin: {
         Args: { p_id: string }
         Returns: {
@@ -3050,6 +3584,23 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "ops_services"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_location: {
+        Args: { code: string; country: string; name: string }
+        Returns: {
+          code: string
+          country: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "location_codes"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3181,6 +3732,7 @@ export type Database = {
         Returns: Json
       }
       delete_templates: { Args: { ids: string[] }; Returns: Json }
+      discard_import_batch: { Args: { p_batch_id: string }; Returns: undefined }
       due_followups: { Args: never; Returns: Json }
       edit_quote_days: {
         Args: {
@@ -3207,6 +3759,16 @@ export type Database = {
           p_changes: Json
           p_id: string
           p_promote?: boolean
+        }
+        Returns: Json
+      }
+      edit_quote_selection: {
+        Args: {
+          p_id: string
+          p_operation: string
+          p_payload: Json
+          p_result?: Json
+          p_updated_at?: string
         }
         Returns: Json
       }
@@ -3238,6 +3800,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      import_template_package: { Args: { p_template: string }; Returns: Json }
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean }
         Returns: {
@@ -3246,6 +3809,7 @@ export type Database = {
           airline: string | null
           applies_tc: boolean
           arr_time: string | null
+          billing: string
           check_in: string | null
           check_out: string | null
           created_at: string
@@ -3257,7 +3821,10 @@ export type Database = {
           flight_no: string | null
           id: string
           included: boolean
+          is_default: boolean
           margin_applicable: boolean
+          margin_mode: string
+          margin_pct: number | null
           meal_plan: Database["public"]["Enums"]["meal_plan"] | null
           override_note: string | null
           price_overridden: boolean
@@ -3265,13 +3832,21 @@ export type Database = {
           pricing_unit: Database["public"]["Enums"]["pricing_unit"]
           promote_to_master: boolean
           qty: number
+          qty_cost: number | null
+          qty_override: number | null
+          qty_supplier: number | null
           quote_day_id: string
           room_distribution: Json | null
           route: string | null
+          selected: boolean
+          selection_source: string
           service_id: string | null
           sku: string | null
+          slot_key: string
           source_block_service_id: string | null
+          span_days: number
           supplier_id: string | null
+          tc_policy: string | null
           total_cost_local: number | null
           total_cost_usd: number | null
           type: Database["public"]["Enums"]["service_type"]
@@ -3302,23 +3877,16 @@ export type Database = {
       promote_quote_template: { Args: { p_id: string }; Returns: string }
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean }
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json }
-      review_imported_service_cleanup: {
-        Args: { ids: string[] }
-        Returns: Json
-      }
-      cleanup_imported_services: {
-        Args: {
-          ids: string[]
-          p_expected_fingerprint: string
-          p_confirm: string
-        }
-        Returns: Json
-      }
+      quote_day_hotel: { Args: { p_day: string }; Returns: string }
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean }
       quote_document_context: { Args: { p_id: string }; Returns: Json }
       quote_payment_summary: { Args: { p_id: string }; Returns: Json }
       quote_proposal_context: { Args: { p_id: string }; Returns: Json }
       quote_template_source: {
+        Args: { p_client: string; p_template: string }
+        Returns: Json
+      }
+      quote_template_source_before_v2: {
         Args: { p_client: string; p_template: string }
         Returns: Json
       }
@@ -3342,12 +3910,24 @@ export type Database = {
         Args: { ids: string[]; kind: string }
         Returns: Json
       }
+      review_import_items: {
+        Args: { ids: string[]; kind: string }
+        Returns: Json
+      }
+      review_imported_service_cleanup: {
+        Args: { ids: string[] }
+        Returns: Json
+      }
       review_quote_days: {
         Args: {
           p_also_update_block?: boolean
           p_day_ids?: string[]
           p_quote_id: string
         }
+        Returns: Json
+      }
+      rooming_distribution: {
+        Args: { p_night?: number; p_rows: Json }
         Returns: Json
       }
       save_doc_section_as_block: {
@@ -3554,10 +4134,29 @@ export type Database = {
         Returns: undefined
       }
       snapshot_day_block: { Args: { p_id: string }; Returns: Json }
+      stage_import_package: {
+        Args: {
+          p_file_name: string
+          p_package: Json
+          p_rows: Json
+          p_validation: Json
+        }
+        Returns: string
+      }
+      stage_import_package_before_economic_guard: {
+        Args: {
+          p_file_name: string
+          p_package: Json
+          p_rows: Json
+          p_validation: Json
+        }
+        Returns: string
+      }
       store_rendered_proposal: {
         Args: { p_hash: string; p_html: string; p_id: string; p_lang: string }
         Returns: undefined
       }
+      template_import_links: { Args: { p_template: string }; Returns: Json }
       transition_quote: {
         Args: {
           p_id: string
