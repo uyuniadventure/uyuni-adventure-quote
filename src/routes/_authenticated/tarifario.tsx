@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PRICING_UNIT_LABELS, SERVICE_TYPES, STATUSES, StatusBadge, cap } from "@/components/catalog/shared";
 import { ServiceDetail } from "@/components/catalog/service-detail";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useCatalogSelection } from "@/components/catalog/catalog-selection";
+import { BulkStatusBar } from "@/components/catalog/bulk-status-bar";
 import { CreateServiceDialog } from "@/components/catalog/create-service";
 import {
   ChangeRequestsPanel, PendingServicesPanel, useChangeRequests, usePendingServices,
@@ -99,6 +102,21 @@ function ServicesTable({ suppliers, onOpen }: { suppliers: { id: string; name: s
   const [status, setStatus] = useState(ALL);
   const [page, setPage] = useState(0);
   const term = useDebounced(search.trim());
+  const { role } = useCurrentUser();
+  const manager = canManageCatalog(role);
+  const filterKey = JSON.stringify({ search, term, type, country, supplier, status });
+  const selection = useCatalogSelection(["services"], filterKey, manager, async (offset, end) => {
+    let query = db.from("services").select("id, sku, name").order("sku").order("id").range(offset, end);
+    if (term) { const t = term.replace(/[%,()]/g, " "); query = query.or(`sku.ilike.%${t}%,name.ilike.%${t}%`); }
+    if (type !== ALL) query = query.eq("type", type as Enums<"service_type">);
+    if (country !== ALL) query = query.eq("country", country);
+    if (supplier !== ALL) query = supplier === "none" ? query.is("supplier_id", null) : query.eq("supplier_id", supplier);
+    if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data.map((r) => ({ id: r.id, code: r.sku, name: r.name }));
+  });
+  const cols = manager ? 10 : 9;
 
   useEffect(() => setPage(0), [term, type, country, supplier, status]);
 
@@ -151,23 +169,26 @@ function ServicesTable({ suppliers, onOpen }: { suppliers: { id: string; name: s
         <Filter value={status} onChange={setStatus} placeholder="Estado" options={STATUSES.map((x) => [x, cap(x)])} />
       </div>
 
+      {manager && <BulkStatusBar kind="services" selection={selection} invalidate={["services"]} />}
       <div className="rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
+              {manager && <TableHead className="w-10" />}
               <TableHead>SKU</TableHead><TableHead>Nombre</TableHead><TableHead>Tipo</TableHead>
               <TableHead>Proveedor</TableHead><TableHead>País</TableHead><TableHead>Unidad</TableHead>
               <TableHead>Moneda</TableHead><TableHead className="text-right">Tarifas</TableHead><TableHead>Estado</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {q.isLoading && <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
-            {q.isError && <TableRow><TableCell colSpan={9} className="py-10 text-center text-destructive">No se pudo cargar el tarifario.</TableCell></TableRow>}
+            {q.isLoading && <TableRow><TableCell colSpan={cols} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
+            {q.isError && <TableRow><TableCell colSpan={cols} className="py-10 text-center text-destructive">No se pudo cargar el tarifario.</TableCell></TableRow>}
             {q.data && q.data.rows.length === 0 && (
-              <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">No hay servicios con estos filtros.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={cols} className="py-10 text-center text-muted-foreground">No hay servicios con estos filtros.</TableCell></TableRow>
             )}
             {q.data?.rows.map((r) => (
               <TableRow key={r.id} className="cursor-pointer" onClick={() => onOpen(r.id)}>
+                {manager && <TableCell onClick={(e) => e.stopPropagation()}><Checkbox aria-label={`Seleccionar ${r.sku}`} checked={selection.ids.has(r.id)} disabled={!selection.ready} onCheckedChange={(v) => selection.toggle(r.id, v === true)} /></TableCell>}
                 <TableCell className="max-w-[220px] truncate font-mono text-xs">{r.sku}</TableCell>
                 <TableCell className="max-w-[280px] truncate font-medium text-foreground">{r.name}</TableCell>
                 <TableCell>{cap(r.type)}</TableCell>
