@@ -17,6 +17,7 @@ vi.mock("../db", () => ({
 }));
 import {
   approveDayBlocks,
+  approveImportReviewItems,
   approveTemplates,
   archiveDayBlocks,
   archiveTemplates,
@@ -35,6 +36,22 @@ const one = async <T = Record<string, unknown>>(sql: string, args: unknown[] = [
 async function as(id: string) {
   await pg.exec("set role authenticated");
   await pg.query("select set_config('request.jwt.claim.sub',$1,true)", [id]);
+}
+async function legacyImportFingerprint() {
+  return one<{ fingerprint: string }>(`select md5(jsonb_build_array(
+    'import-approval-v3', false, (now() at time zone 'America/Santiago')::date, auth.uid(),
+    (select jsonb_agg(s order by s.id) from public.services s),
+    (select jsonb_agg(r order by r.id) from public.service_rates r),
+    (select jsonb_agg(t order by t.id) from public.itinerary_templates t),
+    (select jsonb_agg(t order by t.id) from public.template_day_items t),
+    (select jsonb_agg(t order by t.id) from public.template_segment_items t),
+    (select jsonb_agg(d order by d.id) from public.template_days d),
+    (select jsonb_agg(b order by b.id) from public.day_blocks b),
+    (select jsonb_agg(i order by i.id) from public.day_block_items i),
+    (select jsonb_agg(m order by m.id) from public.day_block_modules m),
+    (select jsonb_agg(m order by m.id) from public.activity_modules m),
+    (select jsonb_agg(i order by i.id) from public.activity_module_items i)
+  )::text) fingerprint`);
 }
 async function service(status: "activo" | "pendiente" | "inactivo" = "activo", rate = true) {
   const s = await one<{ id: string }>(
@@ -203,6 +220,116 @@ it("aceptar avisos no aprueba servicios ni marca revisados los textos", async ()
   });
 });
 
+it("aprueba un servicio incompleto y conserva sus advertencias económicas y de importación", async () => {
+  const id = await service("pendiente", false);
+  await pg.query(
+    "update services set pricing_unit=null,currency=null,import_issues='Revisar fuente' where id=$1",
+    [id],
+  );
+
+  const result = await approveImportReviewItems("services", [id]);
+  expect(result).toMatchObject({ approved: 1, pending: 0 });
+  expect(
+    await one("select status,pricing_unit,currency,approval_issues,import_issues from services where id=$1", [id]),
+  ).toEqual({
+    status: "activo",
+    pricing_unit: null,
+    currency: null,
+    approval_issues: ["Sin unidad de cobro.", "Sin moneda.", "Sin tarifa habilitada."],
+    import_issues: "Revisar fuente",
+  });
+});
+
+it("informa como aprobadas solo las filas de servicios realmente actualizadas", async () => {
+  const id = await service("pendiente", false);
+  await pg.exec(`reset role;
+    create function public.skip_service_approval_test() returns trigger language plpgsql as $$
+    begin
+      if new.id='${id}'::uuid then return null; end if;
+      return new;
+    end $$;
+    create trigger skip_service_approval_test before update on services
+    for each row execute function public.skip_service_approval_test()`);
+  await as(admin);
+
+  expect(await approveImportReviewItems("services", [id])).toMatchObject({
+    approved: 0,
+    pending: 1,
+  });
+  expect(await one("select status from services where id=$1", [id])).toEqual({
+    status: "pendiente",
+  });
+});
+
+it("aprueba en lote servicios sin moneda, unidad, tarifa, costo o tarifa habilitada sin completar datos", async () => {
+  const missingCurrency = await service("pendiente");
+  await pg.query("update services set currency=null where id=$1", [missingCurrency]);
+  const missingUnit = await service("pendiente");
+  await pg.query("update services set pricing_unit=null where id=$1", [missingUnit]);
+  const noRate = await service("pendiente", false);
+  const noCost = await service("pendiente", false);
+  await pg.query("insert into service_rates(service_id,price_net,price_rack) values($1,null,null)", [noCost]);
+  const disabledRate = await service("pendiente", false);
+  await pg.query(
+    "insert into service_rates(service_id,price_net,pricing_enabled) values($1,25,false)",
+    [disabledRate],
+  );
+  const ids = [missingCurrency, missingUnit, noRate, noCost, disabledRate];
+
+  expect(await approveImportReviewItems("services", ids)).toMatchObject({
+    approved: ids.length,
+    pending: 0,
+  });
+  const rows = (
+    await pg.query<{ status: string; pricing_unit: string | null; currency: string | null }>(
+      "select status,pricing_unit,currency from services where id=any($1) order by id",
+      [ids],
+    )
+  ).rows;
+  expect(rows).toHaveLength(ids.length);
+  expect(rows.every((row) => row.status === "activo")).toBe(true);
+  expect(rows.some((row) => row.currency === null)).toBe(true);
+  expect(rows.some((row) => row.pricing_unit === null)).toBe(true);
+  expect(
+    await one("select count(*)::int n from service_rates where service_id=any($1) and price_net=0", [ids]),
+  ).toEqual({ n: 0 });
+});
+
+it("mantiene reglas de módulos y permite aprobar servicios incompletos solo a Admin u Operación", async () => {
+  const emptyModule = await one<{ id: string }>(
+    "insert into activity_modules(code,name,duration) values($1,'Vacío','FD') returning id",
+    [crypto.randomUUID()],
+  );
+  expect(await approveImportReviewItems("activity_modules", [emptyModule.id])).toMatchObject({
+    approved: 0,
+    pending: 1,
+  });
+  expect(await one("select status from activity_modules where id=$1", [emptyModule.id])).toEqual({
+    status: "pendiente",
+  });
+
+  const byOps = await service("pendiente", false);
+  await pg.query("update services set pricing_unit=null,currency=null where id=$1", [byOps]);
+  await as(ops);
+  expect(await approveImportReviewItems("services", [byOps])).toMatchObject({
+    approved: 1,
+    pending: 0,
+  });
+
+  await as(admin);
+  const denied = await service("pendiente", false);
+  await as(seller);
+  await pg.exec("savepoint denied_service_approval");
+  await expect(approveImportReviewItems("services", [denied])).rejects.toThrow(
+    /Solo Admin y Operación/,
+  );
+  await pg.exec("rollback to savepoint denied_service_approval");
+  await as(admin);
+  expect(await one("select status from services where id=$1", [denied])).toEqual({
+    status: "pendiente",
+  });
+});
+
 it("aprobar plantillas permite aceptar avisos estructurales y de importación sin alterar los servicios", async () => {
   const pending = await service("pendiente");
   const bad = await template([await block({ serviceId: pending })], ["Revisar variante"]);
@@ -345,13 +472,22 @@ it("un fallo de aprobación revierte todo el lote", async () => {
   ]);
 });
 
-it("aprobación masiva conserva simulación/huella, acepta avisos solo de plantillas y no tarifas inválidas", async () => {
+it("aprobación masiva conserva simulación/huella, aprueba servicios incompletos y mantiene reglas de plantillas", async () => {
   const missingRate = await service("pendiente", false);
   const tid = await template([await block({ serviceId: missingRate })]);
   const before = (await pg.query("select * from itinerary_templates order by id")).rows;
   const normal = await reviewImport();
+  expect(normal.services).toMatchObject({ eligible: expect.any(Number), remaining: 0 });
+  expect(normal.services.items.find((i) => i.id === missingRate)?.reasons).toContain(
+    "Sin tarifa vigente con costo neto o rack.",
+  );
   expect(normal.templates.items.find((i) => i.id === tid)?.reasons).toHaveLength(1);
   expect((await pg.query("select * from itinerary_templates order by id")).rows).toEqual(before);
+  await pg.exec("savepoint legacy_fingerprint");
+  await expect(reviewImport((await legacyImportFingerprint()).fingerprint)).rejects.toThrow(
+    /Vuelve a simular/,
+  );
+  await pg.exec("rollback to savepoint legacy_fingerprint");
   await pg.exec("savepoint stale");
   await expect(reviewImport(normal.fingerprint, { acceptWarnings: true })).rejects.toThrow(
     /Vuelve a simular/,
@@ -365,7 +501,7 @@ it("aprobación masiva conserva simulación/huella, acepta avisos solo de planti
     status: "activo",
   });
   expect(await one("select status from services where id=$1", [missingRate])).toEqual({
-    status: "pendiente",
+    status: "activo",
   });
 });
 
@@ -386,6 +522,7 @@ it("la migración tiene espejo idéntico y solo expone RPC públicas a authentic
   for (const fn of [
     "approve_day_blocks(uuid[],boolean)",
     "approve_templates(uuid[],boolean)",
+    "approve_import_items(text,uuid[])",
     "archive_catalog(text,uuid[])",
     "review_catalog_approval(text,uuid[])",
     "preview_template_deletion(uuid[])",
@@ -402,4 +539,22 @@ it("la migración tiene espejo idéntico y solo expone RPC públicas a authentic
       "select has_function_privilege('authenticated','public._template_approval_rows(uuid[],uuid[])','execute') a",
     ),
   ).toEqual({ a: false });
+  expect(
+    await one(
+      "select count(*)::int n from pg_constraint where conrelid='public.services'::regclass and conname='services_check'",
+    ),
+  ).toEqual({ n: 0 });
+  const flexibleApproval = await readFile(
+    new URL("supabase/migrations/20261026000100_flexible_service_approval.sql", root),
+    "utf8",
+  );
+  expect(flexibleApproval).toContain("'import-approval-v4'");
+  expect(flexibleApproval).not.toContain("'import-approval-v3'");
+  expect(
+    await one(
+      `select
+        pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure) like '%import-approval-v4%' v4,
+        pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure) like '%import-approval-v3%' v3`,
+    ),
+  ).toEqual({ v4: true, v3: false });
 });

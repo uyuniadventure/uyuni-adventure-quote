@@ -165,8 +165,11 @@ con permisos RLS y control de cambios concurrentes. El reemplazo conserva el ID,
 queda pendiente de revisión y no modifica los snapshots de cotizaciones existentes
 ni borra los bloques anteriores que puedan estar compartidos.
 
-**Aprobación masiva de pendientes:** un servicio necesita unidad, moneda y al menos
-una tarifa vigente en la fecha de Santiago con costo neto o rack; cero explícito es válido.
+**Aprobación masiva de pendientes:** la aprobación administrativa de servicios no
+exige unidad, moneda ni tarifa. Todos los servicios alcanzados quedan activos y
+conservan en `approval_issues` las advertencias económicas detectadas; no se inventan
+unidades, monedas o tarifas, ni se convierten costos faltantes en cero. Los controles
+de cotización y precio definitivo siguen rechazando o marcando como error esos datos.
 Una plantilla necesita todos sus días numerados del 1 a su duración, con servicios
 aprobados (incluidos hoteles y servicios dentro de módulos, también los aprobables en
 la misma operación). Días vacíos, módulos vacíos y bloques/módulos inactivos generan

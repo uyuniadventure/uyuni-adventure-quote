@@ -137,6 +137,10 @@ export function pgliteSupabase(pg: PGlite) {
           ["ids", "uuid[]"],
           ["accept_warnings", "boolean"],
         ],
+        approve_import_items: [
+          ["kind", "text"],
+          ["ids", "uuid[]"],
+        ],
         preview_template_deletion: [["ids", "uuid[]"]],
         archive_catalog: [
           ["kind", "text"],

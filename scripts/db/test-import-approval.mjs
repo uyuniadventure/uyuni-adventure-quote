@@ -185,8 +185,8 @@ try {
   );
   assert.equal(preview.review_date, today);
   assert.equal(preview.services.pending, 10);
-  assert.equal(preview.services.eligible, 4);
-  assert.equal(preview.services.remaining, 6);
+  assert.equal(preview.services.eligible, 10);
+  assert.equal(preview.services.remaining, 0);
   assert.equal(
     preview.templates.eligible,
     1,
@@ -250,7 +250,10 @@ try {
     const row = await one(`select status, approval_issues from public.${table} where id=$1`, [
       item.id,
     ]);
-    assert.equal(row.status, item.reasons.length ? "pendiente" : "activo");
+    assert.equal(
+      row.status,
+      table === "services" ? "activo" : item.reasons.length ? "pendiente" : "activo",
+    );
     assert.deepEqual(row.approval_issues, item.reasons);
   }
   assert.equal(
@@ -303,7 +306,7 @@ try {
     );
     assert.equal(
       (await one("select count(*)::int n from public.services where id=$1", [missingUnit])).n,
-      0,
+      1,
     );
     assert.equal(
       (await one("select count(*)::int n from public.day_blocks where code='EMPTY'")).n,
@@ -319,17 +322,14 @@ try {
   );
   const again = await as(admin, () => rpc());
   assert.equal(again.services.eligible, 0);
-  assert.equal(again.templates.eligible, 0);
-  await db.query("update public.services set pricing_unit='per_person' where id=$1", [missingUnit]);
-  const repaired = await as(admin, () => rpc());
-  await as(admin, () => rpc(false, repaired.fingerprint));
+  assert.equal(again.templates.eligible, 2);
   assert.deepEqual(
     (await one("select approval_issues from public.services where id=$1", [missingUnit]))
       .approval_issues,
-    [],
+    ["Sin unidad de cobro."],
   );
   console.log(
-    "PASS import approval: Admin-only, read-only simulation, date/cost/unit validation, all template dependencies, stale preview, atomic rollback, persisted reasons, seller visibility and no write escalation.",
+    "PASS import approval: Admin-only global apply, all pending services approved with persisted economic warnings, unchanged template rules, stale preview, atomic rollback, seller visibility and no write escalation.",
   );
 } finally {
   await db.close();

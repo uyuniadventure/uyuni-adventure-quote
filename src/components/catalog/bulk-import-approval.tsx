@@ -68,7 +68,7 @@ export function BulkImportApproval() {
   return (
     <>
       <Button disabled={busy} onClick={() => void run()}>
-        Aprobar todo lo válido
+        Revisar aprobación masiva
       </Button>
       <Dialog
         open={open}
@@ -85,8 +85,8 @@ export function BulkImportApproval() {
             </DialogTitle>
             <DialogDescription>
               {result && !result.dry_run
-                ? "Los elementos válidos están activos. Los demás siguen pendientes con sus motivos guardados."
-                : "Revisa los conteos y los motivos. No se guardará ningún cambio hasta que confirmes."}
+                ? "Todos los servicios revisados están activos y conservan sus advertencias. Las plantillas mantienen sus reglas de aprobación."
+                : "Todos los servicios revisados se aprobarán aunque tengan información económica incompleta; las advertencias se conservarán. No se guardará ningún cambio hasta que confirmes."}
             </DialogDescription>
           </DialogHeader>
           <label className="flex items-center gap-2 text-sm">
@@ -152,7 +152,7 @@ export function BulkImportApproval() {
                         </p>
                         <p className="text-muted-foreground">
                           {item.reasons.length
-                            ? item.reasons.join(" ")
+                            ? `${label === "Servicios" ? (result.dry_run ? "Se aprobará con advertencias: " : "Aprobado con advertencias: ") : ""}${item.reasons.join(" ")}`
                             : result.dry_run
                               ? "Válido para aprobar."
                               : "Aprobado."}

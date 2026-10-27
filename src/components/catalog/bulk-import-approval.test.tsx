@@ -15,8 +15,8 @@ const preview: ImportApprovalResult = {
   fingerprint: "catalog-snapshot",
   services: {
     pending: 2,
-    eligible: 1,
-    remaining: 1,
+    eligible: 2,
+    remaining: 0,
     items: [
       { id: "20000000-0000-0000-0000-000000000001", code: "VALID", name: "Válido", reasons: [] },
       {
@@ -56,9 +56,9 @@ describe("Aprobación masiva", () => {
   it("simulates first and only applies the reviewed fingerprint after confirmation", async () => {
     review.mockResolvedValueOnce(preview).mockResolvedValueOnce({ ...preview, dry_run: false });
     const invalidate = show();
-    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revisar aprobación masiva" }));
     expect(await screen.findByText("Se aprobarían")).toBeInTheDocument();
-    expect(screen.getByText("Sin unidad de cobro.")).toBeInTheDocument();
+    expect(screen.getByText("Se aprobará con advertencias: Sin unidad de cobro.")).toBeInTheDocument();
     expect(review.mock.calls).toEqual([[undefined, { acceptWarnings: false }]]);
     expect(invalidate).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Confirmar aprobación" }));
@@ -71,10 +71,10 @@ describe("Aprobación masiva", () => {
   it("cancel does not approve anything and reopening makes a fresh simulation", async () => {
     review.mockResolvedValue(preview);
     show();
-    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revisar aprobación masiva" }));
     await screen.findByText("Se aprobarían");
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
-    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revisar aprobación masiva" }));
     await waitFor(() => expect(review.mock.calls).toEqual([[undefined, { acceptWarnings: false }], [undefined, { acceptWarnings: false }]]));
   });
   it("clears a rejected preview and requires another simulation", async () => {
@@ -82,7 +82,7 @@ describe("Aprobación masiva", () => {
       .mockResolvedValueOnce(preview)
       .mockRejectedValueOnce(new Error("El catálogo cambió. Vuelve a simular."));
     show();
-    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revisar aprobación masiva" }));
     fireEvent.click(await screen.findByRole("button", { name: "Confirmar aprobación" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("El catálogo cambió");
     expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).not.toBeInTheDocument();
@@ -92,14 +92,14 @@ describe("Aprobación masiva", () => {
     auth.role = role;
     show();
     expect(
-      screen.queryByRole("button", { name: "Aprobar todo lo válido" }),
+      screen.queryByRole("button", { name: "Revisar aprobación masiva" }),
     ).not.toBeInTheDocument();
     expect(review).not.toHaveBeenCalled();
   });
   it("changing warning consent discards the fingerprint and requires a matching simulation", async () => {
     review.mockResolvedValueOnce(preview).mockResolvedValueOnce({ ...preview, accept_warnings: true, fingerprint: "accepted" }).mockResolvedValueOnce({ ...preview, dry_run: false, accept_warnings: true });
     show();
-    fireEvent.click(screen.getByRole("button", { name: "Aprobar todo lo válido" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revisar aprobación masiva" }));
     await screen.findByRole("button", { name: "Confirmar aprobación" });
     fireEvent.click(screen.getByRole("checkbox", { name: "Aceptar avisos de plantillas" }));
     expect(screen.queryByRole("button", { name: "Confirmar aprobación" })).toBeNull();

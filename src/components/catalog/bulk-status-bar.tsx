@@ -67,8 +67,10 @@ export function BulkStatusBar({ kind, selection, invalidate }: { kind: ImportRev
             <AlertDialogTitle>{action === "approve" ? "Aprobar selección" : "Archivar selección"}</AlertDialogTitle>
             <AlertDialogDescription>
               {action === "approve"
-                ? `Se aprobarán ${n} registros pendientes (pasan a Activo). Los que no cumplan requisitos quedarán pendientes.`
-                : `${n} registros pasarán a Inactivo. No se borra nada.`}
+                  ? kind === "services"
+                    ? `Se aprobarán ${n} servicios seleccionados, aunque tengan información económica incompleta. Las advertencias se conservarán.`
+                    : `Se revisarán ${n} módulos seleccionados. Los que no cumplan los requisitos seguirán pendientes.`
+                  : `${n} registros pasarán a Inactivo. No se borra nada.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
+import { approveImportReviewItems } from "@/lib/catalog";
 import type { Json } from "@/types/db";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -162,15 +163,16 @@ export function PendingServicesPanel({ onOpenService }: { onOpenService: (id: st
 
   const review = useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
-      const { error } = await db.from("services").update({ status: approve ? "activo" : "inactivo" }).eq("id", id);
+      if (approve) return approveImportReviewItems("services", [id]);
+      const { error } = await db.from("services").update({ status: "inactivo" }).eq("id", id);
       if (error) throw error;
+      return;
     },
     onSuccess: (_, { approve }) => {
       toast.success(approve ? "Servicio aprobado." : "Servicio rechazado (inactivo).");
       qc.invalidateQueries({ queryKey: ["services"] });
     },
-    onError: (e: Error) =>
-      toast.error(e.message.includes("check") ? "Para activarlo, el servicio necesita unidad de cobro y moneda." : e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Cargando…</p>;

@@ -58,7 +58,7 @@ function usePending() {
           issues: [
             ...x.approval_issues,
             ...(x.import_issues ? [x.import_issues] : []),
-            ...(!x.currency || !x.pricing_unit ? ["Falta moneda o unidad de precio: no se puede activar."] : []),
+            ...(!x.currency || !x.pricing_unit ? ["Información económica incompleta: completa moneda y unidad antes de calcular costos definitivos."] : []),
           ],
         })),
         activity_modules: (md.data ?? []).map((x) => ({
@@ -107,8 +107,8 @@ function ReviewPage() {
     },
     onSuccess: ({ ok, failed }) => {
       if (failed === 0) toast.success(`${ok} aprobados.`);
-      else if (ok === 0) toast.error("Ninguno se pudo aprobar: faltan datos obligatorios (moneda / unidad de precio).");
-      else toast.warning(`${ok} aprobados, ${failed} con error: faltan datos obligatorios (moneda / unidad de precio).`);
+      else if (ok === 0) toast.error("Ninguno se pudo aprobar; revisa las advertencias guardadas.");
+      else toast.warning(`${ok} aprobados y ${failed} pendientes; revisa sus advertencias.`);
       setSelected({ services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set() });
       qc.invalidateQueries({ queryKey: ["import-review"] });
     },
@@ -131,7 +131,7 @@ function ReviewPage() {
       qc.invalidateQueries({ queryKey: ["import-review"] });
       qc.invalidateQueries({ queryKey: [v.kind] });
     },
-    onError: (e: Error) => toast.error(e.message.includes("check") ? "No se puede activar: faltan datos obligatorios (moneda / unidad de precio)." : e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const close = () => { setOpen(null); qc.invalidateQueries({ queryKey: ["import-review"] }); };
