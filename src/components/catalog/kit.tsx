@@ -17,6 +17,11 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { AppRole } from "@/hooks/use-auth";
 import { canManageCatalog } from "@/hooks/use-auth";
+import {
+  fetchBlockRowsByIds,
+  fetchUnsearchedBlockPage,
+  searchDayBlockIds,
+} from "@/lib/catalog/block-search";
 
 export const ALL = "all";
 export const LANGS = [
@@ -185,7 +190,16 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
         <Command shouldFilter={false}>
           <CommandInput value={term} onValueChange={setTerm} placeholder="Buscar…" />
           <CommandList>
-            {q.isLoading ? <div className="p-3 text-sm text-muted-foreground">Buscando…</div> : <CommandEmpty>Sin resultados.</CommandEmpty>}
+            {q.isLoading && <div className="p-3 text-sm text-muted-foreground">Buscando…</div>}
+            {q.isError && (
+              <div role="alert" className="space-y-2 p-3 text-sm text-destructive">
+                <p>No se pudieron cargar los resultados.</p>
+                <Button size="sm" variant="outline" onClick={() => void q.refetch()}>
+                  Reintentar
+                </Button>
+              </div>
+            )}
+            {!q.isLoading && !q.isError && <CommandEmpty>Sin resultados.</CommandEmpty>}
             <CommandGroup>
               {value && (
                 <CommandItem onSelect={() => { onPick(null); setOpen(false); }}>
@@ -228,15 +242,27 @@ export async function fetchModules(term: string): Promise<PickOption[]> {
 }
 
 export async function fetchBlocks(term: string): Promise<PickOption[]> {
-  let q = db
-    .from("day_blocks")
-    .select("id, code, route_from, route_to, day_block_translations(lang, title)")
-    .neq("status", "inactivo")
-    .order("code")
-    .limit(30);
-  if (term) q = q.ilike("code", `%${ilikeTerm(term)}%`);
-  const { data, error } = await q;
-  if (error) throw error;
+  type Row = {
+    id: string;
+    code: string;
+    route_from: string | null;
+    route_to: string | null;
+    day_block_translations: { lang: string; title: string }[] | null;
+  };
+  const cleaned = term.trim();
+  const data = cleaned
+    ? await searchDayBlockIds(cleaned, { excludeInactive: true }).then((matches) =>
+        fetchBlockRowsByIds<Row>(
+          matches.map((match) => match.id),
+          "id,code,route_from,route_to,day_block_translations(lang,title)",
+        ),
+      )
+    : await fetchUnsearchedBlockPage<Row>(
+        "id,code,route_from,route_to,day_block_translations(lang,title)",
+        { excludeInactive: true },
+        0,
+        49,
+      );
   return data.map((b) => ({ id: b.id, label: blockTitle(b), sub: b.code }));
 }
 

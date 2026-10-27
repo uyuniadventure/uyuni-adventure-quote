@@ -14,7 +14,7 @@ import { beginQuoteEdit, transitionQuote } from "@/lib/states";
 import type { Enums } from "@/types/db";
 import { money } from "@/components/catalog/shared";
 import { QuoteWorkspace } from "./quote-workspace";
-import { addBlockDay, updateDayContent } from "@/lib/quotes/days";
+import { addBlockDay, addBlockDays, deleteDay, moveDay, updateDayContent } from "@/lib/quotes/days";
 
 vi.mock("@/lib/quotes", async (original) => ({
   ...(await original<typeof import("@/lib/quotes")>()),
@@ -30,8 +30,21 @@ vi.mock("@/lib/states", () => ({ beginQuoteEdit: vi.fn(), transitionQuote: vi.fn
 vi.mock("@/lib/quotes/days", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/days")>()),
   addBlockDay: vi.fn(),
+  addBlockDays: vi.fn(),
+  deleteDay: vi.fn(),
+  moveDay: vi.fn(),
   validateContinuity: vi.fn().mockResolvedValue([]),
   updateDayContent: vi.fn().mockResolvedValue(undefined),
+}));
+const blockSearch = vi.hoisted(() => ({
+  search: vi.fn(),
+  rows: vi.fn(),
+  page: vi.fn(),
+}));
+vi.mock("@/lib/catalog/block-search", () => ({
+  searchDayBlockIds: blockSearch.search,
+  fetchBlockRowsByIds: blockSearch.rows,
+  fetchUnsearchedBlockPage: blockSearch.page,
 }));
 vi.mock("@/components/catalog/block-editor", () => ({
   BlockEditor: ({
@@ -71,7 +84,26 @@ vi.mock("@/lib/db", async (original) => ({
   },
 }));
 beforeEach(() => {
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
   auth.role = "vendedor";
+  blockSearch.search.mockResolvedValue([{ id: "salar-block", code: "BLOCK_NO_SALAR_CODE" }]);
+  blockSearch.rows.mockResolvedValue([
+    {
+      id: "salar-block",
+      code: "BLOCK_NO_SALAR_CODE",
+      route_from: "UYU",
+      route_to: "SPA",
+      day_block_translations: [{ lang: "es", title: "Visita al Salar de Uyuni" }],
+    },
+  ]);
+  blockSearch.page.mockResolvedValue([]);
 });
 afterEach(() => {
   cleanup();
@@ -260,6 +292,41 @@ it("creates a catalog block from the quote and incorporates it without searching
   fireEvent.click(screen.getByRole("button", { name: "Crear bloque simulado" }));
   fireEvent.click(await screen.findByRole("button", { name: "Incorporar al día 1" }));
   await waitFor(() => expect(addBlockDay).toHaveBeenCalledExactlyOnceWith("quote", "created-block"));
+});
+
+it("busca por título y selecciona un bloque para agregarlo a Nueva cotización", async () => {
+  const data = savedQuote("borrador");
+  data.days = [];
+  data.items = [];
+  vi.mocked(addBlockDays).mockResolvedValue({ calculation: data.quote.calculation } as never);
+  renderQuote(data);
+
+  fireEvent.click(await screen.findByRole("combobox", { name: "Buscar bloque diario…" }));
+  fireEvent.change(screen.getByPlaceholderText("Buscar…"), { target: { value: "salar" } });
+  fireEvent.click(await screen.findByText("Visita al Salar de Uyuni"));
+  expect(screen.getByText("Día 1: Visita al Salar de Uyuni")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Añadir bloques" }));
+  await waitFor(() =>
+    expect(addBlockDays).toHaveBeenCalledExactlyOnceWith("quote", ["salar-block"]),
+  );
+});
+
+it("busca por título y selecciona un bloque para reemplazar un día", async () => {
+  const data = savedQuote("borrador");
+  vi.mocked(addBlockDay).mockResolvedValue({ calculation: data.quote.calculation } as never);
+  vi.mocked(moveDay).mockResolvedValue({ calculation: data.quote.calculation } as never);
+  vi.mocked(deleteDay).mockResolvedValue({ calculation: data.quote.calculation } as never);
+  renderQuote(data);
+
+  fireEvent.click(await screen.findByRole("button", { name: "Reemplazar bloque" }));
+  fireEvent.click(
+    screen.getByRole("combobox", { name: "Bloque que reemplaza este día…" }),
+  );
+  fireEvent.change(screen.getByPlaceholderText("Buscar…"), { target: { value: "SaLaR" } });
+  fireEvent.click(await screen.findByText("Visita al Salar de Uyuni"));
+  await waitFor(() =>
+    expect(addBlockDay).toHaveBeenCalledExactlyOnceWith("quote", "salar-block"),
+  );
 });
 
 it.each([

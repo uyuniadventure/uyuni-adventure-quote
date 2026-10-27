@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { db } from "@/lib/db";
 import type { Enums } from "@/types/db";
@@ -9,14 +9,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { STATUSES, StatusBadge, cap } from "@/components/catalog/shared";
-import { ALL, Filter, PageHeader, blockTitle, ilikeTerm, primaryBtn, useDebounced, useLocationCodes } from "@/components/catalog/kit";
+import { ALL, Filter, PageHeader, blockTitle, primaryBtn, useDebounced, useLocationCodes } from "@/components/catalog/kit";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CatalogRowMenu, CatalogSelectionBar, useCatalogActions } from "@/components/catalog/catalog-actions";
 import { useCatalogSelection } from "@/components/catalog/catalog-selection";
 import { BlockEditor } from "@/components/catalog/block-editor";
+import {
+  fetchBlockRowsByIds,
+  fetchUnsearchedBlockPage,
+  searchDayBlockIds,
+  type BlockSearchFilters,
+} from "@/lib/catalog/block-search";
 
 const s = SECTIONS["bloques-diarios"];
+const PAGE_SIZE = 100;
+const BLOCK_SELECT = "id,code,route_from,route_to,places,modality,default_day_position,status,services(name),day_block_translations(lang,title),day_block_modules(count),day_block_items(count)";
+type BlockRow = {
+  id: string;
+  code: string;
+  route_from: string | null;
+  route_to: string | null;
+  places: string[];
+  modality: Enums<"itinerary_modality">;
+  default_day_position: number | null;
+  status: Enums<"catalog_status">;
+  services: { name: string } | null;
+  day_block_translations: { lang: string; title: string }[] | null;
+  day_block_modules: { count: number }[];
+  day_block_items: { count: number }[];
+};
 
 export const Route = createFileRoute("/_authenticated/bloques-diarios")({
   head: () => sectionHead(s),
@@ -47,38 +69,71 @@ function BlocksPage() {
     },
   });
 
-  const filterKey = JSON.stringify({ search, term, from, to, place, placeTerm, hotel, status });
-  const actions = useCatalogActions("day_blocks", () => selection.clear());
-  const selection = useCatalogSelection(["day_blocks"], filterKey, canManageCatalog(role), async (offset, end) => {
-    let query = db.from("day_blocks").select("id, code, name").order("code").order("id").range(offset, end);
-      if (term) query = query.ilike("code", `%${ilikeTerm(term)}%`);
-      if (from !== ALL) query = query.eq("route_from", from);
-      if (to !== ALL) query = query.eq("route_to", to);
-      if (placeTerm) query = query.contains("places", [placeTerm]);
-      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_service_id", null) : query.eq("hotel_service_id", hotel);
-      if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
-    const { data, error } = await query;
-    if (error) throw error;
-    return data.map((r) => ({ id: r.id, code: r.code, name: r.name ?? r.code }));
+  const filters: BlockSearchFilters = {
+    ...(from !== ALL ? { from } : {}),
+    ...(to !== ALL ? { to } : {}),
+    ...(placeTerm ? { place: placeTerm } : {}),
+    ...(hotel !== ALL ? { hotel } : {}),
+    ...(status !== ALL ? { status } : {}),
+  };
+  const filterKey = JSON.stringify({ term, filters });
+  const matches = useQuery({
+    queryKey: ["day_blocks", "search-ids", term, filters],
+    enabled: !!term,
+    queryFn: () => searchDayBlockIds(term, filters),
   });
-  const q = useQuery({
+  const actions = useCatalogActions("day_blocks", () => selection.clear());
+  const selection = useCatalogSelection(
+    ["day_blocks"],
+    filterKey,
+    canManageCatalog(role) && (!term || matches.isSuccess),
+    async (offset, end) => {
+      const rows = term
+        ? await fetchBlockRowsByIds<{ id: string; code: string; name: string | null }>(
+            (matches.data ?? []).slice(offset, end + 1).map((match) => match.id),
+            "id,code,name",
+          )
+        : await fetchUnsearchedBlockPage<{ id: string; code: string; name: string | null }>(
+            "id,code,name",
+            filters,
+            offset,
+            end,
+          );
+      return rows.map((row) => ({ id: row.id, code: row.code, name: row.name ?? row.code }));
+    },
+  );
+  const q = useInfiniteQuery({
     queryKey: ["day_blocks", { term, from, to, placeTerm, hotel, status }],
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      let query = db.from("day_blocks")
-        .select("id, code, route_from, route_to, places, modality, default_day_position, status, services(name), day_block_translations(lang, title), day_block_modules(count), day_block_items(count)")
-        .order("code").order("id").limit(500);
-      if (term) query = query.ilike("code", `%${ilikeTerm(term)}%`);
-      if (from !== ALL) query = query.eq("route_from", from);
-      if (to !== ALL) query = query.eq("route_to", to);
-      if (placeTerm) query = query.contains("places", [placeTerm]);
-      if (hotel !== ALL) query = hotel === "none" ? query.is("hotel_service_id", null) : query.eq("hotel_service_id", hotel);
-      if (status !== ALL) query = query.eq("status", status as Enums<"catalog_status">);
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+    initialPageParam: 0,
+    enabled: !term || matches.isSuccess,
+    queryFn: async ({ pageParam }) => {
+      if (term) {
+        const ids = (matches.data ?? [])
+          .slice(pageParam, pageParam + PAGE_SIZE)
+          .map((match) => match.id);
+        return fetchBlockRowsByIds<BlockRow>(ids, BLOCK_SELECT);
+      }
+      return fetchUnsearchedBlockPage<BlockRow>(
+        BLOCK_SELECT,
+        filters,
+        pageParam,
+        pageParam + PAGE_SIZE - 1,
+      );
+    },
+    getNextPageParam: (last, pages) => {
+      const next = pages.length * PAGE_SIZE;
+      return term
+        ? next < (matches.data?.length ?? 0)
+          ? next
+          : undefined
+        : last.length === PAGE_SIZE
+          ? next
+          : undefined;
     },
   });
+  const rows = q.data?.pages.flat() ?? [];
+  const queryError = matches.error ?? q.error;
   const locOpts = (locs.data ?? []).map((l) => [l.code, `${l.code} · ${l.name}`] as [string, string]);
   const count = (v: unknown) => (v as { count: number }[])[0]?.count ?? 0;
 
@@ -89,7 +144,7 @@ function BlocksPage() {
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-[200px] flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por código…" className="pl-8" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por código, título, lugar o ruta…" className="pl-8" />
         </div>
         <Filter value={from} onChange={setFrom} placeholder="Desde" options={locOpts} />
         <Filter value={to} onChange={setTo} placeholder="Hasta" options={locOpts} />
@@ -108,10 +163,10 @@ function BlocksPage() {
             <TableHead>Hotel</TableHead><TableHead className="text-right">Día</TableHead><TableHead className="text-right">Mód.</TableHead><TableHead className="text-right">Serv.</TableHead><TableHead>Estado</TableHead>{actions.allowed && <TableHead />}
           </TableRow></TableHeader>
           <TableBody>
-            {q.isLoading && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
-            {q.isError && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="py-10 text-center text-destructive">No se pudieron cargar los bloques.</TableCell></TableRow>}
-            {q.data?.length === 0 && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="py-10 text-center text-muted-foreground">No hay bloques con estos filtros.</TableCell></TableRow>}
-            {q.data?.map((b) => (
+            {(matches.isLoading || q.isLoading) && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="py-10 text-center text-muted-foreground">Cargando…</TableCell></TableRow>}
+            {queryError && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="space-y-2 py-10 text-center text-destructive"><p>No se pudieron cargar los bloques.</p><Button size="sm" variant="outline" onClick={() => { if (matches.error) void matches.refetch(); else void q.refetch(); }}>Reintentar</Button></TableCell></TableRow>}
+            {!queryError && !q.isLoading && rows.length === 0 && <TableRow><TableCell colSpan={actions.allowed ? 11 : 9} className="py-10 text-center text-muted-foreground">No hay bloques con estos filtros.</TableCell></TableRow>}
+            {rows.map((b) => (
               <TableRow key={b.id} className="cursor-pointer" onClick={() => setOpenId(b.id)}>
                 {actions.allowed && <TableCell onClick={(e) => e.stopPropagation()}><Checkbox aria-label={`Seleccionar ${b.code}`} checked={selection.ids.has(b.id)} disabled={!selection.ready || actions.busy} onCheckedChange={(v) => selection.toggle(b.id, v === true)} /></TableCell>}
                 <TableCell className="max-w-[200px] truncate font-mono text-xs">{b.code}</TableCell>
@@ -129,6 +184,13 @@ function BlocksPage() {
           </TableBody>
         </Table>
       </div>
+      {q.hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="outline" disabled={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()}>
+            {q.isFetchingNextPage ? "Cargando…" : "Cargar más"}
+          </Button>
+        </div>
+      )}
       {actions.dialog}
       <BlockEditor id={openId} onClose={() => setOpenId(null)} onCreated={setOpenId} />
     </div>
