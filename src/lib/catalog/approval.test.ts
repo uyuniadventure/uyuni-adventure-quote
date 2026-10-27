@@ -39,7 +39,7 @@ async function as(id: string) {
 }
 async function legacyImportFingerprint() {
   return one<{ fingerprint: string }>(`select md5(jsonb_build_array(
-    'import-approval-v3', false, (now() at time zone 'America/Santiago')::date, auth.uid(),
+    'import-approval-v4', false, (now() at time zone 'America/Santiago')::date, auth.uid(),
     (select jsonb_agg(s order by s.id) from public.services s),
     (select jsonb_agg(r order by r.id) from public.service_rates r),
     (select jsonb_agg(t order by t.id) from public.itinerary_templates t),
@@ -357,6 +357,39 @@ it("una plantilla vacía puede aprobarse solo al aceptar sus avisos explícitame
   });
 });
 
+it.each(["pending", "blocked"] as const)(
+  "aceptar advertencias activa una plantilla importada con estado económico %s sin alterar su evaluación",
+  async (economicStatus) => {
+  const id = await template([await block()]);
+  await pg.query(
+    "update itinerary_templates set catalog_origin='importacion',import_v2_route='UYU-SYN',economic_status=$2,economic_issues=array['Revisión económica pendiente'] where id=$1",
+    [id, economicStatus],
+  );
+
+  expect(await approveTemplates([id])).toMatchObject({ approved: 0, pending: 1 });
+  const result = await approveTemplates([id], { acceptWarnings: true });
+  expect(result).toMatchObject({ approved: 1, pending: 0, accept_warnings: true });
+  expect(result.items[0]?.reasons).toContain(
+    "Validación económica: Revisión económica pendiente.",
+  );
+  expect(
+    await one("select status,economic_status,economic_issues,approval_issues from itinerary_templates where id=$1", [id]),
+  ).toEqual({
+    status: "activo",
+    economic_status: economicStatus,
+    economic_issues: ["Revisión económica pendiente"],
+    approval_issues: expect.arrayContaining([
+      "Validación económica: Revisión económica pendiente.",
+    ]),
+  });
+  await pg.exec("savepoint protected_economics");
+  await expect(
+    pg.query("update itinerary_templates set economic_status='validated',economic_issues='{}' where id=$1", [id]),
+  ).rejects.toMatchObject({ code: "42501" });
+  await pg.exec("rollback to savepoint protected_economics");
+  },
+);
+
 it("borrar un día de SPASPA-4D3N-FJJ renumera y actualiza la duración a 3/3", async () => {
   const bids = await Promise.all([block(), block(), block(), block()]);
   const id = await template(bids, [], "SPASPA-4D3N-FJJ");
@@ -505,6 +538,31 @@ it("aprobación masiva conserva simulación/huella, aprueba servicios incompleto
   });
 });
 
+it("la aprobación global activa plantillas económicamente bloqueadas solo al aceptar advertencias", async () => {
+  const id = await template([await block()]);
+  await pg.query(
+    "update itinerary_templates set catalog_origin='importacion',import_v2_route='GLOBAL-SYN',economic_status='blocked',economic_issues=array['Costo sin validar'] where id=$1",
+    [id],
+  );
+
+  const normal = await reviewImport();
+  expect(normal.templates.items.find((item) => item.id === id)?.reasons).toContain(
+    "Validación económica: Costo sin validar.",
+  );
+  expect(normal.templates.remaining).toBeGreaterThan(0);
+
+  const accepted = await reviewImport(undefined, { acceptWarnings: true });
+  expect(accepted.templates.remaining).toBe(0);
+  await reviewImport(accepted.fingerprint, { acceptWarnings: true });
+  expect(
+    await one("select status,economic_status,economic_issues from itinerary_templates where id=$1", [id]),
+  ).toEqual({
+    status: "activo",
+    economic_status: "blocked",
+    economic_issues: ["Costo sin validar"],
+  });
+});
+
 it("Operación aprueba plantillas seleccionadas pero no el lote global que también cambia tarifas/servicios", async () => {
   await as(ops);
   await expect(reviewImport(undefined, { acceptWarnings: true })).rejects.toThrow("Solo Admin");
@@ -556,5 +614,25 @@ it("la migración tiene espejo idéntico y solo expone RPC públicas a authentic
         pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure) like '%import-approval-v4%' v4,
         pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure) like '%import-approval-v3%' v3`,
     ),
-  ).toEqual({ v4: true, v3: false });
+  ).toEqual({ v4: false, v3: false });
+  const flexibleTemplates = await readFile(
+    new URL("supabase/migrations/20261026000200_flexible_template_approval.sql", root),
+    "utf8",
+  );
+  expect(flexibleTemplates).toContain("import-approval-v5");
+  expect(
+    await one(
+      `select
+        pg_get_functiondef('public.approve_valid_imports(boolean,text,boolean)'::regprocedure) like '%import-approval-v5%' v5,
+        pg_get_functiondef('public.guard_template_economic_status()'::regprocedure) not like '%requiere validación económica antes de activarse%' flexible_guard`,
+    ),
+  ).toEqual({ v5: true, flexible_guard: true });
+  expect(
+    await one(
+      `select count(*)::int n from pg_constraint
+       where conrelid='public.itinerary_templates'::regclass
+         and pg_get_constraintdef(oid) ~* '\mstatus\M'
+         and pg_get_constraintdef(oid) ilike '%economic_status%'`,
+    ),
+  ).toEqual({ n: 0 });
 });

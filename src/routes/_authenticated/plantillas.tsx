@@ -81,7 +81,7 @@ function TemplatesPage() {
     queryKey: ["itinerary_templates", { term, from, to, days, category, hotelTerm, status }],
     placeholderData: keepPreviousData,
     queryFn: async () => {
-      let query = db.from("itinerary_templates").select("id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, modality, status, template_days(count)").order("sku").order("id").limit(500);
+      let query = db.from("itinerary_templates").select("id, sku, name, route_from, route_to, route_type, days, nights, category, hotel_combo, modality, status, economic_status, economic_issues, template_days(count)").order("sku").order("id").limit(500);
       if (term) query = query.ilike("sku", `%${ilikeTerm(term)}%`);
       if (from !== ALL) query = query.eq("route_from", from);
       if (to !== ALL) query = query.eq("route_to", to);
@@ -224,27 +224,28 @@ function TemplatesPage() {
               <TableHead>Hoteles</TableHead>
               <TableHead className="text-right">Días armados</TableHead>
               <TableHead>Estado</TableHead>
+              <TableHead>Validación económica</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
             {q.isLoading && (
               <TableRow>
-                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={actions.allowed ? 11 : 10} className="py-10 text-center text-muted-foreground">
                   Cargando…
                 </TableCell>
               </TableRow>
             )}
             {q.isError && (
               <TableRow>
-                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-destructive">
+                <TableCell colSpan={actions.allowed ? 11 : 10} className="py-10 text-center text-destructive">
                   No se pudieron cargar las plantillas.
                 </TableCell>
               </TableRow>
             )}
             {q.data?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={actions.allowed ? 10 : 9} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={actions.allowed ? 11 : 10} className="py-10 text-center text-muted-foreground">
                   No hay plantillas con estos filtros.
                 </TableCell>
               </TableRow>
@@ -286,11 +287,23 @@ function TemplatesPage() {
                     <StatusBadge status={t.status} />
                   </TableCell>
                   <TableCell>
+                    <Badge
+                      variant={t.economic_status === "validated" ? "secondary" : "outline"}
+                      title={t.economic_issues.join("\n")}
+                    >
+                      {t.economic_status === "validated" ? "Validada" : t.economic_status === "blocked" ? "Bloqueada" : "Pendiente"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <CatalogRowMenu record={{ id: t.id, code: t.sku, name: t.name }} actions={actions} />
-                    <TemplateQuoteLink
-                      template={t}
-                      className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
-                    />
+                    {t.economic_status === "validated" ? (
+                      <TemplateQuoteLink
+                        template={t}
+                        className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                      />
+                    ) : (
+                      <span className="text-xs text-brand-orange-deep">No disponible para cotizar</span>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"

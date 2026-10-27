@@ -10,7 +10,7 @@ export async function getTemplateForQuote(id: string) {
   const { data, error } = await db
     .from("itinerary_templates")
     .select(
-      "id, sku, name, route_from, route_to, days, nights, category, modality, status, quote_defaults, import_warnings",
+      "id, sku, name, route_from, route_to, days, nights, category, modality, status, economic_status, economic_issues, quote_defaults, import_warnings",
     )
     .eq("id", id)
     .single();
@@ -21,6 +21,12 @@ export async function getTemplateForQuote(id: string) {
   if (!data) throw new Error("La plantilla no existe o no tienes acceso.");
   if (data.status !== "activo" && data.status !== "pendiente")
     throw new Error("La plantilla está archivada y no se puede usar para cotizar.");
+  if (data.economic_status !== "validated")
+    throw new Error(
+      data.economic_status === "blocked"
+        ? `Itinerario bloqueado: ${data.economic_issues.join("; ")}`
+        : "El itinerario todavía requiere validación económica",
+    );
   return data;
 }
 export type TemplateForQuote = Awaited<ReturnType<typeof getTemplateForQuote>>;

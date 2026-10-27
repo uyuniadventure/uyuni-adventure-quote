@@ -178,8 +178,9 @@ aprobado, aunque tenga un snapshot con precio. Los motivos se guardan en
 `approval_issues` al aplicar, sin sustituir las advertencias de importación.
 Desde T01k, las advertencias de importación también aparecen entre los motivos.
 Sin `accept_warnings`, las plantillas con avisos quedan pendientes. Con él se
-activan conservando los motivos; no se corrigen servicios ni tarifas ni se omiten
-los controles de cotización/PDF. El lote global solo procesa pendientes y conserva
+activan administrativamente conservando los motivos, incluso si su validación
+económica está pendiente o bloqueada; no se corrigen servicios ni tarifas ni se omiten
+los controles de creación, cálculo, revisión, envío o PDF. El lote global solo procesa pendientes y conserva
 el permiso Admin; la aceptación forma parte de la huella de simulación.
 El vendedor puede leer los bloques y módulos de una plantilla activa sin cambiar
 el estado propio de esos bloques/módulos ni ganar permisos de edición.

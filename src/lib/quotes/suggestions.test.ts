@@ -12,6 +12,8 @@ import { templatePassengerDefaults, templatePassengerMismatch } from "./template
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 const admin = randomUUID(),
   seller = randomUUID();
+const one = async <T = Record<string, unknown>>(sql: string, args: unknown[] = []) =>
+  (await pg.query<T>(sql, args)).rows[0]!;
 const as = async (id: string) => {
   await pg.exec("set role authenticated");
   await pg.query("select set_config('request.jwt.claim.sub',$1,false)", [id]);
@@ -104,6 +106,21 @@ it("matches catalogue RLS: own pending and all active, never another seller's pe
   await add("PUBLIC", "activo");
   await as(seller);
   expect((await suggestTemplates({})).map((t) => t.sku)).toEqual(["PUBLIC", "OWN"]);
+});
+it("does not offer economically pending or blocked templates for quotation", async () => {
+  await add("VALID", "activo");
+  await add("BLOCKED", "activo");
+  await add("PENDING-ECONOMICS", "activo");
+  await pg.exec(`update itinerary_templates set economic_status='blocked',economic_issues=array['Costo pendiente'] where sku='BLOCKED';
+    update itinerary_templates set economic_status='pending',economic_issues=array['Tarifa pendiente'] where sku='PENDING-ECONOMICS'`);
+  const blocked = await one<{ id: string }>(
+    "select id from itinerary_templates where sku='BLOCKED'",
+  );
+
+  expect((await suggestTemplates({})).map((t) => t.sku)).toEqual(["VALID"]);
+  await expect(getTemplateForQuote(blocked.id)).rejects.toThrow(
+    "Itinerario bloqueado: Costo pendiente",
+  );
 });
 it.each([
   [

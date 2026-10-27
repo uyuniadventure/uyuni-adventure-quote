@@ -329,7 +329,7 @@ try {
     ["Sin unidad de cobro."],
   );
   console.log(
-    "PASS import approval: Admin-only global apply, all pending services approved with persisted economic warnings, unchanged template rules, stale preview, atomic rollback, seller visibility and no write escalation.",
+    "PASS import approval: Admin-only global apply, flexible administrative approval with persisted warnings, stale preview, atomic rollback, seller visibility and no write escalation.",
   );
 } finally {
   await db.close();

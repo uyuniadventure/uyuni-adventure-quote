@@ -291,6 +291,31 @@ describe("creación atómica desde plantilla", () => {
     }
   });
 
+  it("rejects an active template whose economic validation remains blocked", async () => {
+    const before = await persisted();
+    await pg.exec("reset role; select set_config('app.import_economic_write','on',false)");
+    await pg.query(
+      "update itinerary_templates set status='activo',economic_status='blocked',economic_issues=array['Costo pendiente'] where id=$1",
+      [templateId],
+    );
+    await pg.exec("set role authenticated");
+    await as(admin);
+    try {
+      await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow(
+        "Itinerario bloqueado: Costo pendiente",
+      );
+      expect(await persisted()).toEqual(before);
+    } finally {
+      await pg.exec("reset role; select set_config('app.import_economic_write','on',false)");
+      await pg.query(
+        "update itinerary_templates set economic_status='validated',economic_issues='{}' where id=$1",
+        [templateId],
+      );
+      await pg.exec("set role authenticated");
+      await as(admin);
+    }
+  });
+
   it("rejects inactive templates and empty source days before any write", async () => {
     const before = await persisted();
     await pg.query("update itinerary_templates set status='inactivo' where id=$1", [templateId]);

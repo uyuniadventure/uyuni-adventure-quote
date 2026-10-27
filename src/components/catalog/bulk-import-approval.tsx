@@ -85,8 +85,8 @@ export function BulkImportApproval() {
             </DialogTitle>
             <DialogDescription>
               {result && !result.dry_run
-                ? "Todos los servicios revisados están activos y conservan sus advertencias. Las plantillas mantienen sus reglas de aprobación."
-                : "Todos los servicios revisados se aprobarán aunque tengan información económica incompleta; las advertencias se conservarán. No se guardará ningún cambio hasta que confirmes."}
+                ? "Los servicios y las plantillas aceptadas están activos y conservan sus advertencias. La aprobación administrativa no valida precios."
+                : "Los servicios se aprobarán con sus advertencias. Si aceptas los avisos, las plantillas también se aprobarán administrativamente sin validar precios. No se guardará ningún cambio hasta que confirmes."}
             </DialogDescription>
           </DialogHeader>
           <label className="flex items-center gap-2 text-sm">

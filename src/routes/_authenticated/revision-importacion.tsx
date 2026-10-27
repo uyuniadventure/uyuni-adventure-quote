@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Check, CheckSquare, Pencil, Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
-import { approveDayBlocks, approveImportReviewItems, approveTemplates } from "@/lib/catalog";
+import { approveImportReviewSelection, bulkApprovalNotice } from "@/lib/catalog/review-approval";
 import type { Enums } from "@/types/db";
 import { SECTIONS, sectionHead } from "@/components/section";
 import { canManageCatalog, useCurrentUser } from "@/hooks/use-auth";
@@ -33,6 +33,12 @@ interface Item { id: string; code: string; title: string; facts: string[]; issue
 const KIND_LABELS: Record<Kind, string> = {
   services: "Servicios", activity_modules: "Módulos", day_blocks: "Bloques", itinerary_templates: "Plantillas",
 };
+
+function confirmWarningAcceptance(kind: "day_blocks" | "itinerary_templates", warningCount: number) {
+  return window.confirm(
+    `${warningCount} ${kind === "day_blocks" ? "bloques" : "plantillas"} tienen advertencias. ¿Quieres aceptarlas explícitamente e intentar aprobar esos registros? La aprobación es administrativa y no valida precios. Si cancelas, no se realizará ningún cambio.`,
+  );
+}
 
 function warningsList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
@@ -102,15 +108,18 @@ function ReviewPage() {
 
   const bulkApprove = useMutation({
     mutationFn: async ({ kind, ids }: { kind: Kind; ids: string[] }) => {
-      const result = await approveImportReviewItems("activity_modules", ids);
+      const result = await approveImportReviewSelection(kind, ids, confirmWarningAcceptance);
+      if (result === null) return null;
       return { ok: result.approved, failed: result.pending };
     },
-    onSuccess: ({ ok, failed }) => {
-      if (failed === 0) toast.success(`${ok} aprobados.`);
-      else if (ok === 0) toast.error("Ninguno se pudo aprobar; revisa las advertencias guardadas.");
-      else toast.warning(`${ok} aprobados y ${failed} pendientes; revisa sus advertencias.`);
-      setSelected({ services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set() });
+    onSuccess: (result, { kind }) => {
+      if (result === null) return;
+      const { ok, failed } = result;
+      const notice = bulkApprovalNotice(ok, failed);
+      toast[notice.level](notice.message);
+      setSelected((prev) => ({ ...prev, [kind]: new Set<string>() }));
       qc.invalidateQueries({ queryKey: ["import-review"] });
+      qc.invalidateQueries({ queryKey: [kind] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -118,16 +127,20 @@ function ReviewPage() {
   const decide = useMutation({
     mutationFn: async ({ kind, id, status }: { kind: Kind; id: string; status: Enums<"catalog_status"> }) => {
       if (status === "activo") {
-        if (kind === "day_blocks") return approveDayBlocks([id]);
-        if (kind === "itinerary_templates") return approveTemplates([id]);
-        return approveImportReviewItems(kind, [id]);
+        return approveImportReviewSelection(kind, [id], confirmWarningAcceptance);
       }
       const { error } = await db.from(kind).update({ status }).eq("id", id);
       if (error) throw error;
       return;
     },
-    onSuccess: (_d, v) => {
-      toast.success(v.status === "activo" ? "Aprobado." : "Rechazado (marcado como inactivo).");
+    onSuccess: (result, v) => {
+      if (v.status === "activo") {
+        if (!result) return;
+        const notice = bulkApprovalNotice(result.approved, result.pending);
+        toast[notice.level](notice.message);
+      } else {
+        toast.success("Rechazado (marcado como inactivo).");
+      }
       qc.invalidateQueries({ queryKey: ["import-review"] });
       qc.invalidateQueries({ queryKey: [v.kind] });
     },
@@ -159,14 +172,14 @@ function ReviewPage() {
           <TabsContent key={k} value={k} className="mt-4 space-y-3">
             {q.isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
             {items.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No hay {KIND_LABELS[k].toLowerCase()} pendientes.</p>}
-            {isAdmin && k !== "services" && k !== "itinerary_templates" && items.length > 0 && (
+            {isAdmin && items.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2">
                 <Button
                   size="sm" variant="ghost" disabled={bulkApprove.isPending}
                   onClick={() => setSelected((prev) => ({ ...prev, [k]: allSelected ? new Set<string>() : new Set(items.map((it) => it.id)) }))}
                 >
                   {allSelected ? <CheckSquare className="mr-1.5 h-4 w-4" /> : <Square className="mr-1.5 h-4 w-4" />}
-                  {allSelected ? "Quitar selección" : "Seleccionar todos"}
+                  {allSelected ? "Quitar selección" : "Seleccionar visibles"}
                 </Button>
                 <span className="text-xs text-muted-foreground">{sel.size} de {items.length} seleccionados</span>
                 <div className="ml-auto flex gap-2">
@@ -177,14 +190,14 @@ function ReviewPage() {
                     <Check className="mr-1 h-3.5 w-3.5" />Aprobar seleccionados{sel.size > 0 ? ` (${sel.size})` : ""}
                   </Button>
                   <Button size="sm" variant="outline" disabled={bulkApprove.isPending} onClick={() => bulkApprove.mutate({ kind: k, ids: items.map((it) => it.id) })}>
-                    <CheckSquare className="mr-1 h-3.5 w-3.5" />Aprobar todos ({items.length})
+                    <CheckSquare className="mr-1 h-3.5 w-3.5" />Aprobar visibles ({items.length})
                   </Button>
                 </div>
               </div>
             )}
             {items.map((it) => (
               <Card key={it.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
-                {isAdmin && k !== "services" && k !== "itinerary_templates" && (
+                {isAdmin && (
                   <button
                     type="button" aria-label={sel.has(it.id) ? "Quitar de la selección" : "Seleccionar"}
                     className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
