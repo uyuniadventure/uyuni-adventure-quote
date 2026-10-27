@@ -188,6 +188,55 @@ export function calculateSavedQuote(data: Awaited<ReturnType<typeof loadQuote>>)
   const result = calculateQuote(quotePricingInput(data));
   const continuity = continuityWarnings(data.days);
   result.warnings.push(...continuity.map((w) => w.mensaje));
+  const incompleteDays = data.days.flatMap((day) => {
+    const snapshot = day.snapshot as {
+      required_service_count?: number;
+      omitted_economic_items?: string[];
+    } | null;
+    const required = snapshot?.required_service_count;
+    if (!required) return [];
+    const ownItemCount = data.items.filter((item) => {
+      if (item.quote_day_id !== day.id) return false;
+      const start = (item.pricing_snapshot as { coverage_start_day?: number }).coverage_start_day;
+      return start == null || start === day.day_number;
+    }).length;
+    return ownItemCount < required
+      ? [{ day_number: day.day_number, issues: snapshot?.omitted_economic_items ?? [] }]
+      : [];
+  });
+  if (incompleteDays.length) {
+    const incompleteNumbers = incompleteDays.map((day) => day.day_number);
+    result.status = "error";
+    result.warnings.push(
+      `Días con servicios pendientes: ${incompleteNumbers.join(", ")}. Completa el itinerario antes de revisar, generar PDF o enviar.`,
+      ...incompleteDays.flatMap((day) => day.issues),
+    );
+    result.total_cost_usd = null;
+    result.total_adjustments_usd = null;
+    result.total_margin_usd = null;
+    result.total_commission_usd = null;
+    result.rounding_adjustment_usd = null;
+    result.total_price_usd = null;
+    result.price_per_pax_usd = null;
+    result.single_supplement_pp = null;
+    result.days = result.days.map((day) =>
+      incompleteNumbers.includes(day.day_number)
+        ? { ...day, total_cost_usd: null, total_margin_usd: null }
+        : day,
+    );
+    result.scenarios = result.scenarios.map((scenario) => ({
+      ...scenario,
+      status: "error",
+      total_cost_usd: null,
+      total_adjustments_usd: null,
+      total_margin_usd: null,
+      total_commission_usd: null,
+      rounding_adjustment_usd: null,
+      total_price_usd: null,
+      price_per_pax_usd: null,
+      single_supplement_pp: null,
+    }));
+  }
   return result;
 }
 export async function recalculateQuote(quoteId: string): Promise<QuoteResult> {

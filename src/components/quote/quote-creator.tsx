@@ -211,6 +211,18 @@ export function QuoteCreator({
                       ))}
                     </ul>
                   )}
+                  {selected.economic_status !== "validated" && (
+                    <div role="alert" className="text-sm text-brand-orange-deep">
+                      Se creará un borrador con totales pendientes.
+                      {selected.economic_issues.length > 0 && (
+                        <ul className="list-inside list-disc">
+                          {selected.economic_issues.map((issue, index) => (
+                            <li key={index}>{issue}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                   {templatePassengerLabel(selected.quote_defaults) && (
                     <p className="text-sm text-muted-foreground">
                       Configuración de referencia: {templatePassengerLabel(selected.quote_defaults)}
@@ -564,6 +576,14 @@ export function TemplateStep({
                     Pendiente de revisión
                   </Badge>
                 )}
+                {t.economic_status !== "validated" && (
+                  <Badge
+                    variant="outline"
+                    className="border-brand-orange-deep text-brand-orange-deep"
+                  >
+                    Totales pendientes
+                  </Badge>
+                )}
                 {Number(b.days) > 0 && t.days !== Number(b.days) && (
                   <Badge variant="outline">Duración distinta</Badge>
                 )}
@@ -578,6 +598,16 @@ export function TemplateStep({
                 >
                   {warnings.map((warning, index) => (
                     <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              )}
+              {t.economic_status !== "validated" && t.economic_issues.length > 0 && (
+                <ul
+                  aria-label="Advertencias económicas"
+                  className="list-inside list-disc text-xs text-brand-orange-deep"
+                >
+                  {t.economic_issues.map((issue, index) => (
+                    <li key={index}>{issue}</li>
                   ))}
                 </ul>
               )}

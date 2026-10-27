@@ -32,10 +32,9 @@ export async function suggestTemplates(basics: TemplateSearchBasics) {
     db
       .from("itinerary_templates")
       .select(
-        "id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, quote_defaults, import_warnings, template_days(count)",
+        "id, sku, name, route_from, route_to, days, nights, category, modality, hotel_combo, meals_summary, status, economic_status, economic_issues, quote_defaults, import_warnings, template_days(count)",
       )
       .in("status", ["activo", "pendiente"])
-      .eq("economic_status", "validated")
       .order("id")
       .range(offset, offset + pageSize - 1);
   const first = await page(0);

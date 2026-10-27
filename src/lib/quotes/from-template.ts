@@ -94,9 +94,7 @@ export function serviceItem(
   if (!["activo", "pendiente"].includes(s.status)) throw new Error(`Servicio inactivo: ${s.sku}`);
   if (!s.pricing_unit || !s.currency)
     throw new Error(`Approve missing pricing unit/currency: ${s.sku}`);
-  const rates = source.rates.filter(
-    (r) => r.service_id === s.id && r.pricing_enabled !== false,
-  );
+  const rates = source.rates.filter((r) => r.service_id === s.id && r.pricing_enabled !== false);
   const config = (row.pricing_config ?? {}) as {
     pricing_unit?: Enums<"pricing_unit">;
     description?: string;
@@ -174,6 +172,58 @@ export function serviceItem(
   };
 }
 
+function prepareDraftServiceItem(
+  row: Parameters<typeof serviceItem>[0],
+  day: number,
+  source: Pick<TemplateSource, "services" | "rates">,
+): { item?: QuoteItemInput; issue?: string } {
+  if (!row.item_snapshot && row.service_id) {
+    const service = source.services.find((candidate) => candidate.id === row.service_id);
+    if (service && (!service.pricing_unit || !service.currency)) {
+      const missing = [
+        !service.pricing_unit ? "unidad de cobro" : null,
+        !service.currency ? "moneda" : null,
+      ].filter(Boolean);
+      return {
+        issue: `${service.sku}: falta ${missing.join(" y ")}; selecciona un servicio válido en el borrador.`,
+      };
+    }
+  }
+  return { item: serviceItem(row, day, source) };
+}
+
+function forceIncompleteDraft(result: ReturnType<typeof calculateSavedQuote>, warnings: string[]) {
+  if (!warnings.length) return result;
+  result.status = "error";
+  result.warnings = [...new Set([...result.warnings, ...warnings])];
+  result.total_cost_usd = null;
+  result.total_adjustments_usd = null;
+  result.total_margin_usd = null;
+  result.total_commission_usd = null;
+  result.rounding_adjustment_usd = null;
+  result.total_price_usd = null;
+  result.price_per_pax_usd = null;
+  result.single_supplement_pp = null;
+  result.days = result.days.map((day) => ({
+    ...day,
+    total_cost_usd: null,
+    total_margin_usd: null,
+  }));
+  result.scenarios = result.scenarios.map((scenario) => ({
+    ...scenario,
+    status: "error",
+    total_cost_usd: null,
+    total_adjustments_usd: null,
+    total_margin_usd: null,
+    total_commission_usd: null,
+    rounding_adjustment_usd: null,
+    total_price_usd: null,
+    price_per_pax_usd: null,
+    single_supplement_pp: null,
+  }));
+  return result;
+}
+
 /** All preparation is read-only; one RPC commits the snapshot and calculation. */
 export async function createQuoteFromTemplate(
   templateId: string,
@@ -181,12 +231,6 @@ export async function createQuoteFromTemplate(
 ): Promise<Tables<"quotes">> {
   const source = await loadTemplateSource(templateId, input.client_id);
   const { template, client } = source;
-  if (template.economic_status && template.economic_status !== "validated")
-    throw new Error(
-      template.economic_status === "blocked"
-        ? `Itinerario bloqueado: ${template.economic_issues.join("; ")}`
-        : "El itinerario todavía requiere validación económica",
-    );
   const fx: Record<string, number> = { USD: 1 };
   for (const rate of [...source.fx].sort((a, b) => a.valid_from.localeCompare(b.valid_from))) {
     if (rate.valid_from.slice(0, 10) <= input.start_date) fx[rate.currency] = rate.rate_to_usd;
@@ -231,6 +275,8 @@ export async function createQuoteFromTemplate(
       seasons: basics.seasons ?? [],
       single_supplements: basics.single_supplements ?? [],
       unresolved: template.import_warnings,
+      template_economic_status: template.economic_status,
+      template_economic_issues: template.economic_issues,
       source_template: template,
     },
   };
@@ -256,8 +302,12 @@ export async function createQuoteFromTemplate(
       (i) => i.block_id === block.id && (i.variant_key == null || i.variant_key === td.variant_key),
     );
     const imported = source.importLinks.filter((i) => i.day_number === td.day_number);
+    const preparedItems = [...rows, ...imported].map((i) =>
+      prepareDraftServiceItem(i, td.day_number, source),
+    );
+    const omittedEconomicItems = preparedItems.flatMap(({ issue }) => (issue ? [issue] : []));
     const items = initialRoomAlternatives(
-      [...rows, ...imported].map((i) => serviceItem(i, td.day_number, source)),
+      preparedItems.flatMap(({ item }) => (item ? [item] : [])),
       basics.rooming,
       basics.pax_paying,
       basics.tc_count,
@@ -321,26 +371,36 @@ export async function createQuoteFromTemplate(
       const mi = source.moduleItems.filter((i) => i.module_id === link.module_id);
       if (!module || module.status === "inactivo" || !mi.length)
         throw new Error(`Día ${td.day_number}: módulo vacío o no disponible`);
-      items.push(...mi.map((i) => serviceItem(i, td.day_number, source)));
+      const preparedModuleItems = mi.map((i) => prepareDraftServiceItem(i, td.day_number, source));
+      omittedEconomicItems.push(
+        ...preparedModuleItems.flatMap(({ issue }) => (issue ? [issue] : [])),
+      );
+      items.push(...preparedModuleItems.flatMap(({ item }) => (item ? [item] : [])));
     }
     if (block.hotel_service_id && !items.some((i) => i.service_id === block.hotel_service_id)) {
-      items.push(
-        serviceItem(
-          {
-            service_id: block.hotel_service_id,
-            source_kind: "hotel",
-            qty: 1,
-            applies_tc: null,
-            margin_applicable: null,
-            multi_day_span: 1,
-          },
-          td.day_number,
-          source,
-        ),
+      const preparedHotel = prepareDraftServiceItem(
+        {
+          service_id: block.hotel_service_id,
+          source_kind: "hotel",
+          qty: 1,
+          applies_tc: null,
+          margin_applicable: null,
+          multi_day_span: 1,
+        },
+        td.day_number,
+        source,
       );
+      if (preparedHotel.item) items.push(preparedHotel.item);
+      if (preparedHotel.issue) omittedEconomicItems.push(preparedHotel.issue);
     }
-    if (!items.length && !template.import_v2_route)
-      throw new Error(`Día ${td.day_number}: sin servicios`);
+    const ownItemCount = items.filter((item) => {
+      const start = (item.pricing_snapshot as { coverage_start_day?: number }).coverage_start_day;
+      return start == null || start === td.day_number;
+    }).length;
+    const requiredServiceCount =
+      omittedEconomicItems.length > 0 || ownItemCount === 0
+        ? Math.max(1, ownItemCount + omittedEconomicItems.length)
+        : undefined;
     return {
       day_number: td.day_number,
       source_block_id: block.id,
@@ -361,6 +421,8 @@ export async function createQuoteFromTemplate(
         hotel_name: td.import_lodging,
         meals: td.import_meals,
         note: td.import_note,
+        omitted_economic_items: omittedEconomicItems,
+        ...(requiredServiceCount ? { required_service_count: requiredServiceCount } : {}),
         source_day: td,
         block,
         translation: text.translation,
@@ -420,7 +482,15 @@ export async function createQuoteFromTemplate(
     days: prepared,
     items: prepared.flatMap((d) => d.items.map((i) => ({ ...i, quote_day_id: d.id }))),
   } as unknown as Awaited<ReturnType<typeof loadQuote>>;
-  const result = calculateSavedQuote(data);
+  const incompleteWarnings = days.flatMap((day) => {
+    const omitted = (day.snapshot as { omitted_economic_items?: string[] }).omitted_economic_items;
+    return omitted ?? [];
+  });
+  if (template.economic_status && template.economic_status !== "validated")
+    incompleteWarnings.unshift(
+      `Validación económica de la plantilla: ${template.economic_issues.join("; ") || template.economic_status}.`,
+    );
+  const result = forceIncompleteDraft(calculateSavedQuote(data), incompleteWarnings);
   return unwrap(
     await db.rpc("create_quote_from_template", {
       p_template: templateId,

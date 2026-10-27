@@ -107,7 +107,7 @@ it("matches catalogue RLS: own pending and all active, never another seller's pe
   await as(seller);
   expect((await suggestTemplates({})).map((t) => t.sku)).toEqual(["PUBLIC", "OWN"]);
 });
-it("does not offer economically pending or blocked templates for quotation", async () => {
+it("offers economically pending and blocked templates as draft starting points", async () => {
   await add("VALID", "activo");
   await add("BLOCKED", "activo");
   await add("PENDING-ECONOMICS", "activo");
@@ -117,10 +117,15 @@ it("does not offer economically pending or blocked templates for quotation", asy
     "select id from itinerary_templates where sku='BLOCKED'",
   );
 
-  expect((await suggestTemplates({})).map((t) => t.sku)).toEqual(["VALID"]);
-  await expect(getTemplateForQuote(blocked.id)).rejects.toThrow(
-    "Itinerario bloqueado: Costo pendiente",
-  );
+  expect((await suggestTemplates({})).map((t) => t.sku)).toEqual([
+    "BLOCKED",
+    "PENDING-ECONOMICS",
+    "VALID",
+  ]);
+  await expect(getTemplateForQuote(blocked.id)).resolves.toMatchObject({
+    economic_status: "blocked",
+    economic_issues: ["Costo pendiente"],
+  });
 });
 it.each([
   [

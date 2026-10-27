@@ -16,6 +16,7 @@ vi.mock("../db", () => ({
   },
 }));
 import { createQuoteFromTemplate, loadQuote } from "../quotes";
+import { generateQuotePdf } from "../pdf";
 import { costPackageTemplate, costTemplate } from "../pricing/template-cost";
 import {
   assessPackageTemplates,
@@ -235,39 +236,62 @@ describe.sequential("staging y commit reales con RLS", () => {
     ).toHaveLength(1);
     expect((await commit(changed.id)).status).toBe("committed");
   });
-  it("aceptar avisos no activa plantillas sin validación económica", async () => {
-    const template = (
-      await pg.query<{ id: string }>(
-        "select id from itinerary_templates where economic_status='pending' order by sku limit 1",
+  it("aceptar avisos activa administrativamente sin alterar la validación económica", async () => {
+    const before = (
+      await pg.query<{
+        id: string;
+        economic_status: string;
+        economic_issues: string[];
+      }>(
+        "select id,economic_status,economic_issues from itinerary_templates where import_v2_route is not null and economic_status<>'validated' order by sku",
       )
-    ).rows[0]!.id;
+    ).rows;
+    expect(before).toHaveLength(2);
+    const template = before[0]!;
     const selected = (
       await pg.query<{ result: { approved: number; pending: number } }>(
         "select public.approve_templates(array[$1]::uuid[],true) result",
-        [template],
+        [template.id],
       )
     ).rows[0]!.result;
-    expect(selected).toMatchObject({ approved: 0, pending: 1 });
+    expect(selected).toMatchObject({ approved: 1, pending: 0 });
     expect(
       (
-        await pg.query<{ status: string }>("select status from itinerary_templates where id=$1", [
-          template,
+        await pg.query<{
+          status: string;
+          economic_status: string;
+          economic_issues: string[];
+        }>("select status,economic_status,economic_issues from itinerary_templates where id=$1", [
+          template.id,
         ])
-      ).rows[0]!.status,
-    ).toBe("pendiente");
+      ).rows[0],
+    ).toEqual({
+      status: "activo",
+      economic_status: template.economic_status,
+      economic_issues: template.economic_issues,
+    });
     const bulk = (
       await pg.query<{ result: { fingerprint: string; templates: { eligible: number } } }>(
         "select public.approve_valid_imports(true,null,true) result",
       )
     ).rows[0]!.result;
     await pg.query("select public.approve_valid_imports(false,$1,true)", [bulk.fingerprint]);
-    expect(
-      (
-        await pg.query<{ n: number }>(
-          "select count(*)::int n from itinerary_templates where import_v2_route is not null and economic_status<>'validated' and status='pendiente'",
-        )
-      ).rows[0]!.n,
-    ).toBe(2);
+    const after = (
+      await pg.query<{
+        id: string;
+        status: string;
+        economic_status: string;
+        economic_issues: string[];
+      }>(
+        "select id,status,economic_status,economic_issues from itinerary_templates where import_v2_route is not null and economic_status<>'validated' order by sku",
+      )
+    ).rows;
+    expect(after.map(({ id, economic_status, economic_issues }) => ({
+      id,
+      economic_status,
+      economic_issues,
+    }))).toEqual(before);
+    expect(after.every((row) => row.status === "activo")).toBe(true);
   });
   it("crea la cotización con habitaciones fuera de bloques y un solo cargo de tramo", async () => {
     const staged = await stage(pkg);
@@ -310,7 +334,7 @@ describe.sequential("staging y commit reales con RLS", () => {
     expect(segment.filter((i) => Number(i.total_cost_usd) > 0)).toHaveLength(1);
     expect(saved.items.filter((i) => i.slot_key === "ALOJAMIENTO").length).toBeGreaterThan(0);
   });
-  it("crea los cinco escenarios validados y rechaza la plantilla pendiente", async () => {
+  it("crea los cinco escenarios validados y convierte la plantilla pendiente en borrador bloqueado", async () => {
     const client = (
       await pg.query<{ id: string }>(
         "insert into clients(type,name) values('B2C','Control de importación') returning id",
@@ -343,21 +367,96 @@ describe.sequential("staging y commit reales con RLS", () => {
       }
     }
     const pending = (
-      await pg.query<{ id: string; economic_status: string }>(
-        "select id,economic_status from itinerary_templates where sku='SPASPA-4D3N-AB'",
+      await pg.query<{
+        id: string;
+        status: string;
+        economic_status: string;
+        economic_issues: string[];
+      }>(
+        "select id,status,economic_status,economic_issues from itinerary_templates where sku='SPASPA-4D3N-AB'",
       )
     ).rows[0]!;
+    expect(pending.status).toBe("pendiente");
     expect(pending.economic_status).toBe("pending");
-    await expect(
-      createQuoteFromTemplate(pending.id, {
-        client_id: client,
-        language: "es",
-        start_date: "2026-11-01",
-        pax_paying: 2,
-        category: "COMFORT",
-        fx_snapshot: { USD: 1, CLP: 900, BOB: 7 },
+    expect(pending.economic_issues.length).toBeGreaterThan(0);
+    expect(
+      (
+        await pg.query<{ result: { approved: number; pending: number } }>(
+          "select public.approve_templates(array[$1]::uuid[],true) result",
+          [pending.id],
+        )
+      ).rows[0]!.result,
+    ).toMatchObject({ approved: 1, pending: 0 });
+    expect(
+      (
+        await pg.query<{
+          status: string;
+          economic_status: string;
+          economic_issues: string[];
+        }>("select status,economic_status,economic_issues from itinerary_templates where id=$1", [
+          pending.id,
+        ])
+      ).rows[0],
+    ).toEqual({
+      status: "activo",
+      economic_status: pending.economic_status,
+      economic_issues: pending.economic_issues,
+    });
+    const draft = await createQuoteFromTemplate(pending.id, {
+      client_id: client,
+      language: "es",
+      start_date: "2026-11-01",
+      pax_paying: 2,
+      category: "COMFORT",
+      fx_snapshot: { USD: 1, CLP: 900, BOB: 7 },
+    });
+    expect(draft).toMatchObject({
+      status: "borrador",
+      total_cost_usd: null,
+      total_margin_usd: null,
+      total_price_usd: null,
+      price_per_pax_usd: null,
+      single_supplement_pp: null,
+      calculation: {
+        status: "error",
+        warnings: expect.arrayContaining([expect.stringMatching(/Validación económica/)]),
+      },
+      pricing_config: expect.objectContaining({
+        template_economic_status: pending.economic_status,
+        template_economic_issues: pending.economic_issues,
       }),
-    ).rejects.toThrow(/validación económica/);
+    });
+    expect(
+      await pg.query(
+        "select economic_status,economic_issues from itinerary_templates where id=$1",
+        [pending.id],
+      ),
+    ).toMatchObject({
+      rows: [{ economic_status: pending.economic_status, economic_issues: pending.economic_issues }],
+    });
+
+    await expect(
+      pg.query("select public.transition_quote($1,'revisada')", [draft.id]),
+    ).rejects.toThrow();
+    await expect(
+      pg.query("update quotes set status='revisada' where id=$1", [draft.id]),
+    ).rejects.toThrow();
+    await expect(generateQuotePdf(draft.id)).rejects.toThrow(
+      /errores de cálculo|Faltan revisar los textos/,
+    );
+    await expect(
+      pg.query("update quotes set pdf_path=$2,pdf_url=$3 where id=$1", [
+        draft.id,
+        `${draft.id}/forged.pdf`,
+        "https://example.invalid/forged.pdf",
+      ]),
+    ).rejects.toThrow(/no se puede guardar un PDF/);
+    await expect(
+      pg.query(
+        "select public.claim_quote_email($1,'client@example.invalid','Programa','Contenido')",
+        [draft.id],
+      ),
+    ).rejects.toThrow(/Reviewed quote with current PDF required/);
   });
   it("mantiene Sky Dream por persona al pasar de staging a commit", async () => {
     const p = packageWithValidatedControls();

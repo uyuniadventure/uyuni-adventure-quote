@@ -7,6 +7,7 @@ import fixture from "../../../tests/fixtures/SPAUYU-3D2N-MP.json";
 import { registerQuotePayment } from "./payments";
 import { transitionQuote } from "../states";
 import { calculateQuote, type QuoteInput } from "../pricing";
+import { generateQuotePdf } from "../pdf";
 import { getTemplateForQuote, templateQuotePrefill } from "./template-entry";
 import { saveItemLabel, saveQuoteDocument } from "./document";
 
@@ -291,7 +292,7 @@ describe("creación atómica desde plantilla", () => {
     }
   });
 
-  it("rejects an active template whose economic validation remains blocked", async () => {
+  it("creates an error draft from an active template whose economics remain blocked", async () => {
     const before = await persisted();
     await pg.exec("reset role; select set_config('app.import_economic_write','on',false)");
     await pg.query(
@@ -301,10 +302,25 @@ describe("creación atómica desde plantilla", () => {
     await pg.exec("set role authenticated");
     await as(admin);
     try {
-      await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow(
-        "Itinerario bloqueado: Costo pendiente",
-      );
-      expect(await persisted()).toEqual(before);
+      const quote = await createQuoteFromTemplate(templateId, basics());
+      expect(quote).toMatchObject({
+        status: "borrador",
+        total_cost_usd: null,
+        total_margin_usd: null,
+        total_price_usd: null,
+      });
+      expect(quote.calculation).toMatchObject({
+        status: "error",
+        warnings: expect.arrayContaining([
+          expect.stringContaining("Validación económica de la plantilla: Costo pendiente"),
+        ]),
+      });
+      expect((await persisted())["quotes"]).toBe(Number(before["quotes"]) + 1);
+      expect(
+        await one("select economic_status,economic_issues from itinerary_templates where id=$1", [
+          templateId,
+        ]),
+      ).toEqual({ economic_status: "blocked", economic_issues: ["Costo pendiente"] });
     } finally {
       await pg.exec("reset role; select set_config('app.import_economic_write','on',false)");
       await pg.query(
@@ -316,7 +332,7 @@ describe("creación atómica desde plantilla", () => {
     }
   });
 
-  it("rejects inactive templates and empty source days before any write", async () => {
+  it("rejects inactive templates but copies empty source days as editable error drafts", async () => {
     const before = await persisted();
     await pg.query("update itinerary_templates set status='inactivo' where id=$1", [templateId]);
     await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow("archivada");
@@ -339,16 +355,146 @@ describe("creación atómica desde plantilla", () => {
     );
     try {
       await pg.query("update template_days set block_id=$1 where id=$2", [emptyBlock, original.id]);
-      await expect(createQuoteFromTemplate(templateId, basics())).rejects.toThrow(
-        "Día 2: sin servicios",
-      );
+      const quote = await createQuoteFromTemplate(templateId, basics());
+      const saved = await loadQuote(quote.id);
+      expect(saved.days).toHaveLength(3);
+      expect(saved.days[1]).toMatchObject({ day_number: 2, title: "Vacío" });
+      expect(quote).toMatchObject({
+        status: "borrador",
+        total_cost_usd: null,
+        total_price_usd: null,
+      });
+      expect(quote.calculation).toMatchObject({
+        status: "error",
+        warnings: expect.arrayContaining([
+          expect.stringContaining("Días con servicios pendientes: 2"),
+        ]),
+      });
     } finally {
       await pg.query("update template_days set block_id=$1 where id=$2", [
         original.block_id,
         original.id,
       ]);
     }
-    expect(await persisted()).toEqual(before);
+    expect((await persisted())["quotes"]).toBe(Number(before["quotes"]) + 1);
+  });
+
+  it("keeps missing tariffs as null errors and blocks review and PDF", async () => {
+    const service = (
+      await one<{ service_id: string }>(
+        `select i.service_id from day_block_items i join template_days d on d.block_id=i.block_id
+         where d.template_id=$1 and i.service_id is not null limit 1`,
+        [templateId],
+      )
+    ).service_id;
+    const rates = (
+      await pg.query<{ id: string; price_net: number | null; price_rack: number | null }>(
+        "select id,price_net,price_rack from service_rates where service_id=$1",
+        [service],
+      )
+    ).rows;
+    try {
+      await pg.query(
+        "update service_rates set price_net=null,price_rack=null where service_id=$1",
+        [service],
+      );
+      const quote = await createQuoteFromTemplate(templateId, basics());
+      const saved = await loadQuote(quote.id);
+      expect(quote).toMatchObject({
+        status: "borrador",
+        total_cost_usd: null,
+        total_margin_usd: null,
+        total_price_usd: null,
+      });
+      expect(quote.calculation).toMatchObject({ status: "error" });
+      expect(
+        (quote.calculation as { items: { status: string; total_cost_usd: number | null }[] }).items,
+      ).toContainEqual(expect.objectContaining({ status: "error", total_cost_usd: null }));
+      await pg.query(
+        "update quotes set pricing_config=jsonb_set(pricing_config,'{unresolved}','[]') where id=$1",
+        [quote.id],
+      );
+      await pg.query(
+        "update quote_days set snapshot=jsonb_set(snapshot,'{reviewed}','true') where quote_id=$1",
+        [quote.id],
+      );
+      await recalculateQuote(quote.id);
+      await expect(transitionQuote(quote.id, "revisada")).rejects.toThrow("errores de cálculo");
+      await expect(generateQuotePdf(quote.id)).rejects.toThrow("errores de cálculo");
+      expect(
+        (await loadQuote(quote.id)).items.map((item) => [
+          item.id,
+          item.service_id,
+          item.pricing_snapshot,
+        ]),
+      ).toEqual(saved.items.map((item) => [item.id, item.service_id, item.pricing_snapshot]));
+    } finally {
+      for (const rate of rates)
+        await pg.query("update service_rates set price_net=$2,price_rack=$3 where id=$1", [
+          rate.id,
+          rate.price_net,
+          rate.price_rack,
+        ]);
+    }
+  });
+
+  it("preserves an unrepresentable service warning without fabricating an item", async () => {
+    const service = (
+      await one<{ id: string }>(
+        `insert into services(sku,name,type,status)
+         values('INCOMPLETE_DRAFT_SERVICE','Servicio por completar','extra','activo') returning id`,
+      )
+    ).id;
+    const block = (
+      await one<{ id: string }>(
+        "insert into day_blocks(code,status) values('INCOMPLETE_DRAFT_DAY','activo') returning id",
+      )
+    ).id;
+    await pg.query(
+      "insert into day_block_translations(block_id,lang,title,description,reviewed) values($1,'es','Día editable','Completar servicios',true)",
+      [block],
+    );
+    await pg.query("insert into day_block_items(block_id,service_id,qty) values($1,$2,1)", [
+      block,
+      service,
+    ]);
+    const template = (
+      await one<{ id: string }>(
+        `insert into itinerary_templates(sku,name,days,nights,route_type,category,status)
+         values('INCOMPLETE-DRAFT-1D0N','Borrador incompleto',1,0,'ONEWAY','COMFORT','activo') returning id`,
+      )
+    ).id;
+    await pg.query("insert into template_days(template_id,day_number,block_id) values($1,1,$2)", [
+      template,
+      block,
+    ]);
+
+    const quote = await createQuoteFromTemplate(template, basics());
+    const saved = await loadQuote(quote.id);
+    expect(saved.items).toEqual([]);
+    expect(saved.days[0]!.snapshot).toMatchObject({
+      omitted_economic_items: [
+        expect.stringContaining("INCOMPLETE_DRAFT_SERVICE: falta unidad de cobro y moneda"),
+      ],
+    });
+    expect(quote).toMatchObject({
+      status: "borrador",
+      total_cost_usd: null,
+      total_margin_usd: null,
+      total_price_usd: null,
+    });
+    expect(quote.calculation).toMatchObject({
+      status: "error",
+      warnings: expect.arrayContaining([
+        expect.stringContaining("INCOMPLETE_DRAFT_SERVICE: falta unidad de cobro y moneda"),
+      ]),
+    });
+    expect(await recalculateQuote(quote.id)).toMatchObject({
+      status: "error",
+      warnings: expect.arrayContaining([
+        expect.stringContaining("INCOMPLETE_DRAFT_SERVICE: falta unidad de cobro y moneda"),
+      ]),
+    });
   });
 
   it("denies anonymous/unregistered callers and does not expose the privileged source reader", async () => {

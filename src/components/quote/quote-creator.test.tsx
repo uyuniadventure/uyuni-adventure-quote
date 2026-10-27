@@ -76,6 +76,8 @@ const pending = {
   hotel_combo: null,
   meals_summary: null,
   status: "pendiente",
+  economic_status: "validated",
+  economic_issues: [],
   quote_defaults: {},
   import_warnings: ["Confirmar hotel del día 2"],
   template_days: [{ count: 4 }],
@@ -118,6 +120,21 @@ it("shows pending status and warnings, and creates through the library", async (
   expect(createQuoteFromTemplate).toHaveBeenCalledWith(
     "template",
     expect.objectContaining({ pax_paying: 2, tc_count: 0 }),
+  );
+});
+it("labels an economically incomplete template without disabling draft creation", async () => {
+  vi.mocked(suggestTemplates).mockResolvedValue([
+    { ...pending, economic_status: "blocked", economic_issues: ["Falta tarifa del hotel"] },
+  ]);
+  vi.mocked(createQuoteFromTemplate).mockResolvedValue({ id: "draft" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplate>
+  >);
+  show();
+  expect(await screen.findByText("Totales pendientes")).toBeVisible();
+  expect(screen.getByText("Falta tarifa del hotel")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Usar plantilla" }));
+  await waitFor(() =>
+    expect(createQuoteFromTemplate).toHaveBeenCalledWith("template", expect.anything()),
   );
 });
 it("starts a Spanish quote from scratch without requiring a template translation", async () => {
