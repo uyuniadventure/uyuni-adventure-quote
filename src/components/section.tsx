@@ -13,7 +13,6 @@ import {
   FileInput,
   ClipboardCheck,
   ShieldCheck,
-  Upload,
 } from "lucide-react";
 
 export interface SectionDef {
@@ -108,12 +107,6 @@ export const SECTIONS = {
     description: "Usuarios, roles y configuración general del cotizador.",
     icon: ShieldCheck,
   },
-  "importar-paquete": {
-    path: "/admin/importar",
-    title: "Importar paquete",
-    description: "Previsualiza y confirma paquetes ZIP/CSV sin activar automáticamente el catálogo.",
-    icon: Upload,
-  },
 } satisfies Record<string, SectionDef>;
 
 export const SECTION_GROUPS: { label: string | null; items: SectionDef[] }[] = [
@@ -140,7 +133,6 @@ export const SECTION_GROUPS: { label: string | null; items: SectionDef[] }[] = [
     items: [
       SECTIONS["revision-importacion"],
       SECTIONS.operacion,
-      SECTIONS["importar-paquete"],
       SECTIONS.admin,
     ],
   },

@@ -1,8 +1,0 @@
-﻿id,titulo,tipo,idioma,orden,obligatorio,texto
-ITI_DISCLAIMER,Itinerario de referencia,itinerario,es,10,sí,Texto de prueba del aviso.
-PAGO_METODOS,Métodos de pago,pago,es,100,sí,**Transferencia:** texto de prueba.
-INCLUYE_SPASPA,Incluye · San Pedro → Uyuni → San Pedro,incluye,es,500,no,"- Ítem uno
-- Ítem dos"
-NO_INCLUYE_SPASPA,No incluye · San Pedro → Uyuni → San Pedro,incluye,es,501,no,- Ítem tres
-INCLUYE_UYUUYU,Incluye · Uyuni → Uyuni,incluye,es,502,no,- Ítem uno
-NO_INCLUYE_UYUUYU,No incluye · Uyuni → Uyuni,incluye,es,503,no,- Ítem tres

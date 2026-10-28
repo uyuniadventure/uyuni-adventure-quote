@@ -1,4 +1,0 @@
-﻿sku,nombre,origen,destino,dias,noches,categoria,idioma,temporada,hoteles_codigo,bloque_incluye,bloque_no_incluye,presupuesto_pestana,linea_guia,estado,servicios
-SPASPA-4D3N-AB,Prueba 4 días (Hotel A + Hotel B + Hotel A),San Pedro de Atacama,San Pedro de Atacama,4,3,COMFORT,ES,ALL,ABA,INCLUYE_SPASPA,NO_INCLUYE_SPASPA,FIXTURE,1,borrador,si
-UYUUYU-3D2N-AB,Prueba 3 días (Hotel A + Hotel B),Uyuni,Uyuni,3,2,,ES,ALL,AB,INCLUYE_UYUUYU,NO_INCLUYE_UYUUYU,FIXTURE,2,borrador,si
-UYUUYU-3D2N-SOLO-TEXTO,Prueba sin presupuesto,Uyuni,Uyuni,3,2,,EN,DRY,AB,,,,3,borrador,no
