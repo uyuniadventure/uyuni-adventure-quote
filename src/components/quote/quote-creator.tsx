@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { db } from "@/lib/db";
 import {
   createEmptyQuote,
+  createQuoteFromCostScenario,
   createQuoteFromTemplate,
   getTemplateForQuote,
   templateQuotePrefill,
@@ -422,7 +423,7 @@ export function QuoteCreator({
 
 function useQuoteCreation(b: Basics, onCreated: (id: string) => void) {
   return useMutation({
-    mutationFn: async (templateId: string | null) => {
+    mutationFn: async (source: string | null | { scenarioId: string }) => {
       if (!validBasics(b))
         throw new Error("Completa cliente, fecha de inicio y pasajeros válidos en Datos básicos.");
       const fx = await latestFx();
@@ -448,9 +449,12 @@ function useQuoteCreation(b: Basics, onCreated: (id: string) => void) {
           days_available: Number(b.days) || null,
         },
       };
-      const quote = templateId
-        ? await createQuoteFromTemplate(templateId, basics)
-        : await createEmptyQuote(basics);
+      const quote =
+        typeof source === "object" && source
+          ? await createQuoteFromCostScenario(source.scenarioId, basics)
+          : source
+            ? await createQuoteFromTemplate(source, basics)
+            : await createEmptyQuote(basics);
       return quote.id;
     },
     onSuccess: (id) => {
@@ -479,6 +483,22 @@ export function TemplateStep({
   });
   const create = useQuoteCreation(b, onCreated);
   const valid = validBasics(b);
+  const scenarios = useQuery({
+    queryKey: ["quote-cost-scenarios", Number(b.pax_paying)],
+    enabled: Number.isInteger(Number(b.pax_paying)) && Number(b.pax_paying) > 0,
+    queryFn: async () => {
+      const { data, error } = await db
+        .from("tour_cost_scenarios")
+        .select("id,tour_sku,rate_year,season,pax,approved_cost_usd,detail_cost_usd,cost_difference_usd,reconciliation_status,source_ref")
+        .eq("status", "activo")
+        .eq("pax", Number(b.pax_paying))
+        .order("tour_sku")
+        .order("rate_year")
+        .order("season");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -506,6 +526,47 @@ export function TemplateStep({
           Creando borrador y copiando servicios de la plantilla…
         </p>
       )}
+      <Card className="space-y-3 p-4">
+        <div>
+          <h3 className="font-medium text-foreground">Escenarios económicos importados</h3>
+          <p className="text-sm text-muted-foreground">
+            Coincidencia exacta por tour, año, temporada y {b.pax_paying || "—"} pasajero(s).
+          </p>
+        </div>
+        {scenarios.isLoading && <p className="text-sm text-muted-foreground">Buscando escenarios…</p>}
+        {scenarios.isError && (
+          <p role="alert" className="text-sm text-destructive">{scenarios.error.message}</p>
+        )}
+        {!scenarios.isLoading && !scenarios.isError && scenarios.data?.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No hay escenarios activos para esta cantidad exacta de pasajeros.
+          </p>
+        )}
+        <div className="grid gap-2 sm:grid-cols-2">
+          {scenarios.data?.map((scenario) => (
+            <div key={scenario.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
+              <div>
+                <div className="font-mono text-xs text-muted-foreground">{scenario.tour_sku}</div>
+                <div className="text-sm font-medium">
+                  {scenario.rate_year} · {scenario.season} · P{scenario.pax}
+                </div>
+                {scenario.reconciliation_status === "difference" && (
+                  <p className="text-xs text-brand-orange-deep">
+                    Conciliación pendiente: aprobado USD {scenario.approved_cost_usd} · desglose USD {scenario.detail_cost_usd} · diferencia USD {scenario.cost_difference_usd}
+                  </p>
+                )}
+              </div>
+              <Button
+                size="sm"
+                disabled={create.isPending || !valid}
+                onClick={() => create.mutate({ scenarioId: scenario.id })}
+              >
+                Usar escenario
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Card>
       {q.isLoading && <p className="text-sm text-muted-foreground">Buscando plantillas…</p>}
       {q.isError && (
         <div role="alert" className="space-y-2 rounded-md border p-4">

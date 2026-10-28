@@ -184,7 +184,7 @@ it("protects closing and tab changes while data has unsaved changes", async () =
   expect(await screen.findByRole("tab", { name: "Datos" })).toBeInTheDocument();
   expect(screen.queryByRole("tab", { name: "Módulos" })).not.toBeInTheDocument();
   expect(screen.getByRole("tab", { name: "Textos" })).toBeInTheDocument();
-  expect(screen.getByRole("tab", { name: "Servicios sueltos" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "Servicios" })).toBeInTheDocument();
   const code = await screen.findByLabelText("Código");
   fireEvent.change(code, { target: { value: "BD-EDIT" } });
   await screen.findByText("Cambios sin guardar");
@@ -247,7 +247,7 @@ it("waits for a service write before allowing incorporation", async () => {
   );
   const onComplete = vi.fn().mockResolvedValue(true);
   show("block-1", { label: "Incorporar al día 1", onComplete });
-  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios sueltos" }), { button: 0, ctrlKey: false });
+  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios" }), { button: 0, ctrlKey: false });
   fireEvent.click(screen.getByRole("combobox", { name: "Añadir servicio suelto (comida, traslado, entrada…)" }));
   fireEvent.click(await screen.findByText("Almuerzo"));
 
@@ -319,7 +319,7 @@ it("preserves and labels a legacy hotel association", async () => {
 
 it("assigns a hotel once to an existing block without hotel", async () => {
   show("block-1");
-  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios sueltos" }), { button: 0, ctrlKey: false });
+  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios" }), { button: 0, ctrlKey: false });
   expect(await screen.findByText("Asigna primero un hotel", { exact: false })).toBeInTheDocument();
   fireEvent.mouseDown(screen.getByRole("tab", { name: "Datos" }), { button: 0, ctrlKey: false });
   fireEvent.click(screen.getByRole("combobox", { name: "Sin hotel" }));
@@ -335,7 +335,7 @@ it("adds only compatible rooms with the accommodation slot", async () => {
   mocks.read.mockResolvedValue({ data: { ...existing, hotel_id: "hotel-1" }, error: null });
   mocks.eligibleHotelRooms.mockResolvedValue([room]);
   show("block-1");
-  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios sueltos" }), { button: 0, ctrlKey: false });
+  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios" }), { button: 0, ctrlKey: false });
   fireEvent.click(screen.getByRole("combobox", { name: "Añadir habitación compatible…" }));
   fireEvent.click(await screen.findByText("Habitación doble"));
   await waitFor(() => expect(mocks.itemInsert).toHaveBeenCalledTimes(1));
@@ -348,7 +348,7 @@ it("rejects a room that becomes incompatible and keeps other services available"
   mocks.eligibleHotelRooms.mockResolvedValueOnce([room]).mockResolvedValueOnce([]);
   mocks.fetchServices.mockResolvedValue([{ id: "meal-1", label: "Almuerzo", sub: "MEAL-1" }]);
   show("block-1");
-  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios sueltos" }), { button: 0, ctrlKey: false });
+  fireEvent.mouseDown(await screen.findByRole("tab", { name: "Servicios" }), { button: 0, ctrlKey: false });
   fireEvent.click(screen.getByRole("combobox", { name: "Añadir habitación compatible…" }));
   fireEvent.click(await screen.findByText("Habitación doble"));
   await waitFor(() => expect(mocks.eligibleHotelRooms).toHaveBeenCalledTimes(2));

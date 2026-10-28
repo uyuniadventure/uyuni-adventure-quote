@@ -122,7 +122,7 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
 
   const s = q.data;
   const rates = [...(s?.service_rates ?? [])].sort(
-    (a, b) => a.season.localeCompare(b.season) || (a.pax_min ?? 0) - (b.pax_min ?? 0),
+    (a, b) => (a.season ?? "").localeCompare(b.season ?? "") || (a.pax_min ?? 0) - (b.pax_min ?? 0),
   );
 
   return (
@@ -185,16 +185,16 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
                 <TableHeader>
                   <TableRow>
                     <TableHead>Temporada</TableHead><TableHead>Vigencia</TableHead><TableHead>Pax</TableHead>
-                    <TableHead className="text-right">Neto</TableHead><TableHead className="text-right">Rack</TableHead><TableHead />
+                    <TableHead className="text-right">Neto</TableHead><TableHead className="text-right">Rack</TableHead><TableHead>Control económico</TableHead><TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rates.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="py-6 text-center text-muted-foreground">Sin tarifas cargadas.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="py-6 text-center text-muted-foreground">Sin tarifas cargadas.</TableCell></TableRow>
                   )}
                   {rates.map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell><Badge variant="outline">{r.season}</Badge></TableCell>
+                      <TableCell><Badge variant="outline">{r.season ?? "Sin definir"}</Badge></TableCell>
                       <TableCell className="whitespace-nowrap text-xs">{validity(r)}</TableCell>
                       <TableCell>{paxRange(r)}</TableCell>
                       <TableCell className="text-right">
@@ -202,6 +202,12 @@ export function ServiceDetail({ serviceId, onClose }: { serviceId: string | null
                         {r.net_cost_missing && <p className="text-[11px] text-brand-orange-deep">sin costo neto</p>}
                       </TableCell>
                       <TableCell className="text-right">{money(r.price_rack, s.currency)}</TableCell>
+                      <TableCell className="max-w-64 text-xs">
+                        {r.pricing_enabled === false && <p className="text-brand-orange-deep">Tarifa pendiente de precio</p>}
+                        {r.exclusion_text && <p>Exclusión de vigencia: {r.exclusion_text}</p>}
+                        {Array.isArray(r.date_exclusions) && r.date_exclusions.length > 0 && <p>{r.date_exclusions.length} exclusión(es) de fecha</p>}
+                        {r.pricing_enabled !== false && !r.exclusion_text && (!Array.isArray(r.date_exclusions) || r.date_exclusions.length === 0) && <span className="text-muted-foreground">Sin incidencias</span>}
+                      </TableCell>
                       <TableCell className="whitespace-nowrap text-right">
                         {manager ? (
                           <>

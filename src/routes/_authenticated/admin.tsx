@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldAlert } from "lucide-react";
+import { FileSpreadsheet, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { SECTIONS, sectionHead } from "@/components/section";
 import { db } from "@/lib/db";
@@ -11,6 +11,7 @@ import { PageHeader, LANGS } from "@/components/catalog/kit";
 import { CrudTable } from "@/components/admin/crud-table";
 import { PaymentSettings } from "@/components/admin/payment-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -36,7 +37,8 @@ function AdminPage() {
   }
   return (
     <div className="space-y-6">
-      <PageHeader title="Admin" subtitle="Usuarios, divisas, códigos, textos fijos y datos bancarios." />
+      <PageHeader title="Admin" subtitle="Usuarios, divisas, códigos, textos fijos y datos bancarios."
+        action={<Button asChild variant="outline"><Link to="/admin/importar"><FileSpreadsheet className="mr-1 h-4 w-4" />Importar Excel</Link></Button>} />
       <Tabs defaultValue="usuarios">
         <TabsList className="flex-wrap">
           <TabsTrigger value="usuarios">Usuarios y roles</TabsTrigger>

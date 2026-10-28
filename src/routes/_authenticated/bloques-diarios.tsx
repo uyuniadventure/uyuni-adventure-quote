@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CatalogRowMenu, CatalogSelectionBar, useCatalogActions } from "@/components/catalog/catalog-actions";
 import { useCatalogSelection } from "@/components/catalog/catalog-selection";
 import { BlockEditor } from "@/components/catalog/block-editor";
+import { ScenarioDaysPanel } from "@/components/catalog/scenario-days-panel";
 import {
   fetchBlockRowsByIds,
   fetchUnsearchedBlockPage,
@@ -141,6 +142,7 @@ function BlocksPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader title={s.title} subtitle="Cada bloque es un día de itinerario. Un mismo día con otro hotel es otro bloque."
         action={<Button className={primaryBtn} onClick={() => setOpenId("new")}><Plus className="mr-1 h-4 w-4" />Nuevo bloque</Button>} />
+      <ScenarioDaysPanel />
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-[200px] flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

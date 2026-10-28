@@ -73,7 +73,9 @@ export interface ProposalQuote {
 }
 export interface ProposalContext {
   quote: ProposalQuote;
-  days: (DocumentDay & { snapshot?: { reviewed?: boolean } })[];
+  days: (DocumentDay & {
+    snapshot?: { reviewed?: boolean; source_ref?: { hotel?: unknown; meals?: unknown } };
+  })[];
   items: DocumentItem[];
   sections: DocSection[];
   seller: string;

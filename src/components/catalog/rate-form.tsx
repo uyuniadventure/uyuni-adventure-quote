@@ -9,6 +9,7 @@ import {
 import { SEASONS, type RateValues } from "./shared";
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v));
+const UNKNOWN_SEASON = "__UNKNOWN__";
 
 export function RateForm({
   initial, submitLabel, withReason, busy, onSubmit,
@@ -33,9 +34,9 @@ export function RateForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2 space-y-1.5">
           <Label>Temporada</Label>
-          <Select value={v.season} onValueChange={(x) => set("season", x as RateValues["season"])}>
+          <Select value={v.season ?? UNKNOWN_SEASON} onValueChange={(x) => set("season", x === UNKNOWN_SEASON ? null : x as RateValues["season"])}>
             <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{SEASONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            <SelectContent><SelectItem value={UNKNOWN_SEASON}>Sin definir</SelectItem>{SEASONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <Field label="Vigente desde"><Input type="date" value={v.valid_from ?? ""} onChange={(e) => set("valid_from", e.target.value || null)} /></Field>

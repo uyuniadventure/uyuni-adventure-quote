@@ -31,6 +31,13 @@ import { QuoteDelivery } from "./quote-delivery";
 import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuoteDayTexts, QuoteIdentityTexts } from "./quote-day-texts";
 import type { DocumentContent } from "@/lib/quotes/document-model";
+import { sourceLodgingDetails } from "@/lib/quotes/document-model";
+import {
+  hasCatalogRateSnapshot,
+  isScenarioItem,
+  manualOverrideNote,
+  quoteItemCostLabel,
+} from "@/lib/quotes/scenario-origin";
 
 type Data = Awaited<ReturnType<typeof loadQuote>>;
 type Item = Tables<"quote_items">;
@@ -131,7 +138,7 @@ export function QuoteWorkspace({ quoteId, onReset }: { quoteId: string; onReset:
             <div className="space-y-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
               {editable && (
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" title="Recalcula con las tarifas guardadas en la cotización" onClick={() => actions.act(async () => {}, "Tarifas recalculadas.")}><RefreshCw className="mr-1 h-4 w-4" />Actualizar tarifas</Button>
+                  <Button variant="outline" size="sm" className="flex-1" title="Vuelve a calcular usando los costos guardados en la cotización" onClick={() => actions.act(async () => {}, "Cotización recalculada.")}><RefreshCw className="mr-1 h-4 w-4" />Recalcular cotización</Button>
                   <Button variant="outline" size="sm" className="flex-1" disabled={actions.busy} onClick={() => setSaveTemplateOpen(true)}><LayoutTemplate className="mr-1 h-4 w-4" />Guardar como plantilla</Button>
                 </div>
               )}
@@ -346,6 +353,11 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
   const [hotelOpen, setHotelOpen] = useState(false);
   const [newItem, setNewItem] = useState(false);
   const hotels = items.filter((i) => i.type === "alojamiento" && i.pricing_unit !== "per_staff");
+  const informed = sourceLodgingDetails(day);
+  const informedAccommodation = informed.accommodation;
+  const accommodation = hotels.length
+    ? [...new Set(hotels.map((hotel) => hotel.description))].join(" · ")
+    : informedAccommodation;
   const [reading, setReading] = useState(false);
   const dayTotal = result?.days.find((x) => x.day_number === day.day_number);
 
@@ -377,10 +389,16 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
         )}
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <BedDouble className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Hotel:</span>
-          <span className="font-medium">{hotels.length ? [...new Set(hotels.map((h) => h.description))].join(" · ") : "Sin alojamiento"}</span>
+          <span className="text-muted-foreground">{hotels.length ? "Hotel:" : informedAccommodation ? "Alojamiento informado:" : "Alojamiento:"}</span>
+          <span className="font-medium">{accommodation || "Sin alojamiento informado"}</span>
           {editable && <Button size="sm" variant="outline" className="h-7" onClick={() => setHotelOpen(true)}>Cambiar hotel</Button>}
         </div>
+        {informed.meals && (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Comidas incluidas:</span>
+            <span className="font-medium">{informed.meals}</span>
+          </div>
+        )}
         <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader><TableRow>
@@ -416,18 +434,19 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
   const [override, setOverride] = useState(false);
   const r = result?.items.find((x) => x.id === item.id);
   const s = snap(item);
+  const costLabel = quoteItemCostLabel(item);
   const upd = (changes: Parameters<typeof updateQuoteItem>[1]) => act(() => updateQuoteItem(item.id, changes));
   return (
     <TableRow id={`item-${item.id}`} className={r?.status === "error" ? "bg-destructive/10 text-destructive" : item.included ? "" : "opacity-60"}>
       <TableCell className="max-w-[320px]">
         <div className="truncate font-medium">{item.description}</div>
         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-          <span className="font-mono">{item.sku ?? "manual"}</span>
+          <span className="font-mono">{isScenarioItem(item) ? "escenario económico" : item.sku ?? "manual"}</span>
           <span>· {PRICING_UNIT_LABELS[item.pricing_unit]}</span>
           {s.room_type && <span>· {s.room_type}</span>}
           {s.vehicle_segment && <span>· tramo {s.vehicle_segment}</span>}
           {item.day_span > 1 && <span>· {item.day_span} días</span>}
-          {item.price_overridden && <Badge variant="outline" className="h-4 border-brand-orange/40 px-1 text-[10px] text-brand-orange-deep" title={item.override_note ?? ""}>Precio manual</Badge>}
+          {costLabel && <Badge variant="outline" className="h-4 border-brand-orange/40 px-1 text-[10px] text-brand-orange-deep" title={item.override_note ?? ""}>{costLabel}</Badge>}
         </div>
         {r?.warning && <div className="text-xs text-destructive">{r.warning}</div>}
       </TableCell>
@@ -482,10 +501,10 @@ function OverrideDialog({ open, onOpenChange, item, currentCost, onConfirm }: {
           <Field label="Nota (obligatoria)"><Textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ej. tarifa negociada con el proveedor por email del 12/10" /></Field>
         </div>
         <DialogFooter className="gap-2">
-          {item.price_overridden && (
+          {item.price_overridden && hasCatalogRateSnapshot(item) && (
             <Button variant="outline" onClick={() => { onConfirm({ price_overridden: false, override_note: null }); onOpenChange(false); }}>Volver a tarifa</Button>
           )}
-          <Button disabled={!valid} onClick={() => { onConfirm({ price_overridden: true, unit_cost_original: Number(cost), override_note: note.trim() }); onOpenChange(false); }}>Aplicar precio</Button>
+          <Button disabled={!valid} onClick={() => { onConfirm({ price_overridden: true, unit_cost_original: Number(cost), override_note: manualOverrideNote(item, note) }); onOpenChange(false); }}>Aplicar precio</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

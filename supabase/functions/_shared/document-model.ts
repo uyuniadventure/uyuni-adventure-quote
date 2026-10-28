@@ -14,7 +14,7 @@ export interface DocumentDay {
   date: string | null;
   block_snapshot: unknown;
   overrides: unknown;
-  reviewed?: boolean;
+  snapshot?: unknown;
 }
 export interface DocumentItem {
   id: string;
@@ -61,6 +61,46 @@ export function resolveDocumentDay(day: DocumentDay): DayText {
     (day.block_snapshot as { content?: DayText })?.content ?? {},
     (day.overrides ?? {}) as DayText,
   );
+}
+
+const INCLUDED_MEALS = /\s+Comidas\s+inclu[ií]das\s*:\s*/i;
+
+export interface DescriptiveLodging {
+  accommodation: string;
+  meals: string;
+}
+
+/** Separates the known Excel suffix without guessing when the marker is absent. */
+export function splitDescriptiveLodging(
+  accommodation: string | null | undefined,
+  meals: string | null | undefined,
+): DescriptiveLodging {
+  const original = accommodation?.trim() ?? "";
+  const separateMeals = meals?.trim() ?? "";
+  const match = INCLUDED_MEALS.exec(original);
+  if (!match)
+    return { accommodation: original, meals: separateMeals };
+  return {
+    accommodation: original.slice(0, match.index).trim(),
+    meals: separateMeals || original.slice(match.index + match[0].length).trim(),
+  };
+}
+
+/** Descriptive Excel fallback; it never implies a structured hotel link. */
+export function sourceLodgingDetails(day: DocumentDay): DescriptiveLodging {
+  const snapshot = day.snapshot as {
+    source_ref?: { hotel?: unknown; meals?: unknown };
+  } | null;
+  const hotel = snapshot?.source_ref?.hotel;
+  const meals = snapshot?.source_ref?.meals;
+  return splitDescriptiveLodging(
+    typeof hotel === "string" ? hotel : "",
+    typeof meals === "string" ? meals : "",
+  );
+}
+
+export function sourceAccommodationText(day: DocumentDay) {
+  return sourceLodgingDetails(day).accommodation;
 }
 export interface DocumentContent extends DocumentContentPatch {
   /** Legacy text is retained for audit; document sections are authoritative after migration. */
@@ -157,6 +197,7 @@ export function buildQuoteDocumentModel(
     .sort((a, b) => a.day_number - b.day_number)
     .map((day) => {
       const effective = resolveDocumentDay(day);
+      const sourceLodging = sourceLodgingDetails(day);
       const overrides = (day.overrides ?? {}) as Record<string, unknown>;
       const field = (key: string, value: string): TextField => ({
         value,
@@ -167,6 +208,10 @@ export function buildQuoteDocumentModel(
       });
       const routeFrom = effective.start_point ?? "";
       const routeTo = effective.end_point ?? "";
+      const lodging = splitDescriptiveLodging(
+        localized(effective.accommodation_text, lang) || sourceLodging.accommodation,
+        effective.meals?.length ? effective.meals.join(", ") : sourceLodging.meals,
+      );
       return {
         id: day.id,
         day_number: day.day_number,
@@ -179,10 +224,10 @@ export function buildQuoteDocumentModel(
         },
         accommodation_text: field(
           "accommodation_text",
-          localized(effective.accommodation_text, lang),
+          lodging.accommodation,
         ),
         meals: {
-          value: effective.meals ?? [],
+          value: effective.meals?.length ? effective.meals : lodging.meals ? [lodging.meals] : [],
           overridden: "meals" in overrides,
         },
         transport_text: field("transport_text", localized(effective.transport_text, lang)),

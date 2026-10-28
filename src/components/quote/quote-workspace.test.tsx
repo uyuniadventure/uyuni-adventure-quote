@@ -374,6 +374,39 @@ it("does not offer changes to an archived sent version", async () => {
   }
 });
 
+it("identifica costos de escenario, alojamiento informado y el recálculo real", async () => {
+  const data = savedQuote("borrador");
+  data.days[0]!.snapshot = {
+    reviewed: true,
+    source_ref: {
+      hotel: "Hotel de origen sin vínculo ambiguo Comidas incluidas: Almuerzo.",
+      meals: "Almuerzo.",
+    },
+  };
+  Object.assign(data.items[0]!, {
+    price_overridden: true,
+    override_note: "Costo total aprobado en escenario consolidado",
+    pricing_snapshot: { scenario_line_id: "scenario-line", charge_once_key: "hotel-night" },
+    unit_cost_original: 20,
+  });
+  renderQuote(data);
+
+  expect(await screen.findByText("Costo importado del escenario")).toBeVisible();
+  expect(screen.getByText("Alojamiento informado:")).toBeVisible();
+  expect(screen.getAllByText("Hotel de origen sin vínculo ambiguo")).toHaveLength(2);
+  expect(screen.getByText("Comidas incluidas:")).toBeVisible();
+  expect(screen.getByText("Almuerzo.")).toBeVisible();
+  expect(screen.getByText("escenario económico")).toBeVisible();
+  expect(screen.queryByText("manual")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Recalcular cotización" })).toHaveAttribute(
+    "title",
+    "Vuelve a calcular usando los costos guardados en la cotización",
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: "Precio manual" }));
+  expect(screen.queryByRole("button", { name: "Volver a tarifa" })).not.toBeInTheDocument();
+});
+
 it("blocks sending on a red calculation warning but permits cancellation", async () => {
   const data = savedQuote("revisada");
   data.quote.calculation = { ...(data.quote.calculation as object), status: "error" };

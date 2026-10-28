@@ -46,7 +46,7 @@ export function validity(r: Pick<Tables<"service_rates">, "valid_from" | "valid_
 
 /** Campos de tarifa que se pueden proponer / editar. */
 export interface RateValues {
-  season: Enums<"season">;
+  season: Enums<"season"> | null;
   valid_from: string | null;
   valid_to: string | null;
   pax_min: number | null;
@@ -58,7 +58,9 @@ export interface RateValues {
 
 export function rateValuesFrom(r?: Partial<Tables<"service_rates">> | null): RateValues {
   return {
-    season: r?.season ?? "ALL",
+    // New manual tariffs keep the existing ALL convenience. Imported blank
+    // seasons remain NULL and must be resolved explicitly by an operator.
+    season: r ? (r.season ?? null) : "ALL",
     valid_from: r?.valid_from ?? null,
     valid_to: r?.valid_to ?? null,
     pax_min: r?.pax_min ?? null,

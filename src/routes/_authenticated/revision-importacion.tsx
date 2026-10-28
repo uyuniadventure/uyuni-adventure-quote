@@ -18,6 +18,7 @@ import { ServiceDetail } from "@/components/catalog/service-detail";
 import { BlockEditor } from "@/components/catalog/block-editor";
 import { TemplateEditor } from "@/components/catalog/template-editor";
 import { BulkImportApproval } from "@/components/catalog/bulk-import-approval";
+import { ConsolidatedIssuesPanel } from "@/components/catalog/consolidated-issues-panel";
 
 const s = SECTIONS["revision-importacion"];
 
@@ -146,6 +147,7 @@ function ReviewPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader title={s.title} subtitle="Elementos en estado pendiente (importados o sugeridos por vendedores) a la espera de revisión." />
+      <ConsolidatedIssuesPanel />
       <BulkImportApproval />
       {!manager && <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">Solo Admin y Operación pueden aprobar o rechazar. Aquí ves tus elementos pendientes.</p>}
       {q.isError && <p className="text-sm text-destructive">No se pudo cargar la revisión.</p>}

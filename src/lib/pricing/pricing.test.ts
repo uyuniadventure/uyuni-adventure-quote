@@ -87,6 +87,48 @@ describe("pricing", () => {
     expect(result.items[0]?.status).toBe("error");
     expect(() => assertCompleteCalculation(result)).toThrow(/errores de cálculo/);
   });
+  it("never treats an unknown source season as ALL", () => {
+    const result = calculateQuote({
+      ...base,
+      days: [{ day_number: 1, items: [{ ...item, rates: [{ ...rate, season: null }] }] }],
+    });
+    expect(result.items[0]).toMatchObject({ status: "error", base_cost_usd: null });
+  });
+  it("selects the exact tariff year when multiple years coexist", () => {
+    const rates = [
+      { ...rate, rate_year: 2026, price_net: 100 },
+      { ...rate, rate_year: 2027, price_net: 125 },
+    ];
+    expect(calculateQuote({ ...base, start_date: "2026-12-31", days: [{ day_number: 1, items: [{ ...item, rates }] }] }).total_cost_usd).toBe(300);
+    expect(calculateQuote({ ...base, start_date: "2027-01-01", days: [{ day_number: 1, items: [{ ...item, rates }] }] }).total_cost_usd).toBe(375);
+  });
+  it("gives the approved PRECIO_USD precedence without converting it twice", () => {
+    const result = calculateQuote({
+      ...base,
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          currency: "CLP",
+          rates: [{ ...rate, price_net: 88_500, source_price_usd: 97 }],
+        }],
+      }],
+    });
+    expect(result.total_cost_usd).toBe(291);
+    expect(result.items[0]).toMatchObject({ unit_cost_original: 88_500, unit_cost_usd: 97 });
+  });
+  it("does not apply prose restrictions or an explicitly excluded date", () => {
+    for (const restricted of [
+      { exclusion_text: "EXCLUYE AÑO NUEVO Y CARNAVALES" },
+      { date_exclusions: [{ from: "2026-12-31", to: "2027-01-02" }] },
+    ]) {
+      const result = calculateQuote({
+        ...base,
+        days: [{ day_number: 1, items: [{ ...item, rates: [{ ...rate, ...restricted }] }] }],
+      });
+      expect(result.items[0]).toMatchObject({ status: "error", base_cost_usd: null });
+    }
+  });
   it("does not let an explicit itinerary calendar override DRY/RAIN", () => {
     const result = calculateQuote({
       ...base,

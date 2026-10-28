@@ -131,6 +131,27 @@ describe("constructor de propuesta", () => {
       renderProposalContent(ctx, { target: "pdf", lang: "es" }).avisos.map((n) => n.code),
     ).toContain("tiers");
   });
+  it("usa el alojamiento descriptivo del escenario cuando no hay hotel estructurado", () => {
+    const ctx = proposalFixture("B2B");
+    ctx.days[0]!.snapshot = {
+      reviewed: true,
+      source_ref: {
+        hotel: "Alojamiento informado desde el Excel Comidas incluidas: Cena.",
+        meals: "Cena.",
+      },
+    };
+    ctx.days[0]!.block_snapshot = { content: {} };
+    ctx.sections.push({
+      ...ctx.sections[1]!,
+      id: "HOTELES-ORIGEN",
+      sort: 8,
+      snapshot: { ...ctx.sections[1]!.snapshot, code: "HOTELES", data_key: "hoteles" },
+    });
+    const result = renderProposalContent(ctx, { target: "pdf", lang: "es" });
+    expect(result.html).toContain("Alojamiento informado desde el Excel");
+    expect(result.html).toContain("Cena.");
+    expect(result.html).not.toContain("Alojamiento informado desde el Excel Comidas");
+  });
   it("la copia enviada no cambia con datos, pagos o idioma posteriores", () => {
     const ctx = proposalFixture();
     const before = renderProposalContent(ctx, { target: "pdf", lang: "es" });

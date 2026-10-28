@@ -22,18 +22,24 @@ export type { MarginMode, CommissionMode, ClientPricing, AdminPricing } from "./
 
 export interface Rate {
   id?: string;
-  season: Enums<"season">;
+  /** NULL is an unknown source season and is deliberately never a wildcard. */
+  season: Enums<"season"> | null;
+  rate_year?: number | null;
   valid_from: string | null;
   valid_to: string | null;
   pax_min: number | null;
   pax_max: number | null;
   price_net: number | null;
   price_rack?: number | null;
+  /** Approved consolidated USD amount; when present it wins over FX conversion. */
+  source_price_usd?: number | null;
   // Historical import flag; current availability is determined by the prices.
   net_cost_missing?: boolean;
   /** False keeps the original tariff for audit but excludes it from quotation. */
   pricing_enabled?: boolean;
   room_type?: string | null;
+  exclusion_text?: string | null;
+  date_exclusions?: unknown;
 }
 export interface Rooming {
   paying: Record<string, number>;
@@ -243,7 +249,7 @@ export class RateError extends Error {
       item.rates
         .map(
           (r) =>
-            `${r.season} · ${r.valid_from ? displayDate(r.valid_from) : "sin inicio"} a ${r.valid_to ? displayDate(r.valid_to) : "sin fin"} · ${r.pax_min ?? 0}–${r.pax_max ?? "∞"} pax${r.room_type ? ` · ${r.room_type}` : ""} · ${r.price_net ?? r.price_rack ?? "sin costo"} ${item.currency}`,
+            `${r.season ?? "temporada desconocida"} · ${r.valid_from ? displayDate(r.valid_from) : "sin inicio"} a ${r.valid_to ? displayDate(r.valid_to) : "sin fin"} · ${r.pax_min ?? 0}–${r.pax_max ?? "∞"} pax${r.room_type ? ` · ${r.room_type}` : ""} · ${r.price_net ?? r.price_rack ?? "sin costo"} ${item.currency}`,
         )
         .join("; ") || "ninguna";
     super(
@@ -265,9 +271,24 @@ export function selectRate(
     .filter((s) => validDate(s.from) <= date && validDate(s.to) >= date)
     .map((s) => s.season);
   const climateSeason = climateSeasonForDate(date);
+  const isExcluded = (rate: Rate) => {
+    // Free-form restrictions such as Carnival cannot be guessed. They remain
+    // unavailable until an importer/operator supplies explicit ranges.
+    if (rate.exclusion_text?.trim()) return true;
+    if (!Array.isArray(rate.date_exclusions)) return false;
+    return rate.date_exclusions.some((value) => {
+      if (!value || typeof value !== "object") return false;
+      const range = value as { from?: unknown; to?: unknown };
+      return typeof range.from === "string" && typeof range.to === "string" &&
+        validDate(range.from) <= date && validDate(range.to) >= date;
+    });
+  };
   const candidates = item.rates.filter(
     (r) =>
       r.pricing_enabled !== false &&
+      r.season !== null &&
+      !isExcluded(r) &&
+      (r.rate_year == null || r.rate_year === Number(date.slice(0, 4))) &&
       (!r.valid_from || validDate(r.valid_from) <= date) &&
       (!r.valid_to || validDate(r.valid_to) >= date) &&
       (r.pax_min === null || pax >= r.pax_min) &&
@@ -557,6 +578,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           continue;
         }
         let native: number;
+        let approvedUnitUsd: number | null = null;
         const roomBreakdown: NonNullable<ItemResult["room_breakdown"]> = [];
         if (item.price_overridden) {
           if (!item.override_note?.trim() || item.unit_cost_original === undefined)
@@ -567,6 +589,7 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             { type: undefined, quantity: qty },
           ];
           let totalNative = 0;
+          let totalUsd = 0;
           let missingPrice = false;
           for (const part of parts) {
             const rate =
@@ -584,13 +607,17 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             }
             nonnegative(price, "price");
             totalNative += price * part.quantity;
+            const partUsd = rate.source_price_usd == null
+              ? price / fx(input, item.currency)
+              : nonnegative(rate.source_price_usd, "source_price_usd");
+            totalUsd += partUsd * part.quantity;
             if (part.type)
               roomBreakdown.push({
                 room_type: part.type,
                 quantity: part.quantity,
                 unit_cost_original: price,
                 total_cost_usd: adjustedCost(
-                  (price * part.quantity) / fx(input, item.currency),
+                  partUsd * part.quantity,
                   item.adjustment_pct,
                 ),
               });
@@ -617,8 +644,9 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             continue;
           }
           native = totalNative / qty;
+          approvedUnitUsd = totalUsd / qty;
         }
-        const usd = native / fx(input, item.currency),
+        const usd = approvedUnitUsd ?? native / fx(input, item.currency),
           baseCost = qty * usd,
           cost = adjustedCost(baseCost, item.adjustment_pct);
         items.push({

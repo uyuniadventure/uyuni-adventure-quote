@@ -24,7 +24,12 @@ export const documentContentPatchSchema = z
 
 export type DocumentContentPatch = z.infer<typeof documentContentPatchSchema>;
 
-export { buildQuoteDocumentModel } from "../../../supabase/functions/_shared/document-model";
+export {
+  buildQuoteDocumentModel,
+  sourceLodgingDetails,
+  sourceAccommodationText,
+  splitDescriptiveLodging,
+} from "../../../supabase/functions/_shared/document-model";
 export type {
   DocumentContent,
   TextField,

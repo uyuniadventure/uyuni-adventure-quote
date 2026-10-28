@@ -78,7 +78,10 @@ describe("importador de presupuesto SPAUYU · lectura, diff y seed", () => {
       .replaceAll("day_blocks(catalog_origin,id,", "day_blocks(id,")
       .replaceAll("select 'importacion',md5(", "select md5(")
       .replaceAll("set catalog_origin='importacion',quote_defaults=", "set quote_defaults=");
-    expect(legacySql).toBe(await sql("supabase/seed/04_spauyu_mp_2pax.sql"));
+    const normalizeEol = (value: string) => value.replaceAll("\r\n", "\n");
+    expect(normalizeEol(legacySql)).toBe(
+      normalizeEol(await sql("supabase/seed/04_spauyu_mp_2pax.sql")),
+    );
   });
   it("does not silently accept compound lookup formulas or conflicting room SKUs", async () => {
     expect(

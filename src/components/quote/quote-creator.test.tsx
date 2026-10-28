@@ -7,7 +7,7 @@ import {
   templateSuggestionError,
   type TemplateSuggestion,
 } from "@/lib/quotes/suggestions";
-import { createEmptyQuote, createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
+import { createEmptyQuote, createQuoteFromCostScenario, createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -18,6 +18,7 @@ vi.mock("@/lib/db", () => ({
 }));
 vi.mock("@/lib/quotes", () => ({
   createQuoteFromTemplate: vi.fn(),
+  createQuoteFromCostScenario: vi.fn(),
   createEmptyQuote: vi.fn(),
   getTemplateForQuote: vi.fn(),
   templateQuotePrefill: (template: {
@@ -164,7 +165,7 @@ it("shows the missing migration after one retry and allows a successful manual r
   vi.mocked(suggestTemplates).mockResolvedValue([pending]);
   fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
   expect(await screen.findByText("Tour de prueba")).toBeVisible();
-  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.queryByText(/20261011000100_template_quote_defaults\.sql/)).not.toBeInTheDocument();
 });
 it("distinguishes an empty accessible catalogue from a request error", async () => {
   vi.mocked(suggestTemplates).mockResolvedValue([]);

@@ -481,6 +481,97 @@ export type Database = {
           },
         ];
       };
+      consolidated_import_runs: {
+        Row: {
+          id: string;
+          file_name: string;
+          source_sha256: string;
+          schema_version: string;
+          status: string;
+          result: Json;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          file_name: string;
+          source_sha256: string;
+          schema_version: string;
+          status?: string;
+          result: Json;
+          created_by?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          file_name?: string;
+          source_sha256?: string;
+          schema_version?: string;
+          status?: string;
+          result?: Json;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consolidated_import_runs_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      consolidated_import_issues: {
+        Row: {
+          id: string;
+          run_id: string;
+          import_key: string;
+          scenario_key: string | null;
+          day_key: string | null;
+          line_key: string | null;
+          code: string;
+          issue_type: string;
+          detail: string;
+          source_ref: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_id: string;
+          import_key: string;
+          scenario_key?: string | null;
+          day_key?: string | null;
+          line_key?: string | null;
+          code: string;
+          issue_type: string;
+          detail: string;
+          source_ref?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          run_id?: string;
+          import_key?: string;
+          scenario_key?: string | null;
+          day_key?: string | null;
+          line_key?: string | null;
+          code?: string;
+          issue_type?: string;
+          detail?: string;
+          source_ref?: Json;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consolidated_import_issues_run_id_fkey";
+            columns: ["run_id"];
+            isOneToOne: false;
+            referencedRelation: "consolidated_import_runs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       day_blocks: {
         Row: {
           id: string;
@@ -503,6 +594,9 @@ export type Database = {
           catalog_origin: string;
           approval_issues: string[];
           hotel_id: string | null;
+          excel_import_key: string | null;
+          excel_import_fingerprint: string | null;
+          manually_modified_at: string | null;
         };
         Insert: {
           id?: string;
@@ -525,6 +619,9 @@ export type Database = {
           catalog_origin?: string;
           approval_issues?: string[];
           hotel_id?: string | null;
+          excel_import_key?: string | null;
+          excel_import_fingerprint?: string | null;
+          manually_modified_at?: string | null;
         };
         Update: {
           id?: string;
@@ -547,6 +644,9 @@ export type Database = {
           catalog_origin?: string;
           approval_issues?: string[];
           hotel_id?: string | null;
+          excel_import_key?: string | null;
+          excel_import_fingerprint?: string | null;
+          manually_modified_at?: string | null;
         };
         Relationships: [
           {
@@ -1059,6 +1159,9 @@ export type Database = {
           source_season: string | null;
           economic_status: string;
           economic_issues: string[];
+          excel_import_key: string | null;
+          excel_import_fingerprint: string | null;
+          manually_modified_at: string | null;
         };
         Insert: {
           id?: string;
@@ -1094,6 +1197,9 @@ export type Database = {
           source_season?: string | null;
           economic_status?: string;
           economic_issues?: string[];
+          excel_import_key?: string | null;
+          excel_import_fingerprint?: string | null;
+          manually_modified_at?: string | null;
         };
         Update: {
           id?: string;
@@ -1129,6 +1235,9 @@ export type Database = {
           source_season?: string | null;
           economic_status?: string;
           economic_issues?: string[];
+          excel_import_key?: string | null;
+          excel_import_fingerprint?: string | null;
+          manually_modified_at?: string | null;
         };
         Relationships: [
           {
@@ -2426,6 +2535,8 @@ export type Database = {
           commission_mode: Database["public"]["Enums"]["commission_mode"];
           commission_pct: number;
           cancel_reason: string | null;
+          cost_scenario_id: string | null;
+          cost_scenario_warnings: Json;
         };
         Insert: {
           id?: string;
@@ -2473,6 +2584,8 @@ export type Database = {
           commission_mode: Database["public"]["Enums"]["commission_mode"];
           commission_pct: number;
           cancel_reason?: string | null;
+          cost_scenario_id?: string | null;
+          cost_scenario_warnings?: Json;
         };
         Update: {
           id?: string;
@@ -2520,6 +2633,8 @@ export type Database = {
           commission_mode?: Database["public"]["Enums"]["commission_mode"];
           commission_pct?: number;
           cancel_reason?: string | null;
+          cost_scenario_id?: string | null;
+          cost_scenario_warnings?: Json;
         };
         Relationships: [
           {
@@ -2527,6 +2642,13 @@ export type Database = {
             columns: ["client_id"];
             isOneToOne: false;
             referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quotes_cost_scenario_id_fkey";
+            columns: ["cost_scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_cost_scenarios";
             referencedColumns: ["id"];
           },
           {
@@ -2671,7 +2793,7 @@ export type Database = {
         Row: {
           id: string;
           service_id: string;
-          season: Database["public"]["Enums"]["season"];
+          season: Database["public"]["Enums"]["season"] | null;
           valid_from: string | null;
           valid_to: string | null;
           pax_min: number | null;
@@ -2687,11 +2809,20 @@ export type Database = {
           import_source_price_net: number | null;
           import_source_price_rack: number | null;
           pricing_enabled: boolean;
+          rate_year: number | null;
+          import_key: string | null;
+          source_sheet: string | null;
+          source_ref: Json;
+          source_currency: string | null;
+          source_price_usd: number | null;
+          source_price_net: number | null;
+          exclusion_text: string | null;
+          date_exclusions: Json;
         };
         Insert: {
           id?: string;
           service_id: string;
-          season?: Database["public"]["Enums"]["season"];
+          season?: Database["public"]["Enums"]["season"] | null;
           valid_from?: string | null;
           valid_to?: string | null;
           pax_min?: number | null;
@@ -2707,11 +2838,20 @@ export type Database = {
           import_source_price_net?: number | null;
           import_source_price_rack?: number | null;
           pricing_enabled?: boolean;
+          rate_year?: number | null;
+          import_key?: string | null;
+          source_sheet?: string | null;
+          source_ref?: Json;
+          source_currency?: string | null;
+          source_price_usd?: number | null;
+          source_price_net?: number | null;
+          exclusion_text?: string | null;
+          date_exclusions?: Json;
         };
         Update: {
           id?: string;
           service_id?: string;
-          season?: Database["public"]["Enums"]["season"];
+          season?: Database["public"]["Enums"]["season"] | null;
           valid_from?: string | null;
           valid_to?: string | null;
           pax_min?: number | null;
@@ -2727,6 +2867,15 @@ export type Database = {
           import_source_price_net?: number | null;
           import_source_price_rack?: number | null;
           pricing_enabled?: boolean;
+          rate_year?: number | null;
+          import_key?: string | null;
+          source_sheet?: string | null;
+          source_ref?: Json;
+          source_currency?: string | null;
+          source_price_usd?: number | null;
+          source_price_net?: number | null;
+          exclusion_text?: string | null;
+          date_exclusions?: Json;
         };
         Relationships: [
           {
@@ -3174,6 +3323,308 @@ export type Database = {
           },
         ];
       };
+      tour_cost_scenario_days: {
+        Row: {
+          id: string;
+          scenario_id: string;
+          day_number: number;
+          visible_code: string;
+          block_id: string | null;
+          route_from: string | null;
+          route_to: string | null;
+          places: string[];
+          title: string | null;
+          description: string | null;
+          source_ref: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          scenario_id: string;
+          day_number: number;
+          visible_code: string;
+          block_id?: string | null;
+          route_from?: string | null;
+          route_to?: string | null;
+          places?: string[];
+          title?: string | null;
+          description?: string | null;
+          source_ref?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          scenario_id?: string;
+          day_number?: number;
+          visible_code?: string;
+          block_id?: string | null;
+          route_from?: string | null;
+          route_to?: string | null;
+          places?: string[];
+          title?: string | null;
+          description?: string | null;
+          source_ref?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_cost_scenario_days_block_id_fkey";
+            columns: ["block_id"];
+            isOneToOne: false;
+            referencedRelation: "day_blocks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenario_days_scenario_id_fkey";
+            columns: ["scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_cost_scenarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tour_cost_scenario_issues: {
+        Row: {
+          id: string;
+          scenario_id: string;
+          scenario_day_id: string | null;
+          line_key: string | null;
+          code: string;
+          issue_type: string;
+          detail: string;
+          source_ref: Json;
+          resolved_at: string | null;
+          resolved_by: string | null;
+          created_at: string;
+          updated_at: string;
+          import_key: string | null;
+        };
+        Insert: {
+          id?: string;
+          scenario_id: string;
+          scenario_day_id?: string | null;
+          line_key?: string | null;
+          code: string;
+          issue_type?: string;
+          detail: string;
+          source_ref?: Json;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          import_key?: string | null;
+        };
+        Update: {
+          id?: string;
+          scenario_id?: string;
+          scenario_day_id?: string | null;
+          line_key?: string | null;
+          code?: string;
+          issue_type?: string;
+          detail?: string;
+          source_ref?: Json;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          import_key?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_cost_scenario_issues_resolved_by_fkey";
+            columns: ["resolved_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenario_issues_scenario_day_id_scenario_id_fkey";
+            columns: ["scenario_day_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_cost_scenario_days";
+            referencedColumns: ["id", "scenario_id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenario_issues_scenario_id_fkey";
+            columns: ["scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_cost_scenarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tour_cost_scenario_lines: {
+        Row: {
+          id: string;
+          scenario_day_id: string;
+          line_key: string;
+          service_id: string | null;
+          supplier_id: string | null;
+          unresolved_service_ref: string | null;
+          description: string;
+          quantity: number;
+          billing_unit: string;
+          cost_basis: string;
+          reference_unit_cost: number | null;
+          original_amount: number | null;
+          original_currency: string | null;
+          amount_usd: number | null;
+          charge_once_key: string | null;
+          source_ref: Json;
+          resolution_issue: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          scenario_day_id: string;
+          line_key: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          unresolved_service_ref?: string | null;
+          description: string;
+          quantity: number;
+          billing_unit: string;
+          cost_basis: string;
+          reference_unit_cost?: number | null;
+          original_amount?: number | null;
+          original_currency?: string | null;
+          amount_usd?: number | null;
+          charge_once_key?: string | null;
+          source_ref?: Json;
+          resolution_issue?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          scenario_day_id?: string;
+          line_key?: string;
+          service_id?: string | null;
+          supplier_id?: string | null;
+          unresolved_service_ref?: string | null;
+          description?: string;
+          quantity?: number;
+          billing_unit?: string;
+          cost_basis?: string;
+          reference_unit_cost?: number | null;
+          original_amount?: number | null;
+          original_currency?: string | null;
+          amount_usd?: number | null;
+          charge_once_key?: string | null;
+          source_ref?: Json;
+          resolution_issue?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_cost_scenario_lines_scenario_day_id_fkey";
+            columns: ["scenario_day_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_cost_scenario_days";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenario_lines_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenario_lines_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tour_cost_scenarios: {
+        Row: {
+          id: string;
+          tour_sku: string;
+          rate_year: number;
+          season: string;
+          pax: number;
+          template_id: string | null;
+          status: Database["public"]["Enums"]["catalog_status"];
+          import_key: string;
+          source_revision: string | null;
+          source_ref: Json;
+          import_fingerprint: string;
+          manually_modified_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          approved_cost_usd: number | null;
+          detail_cost_usd: number | null;
+          cost_difference_usd: number | null;
+          reconciliation_status: string;
+        };
+        Insert: {
+          id?: string;
+          tour_sku: string;
+          rate_year: number;
+          season: string;
+          pax: number;
+          template_id?: string | null;
+          status?: Database["public"]["Enums"]["catalog_status"];
+          import_key: string;
+          source_revision?: string | null;
+          source_ref?: Json;
+          import_fingerprint: string;
+          manually_modified_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          approved_cost_usd?: number | null;
+          detail_cost_usd?: number | null;
+          cost_difference_usd?: number | null;
+          reconciliation_status?: string;
+        };
+        Update: {
+          id?: string;
+          tour_sku?: string;
+          rate_year?: number;
+          season?: string;
+          pax?: number;
+          template_id?: string | null;
+          status?: Database["public"]["Enums"]["catalog_status"];
+          import_key?: string;
+          source_revision?: string | null;
+          source_ref?: Json;
+          import_fingerprint?: string;
+          manually_modified_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          approved_cost_usd?: number | null;
+          detail_cost_usd?: number | null;
+          cost_difference_usd?: number | null;
+          reconciliation_status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_cost_scenarios_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_cost_scenarios_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "itinerary_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       ops_active_accommodation_bookings: {
@@ -3258,6 +3709,10 @@ export type Database = {
         Args: { p_id: string; p_recipient: string; p_subject: string; p_body: string };
         Returns: Database["public"]["Tables"]["quote_emails"]["Row"];
       };
+      cleanup_imported_services: {
+        Args: { ids: string[]; p_expected_fingerprint: string; p_confirm: string };
+        Returns: Json;
+      };
       commit_import_batch: { Args: { p_batch_id: string }; Returns: Json };
       compute_real_margin: {
         Args: { p_id: string };
@@ -3269,6 +3724,10 @@ export type Database = {
       };
       create_quote_from_template: {
         Args: { p_template: string; p_quote: Json; p_days: Json; p_source: Json; p_result: Json };
+        Returns: Database["public"]["Tables"]["quotes"]["Row"];
+      };
+      create_quote_from_cost_scenario: {
+        Args: { p_scenario: string; p_quote: Json; p_days: Json; p_result: Json };
         Returns: Database["public"]["Tables"]["quotes"]["Row"];
       };
       create_quote_snapshot: {
@@ -3319,6 +3778,11 @@ export type Database = {
         Returns: Database["public"]["Tables"]["ops_communications"]["Row"][];
       };
       import_template_package: { Args: { p_template: string }; Returns: Json };
+      import_consolidated_workbook: {
+        Args: { p_file_name: string; p_source_sha256: string; p_payload: Json; p_confirm?: boolean };
+        Returns: Json;
+      };
+      preview_consolidated_workbook: { Args: { p_payload: Json }; Returns: Json };
       insert_quote_item: {
         Args: { p_day: string; p_item: Json; p_promote?: boolean };
         Returns: Database["public"]["Tables"]["quote_items"]["Row"];
@@ -3336,11 +3800,6 @@ export type Database = {
       promote_quote_template: { Args: { p_id: string }; Returns: string };
       proposal_html_valid: { Args: { p_html: string }; Returns: boolean };
       purge_imported_catalog: { Args: { confirm: string }; Returns: Json };
-      review_imported_service_cleanup: { Args: { ids: string[] }; Returns: Json };
-      cleanup_imported_services: {
-        Args: { ids: string[]; p_expected_fingerprint: string; p_confirm: string };
-        Returns: Json;
-      };
       quote_day_hotel: { Args: { p_day: string }; Returns: string };
       quote_deposit_reached: { Args: { p_id: string }; Returns: boolean };
       quote_document_context: { Args: { p_id: string }; Returns: Json };
@@ -3361,6 +3820,7 @@ export type Database = {
       resolve_day_content: { Args: { p_snapshot: Json; p_overrides: Json }; Returns: Json };
       review_catalog_approval: { Args: { kind: string; ids: string[] }; Returns: Json };
       review_import_items: { Args: { kind: string; ids: string[] }; Returns: Json };
+      review_imported_service_cleanup: { Args: { ids: string[] }; Returns: Json };
       review_quote_days: {
         Args: { p_quote_id: string; p_day_ids?: string[] | null; p_also_update_block?: boolean };
         Returns: Json;
