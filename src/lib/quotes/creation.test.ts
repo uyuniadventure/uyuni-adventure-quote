@@ -292,7 +292,7 @@ describe("creación atómica desde plantilla", () => {
     }
   });
 
-  it("creates an error draft from an active template whose economics remain blocked", async () => {
+  it("does not force an error solely for a legacy economic status", async () => {
     const before = await persisted();
     await pg.exec("reset role; select set_config('app.import_economic_write','on',false)");
     await pg.query(
@@ -303,16 +303,10 @@ describe("creación atómica desde plantilla", () => {
     await as(admin);
     try {
       const quote = await createQuoteFromTemplate(templateId, basics());
-      expect(quote).toMatchObject({
-        status: "borrador",
-        total_cost_usd: null,
-        total_margin_usd: null,
-        total_price_usd: null,
-      });
-      expect(quote.calculation).toMatchObject({
-        status: "error",
+      expect(quote.status).toBe("borrador");
+      expect(quote.calculation).not.toMatchObject({
         warnings: expect.arrayContaining([
-          expect.stringContaining("Validación económica de la plantilla: Costo pendiente"),
+          expect.stringContaining("Validación económica de la plantilla"),
         ]),
       });
       expect((await persisted())["quotes"]).toBe(Number(before["quotes"]) + 1);

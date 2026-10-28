@@ -119,7 +119,6 @@ export const SECTION_GROUPS: { label: string | null; items: SectionDef[] }[] = [
     label: "Diseño del viaje",
     items: [
       SECTIONS["bloques-diarios"],
-      SECTIONS["modulos-actividad"],
       SECTIONS["bloques-documento"],
       SECTIONS.tarifario,
     ],

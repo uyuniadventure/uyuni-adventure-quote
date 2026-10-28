@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import type { Enums, Tables } from "@/types/db";
@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUSES, StatusBadge, cap } from "./shared";
 import {
-  Field, IT_MODALITIES, SaveStateIndicator, SearchPicker, TranslationsPanel, canEditCatalogRow, catalogWriteErrorMessage, fetchModules, fetchServices,
+  Field, IT_MODALITIES, SaveStateIndicator, SearchPicker, TranslationsPanel, canEditCatalogRow, catalogWriteErrorMessage, fetchServices,
   type SaveState,
   useLocationCodes, type PickOption,
 } from "./kit";
@@ -155,7 +155,7 @@ export function BlockEditor({
       >
         <SheetHeader>
           <SheetTitle>{isNew ? "Nuevo bloque diario" : title || row?.code || "Bloque"}</SheetTitle>
-          <SheetDescription className="font-mono text-xs">{row?.code ?? "Un día de itinerario: módulos, servicios sueltos y textos."}</SheetDescription>
+          <SheetDescription className="font-mono text-xs">{row?.code ?? "Un día de itinerario: servicios y textos."}</SheetDescription>
         </SheetHeader>
         {isNew ? (
           <div className="mt-4">
@@ -168,7 +168,7 @@ export function BlockEditor({
             <TabsList>
               <TabsTrigger value="datos">Datos</TabsTrigger>
               <TabsTrigger value="textos">Textos</TabsTrigger>
-              <TabsTrigger value="servicios">Servicios sueltos</TabsTrigger>
+              <TabsTrigger value="servicios">Servicios</TabsTrigger>
             </TabsList>
             <TabsContent value="datos" className="mt-4">
               <BlockForm
@@ -183,9 +183,6 @@ export function BlockEditor({
             </TabsContent>
             <TabsContent value="textos" className="mt-4">
               <TranslationsPanel kind="day_block" parentId={row.id} canEdit={canEdit} onDirtyChange={setDirty} />
-            </TabsContent>
-            <TabsContent value="modulos" className="mt-4">
-              <BlockModules blockId={row.id} canEdit={canEdit} />
             </TabsContent>
             <TabsContent value="servicios" className="mt-4">
               <BlockItems
@@ -440,68 +437,6 @@ function BlockForm({
           <SaveStateIndicator state={saveState === "dirty" && !dirty ? "idle" : saveState === "idle" && dirty ? "dirty" : saveState} error={saveError} />
         </div>
       )}
-    </div>
-  );
-}
-
-function BlockModules({ blockId, canEdit }: { blockId: string; canEdit: boolean }) {
-  const key = ["day_block_modules", blockId];
-  const run = useRun(key);
-  const q = useQuery({
-    queryKey: key,
-    queryFn: async () => {
-      const { data, error } = await db.from("day_block_modules").select("*, activity_modules(code, name, duration, default_time)").eq("block_id", blockId).order("order");
-      if (error) throw error;
-      return data;
-    },
-  });
-  const rows = q.data ?? [];
-  const move = (i: number, d: -1 | 1) => {
-    const a = rows[i], b = rows[i + d];
-    if (!a || !b) return;
-    run.mutate([
-      () => db.from("day_block_modules").update({ order: i + d }).eq("id", a.id),
-      () => db.from("day_block_modules").update({ order: i }).eq("id", b.id),
-    ]);
-  };
-
-  return (
-    <div className="space-y-3">
-      {canEdit && (
-        <SearchPicker placeholder="Añadir módulo de actividad…" queryKey="modules" fetcher={fetchModules}
-          onPick={async (o) => {
-            if (!o) return;
-            const { data } = await db.from("activity_modules").select("default_time").eq("id", o.id).single();
-            run.mutate([() => db.from("day_block_modules").insert({ block_id: blockId, module_id: o.id, order: rows.length, time: data?.default_time ?? null })]);
-          }} />
-      )}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader><TableRow><TableHead className="w-20">Orden</TableHead><TableHead className="w-32">Hora</TableHead><TableHead>Módulo</TableHead><TableHead /></TableRow></TableHeader>
-          <TableBody>
-            {rows.length === 0 && <TableRow><TableCell colSpan={4} className="py-6 text-center text-muted-foreground">Sin módulos.</TableCell></TableRow>}
-            {rows.map((m, i) => (
-              <TableRow key={m.id}>
-                <TableCell>
-                  <div className="flex">
-                    <Button size="icon" variant="ghost" className="h-7 w-7" disabled={!canEdit || i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7" disabled={!canEdit || i === rows.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Input type="time" className="h-8" defaultValue={m.time?.slice(0, 5) ?? ""} disabled={!canEdit}
-                    onBlur={(e) => (e.target.value || null) !== (m.time?.slice(0, 5) ?? null) &&
-                      run.mutate([() => db.from("day_block_modules").update({ time: e.target.value || null }).eq("id", m.id)])} />
-                </TableCell>
-                <TableCell><div className="font-medium">{m.activity_modules?.name}</div><div className="font-mono text-xs text-muted-foreground">{m.activity_modules?.code}</div></TableCell>
-                <TableCell className="text-right">
-                  {canEdit && <Button size="icon" variant="ghost" onClick={() => run.mutate([() => db.from("day_block_modules").delete().eq("id", m.id)])}><Trash2 className="h-4 w-4" /></Button>}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
     </div>
   );
 }

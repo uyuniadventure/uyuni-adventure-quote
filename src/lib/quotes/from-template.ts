@@ -275,8 +275,6 @@ export async function createQuoteFromTemplate(
       seasons: basics.seasons ?? [],
       single_supplements: basics.single_supplements ?? [],
       unresolved: template.import_warnings,
-      template_economic_status: template.economic_status,
-      template_economic_issues: template.economic_issues,
       source_template: template,
     },
   };
@@ -486,10 +484,6 @@ export async function createQuoteFromTemplate(
     const omitted = (day.snapshot as { omitted_economic_items?: string[] }).omitted_economic_items;
     return omitted ?? [];
   });
-  if (template.economic_status && template.economic_status !== "validated")
-    incompleteWarnings.unshift(
-      `Validación económica de la plantilla: ${template.economic_issues.join("; ") || template.economic_status}.`,
-    );
   const result = forceIncompleteDraft(calculateSavedQuote(data), incompleteWarnings);
   return unwrap(
     await db.rpc("create_quote_from_template", {

@@ -13,9 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cap } from "@/components/catalog/shared";
-import { DURATION_LABELS, PageHeader, blockTitle } from "@/components/catalog/kit";
+import { PageHeader, blockTitle } from "@/components/catalog/kit";
 import { ServiceDetail } from "@/components/catalog/service-detail";
-import { ModuleEditor } from "@/components/catalog/module-editor";
 import { BlockEditor } from "@/components/catalog/block-editor";
 import { TemplateEditor } from "@/components/catalog/template-editor";
 import { BulkImportApproval } from "@/components/catalog/bulk-import-approval";
@@ -27,11 +26,11 @@ export const Route = createFileRoute("/_authenticated/revision-importacion")({
   component: ReviewPage,
 });
 
-type Kind = "services" | "activity_modules" | "day_blocks" | "itinerary_templates";
+type Kind = "services" | "day_blocks" | "itinerary_templates";
 interface Item { id: string; code: string; title: string; facts: string[]; issues: string[] }
 
 const KIND_LABELS: Record<Kind, string> = {
-  services: "Servicios", activity_modules: "Módulos", day_blocks: "Bloques", itinerary_templates: "Plantillas",
+  services: "Servicios", day_blocks: "Bloques", itinerary_templates: "Plantillas",
 };
 
 function confirmWarningAcceptance(kind: "day_blocks" | "itinerary_templates", warningCount: number) {
@@ -49,13 +48,12 @@ function usePending() {
   return useQuery({
     queryKey: ["import-review"],
     queryFn: async (): Promise<Record<Kind, Item[]>> => {
-      const [sv, md, bl, tp] = await Promise.all([
+      const [sv, bl, tp] = await Promise.all([
         db.from("services").select("id, sku, name, type, country, currency, pricing_unit, source, import_issues, approval_issues, suppliers(name), service_rates(count)").eq("status", "pendiente").order("sku").limit(500),
-        db.from("activity_modules").select("id, code, name, duration, places(name), activity_module_items(count), activity_module_translations(lang)").eq("status", "pendiente").order("code").limit(500),
-        db.from("day_blocks").select("id, code, route_from, route_to, places, services(name), day_block_translations(lang, title), day_block_modules(count), day_block_items(count)").eq("status", "pendiente").order("code").limit(500),
+        db.from("day_blocks").select("id, code, route_from, route_to, places, services(name), day_block_translations(lang, title), day_block_items(count)").eq("status", "pendiente").order("code").limit(500),
         db.from("itinerary_templates").select("id, sku, name, days, nights, category, route_from, route_to, import_warnings, approval_issues, template_days(count)").eq("status", "pendiente").order("sku").limit(500),
       ]);
-      for (const r of [sv, md, bl, tp]) if (r.error) throw r.error;
+      for (const r of [sv, bl, tp]) if (r.error) throw r.error;
       const c = (v: unknown) => (v as { count: number }[])[0]?.count ?? 0;
       return {
         services: (sv.data ?? []).map((x) => ({
@@ -67,14 +65,9 @@ function usePending() {
             ...(!x.currency || !x.pricing_unit ? ["Información económica incompleta: completa moneda y unidad antes de calcular costos definitivos."] : []),
           ],
         })),
-        activity_modules: (md.data ?? []).map((x) => ({
-          id: x.id, code: x.code, title: x.name,
-          facts: [DURATION_LABELS[x.duration], x.places?.name ?? "Sin lugar", `${c(x.activity_module_items)} servicios`, `Idiomas: ${x.activity_module_translations.map((t) => t.lang).join(", ") || "ninguno"}`],
-          issues: [...(c(x.activity_module_items) === 0 ? ["Sin servicios."] : []), ...(!x.activity_module_translations.some((t) => t.lang === "es") ? ["Sin texto en español."] : [])],
-        })),
         day_blocks: (bl.data ?? []).map((x) => ({
           id: x.id, code: x.code, title: blockTitle(x),
-          facts: [`${x.route_from ?? "—"} → ${x.route_to ?? "—"}`, x.places.join(", ") || "Sin lugares", x.services?.name ?? "Sin hotel", `${c(x.day_block_modules)} módulos`, `${c(x.day_block_items)} servicios`],
+          facts: [`${x.route_from ?? "—"} → ${x.route_to ?? "—"}`, x.places.join(", ") || "Sin lugares", x.services?.name ?? "Sin hotel", `${c(x.day_block_items)} servicios`],
           issues: [...(!x.day_block_translations.some((t) => t.lang === "es") ? ["Sin texto en español."] : [])],
         })),
         itinerary_templates: (tp.data ?? []).map((x) => ({
@@ -95,7 +88,7 @@ function ReviewPage() {
   const q = usePending();
   const [open, setOpen] = useState<{ kind: Kind; id: string } | null>(null);
   const [selected, setSelected] = useState<Record<Kind, Set<string>>>({
-    services: new Set(), activity_modules: new Set(), day_blocks: new Set(), itinerary_templates: new Set(),
+    services: new Set(), day_blocks: new Set(), itinerary_templates: new Set(),
   });
 
   const toggle = (k: Kind, id: string) => {
@@ -230,7 +223,6 @@ function ReviewPage() {
         })}
       </Tabs>
       <ServiceDetail serviceId={open?.kind === "services" ? open.id : null} onClose={close} />
-      <ModuleEditor id={open?.kind === "activity_modules" ? open.id : null} onClose={close} onCreated={() => {}} />
       <BlockEditor id={open?.kind === "day_blocks" ? open.id : null} onClose={close} onCreated={() => {}} />
       <TemplateEditor id={open?.kind === "itinerary_templates" ? open.id : null} onClose={close} onCreated={() => {}} />
     </div>

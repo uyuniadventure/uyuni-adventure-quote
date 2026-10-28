@@ -122,7 +122,7 @@ it("shows pending status and warnings, and creates through the library", async (
     expect.objectContaining({ pax_paying: 2, tc_count: 0 }),
   );
 });
-it("labels an economically incomplete template without disabling draft creation", async () => {
+it("does not show legacy economic warnings or block template selection", async () => {
   vi.mocked(suggestTemplates).mockResolvedValue([
     { ...pending, economic_status: "blocked", economic_issues: ["Falta tarifa del hotel"] },
   ]);
@@ -130,8 +130,9 @@ it("labels an economically incomplete template without disabling draft creation"
     ReturnType<typeof createQuoteFromTemplate>
   >);
   show();
-  expect(await screen.findByText("Totales pendientes")).toBeVisible();
-  expect(screen.getByText("Falta tarifa del hotel")).toBeVisible();
+  expect(await screen.findByRole("button", { name: "Usar plantilla" })).toBeVisible();
+  expect(screen.queryByText("Totales pendientes")).not.toBeInTheDocument();
+  expect(screen.queryByText("Falta tarifa del hotel")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Usar plantilla" }));
   await waitFor(() =>
     expect(createQuoteFromTemplate).toHaveBeenCalledWith("template", expect.anything()),
