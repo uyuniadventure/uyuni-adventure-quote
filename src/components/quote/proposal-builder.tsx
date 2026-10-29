@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/dialog";
 import { ProposalTextEditor } from "./proposal-text-editor";
 import type { useQuoteActions } from "./quote-workspace";
+import { safeLink } from "../../../supabase/functions/_shared/proposal-html";
+import { currentClientEmail } from "@/lib/clients";
 
 type Block = Awaited<ReturnType<typeof doc.listDocBlocks>>[number];
 type Actions = ReturnType<typeof useQuoteActions>;
@@ -128,7 +130,7 @@ function SectionCard({
         transition: sort.transition,
         opacity: section.hidden ? 0.55 : 1,
       }}
-      className="scroll-mt-4 space-y-2 p-3"
+      className="scroll-mt-24 space-y-2 p-3"
     >
       <div className="flex items-center gap-2">
         <button
@@ -242,6 +244,7 @@ export function ProposalBuilder({
   const [target, setTarget] = useState<"pdf" | "email">("pdf");
   const [editing, setEditing] = useState<doc.DocSection | null>(null);
   const [options, setOptions] = useState<doc.DocSection | null>(null);
+  const [optionFocus, setOptionFocus] = useState<"terms-url" | "valid-until" | null>(null);
   const [modal, setModal] = useState<{ kind: "block" | "layout" | "replace"; id?: string } | null>(
     null,
   );
@@ -259,6 +262,10 @@ export function ProposalBuilder({
   const layouts = useQuery({
     queryKey: ["doc-layouts", quote.client_type],
     queryFn: () => doc.listDocLayouts(quote.client_type),
+  });
+  const clientEmail = useQuery({
+    queryKey: ["client-email", quote.client_id],
+    queryFn: () => currentClientEmail(quote.client_id),
   });
   const ordered = sections.data ?? [];
   const preview = useQuery({
@@ -324,7 +331,28 @@ export function ProposalBuilder({
     !preview.data ||
     notices.some((n) => n.level === "error") ||
     !!dayMessage;
-  const content = quote.document_snapshot as { client_email?: string };
+  const sectionForNotice = (notice: (typeof notices)[number]) => {
+    if (notice.sectionId) return notice.sectionId;
+    if (/términ|condiciones|T&C/i.test(notice.message))
+      return ordered.find((section) => section.snapshot.code === "TYC")?.id;
+    if (/validez|válida|valida_hasta/i.test(notice.message))
+      return ordered.find((section) => section.snapshot.data_key === "validez")?.id;
+    return undefined;
+  };
+  const openRequirement = (notice: (typeof notices)[number]) => {
+    const sectionId = sectionForNotice(notice);
+    const section = ordered.find((candidate) => candidate.id === sectionId);
+    if (!section) return;
+    setOptionFocus(
+      section.snapshot.code === "TYC"
+        ? "terms-url"
+        : section.snapshot.data_key === "validez"
+          ? "valid-until"
+          : null,
+    );
+    setOptions(section);
+  };
+  const recipient = clientEmail.data ?? null;
   const generate = () =>
     actions.act(
       async () => {
@@ -387,6 +415,65 @@ export function ProposalBuilder({
           </Button>
         )}
       </div>
+      <Card
+        aria-label="Acciones de PDF y envío"
+        className="sticky top-16 z-20 space-y-2 border-primary/30 bg-background/95 p-3 shadow-sm backdrop-blur"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <Button disabled={actions.busy || blocked} onClick={() => void generate()}>
+            {preview.data?.frozen ? "Descargar propuesta enviada" : "Generar PDF"}
+          </Button>
+          <Button
+            disabled={
+              actions.busy ||
+              blocked ||
+              !!quote.archived_at ||
+              !quote.pdf_path ||
+              !recipient ||
+              !["revisada", "enviada"].includes(quote.status)
+            }
+            onClick={() => void send()}
+          >
+            Enviar por email
+          </Button>
+          <span className="min-w-0 text-sm text-muted-foreground">
+            {recipient || (clientEmail.isLoading ? "Consultando email del cliente…" : "Falta el email del cliente.")}
+          </span>
+        </div>
+        {blocked && (
+          <div className="space-y-1 text-sm" role="alert">
+            <p className="font-medium text-destructive">Completa estos requisitos para generar el PDF:</p>
+            {preview.isFetching && <p className="text-muted-foreground">Comprobando la propuesta…</p>}
+            {preview.error && <p>{preview.error.message}</p>}
+            {dayMessage && <p>{dayMessage}</p>}
+            {notices.filter((notice) => notice.level === "error").map((notice, index) => {
+              const sectionId = sectionForNotice(notice);
+              return sectionId ? (
+                <a
+                  key={index}
+                  className="block underline"
+                  href={`#section-${sectionId}`}
+                  onClick={(event) => { event.preventDefault(); openRequirement(notice); }}
+                >
+                  {notice.message} Ir al campo correspondiente.
+                </a>
+              ) : <p key={index}>{notice.message}</p>;
+            })}
+            {preview.error && (
+              <Button size="sm" variant="outline" onClick={() => void preview.refetch()}>
+                Reintentar
+              </Button>
+            )}
+          </div>
+        )}
+        {!blocked && notices.some((notice) => notice.level !== "error") && (
+          <div className="space-y-1 text-sm text-muted-foreground">
+            {notices.filter((notice) => notice.level !== "error").map((notice, index) => (
+              <p key={index}>{notice.message}</p>
+            ))}
+          </div>
+        )}
+      </Card>
       {!ordered.length && (
         <Card className="space-y-3 p-4">
           <p>
@@ -470,7 +557,7 @@ export function ProposalBuilder({
                       setModal({ kind: "block", id: s.id });
                     }}
                     onMove={(d) => move(s.id, i + d)}
-                    onOptions={() => setOptions(s)}
+                    onOptions={() => { setOptionFocus(null); setOptions(s); }}
                   />
                 ))}
               </Canvas>
@@ -508,52 +595,6 @@ export function ProposalBuilder({
           </div>
         </DndContext>
       )}
-      {(preview.error || dayMessage || notices.length > 0) && (
-        <Card className="space-y-1 border-destructive/40 p-4" role="alert">
-          {preview.error && <p>{preview.error.message}</p>}
-          {dayMessage && <p>{dayMessage}</p>}
-          {notices.map((n, i) => (
-            <p
-              key={i}
-              className={n.level === "error" ? "text-destructive" : "text-muted-foreground"}
-            >
-              {n.sectionId ? (
-                <a className="underline" href={`#section-${n.sectionId}`}>
-                  {n.message}
-                </a>
-              ) : (
-                n.message
-              )}
-            </p>
-          ))}
-          {preview.error && (
-            <Button variant="outline" onClick={() => void preview.refetch()}>
-              Reintentar
-            </Button>
-          )}
-        </Card>
-      )}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={actions.busy || blocked} onClick={() => void generate()}>
-          {preview.data?.frozen ? "Descargar propuesta enviada" : "Generar PDF"}
-        </Button>
-        <Button
-          disabled={
-            actions.busy ||
-            blocked ||
-            !!quote.archived_at ||
-            !quote.pdf_path ||
-            !content?.client_email ||
-            !["revisada", "enviada"].includes(quote.status)
-          }
-          onClick={() => void send()}
-        >
-          Enviar por email
-        </Button>
-        <span className="text-sm text-muted-foreground">
-          {content?.client_email || "Falta el email del cliente."}
-        </span>
-      </div>
       {!editable && (
         <p className="text-sm text-muted-foreground">
           Para editar el documento, vuelve a borrador o crea una nueva versión de la cotización.
@@ -580,8 +621,9 @@ export function ProposalBuilder({
         <SectionOptions
           key={options.id}
           section={options}
+          initialFocus={optionFocus}
           disabled={disabled}
-          onClose={() => setOptions(null)}
+          onClose={() => { setOptions(null); setOptionFocus(null); }}
           onSave={(value) => run(() => doc.setSectionOptions(quote.id, options.id, value))}
         />
       )}
@@ -639,11 +681,13 @@ export function ProposalBuilder({
 }
 function SectionOptions({
   section,
+  initialFocus,
   disabled,
   onClose,
   onSave,
 }: {
   section: doc.DocSection;
+  initialFocus: "terms-url" | "valid-until" | null;
   disabled: boolean;
   onClose: () => void;
   onSave: (options: Record<string, unknown>) => Promise<boolean>;
@@ -651,6 +695,13 @@ function SectionOptions({
   const [value, setValue] = useState(section.options);
   const media = useQuery({ queryKey: ["proposal-media"], queryFn: doc.listProposalMedia });
   const field = (key: string, v: unknown) => setValue((old) => ({ ...old, [key]: v }));
+  const termsMode = String(value["mode"] ?? "full");
+  const termsUrl = String(value["url"] ?? "").trim();
+  const termsUrlValid = termsMode === "full" || Boolean(safeLink(termsUrl)?.startsWith("https://"));
+  const validUntil = String(value["valid_until"] ?? "");
+  const validUntilRequired = section.snapshot.data_key === "validez";
+  const validUntilValid = !validUntilRequired || (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(validUntil) && !Number.isNaN(new Date(validUntil).getTime()));
+  const valid = termsUrlValid && validUntilValid;
   return (
     <Dialog
       open
@@ -665,9 +716,10 @@ function SectionOptions({
         </DialogHeader>
         {section.snapshot.code === "TYC" ? (
           <>
-            <Label>
+            <Label htmlFor="proposal-terms-mode">
               Presentación
               <select
+                id="proposal-terms-mode"
                 className="ml-2 rounded border bg-background p-2"
                 value={String(value["mode"] ?? "full")}
                 onChange={(e) => field("mode", e.target.value)}
@@ -677,19 +729,27 @@ function SectionOptions({
                 <option value="both">Texto y enlace</option>
               </select>
             </Label>
-            <Label>
-              Enlace
+            <Label htmlFor="proposal-terms-url">
+              Enlace web de términos y condiciones
               <Input
+                id="proposal-terms-url"
+                aria-describedby={!termsUrlValid ? "proposal-terms-url-error" : undefined}
+                autoFocus={initialFocus === "terms-url"}
                 type="url"
+                placeholder="https://ejemplo.com/terminos"
                 value={String(value["url"] ?? "")}
                 onChange={(e) => field("url", e.target.value)}
               />
             </Label>
+            {!termsUrlValid && <p id="proposal-terms-url-error" role="alert" className="text-sm text-destructive">Ingresa una URL HTTPS válida.</p>}
           </>
         ) : section.snapshot.data_key === "validez" ? (
-          <Label>
-            Válida hasta (fecha y hora)
+          <Label htmlFor="proposal-valid-until">
+            Propuesta válida hasta (fecha y hora)
             <Input
+              id="proposal-valid-until"
+              aria-describedby={!validUntilValid ? "proposal-valid-until-error" : undefined}
+              autoFocus={initialFocus === "valid-until"}
               type="datetime-local"
               value={String(value["valid_until"] ?? "")}
               onChange={(e) => field("valid_until", e.target.value)}
@@ -735,6 +795,7 @@ function SectionOptions({
             Este bloque utiliza los datos y textos de la cotización.
           </p>
         )}
+        {!validUntilValid && <p id="proposal-valid-until-error" role="alert" className="text-sm text-destructive">Selecciona una fecha y hora válidas.</p>}
         <Label>
           Imágenes de Media
           <select
@@ -761,7 +822,7 @@ function SectionOptions({
           Hasta 10 fotos PNG/JPEG y 4 MB en total. Usa Ctrl para seleccionar varias.
         </p>
         <Button
-          disabled={disabled}
+          disabled={disabled || !valid}
           onClick={async () => {
             if (await onSave(value)) onClose();
           }}

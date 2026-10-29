@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Field, SearchPicker, fetchBlocks, fetchServices, type PickOption } from "@/components/catalog/kit";
+import { Field, SearchPicker, fetchServices, type PickOption } from "@/components/catalog/kit";
 import { BlockEditor } from "@/components/catalog/block-editor";
 import { CURRENCIES, PRICING_UNITS, PRICING_UNIT_LABELS, SERVICE_TYPES, cap, money, paxRange, validity } from "@/components/catalog/shared";
 import { deleteItem, moveDay as moveDayByPosition, replaceDayHotel, serviceToItem } from "./quote-ops";
@@ -32,6 +32,7 @@ import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuoteDayTexts, QuoteIdentityTexts } from "./quote-day-texts";
 import type { DocumentContent } from "@/lib/quotes/document-model";
 import { sourceLodgingDetails } from "@/lib/quotes/document-model";
+import { searchQuoteBlocks, searchQuoteServices, type QuoteBlockFilters, type QuoteServiceFilters } from "@/lib/quotes/catalog-search";
 import {
   hasCatalogRateSnapshot,
   isScenarioItem,
@@ -270,6 +271,51 @@ function History({ quoteId }: { quoteId: string }) {
 
 type Actions = ReturnType<typeof useQuoteActions>;
 
+function ActiveFilters({ values, onClear }: { values: string[]; onClear: () => void }) {
+  if (!values.length) return null;
+  return <div className="mt-2 flex flex-wrap items-center gap-1">
+    {values.map((value) => <Badge key={value} variant="secondary">{value}</Badge>)}
+    <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={onClear}>Limpiar filtros</Button>
+  </div>;
+}
+
+function QuoteBlockPicker({ onPick, disabled, className = "w-full sm:w-[420px]", placeholder = "Buscar bloque diario…" }: {
+  onPick: (option: PickOption | null) => void; disabled?: boolean; className?: string; placeholder?: string;
+}) {
+  const [filters, setFilters] = useState<QuoteBlockFilters>({ place: "", from: "", to: "" });
+  const key = JSON.stringify(filters);
+  const applied = [filters.place && `Lugar: ${filters.place}`, filters.from && `Origen del tour: ${filters.from}`, filters.to && `Destino del tour: ${filters.to}`].filter(Boolean) as string[];
+  return <SearchPicker className={className} placeholder={placeholder} queryKey="quote-blocks" filterKey={key} {...(disabled === undefined ? {} : { disabled })}
+    fetcher={(term, page = 0) => searchQuoteBlocks(term, filters, page)} onPick={onPick}
+    filters={<>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <Input aria-label="Filtrar bloques por lugar" placeholder="Lugar o ciudad" value={filters.place} onChange={(event) => setFilters((current) => ({ ...current, place: event.target.value }))} />
+        <Input aria-label="Filtrar bloques por origen del tour" placeholder="Origen del tour" value={filters.from} onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value.trim().toUpperCase() }))} />
+        <Input aria-label="Filtrar bloques por destino del tour" placeholder="Destino del tour" value={filters.to} onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value.trim().toUpperCase() }))} />
+      </div>
+      <ActiveFilters values={applied} onClear={() => setFilters({ place: "", from: "", to: "" })} />
+    </>} />;
+}
+
+function QuoteServicePicker({ day, quote, onPick }: { day: Tables<"quote_days">; quote: Tables<"quotes">; onPick: (option: PickOption | null) => void }) {
+  const [filters, setFilters] = useState<QuoteServiceFilters>({ supplier: "", location: "", type: "all" });
+  const key = JSON.stringify(filters);
+  const applied = [filters.supplier && `Proveedor: ${filters.supplier}`, filters.location && `Lugar: ${filters.location}`, filters.type !== "all" && `Tipo: ${cap(filters.type)}`].filter(Boolean) as string[];
+  return <SearchPicker className="w-full sm:w-[420px]" placeholder="Agregar servicio del tarifario…" queryKey={`quote-services-${day.id}`} filterKey={key}
+    fetcher={(term, page = 0) => searchQuoteServices(term, filters, page, quote.start_date, day.day_number, quote.pax_paying)} onPick={onPick}
+    filters={<>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <Input aria-label="Filtrar servicios por proveedor" placeholder="Proveedor" value={filters.supplier} onChange={(event) => setFilters((current) => ({ ...current, supplier: event.target.value }))} />
+        <Input aria-label="Filtrar servicios por lugar" placeholder="Lugar o ciudad" value={filters.location} onChange={(event) => setFilters((current) => ({ ...current, location: event.target.value }))} />
+        <Select value={filters.type} onValueChange={(type) => setFilters((current) => ({ ...current, type: type as QuoteServiceFilters["type"] }))}>
+          <SelectTrigger aria-label="Filtrar servicios por tipo"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="all">Todos los tipos</SelectItem>{SERVICE_TYPES.map((type) => <SelectItem key={type} value={type}>{cap(type)}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+      <ActiveFilters values={applied} onClear={() => setFilters({ supplier: "", location: "", type: "all" })} />
+    </>} />;
+}
+
 function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean; actions: Actions }) {
   const { quote, days, items } = data;
   const { act } = actions;
@@ -294,7 +340,7 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
       )}
       {days.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">Cotización vacía. Agrega bloques diarios para armar el itinerario.</p>}
       {days.map((d, i) => (
-        <DayCard key={d.id} day={d} index={i} count={days.length}
+        <DayCard key={d.id} day={d} quote={quote} index={i} count={days.length}
           canMoveUp={i > 0 && (!d.group_id || days[0]?.group_id !== d.group_id)}
           canMoveDown={i < days.length - 1 && (!d.group_id || days.at(-1)?.group_id !== d.group_id)} items={items.filter((it) => it.quote_day_id === d.id)}
           editable={editable} actions={actions} language={quote.language} content={(quote.document_snapshot ?? {}) as DocumentContent}
@@ -312,8 +358,7 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
       {editable && (
         <Card className="flex flex-wrap items-center gap-2 p-3">
           <span className="text-sm text-muted-foreground">Agregar día {days.length + 1}:</span>
-          <SearchPicker className="w-full sm:w-[420px]" placeholder="Buscar bloque diario…" queryKey="blocks" fetcher={fetchBlocks}
-            disabled={actions.busy} onPick={(o) => o && setSelectedBlocks(current => [...current, o])} />
+          <QuoteBlockPicker disabled={actions.busy} onPick={(o) => o && setSelectedBlocks(current => current.some((block) => block.id === o.id) ? current : [...current, o])} />
           <Button variant="outline" disabled={actions.busy} onClick={() => setNewBlockId("new")}>
             <Plus className="mr-1 h-4 w-4" />Nuevo bloque diario
           </Button>
@@ -343,8 +388,8 @@ function DaysEditor({ data, editable, actions }: { data: Data; editable: boolean
   );
 }
 
-function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, actions, language, content, pendingReview, canReview, onReview, onMove, onRemove, onReplace }: {
-  day: Tables<"quote_days">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
+function DayCard({ day, quote, index, count, canMoveUp, canMoveDown, items, editable, actions, language, content, pendingReview, canReview, onReview, onMove, onRemove, onReplace }: {
+  day: Tables<"quote_days">; quote: Tables<"quotes">; index: number; count: number; canMoveUp: boolean; canMoveDown: boolean; items: Item[]; editable: boolean; actions: Actions;
   language: string; content: DocumentContent; pendingReview: boolean; canReview: boolean; onReview: () => void;
   onMove: (to: number) => void; onRemove: () => void; onReplace: (blockId: string) => void;
 }) {
@@ -384,7 +429,7 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
       <div className="space-y-3 p-4">
         <QuoteDayTexts day={day} items={items} language={language} content={content} disabled={!canReview} actions={actions} />
         {replacing && editable && (
-          <SearchPicker className="w-full" placeholder="Bloque que reemplaza este día…" queryKey="blocks" fetcher={fetchBlocks}
+          <QuoteBlockPicker className="w-full" placeholder="Bloque que reemplaza este día…"
             onPick={(o) => { if (o) { setReplacing(false); onReplace(o.id); } }} />
         )}
         <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -413,7 +458,7 @@ function DayCard({ day, index, count, canMoveUp, canMoveDown, items, editable, a
         </div>
         {editable && (
           <div className="flex flex-wrap gap-2">
-            <SearchPicker className="w-full sm:w-[360px]" placeholder="Agregar servicio del tarifario…" queryKey="services" fetcher={(t) => fetchServices(t)}
+            <QuoteServicePicker day={day} quote={quote}
               onPick={(o) => o && act(async () => addQuoteItem(day.id, await serviceToItem(o.id, { maxSpan: count - index }), false), "Servicio agregado.")} />
             <Button variant="outline" onClick={() => setNewItem(true)}><Plus className="mr-1 h-4 w-4" />Ítem nuevo</Button>
           </div>

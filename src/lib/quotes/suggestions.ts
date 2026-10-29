@@ -1,6 +1,7 @@
 import { db } from "../db";
 import type { Json } from "@/types/db";
 import { filterAndRankTemplateSuggestions, type TemplateSearchBasics } from "./suggestion-ranking";
+import { resolveSuggestionRoute } from "./suggestion-route";
 
 export type { TemplateSearchBasics } from "./suggestion-ranking";
 
@@ -45,6 +46,15 @@ export async function suggestTemplates(basics: TemplateSearchBasics) {
     if (result.error) throw templateSuggestionError(result.error);
     templates.push(...(result.data ?? []));
   }
-  return filterAndRankTemplateSuggestions(templates, basics);
+  const locations = await db.from("location_codes").select("code").order("code");
+  if (locations.error) throw templateSuggestionError(locations.error);
+  const locationCodes = (locations.data ?? []).map((location) => location.code);
+  const routedTemplates = templates.map((template) => {
+    const route = resolveSuggestionRoute(template, locationCodes);
+    return route
+      ? { ...template, route_from: route.route_from, route_to: route.route_to }
+      : template;
+  });
+  return filterAndRankTemplateSuggestions(routedTemplates, basics);
 }
 export type TemplateSuggestion = Awaited<ReturnType<typeof suggestTemplates>>[number];

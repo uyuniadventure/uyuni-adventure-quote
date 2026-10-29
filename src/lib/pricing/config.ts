@@ -52,7 +52,15 @@ export function parsePricingConfig(
 export function occupancyType(value: string | null | undefined): string | undefined {
   if (!value) return undefined;
   return (
-    ({ DBL_TWN: "DBL", TWN: "DBL", DBL_MAT: "MAT" } as Record<string, string>)[value] ??
+    ({
+      DBL_TWN: "DBL",
+      TWN: "DBL",
+      DBL_MAT: "MAT",
+      HAB_SGL: "SGL",
+      HAB_DBL: "DBL",
+      HAB_TPL: "TPL",
+      HAB_MAT: "MAT",
+    } as Record<string, string>)[value] ??
     (["SGL", "DBL", "TPL", "MAT", "QUAD"].includes(value) ? value : undefined)
   );
 }

@@ -7,6 +7,20 @@ import { addBlockDay as appendBlock, deleteDay, moveDay as moveQuoteDay } from "
 
 type QuoteDay = Tables<"quote_days">;
 
+/** Exact P2/P3 catalog variants carry a group total despite their imported per_person label. */
+export function catalogSelectionPricing(
+  service: Pick<Tables<"services">, "sku"> & {
+    pricing_unit: NonNullable<Tables<"services">["pricing_unit"]>;
+  },
+  rates: Tables<"service_rates">[],
+) {
+  const suffixPax = Number(service.sku.match(/^(?:ALM_LH_UTU|BIKE_LH)_(\d+)$/i)?.[1]);
+  const exact = rates.length === 1 && rates[0]!.pax_min === suffixPax && rates[0]!.pax_max === suffixPax;
+  return service.pricing_unit === "per_person" && suffixPax > 1 && exact
+    ? { pricing_unit: "per_group" as const, source_pricing_unit: service.pricing_unit }
+    : { pricing_unit: service.pricing_unit, source_pricing_unit: service.pricing_unit };
+}
+
 /** Construye el ítem congelado desde un servicio del tarifario (mismo formato que createQuoteFromTemplate). */
 export async function serviceToItem(
   serviceId: string,
@@ -25,13 +39,17 @@ export async function serviceToItem(
       `El servicio ${s.sku} no tiene unidad de precio o moneda; apruébalo en el tarifario.`,
     );
   const rates = unwrap(await db.from("service_rates").select("*").eq("service_id", s.id));
+  const selectedPricing = catalogSelectionPricing(
+    { sku: s.sku, pricing_unit: s.pricing_unit },
+    rates,
+  );
   const span = Math.max(1, Math.min(s.multi_day_span, opts.maxSpan ?? s.multi_day_span));
   return {
     service_id: s.id,
     sku: s.sku,
     description: s.name,
     type: s.type,
-    pricing_unit: s.pricing_unit,
+    pricing_unit: selectedPricing.pricing_unit,
     qty: opts.qty ?? 1,
     unit_cost_original: 0,
     unit_cost_usd: 0,
@@ -45,6 +63,7 @@ export async function serviceToItem(
     pricing_snapshot: json({
       is_optional: opts.is_optional ?? false,
       rates,
+      source_pricing_unit: selectedPricing.source_pricing_unit,
       room_type: s.room_type,
       vehicle_segment: s.vehicle_type,
       service: s,

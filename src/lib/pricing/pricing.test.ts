@@ -40,6 +40,79 @@ const base: QuoteInput = {
   days: [{ day_number: 1, items: [item] }],
 };
 describe("pricing", () => {
+  it("prices the approved Tunupa P1 row as a USD 15 per-person unit for two passengers", () => {
+    const result = calculateQuote({
+      ...base,
+      tc_count: 0,
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          sku: "ALM_LH_UTU_1",
+          rates: [{ ...rate, pax_min: 1, pax_max: 1, price_net: 15 }],
+        }],
+      }],
+    });
+    expect(result.items[0]).toMatchObject({ status: "ok", quantity: 2, total_cost_usd: 30 });
+  });
+
+  it("accepts the real Bike Salar P2 rate on 2026-11-01", () => {
+    const result = calculateQuote({
+      ...base,
+      tc_count: 0,
+      start_date: "2026-11-01",
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          sku: "BIKE_LH_2",
+          rates: [{ ...rate, season: null, rate_year: 2026, pax_min: 2, pax_max: 2, price_net: 60 }],
+        }],
+      }],
+    });
+    expect(result.items[0]).toMatchObject({ status: "ok" });
+  });
+
+  it("keeps a seasonless annual rate unavailable outside its explicit year", () => {
+    const annual = { ...rate, season: null, rate_year: 2026, price_net: 60 };
+    expect(calculateQuote({
+      ...base,
+      tc_count: 0,
+      start_date: "2026-11-01",
+      days: [{ day_number: 1, items: [{ ...item, rates: [annual] }] }],
+    }).items[0]).toMatchObject({ status: "ok" });
+    expect(calculateQuote({
+      ...base,
+      tc_count: 0,
+      start_date: "2027-11-01",
+      days: [{ day_number: 1, items: [{ ...item, rates: [annual] }] }],
+    }).items[0]).toMatchObject({ status: "error", rate_error: { code: "missing" } });
+  });
+
+  it("charges one ATIX double room at USD 201 for two passengers", () => {
+    const result = calculateQuote({
+      ...base,
+      tc_count: 0,
+      rooming: { paying: { DBL: 1 }, tc: {} },
+      days: [{
+        day_number: 1,
+        items: [{
+          ...item,
+          sku: "ATIX_LPZ_DBL",
+          pricing_unit: "per_room",
+          room_type: "HAB_DBL",
+          applies_tc: false,
+          rates: [{ ...rate, room_type: "HAB_DBL", price_net: 201 }],
+        }],
+      }],
+    });
+    expect(result.items[0]).toMatchObject({
+      status: "ok",
+      quantity: 1,
+      unit_cost_original: 201,
+      total_cost_usd: 201,
+    });
+  });
   it.each([
     ["2026-01-01", "RAIN"],
     ["2026-05-31", "RAIN"],

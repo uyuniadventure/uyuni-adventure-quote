@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { recalculateQuote, unreviewedDays, unreviewedDaysMessage } from "@/lib/quotes";
 import { saveQuoteTermsUrl, sendQuoteEmail } from "@/lib/quotes/delivery";
+import { currentClientEmail } from "@/lib/clients";
 import type { Tables } from "@/types/db";
 import type { useQuoteActions } from "./quote-workspace";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ function LegacyQuoteDelivery({
   const pendingMessage = unreviewedDaysMessage(days, quote.language);
   const qc = useQueryClient();
   const content = (quote.document_snapshot ?? {}) as { client_email?: string; terms_url?: string };
+  const clientEmail = useQuery({ queryKey: ["client-email", quote.client_id], queryFn: () => currentClientEmail(quote.client_id) });
   const [terms, setTerms] = useState(content.terms_url ?? "");
   const editable = !quote.archived_at && ["borrador", "revisada"].includes(quote.status);
   const generate = () =>
@@ -65,7 +67,7 @@ function LegacyQuoteDelivery({
     <Card className="space-y-4 p-4">
       <h2 className="font-semibold">PDF y envío</h2>
       <p className="text-sm text-muted-foreground">
-        Destinatario: {content.client_email || "Falta el email del cliente en esta cotización."}
+        Destinatario: {clientEmail.data || (clientEmail.isLoading ? "Consultando…" : "Falta el email del cliente.")}
       </p>
       {quote.client_type === "B2C" && (
         <div className="space-y-1">
@@ -121,7 +123,7 @@ function LegacyQuoteDelivery({
             !!quote.archived_at ||
             !quote.pdf_path ||
             (quote.client_type === "B2C" && terms !== content.terms_url) ||
-            !content.client_email ||
+            !clientEmail.data ||
             !["revisada", "enviada"].includes(quote.status)
           }
           onClick={() => void send()}

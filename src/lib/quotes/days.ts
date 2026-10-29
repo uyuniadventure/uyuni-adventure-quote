@@ -222,6 +222,17 @@ async function prepareBlockDays(
         unwrap(await db.rpc("snapshot_day_block", { p_id: blockId })) as unknown as BlockSnapshot,
     ),
   );
+  const needsTextRecovery = snapshots.some((snapshot) =>
+    snapshot.translations.some((translation) => !translation.description.trim() && translation.title.trim()),
+  );
+  const reliableTranslations = needsTextRecovery
+    ? unwrap(
+        await db
+          .from("day_block_translations")
+          .select("lang,title,description,includes,excludes,reviewed"),
+      )
+        .filter((translation) => translation.description.trim())
+    : [];
   const ids = [
     ...new Set(
       snapshots
@@ -242,7 +253,7 @@ async function prepareBlockDays(
   return snapshots.map((snapshot, index) => {
     const blockId = blockIds[index]!;
     const dayNumber = firstDay + index;
-    const text = prepareDayText(snapshot, quote.language);
+    const text = prepareDayText(snapshot, quote.language, reliableTranslations);
     const variants = [
       ...new Set(snapshot.services.map((i) => i.variant_key).filter((v): v is string => !!v)),
     ].sort();

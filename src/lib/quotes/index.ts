@@ -6,6 +6,7 @@ export {
   buildScenarioDays,
   applyScenarioReconciliation,
   createQuoteFromCostScenario,
+  createQuoteFromTemplateSelection,
   scenarioRequestFromId,
   type ScenarioQuoteBasics,
 } from "./from-scenario";

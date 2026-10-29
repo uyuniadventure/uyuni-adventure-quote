@@ -16,11 +16,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { normalizeOptionalEmail } from "@/lib/clients";
+import { ClientSheet as SharedClientSheet } from "@/components/clients/client-sheet";
+import { useRequestedClientEditor } from "@/components/clients/use-requested-client-editor";
 
 const s = SECTIONS.clientes;
 
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => sectionHead(s),
+  validateSearch: (search: Record<string, unknown>) => ({ client: typeof search["client"] === "string" ? search["client"] : undefined }),
   component: ClientsPage,
 });
 
@@ -41,6 +45,8 @@ const PAYMENT_DEFAULTS: Record<Enums<"client_type">, { deposit: string; balance:
 };
 
 function ClientsPage() {
+  const { client } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { role } = useCurrentUser();
   const isAdmin = role === "admin";
   return (
@@ -51,7 +57,7 @@ function ClientsPage() {
           <TabsTrigger value="clientes">Clientes</TabsTrigger>
           {isAdmin && <TabsTrigger value="tyc">Términos y condiciones</TabsTrigger>}
         </TabsList>
-        <TabsContent value="clientes" className="mt-4"><ClientsList isAdmin={isAdmin} /></TabsContent>
+        <TabsContent value="clientes" className="mt-4"><ClientsList isAdmin={isAdmin} requestedClientId={client} onClearRequestedClient={() => void navigate({ search: { client: undefined }, replace: true })} /></TabsContent>
         {isAdmin && <TabsContent value="tyc" className="mt-4"><TermsPanel /></TabsContent>}
       </Tabs>
     </div>
@@ -76,7 +82,7 @@ function termsLabel(t: Terms, clients?: { id: string; name: string }[]) {
   return `${SCOPE_LABELS[t.scope]} (${t.lang})${who}`;
 }
 
-function ClientsList({ isAdmin }: { isAdmin: boolean }) {
+function ClientsList({ isAdmin, requestedClientId, onClearRequestedClient }: { isAdmin: boolean; requestedClientId: string | undefined; onClearRequestedClient: () => void }) {
   const [term, setTerm] = useState("");
   const [type, setType] = useState(ALL);
   const [lang, setLang] = useState(ALL);
@@ -94,7 +100,23 @@ function ClientsList({ isAdmin }: { isAdmin: boolean }) {
       return data;
     },
   });
+  const requestedClient = useQuery({
+    queryKey: ["client", requestedClientId],
+    enabled: Boolean(requestedClientId),
+    queryFn: async () => {
+      const { data, error } = await db.from("clients").select("*").eq("id", requestedClientId!).single();
+      if (error) throw error;
+      return data;
+    },
+  });
   const terms = useTerms(isAdmin);
+  const closeEditor = useRequestedClientEditor({
+    requestedId: requestedClientId,
+    requestedClient: requestedClient.data ?? q.data?.find((client) => client.id === requestedClientId),
+    open,
+    setOpen,
+    clearRequestedId: onClearRequestedClient,
+  });
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -136,7 +158,7 @@ function ClientsList({ isAdmin }: { isAdmin: boolean }) {
           </TableBody>
         </Table>
       </div>
-      {open && <ClientSheet client={open === "new" ? null : open} isAdmin={isAdmin} terms={terms.data ?? []} onClose={() => setOpen(null)} />}
+      {open && <SharedClientSheet client={open === "new" ? null : open} onClose={closeEditor} />}
     </div>
   );
 }
@@ -165,22 +187,26 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
 
   const save = async () => {
     if (!v.name.trim()) { toast.error("El nombre es obligatorio."); return; }
+    let email: string | null;
+    try { email = normalizeOptionalEmail(v.email); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "El email no es válido."); return; }
     const deposit = v.deposit_pct === "" ? null : Number(v.deposit_pct);
     if (deposit !== null && (!Number.isFinite(deposit) || deposit < 0 || deposit > 100)) { toast.error("El depósito debe estar entre 0 y 100 %."); return; }
     setSaving(true);
     const payload = {
-      type: v.type, name: v.name.trim(), contact: v.contact.trim() || null, email: v.email.trim() || null,
+      type: v.type, name: v.name.trim(), contact: v.contact.trim() || null, email,
       country: v.country.trim() || null, language: v.language,
       deposit_pct: deposit,
       ...(isAdmin ? { terms_id: v.terms_id || null } : {}),
     };
-    const { error } = client
-      ? await db.from("clients").update(payload).eq("id", client.id)
-      : await db.from("clients").insert({ ...payload, created_by: user.id });
+    const result = client
+      ? await db.from("clients").update(payload).eq("id", client.id).select("id,email").single()
+      : await db.from("clients").insert({ ...payload, created_by: user.id }).select("id,email").single();
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (result.error) { toast.error(`No se pudo guardar el cliente: ${result.error.message}`); return; }
     toast.success("Cliente guardado.");
     qc.invalidateQueries({ queryKey: ["clients"] });
+    qc.invalidateQueries({ queryKey: ["client-email", result.data.id] });
     onClose();
   };
 
@@ -208,7 +234,7 @@ function ClientSheet({ client, isAdmin, terms, onClose }: { client: Client | nul
             <Input value={v.name} onChange={(e) => set("name", e.target.value)} />
           </Field>
           <Field label="Contacto"><Input value={v.contact} onChange={(e) => set("contact", e.target.value)} /></Field>
-          <Field label="Email"><Input type="email" value={v.email} onChange={(e) => set("email", e.target.value)} /></Field>
+          <Field label="Email"><Input aria-label="Email del cliente" type="email" value={v.email} onChange={(e) => set("email", e.target.value)} /></Field>
           <Field label="País"><Input value={v.country} onChange={(e) => set("country", e.target.value)} /></Field>
           <Field label="Depósito % (vacío = global de Admin)"><Input aria-label="Depósito del cliente" type="number" min="0" max="100" step="0.0001" value={v.deposit_pct} onChange={(e) => set("deposit_pct", e.target.value)} /></Field>
           <Field label="Términos y condiciones" className="sm:col-span-2">

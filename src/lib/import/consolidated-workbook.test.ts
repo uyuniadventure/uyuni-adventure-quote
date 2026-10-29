@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   CONSOLIDATED_WORKBOOK_SHEETS,
   parseConsolidatedWorkbook,
@@ -15,8 +15,11 @@ const workbookPath = resolve(
 describe.skipIf(!existsSync(workbookPath))("importador consolidado 2026–2027", () => {
   let parsed: Awaited<ReturnType<typeof parseConsolidatedWorkbook>>;
 
-  it("detecta las diez hojas y sus cabeceras reales", async () => {
+  beforeAll(async () => {
     parsed = await parseConsolidatedWorkbook(readFileSync(workbookPath));
+  });
+
+  it("detecta las diez hojas y sus cabeceras reales", () => {
     expect(parsed.sheetNames).toEqual(CONSOLIDATED_WORKBOOK_SHEETS);
     expect(Object.values(parsed.headerRows)).toEqual(Array(10).fill(4));
   });
@@ -49,6 +52,30 @@ describe.skipIf(!existsSync(workbookPath))("importador consolidado 2026–2027",
     expect(parsed.scenarios.every((scenario) => scenario.expectedCostUsd != null)).toBe(true);
     expect(new Set(parsed.scenarios.map((scenario) => scenario.importKey)).size).toBe(155);
     expect(new Set(parsed.scenarioDays.map((day) => day.importKey)).size).toBe(536);
+  });
+
+  it("conserva SPASPA-4D3N-LLTd 2026 ALL P2 con cuatro días, veinte líneas y USD 2166", () => {
+    const scenario = parsed.scenarios.find(
+      (candidate) =>
+        candidate.tourSku === "SPASPA-4D3N-LLTd" &&
+        candidate.year === 2026 &&
+        candidate.season === "ALL" &&
+        candidate.pax === 2,
+    );
+    expect(scenario).toMatchObject({
+      days: 4,
+      expectedCostUsd: 2166.001728,
+      detailCostUsd: 2166.0017,
+    });
+    const days = parsed.scenarioDays.filter((day) => day.scenarioKey === scenario!.importKey);
+    const lines = parsed.lines.filter((line) => line.scenarioKey === scenario!.importKey);
+    expect(days).toHaveLength(4);
+    expect(lines).toHaveLength(20);
+    expect(lines.reduce((sum, line) => sum + (line.amountUsd ?? 0), 0)).toBeCloseTo(
+      2166.001728,
+      6,
+    );
+    expect(lines.every((line) => line.sourceRef.sheet === "06_DESGLOSE")).toBe(true);
   });
 
   it("preserva el costo total de cada línea sin volver a multiplicarlo", () => {

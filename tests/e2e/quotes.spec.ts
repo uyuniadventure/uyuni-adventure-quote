@@ -146,7 +146,11 @@ test("SPA 2 pax: los mismos tres bloques conservan el total de la plantilla", as
   const templateQuote = await fromTemplate(page, "SPAUYU-3D2N-MP");
   await assertTotals(page, spa.expected.cost_usd!, spa.expected.cost_usd! * 1.25);
   await basics(page);
-  await page.getByRole("button", { name: "Empezar desde cero" }).click();
+  const suggestionNavigation = page.getByRole("button", { name: "Datos básicos" }).locator("..");
+  await expect(
+    suggestionNavigation.getByRole("button", { name: "Empezar desde cero" }),
+  ).toBeVisible();
+  await suggestionNavigation.getByRole("button", { name: "Empezar desde cero" }).click();
   await expect(page.getByRole("heading", { name: "Cotización", exact: true })).toBeVisible();
   for (let n = 1; n <= 3; n++) {
     await page.getByRole("combobox", { name: "Buscar bloque diario…" }).click();

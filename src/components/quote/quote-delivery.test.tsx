@@ -12,6 +12,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { Tables } from "@/types/db";
 import { recalculateQuote } from "@/lib/quotes";
 import { QuoteDelivery } from "./quote-delivery";
+vi.mock("@/lib/clients", () => ({ currentClientEmail: vi.fn().mockResolvedValue("test@example.invalid") }));
 import { useQuoteActions } from "./quote-workspace";
 
 vi.mock("@/lib/quotes", async (original) => ({

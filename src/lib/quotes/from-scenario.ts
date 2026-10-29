@@ -6,6 +6,83 @@ import { calculateSavedQuote, type QuoteBasics, type loadQuote } from "./index";
 import { loadCostScenarioSource, type CostScenarioRequest, type CostScenarioSource } from "./scenario-source";
 import { SCENARIO_IMPORT_OVERRIDE_NOTE } from "./scenario-origin";
 import { splitDescriptiveLodging } from "./document-model";
+import { createQuoteFromTemplate } from "./from-template";
+
+export interface ScenarioNarrativeDay {
+  day_number: number;
+  title: string;
+  description: string;
+  note: string | null;
+  source: "template_translation";
+}
+
+const LODGING_LINE = /(?:\r?\n)+Alojamiento\s*:/i;
+
+/** Removes only the explicit structured lodging line. No punctuation or
+ * length-based narrative splitting is attempted. */
+export function narrativeWithoutLodging(value: string) {
+  const match = LODGING_LINE.exec(value);
+  return (match ? value.slice(0, match.index) : value).trim();
+}
+
+export async function loadSeparatedTemplateNarrative(
+  templateId: string,
+  language: string,
+): Promise<ScenarioNarrativeDay[]> {
+  const templateDays = unwrap(
+    await db
+      .from("template_days")
+      .select("day_number,block_id,import_title,import_note")
+      .eq("template_id", templateId)
+      .order("day_number"),
+  );
+  const blockIds = templateDays.map((day) => day.block_id);
+  if (!blockIds.length) return [];
+  const translations = unwrap(
+    await db
+      .from("day_block_translations")
+      .select("block_id,lang,title,description")
+      .in("block_id", blockIds)
+      .in("lang", [...new Set([language, "es"])]),
+  );
+  return selectSeparatedTemplateNarrative(templateDays, translations, language);
+}
+
+export function selectSeparatedTemplateNarrative(
+  templateDays: readonly {
+    day_number: number;
+    block_id: string;
+    import_title: string | null;
+    import_note: string | null;
+  }[],
+  translations: readonly {
+    block_id: string;
+    lang: string;
+    title: string;
+    description: string;
+  }[],
+  language: string,
+) {
+  return templateDays.flatMap((day) => {
+    // Consolidated-import rows retain import_title. Those are precisely the
+    // rows whose title may contain the combined narrative, so do not split or
+    // reinterpret them here.
+    if (day.import_title?.trim()) return [];
+    const text =
+      translations.find((candidate) => candidate.block_id === day.block_id && candidate.lang === language) ??
+      translations.find((candidate) => candidate.block_id === day.block_id && candidate.lang === "es");
+    const title = text?.title.trim() ?? "";
+    const description = narrativeWithoutLodging(text?.description ?? "");
+    if (!title || !description) return [];
+    return [{
+      day_number: day.day_number,
+      title,
+      description,
+      note: day.import_note?.trim() || null,
+      source: "template_translation" as const,
+    }];
+  });
+}
 
 export type ScenarioQuoteBasics = Pick<
   QuoteBasics,
@@ -24,7 +101,10 @@ export function scenarioRequestFromId(
 }
 
 /** Converts exact imported totals into frozen quote items without recalculating source quantities. */
-export function buildScenarioDays(source: CostScenarioSource) {
+export function buildScenarioDays(
+  source: CostScenarioSource,
+  narrativeDays: readonly ScenarioNarrativeDay[] = [],
+) {
   const dayNumber = new Map(source.days.map((day) => [day.id, day.day_number]));
   const prepared = prepareScenarioLines(
     source.lines.map((line) => ({
@@ -51,6 +131,13 @@ export function buildScenarioDays(source: CostScenarioSource) {
         typeof sourceRef?.hotel === "string" ? sourceRef.hotel : "",
         typeof sourceRef?.meals === "string" ? sourceRef.meals : "",
       );
+      const narrative = narrativeDays.find((candidate) => candidate.day_number === day.day_number);
+      const title = narrative?.title ?? day.title;
+      const description = narrative?.description ?? day.description;
+      const preservedNote = narrative?.note ??
+        (narrative && day.description?.trim() && day.description.trim() !== description?.trim()
+          ? day.description.trim()
+          : null);
       const items = own.flatMap((line) => {
         const frozen = byId.get(line.id)!;
         if (line.amount_usd == null) return [];
@@ -91,15 +178,21 @@ export function buildScenarioDays(source: CostScenarioSource) {
         id: crypto.randomUUID(),
         day_number: day.day_number,
         source_block_id: null,
-        block_snapshot: json({}),
+        block_snapshot: json({
+          content: {
+            ...(title ? { title: { es: title } } : {}),
+            ...(description ? { description: { es: description } } : {}),
+            ...(preservedNote ? { client_note: { es: preservedNote } } : {}),
+          },
+        }),
         overrides: json({
           ...(lodging.accommodation
             ? { accommodation_text: { es: lodging.accommodation } }
             : {}),
           ...(lodging.meals ? { meals: [lodging.meals] } : {}),
         }),
-        title: day.title,
-        description: day.description,
+        title,
+        description,
         includes: null,
         excludes: null,
         route_from: null,
@@ -108,6 +201,11 @@ export function buildScenarioDays(source: CostScenarioSource) {
           cost_scenario_day_id: day.id,
           visible_code: day.visible_code,
           source_ref: day.source_ref,
+          source_narrative: {
+            title: day.title,
+            description: day.description,
+            applied_template_narrative: narrative ?? null,
+          },
           omitted_economic_items: missing.map(
             (line) => `${line.description}: costo USD pendiente (${line.line_key})`,
           ),
@@ -136,16 +234,20 @@ export function applyScenarioReconciliation(
 export async function createQuoteFromCostScenario(
   scenarioId: string,
   input: ScenarioQuoteBasics,
+  narrativeTemplateId?: string,
 ): Promise<Tables<"quotes">> {
   const scenario = unwrap(
     await db.from("tour_cost_scenarios").select("*").eq("id", scenarioId).eq("status", "activo").single(),
   );
   if (scenario.pax !== input.pax_paying)
     throw new Error("Los pasajeros no coinciden con el escenario exacto");
-  const [source, client, settings] = await Promise.all([
+  const [source, client, settings, narrativeDays] = await Promise.all([
     loadCostScenarioSource(scenarioRequestFromId(scenario)),
     db.from("clients").select("*").eq("id", input.client_id).single().then(unwrap),
     db.from("pricing_settings").select("*").order("id").then(unwrap),
+    narrativeTemplateId
+      ? loadSeparatedTemplateNarrative(narrativeTemplateId, input.language)
+      : Promise.resolve([]),
   ]);
   if (!settings[0]) throw new Error("Falta la configuración global de precios");
   const base = {
@@ -169,7 +271,7 @@ export async function createQuoteFromCostScenario(
       source_scenario: scenario,
     },
   };
-  const days = buildScenarioDays(source);
+  const days = buildScenarioDays(source, narrativeDays);
   const data = {
     quote,
     days,
@@ -190,4 +292,56 @@ export async function createQuoteFromCostScenario(
       p_result: json(result),
     }),
   );
+}
+
+/**
+ * Creates from the selected template, using its exact economic scenario when
+ * one was explicitly resolved. The scenario path already contains the
+ * narrative day snapshots and is the only path that copies economic lines, so
+ * days and services cannot be duplicated by combining two drafts.
+ */
+export async function createQuoteFromTemplateSelection(
+  templateId: string,
+  scenarioId: string | null,
+  input: ScenarioQuoteBasics,
+): Promise<Tables<"quotes">> {
+  if (!scenarioId) return createQuoteFromTemplate(templateId, input);
+  const [template, scenario] = await Promise.all([
+    db
+      .from("itinerary_templates")
+      .select("id,sku,status")
+      .eq("id", templateId)
+      .single()
+      .then(unwrap),
+    db
+      .from("tour_cost_scenarios")
+      .select("id,template_id,tour_sku,rate_year,pax,status")
+      .eq("id", scenarioId)
+      .single()
+      .then(unwrap),
+  ]);
+  validateTemplateScenarioSelection(template, scenario, input);
+  return createQuoteFromCostScenario(scenarioId, input, templateId);
+}
+
+export function validateTemplateScenarioSelection(
+  template: Pick<Tables<"itinerary_templates">, "id" | "sku" | "status">,
+  scenario: Pick<
+    Tables<"tour_cost_scenarios">,
+    "id" | "template_id" | "tour_sku" | "rate_year" | "pax" | "status"
+  >,
+  input: Pick<ScenarioQuoteBasics, "start_date" | "pax_paying">,
+) {
+  if (!["activo", "pendiente"].includes(template.status) || scenario.status !== "activo")
+    throw new Error("La plantilla o su escenario económico ya no están disponibles");
+  if (
+    scenario.tour_sku !== template.sku ||
+    (scenario.template_id != null && scenario.template_id !== template.id)
+  )
+    throw new Error("El escenario económico no corresponde a la plantilla seleccionada");
+  const year = Number(input.start_date.match(/^(\d{4})-/)?.[1]);
+  if (!Number.isInteger(year) || scenario.rate_year !== year)
+    throw new Error("El escenario económico no corresponde al año del viaje");
+  if (scenario.pax !== input.pax_paying)
+    throw new Error("El escenario económico no corresponde a los pasajeros seleccionados");
 }

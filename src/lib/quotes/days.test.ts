@@ -46,6 +46,7 @@ import {
   validateContinuity,
 } from "./days";
 import { loadTemplateSource } from "./template-source";
+import { serviceToItem } from "@/components/quote/quote-ops";
 vi.setConfig({ testTimeout: 30000 });
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 let templateId: string, clientId: string;
@@ -115,6 +116,75 @@ async function freeBlock() {
   return b.id;
 }
 describe("días congelados, grupos y operaciones atómicas", () => {
+  it("adds the real seasonless Tunupa/Bike catalog rows through the editor pipeline and restores the baseline", async () => {
+    const data = await newQuote();
+    const baseline = data.quote.total_cost_usd;
+    const addedDay = await addBlockDay(data.quote.id, await freeBlock());
+    const activeQuoteId = addedDay.quote_id;
+    const active = await loadQuote(activeQuoteId);
+    expect(active.quote.status).toBe("borrador");
+    const fifth = active.days.at(-1)!;
+    expect((await one<{ count: number }>("select count(*)::int count from quote_days where id=$1", [fifth.id])).count).toBe(1);
+    const skus = ["ALM_LH_UTU_1", "ALM_LH_UTU_2", "BIKE_LH_1", "BIKE_LH_2"];
+    await pg.query(
+      "update service_rates set season=null,rate_year=2026,pricing_enabled=true where service_id in(select id from services where sku=any($1::text[]))",
+      [skus],
+    );
+    for (const sku of skus) {
+      const service = await one<{ id: string }>("select id from services where sku=$1", [sku]);
+      try {
+        const item = await serviceToItem(service.id, { maxSpan: 1 });
+        await pg.query("select edit_quote_item($1,$2::jsonb,true,false)", [
+          fifth.id,
+          JSON.stringify(item),
+        ]);
+      } catch (error) {
+        throw new Error(`${sku}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    const saved = await loadQuote(activeQuoteId);
+    const selected = saved.items.filter((entry) => skus.includes(entry.sku!));
+    expect(selected.map((entry) => [entry.sku, entry.pricing_unit])).toEqual([
+      ["ALM_LH_UTU_1", "per_person"],
+      ["ALM_LH_UTU_2", "per_group"],
+      ["BIKE_LH_1", "per_person"],
+      ["BIKE_LH_2", "per_group"],
+    ]);
+    expect(selected.every((entry) =>
+      (entry.pricing_snapshot as { rates: { season: null; rate_year: number }[] }).rates
+        .every((rate) => rate.season === null && rate.rate_year === 2026),
+    )).toBe(true);
+    const result = await recalculateQuote(activeQuoteId);
+    expect(result.items.filter((entry) => selected.some((item) => item.id === entry.id)).map((entry) => entry.total_cost_usd))
+      .toEqual([30, 30, 60, 60]);
+    await deleteDay(data.quote.id, fifth.id);
+    expect((await loadQuote(activeQuoteId)).quote.total_cost_usd).toBe(baseline);
+  });
+  it("adds the real Sol de la Mañana text from an exact independent library translation", async () => {
+    const source = await one<{
+      title: string;
+      description: string;
+      includes: string;
+    }>(
+      "select title,description,includes from day_block_translations where lang='es' and title='Sol de la Mañana · Laguna Verde · Hito Cajón · San Pedro de Atacama' and description<>'' limit 1",
+    );
+    const malformed = await one<{ id: string }>(
+      "insert into day_blocks(code,status,catalog_origin) values('REAL-COMBINED-'||gen_random_uuid(),'activo','importacion') returning id",
+    );
+    const original = `${source.title} ${source.description} Comidas incluidas: ${source.includes}`;
+    await pg.query(
+      "insert into day_block_translations(block_id,lang,title,description,includes,reviewed) values($1,'es',$2,'',null,true)",
+      [malformed.id, original],
+    );
+    const data = await newQuote();
+    const added = await addBlockDay(data.quote.id, malformed.id);
+    const day = (await loadQuote(added.quote_id)).days.at(-1)!;
+    expect(day.title).toBe(source.title);
+    expect(day.description).toBe(source.description);
+    expect(resolveDay(day).meals).toEqual(["Desayuno", "Almuerzo"]);
+    expect((day.block_snapshot as { translations: { title: string }[] }).translations[0]!.title)
+      .toBe(original);
+  });
   it("reuses one catalog block in separate quotes and persists both snapshots on reload", async () => {
     const blockId = await freeBlock();
     const quoteBasics = (sku: string): QuoteBasics =>

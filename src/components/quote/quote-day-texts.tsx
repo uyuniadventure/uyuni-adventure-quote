@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,8 @@ import type { DayContent } from "@/lib/quotes/day-content";
 import { saveItemLabel, saveQuoteDocument } from "@/lib/quotes/document";
 import { buildQuoteDocumentModel, type DocumentContent } from "@/lib/quotes/document-model";
 import type { Tables } from "@/types/db";
+import { loadClient } from "@/lib/clients";
+import { ClientSheet } from "@/components/clients/client-sheet";
 import type { useQuoteActions } from "./quote-workspace";
 type Actions = ReturnType<typeof useQuoteActions>;
 type Status = "idle" | "saving" | "saved" | "error";
@@ -92,12 +95,27 @@ export function QuoteIdentityTexts({
   quote: Tables<"quotes">;
   actions: Actions;
 }) {
+  const [editingClient, setEditingClient] = useState(false);
+  const client = useQuery({
+    queryKey: ["client", quote.client_id],
+    queryFn: () => loadClient(quote.client_id),
+  });
   const content = (quote.document_snapshot ?? {}) as DocumentContent;
   const disabled = quote.status !== "borrador" || !!quote.archived_at;
   return (
     <details className="rounded-md border p-3">
       <summary className="cursor-pointer text-sm font-medium">Cliente y guía del documento</summary>
       <div className="mt-3 space-y-3">
+        <Button
+          type="button"
+          variant="link"
+          className="h-auto p-0 text-sm"
+          disabled={client.isLoading || !client.data}
+          onClick={() => setEditingClient(true)}
+        >
+          Editar datos y email del cliente
+        </Button>
+        {client.isError && <p className="text-sm text-destructive">No se pudieron cargar los datos actuales del cliente.</p>}
         <AutoField
           label="Cliente"
           value={content.client_name ?? ""}
@@ -116,6 +134,9 @@ export function QuoteIdentityTexts({
           }
         />
       </div>
+      {editingClient && client.data && (
+        <ClientSheet client={client.data} onClose={() => setEditingClient(false)} />
+      )}
     </details>
   );
 }

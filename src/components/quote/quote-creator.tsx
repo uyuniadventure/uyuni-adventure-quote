@@ -5,13 +5,13 @@ import { toast } from "sonner";
 import { db } from "@/lib/db";
 import {
   createEmptyQuote,
-  createQuoteFromCostScenario,
-  createQuoteFromTemplate,
+  createQuoteFromTemplateSelection,
   getTemplateForQuote,
   templateQuotePrefill,
   type QuoteBasics,
 } from "@/lib/quotes";
 import { suggestTemplates, templateImportWarnings } from "@/lib/quotes/suggestions";
+import { scenariosForTemplate, suggestCostScenarios } from "@/lib/quotes/scenario-suggestions";
 import {
   templatePassengerDefaults,
   templatePassengerLabel,
@@ -386,7 +386,9 @@ export function QuoteCreator({
                   template.isFetching ||
                   create.isPending
                 }
-                onClick={() => selected && create.mutate(selected.id)}
+                onClick={() =>
+                  selected && create.mutate({ templateId: selected.id, scenarioId: null })
+                }
               >
                 {create.isPending
                   ? "Creando cotización…"
@@ -423,7 +425,7 @@ export function QuoteCreator({
 
 function useQuoteCreation(b: Basics, onCreated: (id: string) => void) {
   return useMutation({
-    mutationFn: async (source: string | null | { scenarioId: string }) => {
+    mutationFn: async (source: null | { templateId: string; scenarioId: string | null }) => {
       if (!validBasics(b))
         throw new Error("Completa cliente, fecha de inicio y pasajeros válidos en Datos básicos.");
       const fx = await latestFx();
@@ -450,11 +452,9 @@ function useQuoteCreation(b: Basics, onCreated: (id: string) => void) {
         },
       };
       const quote =
-        typeof source === "object" && source
-          ? await createQuoteFromCostScenario(source.scenarioId, basics)
-          : source
-            ? await createQuoteFromTemplate(source, basics)
-            : await createEmptyQuote(basics);
+        source
+          ? await createQuoteFromTemplateSelection(source.templateId, source.scenarioId, basics)
+          : await createEmptyQuote(basics);
       return quote.id;
     },
     onSuccess: (id) => {
@@ -483,21 +483,11 @@ export function TemplateStep({
   });
   const create = useQuoteCreation(b, onCreated);
   const valid = validBasics(b);
+  const [selectedScenarios, setSelectedScenarios] = useState<Record<string, string>>({});
   const scenarios = useQuery({
-    queryKey: ["quote-cost-scenarios", Number(b.pax_paying)],
+    queryKey: ["quote-cost-scenarios", b.route_from, b.route_to, b.start_date, Number(b.pax_paying)],
     enabled: Number.isInteger(Number(b.pax_paying)) && Number(b.pax_paying) > 0,
-    queryFn: async () => {
-      const { data, error } = await db
-        .from("tour_cost_scenarios")
-        .select("id,tour_sku,rate_year,season,pax,approved_cost_usd,detail_cost_usd,cost_difference_usd,reconciliation_status,source_ref")
-        .eq("status", "activo")
-        .eq("pax", Number(b.pax_paying))
-        .order("tour_sku")
-        .order("rate_year")
-        .order("season");
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => suggestCostScenarios(b),
   });
 
   return (
@@ -526,47 +516,17 @@ export function TemplateStep({
           Creando borrador y copiando servicios de la plantilla…
         </p>
       )}
-      <Card className="space-y-3 p-4">
-        <div>
-          <h3 className="font-medium text-foreground">Escenarios económicos importados</h3>
-          <p className="text-sm text-muted-foreground">
-            Coincidencia exacta por tour, año, temporada y {b.pax_paying || "—"} pasajero(s).
-          </p>
-        </div>
-        {scenarios.isLoading && <p className="text-sm text-muted-foreground">Buscando escenarios…</p>}
-        {scenarios.isError && (
-          <p role="alert" className="text-sm text-destructive">{scenarios.error.message}</p>
-        )}
-        {!scenarios.isLoading && !scenarios.isError && scenarios.data?.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No hay escenarios activos para esta cantidad exacta de pasajeros.
-          </p>
-        )}
-        <div className="grid gap-2 sm:grid-cols-2">
-          {scenarios.data?.map((scenario) => (
-            <div key={scenario.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
-              <div>
-                <div className="font-mono text-xs text-muted-foreground">{scenario.tour_sku}</div>
-                <div className="text-sm font-medium">
-                  {scenario.rate_year} · {scenario.season} · P{scenario.pax}
-                </div>
-                {scenario.reconciliation_status === "difference" && (
-                  <p className="text-xs text-brand-orange-deep">
-                    Conciliación pendiente: aprobado USD {scenario.approved_cost_usd} · desglose USD {scenario.detail_cost_usd} · diferencia USD {scenario.cost_difference_usd}
-                  </p>
-                )}
-              </div>
-              <Button
-                size="sm"
-                disabled={create.isPending || !valid}
-                onClick={() => create.mutate({ scenarioId: scenario.id })}
-              >
-                Usar escenario
-              </Button>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <div className="space-y-1">
+        <h3 className="font-medium text-foreground">Plantillas compatibles</h3>
+        <p className="text-sm text-muted-foreground">
+          Elige un tour para cargar su itinerario y, cuando estén disponibles, sus costos para {b.pax_paying || "—"} pasajero(s).
+        </p>
+      </div>
+      {scenarios.isError && (
+        <p role="alert" className="text-sm text-destructive">
+          No se pudo comprobar la disponibilidad de costos. Las plantillas todavía pueden crear un borrador sin costos.
+        </p>
+      )}
       {q.isLoading && <p className="text-sm text-muted-foreground">Buscando plantillas…</p>}
       {q.isError && (
         <div role="alert" className="space-y-2 rounded-md border p-4">
@@ -578,7 +538,7 @@ export function TemplateStep({
       )}
       {!q.isError && q.data?.length === 0 && (
         <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No hay plantillas activas o pendientes disponibles para tu usuario. Empieza desde cero.
+          No hay plantillas compatibles con esta ruta disponibles para tu usuario. Puedes empezar desde cero.
         </p>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
@@ -594,6 +554,12 @@ export function TemplateStep({
           } catch (e) {
             referenceError = (e as Error).message;
           }
+          const costScenarios = scenariosForTemplate(t, scenarios.data ?? []);
+          const selectedScenario =
+            costScenarios.length === 1
+              ? costScenarios[0]
+              : costScenarios.find((scenario) => scenario.id === selectedScenarios[t.id]);
+          const needsSeason = costScenarios.length > 1 && !selectedScenario;
           return (
             <Card
               key={t.id}
@@ -631,6 +597,43 @@ export function TemplateStep({
               </div>
               {t.hotel_combo && (
                 <p className="font-mono text-xs text-muted-foreground">Hoteles: {t.hotel_combo}</p>
+              )}
+              {scenarios.isLoading ? (
+                <p className="text-xs text-muted-foreground">Comprobando costos…</p>
+              ) : costScenarios.length === 0 ? (
+                <Badge variant="outline" className="self-start">Sin costos compatibles</Badge>
+              ) : costScenarios.length === 1 ? (
+                <Badge variant="secondary" className="self-start">
+                  Costos disponibles · {selectedScenario!.season} · P{selectedScenario!.pax}
+                </Badge>
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-xs text-brand-orange-deep">
+                    Selecciona la temporada económica; hay más de una coincidencia exacta.
+                  </p>
+                  <Select
+                    {...(selectedScenarios[t.id] ? { value: selectedScenarios[t.id] } : {})}
+                    onValueChange={(scenarioId) =>
+                      setSelectedScenarios((current) => ({ ...current, [t.id]: scenarioId }))
+                    }
+                  >
+                    <SelectTrigger aria-label={`Temporada de costos para ${t.sku}`}>
+                      <SelectValue placeholder="Elegir temporada" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {costScenarios.map((scenario) => (
+                        <SelectItem key={scenario.id} value={scenario.id}>
+                          {scenario.season} · {scenario.rate_year} · P{scenario.pax}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {selectedScenario?.reconciliation_status === "difference" && (
+                <p className="text-xs text-brand-orange-deep">
+                  Conciliación pendiente: aprobado USD {selectedScenario.approved_cost_usd} · desglose USD {selectedScenario.detail_cost_usd} · diferencia USD {selectedScenario.cost_difference_usd}
+                </p>
               )}
               {warnings.length > 0 && (
                 <ul
@@ -674,8 +677,17 @@ export function TemplateStep({
               <Button
                 size="sm"
                 className="mt-auto self-end"
-                disabled={create.isPending || incompatible || !!referenceError || !valid}
-                onClick={() => create.mutate(t.id)}
+                disabled={
+                  create.isPending ||
+                  incompatible ||
+                  !!referenceError ||
+                  !valid ||
+                  scenarios.isLoading ||
+                  needsSeason
+                }
+                onClick={() =>
+                  create.mutate({ templateId: t.id, scenarioId: selectedScenario?.id ?? null })
+                }
               >
                 Usar plantilla
               </Button>

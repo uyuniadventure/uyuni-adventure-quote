@@ -13,9 +13,20 @@ import { ProposalDocument } from "./proposal-document";
 import { renderProposal, listDocSections } from "../quotes/document";
 
 export async function generateQuotePdf(quoteId: string): Promise<Blob> {
-  const data = await loadQuote(quoteId);
+  let data: Awaited<ReturnType<typeof loadQuote>>;
+  try {
+    data = await loadQuote(quoteId);
+  } catch (error) {
+    throw new Error(`No se pudo acceder a la cotización ${quoteId}. Verifica que exista y que tengas permiso para verla. ${error instanceof Error ? error.message : ""}`.trim());
+  }
   const q = data.quote;
-  if ((await listDocSections(quoteId)).length) {
+  let sections: Awaited<ReturnType<typeof listDocSections>>;
+  try {
+    sections = await listDocSections(quoteId);
+  } catch (error) {
+    throw new Error(`No se pudieron recuperar las secciones de la propuesta. ${error instanceof Error ? error.message : ""}`.trim());
+  }
+  if (sections.length) {
     const proposal = await renderProposal(quoteId, { target: "pdf", lang: q.language });
     if (!proposal) throw new Error("La propuesta no tiene secciones.");
     const errors = proposal.avisos.filter((a) => a.level === "error");
@@ -28,20 +39,21 @@ export async function generateQuotePdf(quoteId: string): Promise<Blob> {
     const blob = await pdf(<ProposalDocument html={proposal.html} />).toBlob();
     if (proposal.frozen) return blob;
     const path = `${q.id}/${crypto.randomUUID()}.pdf`;
-    unwrap(
-      await db.storage
-        .from("quote-pdfs")
-        .upload(path, blob, { contentType: "application/pdf", upsert: false }),
-    );
-    const signed = unwrap(await db.storage.from("quote-pdfs").createSignedUrl(path, 604800));
-    unwrap(
-      await db.rpc("save_quote_pdf", {
-        p_id: q.id,
-        p_updated_at: q.updated_at,
-        p_path: path,
-        p_url: signed.signedUrl,
-      }),
-    );
+    const uploaded = await db.storage
+      .from("quote-pdfs")
+      .upload(path, blob, { contentType: "application/pdf", upsert: false });
+    if (uploaded.error) throw new Error(`No se pudo guardar el archivo PDF. ${uploaded.error.message}`);
+    const signedResult = await db.storage.from("quote-pdfs").createSignedUrl(path, 604800);
+    if (signedResult.error || !signedResult.data)
+      throw new Error(`No se pudo crear el enlace de descarga del PDF. ${signedResult.error?.message ?? "Respuesta vacía."}`);
+    const saved = await db.rpc("save_quote_pdf", {
+      p_id: q.id,
+      p_updated_at: q.updated_at,
+      p_path: path,
+      p_url: signedResult.data.signedUrl,
+    });
+    // save_quote_pdf returns void, therefore a successful PostgREST response has data: null.
+    if (saved.error) throw new Error(`No se pudo asociar el PDF a la cotización. ${saved.error.message}`);
     return blob;
   }
   const reviewMessage = unreviewedDaysMessage(data.days, q.language);

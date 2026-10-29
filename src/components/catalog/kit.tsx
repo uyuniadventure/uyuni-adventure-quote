@@ -164,20 +164,30 @@ export function useHotelCodes() {
 /* ---------------- Selector con búsqueda en servidor ---------------- */
 
 export interface PickOption { id: string; label: string; sub?: string }
+export interface PickPage { options: PickOption[]; hasMore: boolean }
 
-export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, className, disabled }: {
+export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, className, disabled, filters, filterKey }: {
   placeholder: string;
   value?: PickOption | null;
   onPick: (o: PickOption | null) => void;
-  fetcher: (term: string) => Promise<PickOption[]>;
+  fetcher: (term: string, page?: number) => Promise<PickOption[] | PickPage>;
   queryKey: string;
   className?: string;
   disabled?: boolean;
+  filters?: ReactNode;
+  filterKey?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
+  const [page, setPage] = useState(0);
   const t = useDebounced(term.trim());
-  const q = useQuery({ queryKey: ["picker", queryKey, t], enabled: open, queryFn: () => fetcher(t) });
+  useEffect(() => setPage(0), [t, filterKey]);
+  const q = useQuery({ queryKey: ["picker", queryKey, t, filterKey, page], enabled: open, queryFn: () => fetcher(t, page) });
+  const result: PickPage | undefined = !q.data
+    ? undefined
+    : Array.isArray(q.data)
+      ? { options: q.data, hasMore: false }
+      : q.data;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -189,6 +199,7 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
       <PopoverContent className="w-[420px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput value={term} onValueChange={setTerm} placeholder="Buscar…" />
+          {filters && <div className="border-b p-3">{filters}</div>}
           <CommandList>
             {q.isLoading && <div className="p-3 text-sm text-muted-foreground">Buscando…</div>}
             {q.isError && (
@@ -206,7 +217,7 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
                   <span className="text-muted-foreground">Quitar selección</span>
                 </CommandItem>
               )}
-              {q.data?.map((o) => (
+              {result?.options.map((o) => (
                 <CommandItem key={o.id} value={o.id} onSelect={() => { onPick(o); setOpen(false); }}>
                   <Check className={`mr-2 h-4 w-4 ${value?.id === o.id ? "opacity-100" : "opacity-0"}`} />
                   <div className="min-w-0">
@@ -216,6 +227,13 @@ export function SearchPicker({ placeholder, value, onPick, fetcher, queryKey, cl
                 </CommandItem>
               ))}
             </CommandGroup>
+            {!q.isLoading && !q.isError && (page > 0 || result?.hasMore) && (
+              <div className="flex items-center justify-between border-t p-2 text-xs text-muted-foreground">
+                <Button size="sm" variant="ghost" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>Anterior</Button>
+                <span>Página {page + 1}</span>
+                <Button size="sm" variant="ghost" disabled={!result?.hasMore} onClick={() => setPage((value) => value + 1)}>Siguiente</Button>
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

@@ -80,6 +80,19 @@ it("filters the route and ranks duration, category and modality among compatible
     ["PENDING", 11],
   ]);
 });
+it("offers an imported template whose route is only encoded unambiguously in its SKU", async () => {
+  await add("SPASPA-4D3N-IMPORTED", "activo", 4);
+  await pg.exec(
+    "update itinerary_templates set route_from=null,route_to=null,catalog_origin='importacion' where sku='SPASPA-4D3N-IMPORTED'",
+  );
+  const rows = await suggestTemplates({ route_from: "SPA", route_to: "SPA" });
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({
+    sku: "SPASPA-4D3N-IMPORTED",
+    route_from: "SPA",
+    route_to: "SPA",
+  });
+});
 it("returns no templates when the requested route has no compatible rows", async () => {
   await add("ONE");
   await add("TWO");

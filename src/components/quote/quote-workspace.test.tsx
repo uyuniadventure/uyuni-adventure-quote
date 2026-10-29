@@ -15,6 +15,7 @@ import type { Enums } from "@/types/db";
 import { money } from "@/components/catalog/shared";
 import { QuoteWorkspace } from "./quote-workspace";
 import { addBlockDay, addBlockDays, deleteDay, moveDay, updateDayContent } from "@/lib/quotes/days";
+import { loadClient } from "@/lib/clients";
 
 vi.mock("@/lib/quotes", async (original) => ({
   ...(await original<typeof import("@/lib/quotes")>()),
@@ -27,6 +28,18 @@ vi.mock("@/hooks/use-auth", () => ({
   canManageCatalog: () => false,
 }));
 vi.mock("@/lib/states", () => ({ beginQuoteEdit: vi.fn(), transitionQuote: vi.fn() }));
+vi.mock("@/lib/clients", async (original) => ({
+  ...(await original<typeof import("@/lib/clients")>()),
+  loadClient: vi.fn(),
+}));
+vi.mock("@/components/clients/client-sheet", () => ({
+  ClientSheet: ({ client, onClose }: { client: { email: string | null }; onClose: () => void }) => (
+    <div role="dialog" aria-label="Editar cliente en cotización">
+      <span>{client.email}</span>
+      <button onClick={onClose}>Cancelar cliente</button>
+    </div>
+  ),
+}));
 vi.mock("@/lib/quotes/days", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/days")>()),
   addBlockDay: vi.fn(),
@@ -41,10 +54,16 @@ const blockSearch = vi.hoisted(() => ({
   rows: vi.fn(),
   page: vi.fn(),
 }));
+const quoteCatalogSearch = vi.hoisted(() => ({ blocks: vi.fn(), services: vi.fn() }));
 vi.mock("@/lib/catalog/block-search", () => ({
   searchDayBlockIds: blockSearch.search,
   fetchBlockRowsByIds: blockSearch.rows,
   fetchUnsearchedBlockPage: blockSearch.page,
+}));
+vi.mock("@/lib/quotes/catalog-search", async (original) => ({
+  ...(await original<typeof import("@/lib/quotes/catalog-search")>()),
+  searchQuoteBlocks: quoteCatalogSearch.blocks,
+  searchQuoteServices: quoteCatalogSearch.services,
 }));
 vi.mock("@/components/catalog/block-editor", () => ({
   BlockEditor: ({
@@ -93,6 +112,7 @@ beforeEach(() => {
     },
   );
   auth.role = "vendedor";
+  vi.mocked(loadClient).mockResolvedValue({ id: "client", email: "actualizado@example.com", name: "Cliente" } as Awaited<ReturnType<typeof loadClient>>);
   blockSearch.search.mockResolvedValue([{ id: "salar-block", code: "BLOCK_NO_SALAR_CODE" }]);
   blockSearch.rows.mockResolvedValue([
     {
@@ -104,6 +124,14 @@ beforeEach(() => {
     },
   ]);
   blockSearch.page.mockResolvedValue([]);
+  quoteCatalogSearch.blocks.mockResolvedValue({
+    options: [{ id: "salar-block", label: "Visita al Salar de Uyuni", sub: "BLOCK_NO_SALAR_CODE · Tour SPA → SPA" }],
+    hasMore: false,
+  });
+  quoteCatalogSearch.services.mockResolvedValue({
+    options: [{ id: "late-service", label: "Servicio página 2", sub: "LATE-501 · Proveedor Sur · Uyuni · extra · per_group · Sin tarifa aplicable" }],
+    hasMore: false,
+  });
 });
 afterEach(() => {
   cleanup();
@@ -115,6 +143,7 @@ function savedQuote(status: Enums<"quote_status"> = "enviada", archived_at: stri
   return {
     quote: {
       id: "quote",
+      client_id: "client",
       code: "LTd-0001",
       status,
       archived_at,
@@ -161,6 +190,17 @@ function savedQuote(status: Enums<"quote_status"> = "enviada", archived_at: stri
     ],
   } as unknown as Awaited<ReturnType<typeof loadQuote>>;
 }
+
+it("edits the associated client without leaving the quote URL", async () => {
+  const router = renderQuote(savedQuote("borrador"));
+  fireEvent.click(await screen.findByText("Cliente y guía del documento"));
+  fireEvent.click(await screen.findByRole("button", { name: "Editar datos y email del cliente" }));
+  expect(await screen.findByRole("dialog", { name: "Editar cliente en cotización" })).toBeInTheDocument();
+  expect(router.state.location.pathname).toBe("/nueva-cotizacion");
+  expect(router.state.location.searchStr).toBe("");
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar cliente" }));
+  expect(screen.queryByRole("dialog", { name: "Editar cliente en cotización" })).not.toBeInTheDocument();
+});
 
 function renderQuote(data = savedQuote()) {
   vi.mocked(loadQuote).mockResolvedValue(data);
@@ -309,6 +349,48 @@ it("busca por título y selecciona un bloque para agregarlo a Nueva cotización"
   await waitFor(() =>
     expect(addBlockDays).toHaveBeenCalledExactlyOnceWith("quote", ["salar-block"]),
   );
+});
+
+it("combina y limpia filtros de bloques sin perder los bloques ya seleccionados", async () => {
+  const data = savedQuote("borrador");
+  data.days = [];
+  data.items = [];
+  renderQuote(data);
+  fireEvent.click(await screen.findByRole("combobox", { name: "Buscar bloque diario…" }));
+  fireEvent.change(screen.getByLabelText("Filtrar bloques por lugar"), { target: { value: "Salar" } });
+  fireEvent.change(screen.getByLabelText("Filtrar bloques por origen del tour"), { target: { value: "uyu" } });
+  await waitFor(() => expect(quoteCatalogSearch.blocks).toHaveBeenCalledWith(
+    "",
+    { place: "Salar", from: "UYU", to: "" },
+    0,
+  ));
+  expect(screen.getByText("Lugar: Salar")).toBeInTheDocument();
+  expect(screen.getByText("Origen del tour: UYU")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }));
+  expect(screen.queryByText("Lugar: Salar")).not.toBeInTheDocument();
+});
+
+it("filtra el tarifario, pagina y muestra servicios sin tarifa aplicable", async () => {
+  quoteCatalogSearch.services.mockImplementation(async (_term, _filters, page) => ({
+    options: [{ id: `late-service-${page}`, label: `Servicio página ${page + 1}`, sub: "LATE-501 · Proveedor Sur · Uyuni · extra · per_group · Sin tarifa aplicable" }],
+    hasMore: page === 0,
+  }));
+  renderQuote(savedQuote("borrador"));
+  fireEvent.click(await screen.findByRole("combobox", { name: "Agregar servicio del tarifario…" }));
+  fireEvent.change(screen.getByLabelText("Filtrar servicios por proveedor"), { target: { value: "Proveedor Sur" } });
+  fireEvent.change(screen.getByLabelText("Filtrar servicios por lugar"), { target: { value: "Uyuni" } });
+  await waitFor(() => expect(quoteCatalogSearch.services).toHaveBeenCalledWith(
+    "",
+    { supplier: "Proveedor Sur", location: "Uyuni", type: "all" },
+    0,
+    expect.any(String),
+    1,
+    2,
+  ));
+  expect(await screen.findByText("Servicio página 1")).toBeInTheDocument();
+  expect(screen.getByText(/Sin tarifa aplicable/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+  expect(await screen.findByText("Servicio página 2")).toBeInTheDocument();
 });
 
 it("busca por título y selecciona un bloque para reemplazar un día", async () => {

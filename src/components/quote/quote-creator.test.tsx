@@ -7,7 +7,8 @@ import {
   templateSuggestionError,
   type TemplateSuggestion,
 } from "@/lib/quotes/suggestions";
-import { createEmptyQuote, createQuoteFromCostScenario, createQuoteFromTemplate, getTemplateForQuote } from "@/lib/quotes";
+import { createEmptyQuote, createQuoteFromTemplateSelection, getTemplateForQuote } from "@/lib/quotes";
+import { suggestCostScenarios } from "@/lib/quotes/scenario-suggestions";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -17,8 +18,7 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 vi.mock("@/lib/quotes", () => ({
-  createQuoteFromTemplate: vi.fn(),
-  createQuoteFromCostScenario: vi.fn(),
+  createQuoteFromTemplateSelection: vi.fn(),
   createEmptyQuote: vi.fn(),
   getTemplateForQuote: vi.fn(),
   templateQuotePrefill: (template: {
@@ -50,6 +50,10 @@ vi.mock("./quote-ops", () => ({ latestFx: vi.fn(async () => ({ USD: 1 })) }));
 vi.mock("@/lib/quotes/suggestions", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/suggestions")>()),
   suggestTemplates: vi.fn(),
+}));
+vi.mock("@/lib/quotes/scenario-suggestions", async (original) => ({
+  ...(await original<typeof import("@/lib/quotes/scenario-suggestions")>()),
+  suggestCostScenarios: vi.fn(),
 }));
 const basics = {
   client: { id: "client", label: "Cliente" },
@@ -105,12 +109,15 @@ function showDirectTemplate() {
   );
   return { onCreated };
 }
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.mocked(suggestCostScenarios).mockResolvedValue([]);
+});
 afterEach(cleanup);
 it("shows pending status and warnings, and creates through the library", async () => {
   vi.mocked(suggestTemplates).mockResolvedValue([pending]);
-  vi.mocked(createQuoteFromTemplate).mockResolvedValue({ id: "quote" } as Awaited<
-    ReturnType<typeof createQuoteFromTemplate>
+  vi.mocked(createQuoteFromTemplateSelection).mockResolvedValue({ id: "quote" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplateSelection>
   >);
   const { onCreated } = show();
   expect(await screen.findByText("Pendiente de revisión")).toBeVisible();
@@ -118,17 +125,80 @@ it("shows pending status and warnings, and creates through the library", async (
   expect(screen.getByText("Duración distinta")).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Usar plantilla" }));
   await waitFor(() => expect(onCreated).toHaveBeenCalledWith("quote"));
-  expect(createQuoteFromTemplate).toHaveBeenCalledWith(
+  expect(createQuoteFromTemplateSelection).toHaveBeenCalledWith(
     "template",
+    null,
     expect.objectContaining({ pax_paying: 2, tc_count: 0 }),
   );
+});
+it("uses an exact economic scenario through the template action without a second workflow", async () => {
+  vi.mocked(suggestTemplates).mockResolvedValue([pending]);
+  vi.mocked(suggestCostScenarios).mockResolvedValue([
+    {
+      id: "scenario",
+      template_id: "template",
+      tour_sku: "UYUSPA-4D3N",
+      rate_year: 2026,
+      season: "ALL",
+      pax: 2,
+      approved_cost_usd: 2166,
+      detail_cost_usd: 2166,
+      cost_difference_usd: 0,
+      reconciliation_status: "matched",
+      source_ref: {},
+      suggested_route_from: "UYU",
+      suggested_route_to: "SPA",
+    },
+  ]);
+  vi.mocked(createQuoteFromTemplateSelection).mockResolvedValue({ id: "combined" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplateSelection>
+  >);
+  const { onCreated } = show();
+  expect(await screen.findByText("Costos disponibles · ALL · P2")).toBeVisible();
+  expect(screen.queryByText("Escenarios económicos importados")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Usar escenario" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Usar plantilla" }));
+  await waitFor(() =>
+    expect(createQuoteFromTemplateSelection).toHaveBeenCalledWith(
+      "template",
+      "scenario",
+      expect.objectContaining({ start_date: "2026-10-14", pax_paying: 2 }),
+    ),
+  );
+  expect(onCreated).toHaveBeenCalledWith("combined");
+});
+it("requires an explicit season when a template has multiple exact economic scenarios", async () => {
+  vi.mocked(suggestTemplates).mockResolvedValue([pending]);
+  const economic = (id: string, season: string) => ({
+    id,
+    template_id: "template",
+    tour_sku: "UYUSPA-4D3N",
+    rate_year: 2026,
+    season,
+    pax: 2,
+    approved_cost_usd: 100,
+    detail_cost_usd: 100,
+    cost_difference_usd: 0,
+    reconciliation_status: "matched",
+    source_ref: {},
+    suggested_route_from: "UYU",
+    suggested_route_to: "SPA",
+  });
+  vi.mocked(suggestCostScenarios).mockResolvedValue([
+    economic("dry", "DRY"),
+    economic("rain", "RAIN"),
+  ]);
+  show();
+  expect(await screen.findByText(/Selecciona la temporada económica/)).toBeVisible();
+  expect(screen.getByRole("combobox", { name: "Temporada de costos para UYUSPA-4D3N" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Usar plantilla" })).toBeDisabled();
 });
 it("does not show legacy economic warnings or block template selection", async () => {
   vi.mocked(suggestTemplates).mockResolvedValue([
     { ...pending, economic_status: "blocked", economic_issues: ["Falta tarifa del hotel"] },
   ]);
-  vi.mocked(createQuoteFromTemplate).mockResolvedValue({ id: "draft" } as Awaited<
-    ReturnType<typeof createQuoteFromTemplate>
+  vi.mocked(createQuoteFromTemplateSelection).mockResolvedValue({ id: "draft" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplateSelection>
   >);
   show();
   expect(await screen.findByRole("button", { name: "Usar plantilla" })).toBeVisible();
@@ -136,7 +206,11 @@ it("does not show legacy economic warnings or block template selection", async (
   expect(screen.queryByText("Falta tarifa del hotel")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Usar plantilla" }));
   await waitFor(() =>
-    expect(createQuoteFromTemplate).toHaveBeenCalledWith("template", expect.anything()),
+    expect(createQuoteFromTemplateSelection).toHaveBeenCalledWith(
+      "template",
+      null,
+      expect.anything(),
+    ),
   );
 });
 it("starts a Spanish quote from scratch without requiring a template translation", async () => {
@@ -150,7 +224,7 @@ it("starts a Spanish quote from scratch without requiring a template translation
   expect(createEmptyQuote).toHaveBeenCalledWith(
     expect.objectContaining({ language: "es", client_id: "client" }),
   );
-  expect(createQuoteFromTemplate).not.toHaveBeenCalled();
+  expect(createQuoteFromTemplateSelection).not.toHaveBeenCalled();
 });
 it("shows the missing migration after one retry and allows a successful manual retry", async () => {
   vi.mocked(suggestTemplates).mockRejectedValue(
@@ -171,7 +245,7 @@ it("distinguishes an empty accessible catalogue from a request error", async () 
   vi.mocked(suggestTemplates).mockResolvedValue([]);
   show();
   expect(
-    await screen.findByText(/No hay plantillas activas o pendientes disponibles/),
+    await screen.findByText(/No hay plantillas compatibles con esta ruta/),
   ).toBeVisible();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

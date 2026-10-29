@@ -22,7 +22,7 @@ export type { MarginMode, CommissionMode, ClientPricing, AdminPricing } from "./
 
 export interface Rate {
   id?: string;
-  /** NULL is an unknown source season and is deliberately never a wildcard. */
+  /** NULL is usable only when the source supplies an exact annual rate_year. */
   season: Enums<"season"> | null;
   rate_year?: number | null;
   valid_from: string | null;
@@ -286,7 +286,7 @@ export function selectRate(
   const candidates = item.rates.filter(
     (r) =>
       r.pricing_enabled !== false &&
-      r.season !== null &&
+      (r.season !== null || r.rate_year != null) &&
       !isExcluded(r) &&
       (r.rate_year == null || r.rate_year === Number(date.slice(0, 4))) &&
       (!r.valid_from || validDate(r.valid_from) <= date) &&
@@ -298,7 +298,8 @@ export function selectRate(
           (occupancyType(item.room_type) ?? item.room_type)) &&
       (!item.rate_band ||
         (r.pax_min === item.rate_band.pax_min && r.pax_max === item.rate_band.pax_max)) &&
-      (r.season === "ALL" ||
+      (r.season === null ||
+        r.season === "ALL" ||
         (r.season !== "DRY" && r.season !== "RAIN" && active.includes(r.season)) ||
         r.season === climateSeason ||
         (seasons.length === 0 &&
@@ -307,7 +308,7 @@ export function selectRate(
           !!r.valid_from &&
           !!r.valid_to)),
   );
-  const seasonal = candidates.filter((r) => r.season !== "ALL");
+  const seasonal = candidates.filter((r) => r.season !== "ALL" && r.season !== null);
   const chosen = seasonal.length ? seasonal : candidates;
   if (chosen.length !== 1)
     throw new RateError(chosen.length ? "ambiguous" : "missing", item, date, pax);
@@ -341,6 +342,19 @@ function quantity(input: QuoteInput, item: PricingItem): number {
     default:
       throw new Error("Unknown pricing unit");
   }
+}
+
+/**
+ * This approved Tunupa row is the USD 15 one-person unit from a linear
+ * 15/30/45/... source ladder. Its P1 band describes the source row, not a
+ * restriction on using that unit price for more diners.
+ */
+function ratePaxForItem(item: PricingItem, calculatedPax: number): number {
+  if (item.pricing_unit !== "per_person") return calculatedPax;
+  const variant = item.sku?.match(/^(?:ALM_LH_UTU|BIKE_LH)_(\d+)$/i)?.[1];
+  return variant === "1" && item.rates.some((rate) => rate.pax_min === 1 && rate.pax_max === 1)
+    ? 1
+    : calculatedPax;
 }
 const cents = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 function round(n: number, rule: QuoteInput["rounding_rule"]): number {
@@ -483,7 +497,8 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
           ? item.slot_key && (item.qty_override ?? item.qty) > 0
             ? Math.ceil(vehiclePax / (item.qty_override ?? item.qty)) : vehiclePax
           : input.pax_paying + (item.applies_tc ? input.tc_count : 0);
-        const ratePax = item.slot_key === "TRASLADO_FRONTERA" ? Math.max(2,calculatedRatePax) : calculatedRatePax;
+        const itemRatePax = ratePaxForItem(item, calculatedRatePax);
+        const ratePax = item.slot_key === "TRASLADO_FRONTERA" ? Math.max(2,itemRatePax) : itemRatePax;
         let autoVehicleRate: Rate | undefined;
         let autoVehicle = false;
         if (

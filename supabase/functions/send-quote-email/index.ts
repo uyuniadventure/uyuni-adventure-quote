@@ -9,6 +9,7 @@ import {
   serve,
 } from "../_shared/runtime.ts";
 import { prepareProposal } from "../_shared/prepare-proposal.ts";
+import { quoteRecipient } from "../_shared/quote-recipient.ts";
 serve(async (request) => {
   const { client } = await authenticated(request);
   const input = await request.json();
@@ -17,7 +18,7 @@ serve(async (request) => {
     await client
       .from("quotes")
       .select(
-        "code,tour_sku,language,start_date,pax_paying,tc_count,total_price_usd,document_snapshot",
+        "code,tour_sku,language,start_date,pax_paying,tc_count,total_price_usd,document_snapshot,clients(email)",
       )
       .eq("id", quoteId)
       .single(),
@@ -42,7 +43,11 @@ serve(async (request) => {
     },
   };
   const localized = templates[language];
-  const recipient = input.recipient ?? quote.document_snapshot?.client_email;
+  // The related client is authoritative; document_snapshot is historical and
+  // must not keep sending to an address that was corrected or removed later.
+  const recipient = quoteRecipient(input.recipient, quote.clients?.email);
+  if (!recipient)
+    return response({ error: "El cliente no tiene un email válido. Corrígelo en Clientes antes de enviar." }, 400);
   const subject = input.subject ?? (localized ? `${localized.subject} · ${quote.code}` : null);
   const proposal = await prepareProposal(client, quoteId, "email", quote.language);
   if (proposal?.avisos.some((a) => a.level === "error"))
@@ -61,8 +66,8 @@ serve(async (request) => {
     (localized
       ? `${localized.greeting} ${quote.document_snapshot?.client_name ?? ""},\n\n${localized.summary}\n\n${quote.tour_sku}\n${quote.start_date} · ${quote.pax_paying} + ${quote.tc_count} TC\nUSD ${quote.total_price_usd}\n\nUyuni Adventure`
       : null);
-  if (![quoteId, recipient, subject, body].every((v) => typeof v === "string" && v.length > 0))
-    return response({ error: "quoteId, recipient, subject and body required" }, 400);
+  if (![quoteId, subject, body].every((v) => typeof v === "string" && v.length > 0))
+    return response({ error: "Faltan datos obligatorios para preparar el correo." }, 400);
   const email = must(
     await client.rpc("claim_quote_email", {
       p_id: quoteId,
