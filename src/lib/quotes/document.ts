@@ -32,13 +32,13 @@ export async function listDocLayouts(channel: string) {
     await db.from("doc_layouts").select("*").eq("channel", channel.toLowerCase()).order("name"),
   );
 }
-export async function ensureDocSections(quoteId: string, layoutId?: string) {
-  return unwrap(
-    await db.rpc("ensure_quote_doc_sections", {
-      p_quote_id: quoteId,
-      ...(layoutId ? { p_layout_id: layoutId } : {}),
-    }),
-  );
+export async function ensureDocSections(quoteId: string, layoutId?: string): Promise<void> {
+  const { error } = await db.rpc("ensure_quote_doc_sections", {
+    p_quote_id: quoteId,
+    ...(layoutId ? { p_layout_id: layoutId } : {}),
+  });
+  // The SQL function returns void: null data is a successful response.
+  if (error) throw new Error(error.message);
 }
 async function edit(quoteId: string, action: string, sectionId?: string, data: unknown = {}) {
   return unwrap(
@@ -50,8 +50,14 @@ async function edit(quoteId: string, action: string, sectionId?: string, data: u
     }),
   );
 }
-export const reorderDocSections = async (id: string, ids: string[]) =>
-  unwrap(await db.rpc("reorder_quote_doc_sections", { p_quote_id: id, p_ids: ids }));
+export async function reorderDocSections(id: string, ids: string[]): Promise<void> {
+  const { error } = await db.rpc("reorder_quote_doc_sections", {
+    p_quote_id: id,
+    p_ids: ids,
+  });
+  // The SQL function returns void: only a Supabase error means failure.
+  if (error) throw new Error(error.message);
+}
 export const setSectionHidden = (id: string, sectionId: string, hidden: boolean) =>
   edit(id, "hide", sectionId, { hidden });
 export const updateSectionText = (
