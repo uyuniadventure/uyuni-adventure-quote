@@ -600,9 +600,13 @@ export function calculateQuote(input: QuoteInput): QuoteResult {
             throw new Error("Override requires price and note");
           native = nonnegative(item.unit_cost_original, "override");
         } else {
-          const parts = roomParts?.filter((r) => r.quantity > 0) ?? [
-            { type: undefined, quantity: qty },
-          ];
+          // A manual quantity must drive the room breakdown as well as the displayed
+          // quantity. Otherwise the breakdown can still charge the auto-rooming total.
+          const parts = item.pricing_unit === "per_room" && item.qty_override != null
+            ? [{ type: roomParts?.find((r) => r.quantity > 0)?.type, quantity: qty }]
+            : roomParts?.filter((r) => r.quantity > 0) ?? [
+                { type: undefined, quantity: qty },
+              ];
           let totalNative = 0;
           let totalUsd = 0;
           let missingPrice = false;
