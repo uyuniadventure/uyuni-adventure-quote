@@ -500,6 +500,41 @@ function ItemRow({ item, editable, actions }: { item: Item; editable: boolean; a
           <Input type="number" min={0} step="any" defaultValue={item.qty} className="h-8" disabled={!editable}
             title={item.pricing_unit === "per_staff" ? "Unidades por miembro del staff" : "Cantidad"}
             onBlur={(e) => Number(e.target.value) !== item.qty && upd({ qty: Math.max(0, Number(e.target.value) || 0) })} />
+        ) : ["per_room", "per_person"].includes(item.pricing_unit) && editable ? (
+          <div className="flex items-center gap-1">
+            <Input
+              key={item.id + ":" + String(item.qty_override ?? "auto")}
+              type="number"
+              min={0}
+              step={1}
+              defaultValue={item.qty_override ?? r?.quantity ?? ""}
+              className="h-8 w-20"
+              aria-label={`Cantidad de ${item.description}`}
+              title={item.qty_override === null ? "Cantidad automática. Cambia el valor para fijarlo manualmente." : "Cantidad manual para esta cotización"}
+              onBlur={(e) => {
+                const raw = e.target.value.trim();
+                const value = Number(raw);
+                if (raw === "" || !Number.isSafeInteger(value) || value < 0) {
+                  e.target.value = String(item.qty_override ?? r?.quantity ?? "");
+                  return;
+                }
+                if (item.qty_override !== value)
+                  upd({ qty_override: value });
+              }}
+            />
+            {item.qty_override !== null && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0"
+                title="Volver a cantidad automática"
+                aria-label={`Restablecer cantidad automática de ${item.description}`}
+                onClick={() => upd({ qty_override: null })}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         ) : <span title="Cantidad calculada con los pasajeros, habitaciones o staff del panel">{r?.quantity ?? "—"}</span>}
       </TableCell>
       <TableCell className="text-center"><Switch checked={item.included} disabled={!editable} onCheckedChange={(v) => upd({ included: v })} /></TableCell>
