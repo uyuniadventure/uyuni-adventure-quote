@@ -116,6 +116,29 @@ export function QuoteCreator({
     }
   }, [useTemplate, template.data]);
   const selected = useTemplate ? template.data : undefined;
+  const [directScenarioId, setDirectScenarioId] = useState("");
+  const directScenarios = useQuery({
+    queryKey: ["direct-template-scenarios", selected?.id, selected?.sku, b.start_date, b.pax_paying],
+    enabled: useTemplate && !!selected && /^\\d{4}-\\d{2}-\\d{2}$/.test(b.start_date) &&
+      Number.isInteger(Number(b.pax_paying)) && Number(b.pax_paying) > 0,
+    queryFn: async () => {
+      const year = Number(b.start_date.slice(0, 4));
+      const { data, error } = await db
+        .from("tour_cost_scenarios")
+        .select("id,template_id,tour_sku,season,rate_year,pax,reconciliation_status,approved_cost_usd,detail_cost_usd,cost_difference_usd")
+        .eq("status", "activo")
+        .eq("tour_sku", selected!.sku)
+        .eq("rate_year", year)
+        .eq("pax", Number(b.pax_paying))
+        .order("season");
+      if (error) throw error;
+      return scenariosForTemplate(selected!, data ?? []);
+    },
+  });
+  const availableDirectScenarios = directScenarios.data ?? [];
+  const chosenDirectScenario = availableDirectScenarios.length === 1
+    ? availableDirectScenarios[0]
+    : availableDirectScenarios.find((scenario) => scenario.id === directScenarioId);
   const create = useQuoteCreation(b, onCreated);
   const incompatible = selected && templatePassengerMismatch(b, selected.quote_defaults);
   const useReference = (raw: Json) => {
@@ -218,7 +241,7 @@ export function QuoteCreator({
                       .
                     </p>
                   )}
-                  {incompatible && (
+                  {incompatible && !chosenDirectScenario && (
                     <div role="alert" className="space-y-2">
                       <p className="text-sm text-brand-orange-deep">
                         Los pasajeros no coinciden con la configuración de referencia. Restaura ese
@@ -233,6 +256,53 @@ export function QuoteCreator({
                     </div>
                   )}
                 </>
+              )}
+              {selected && validBasics(b) && (
+                <div className="space-y-2 rounded-md border p-3">
+                  <p className="text-sm font-medium">Temporada de costos de la plantilla</p>
+                  {directScenarios.isPending && <p className="text-sm text-muted-foreground">Buscando escenarios económicos…</p>}
+                  {directScenarios.isError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      No se pudieron consultar los escenarios. Reintenta antes de crear.
+                    </p>
+                  )}
+                  {directScenarios.isSuccess && availableDirectScenarios.length === 0 && (
+                    <p role="alert" className="text-sm text-brand-orange-deep">
+                      No hay un escenario económico exacto para el año y los pasajeros elegidos.
+                      Cambia los datos o selecciona otra plantilla.
+                    </p>
+                  )}
+                  {availableDirectScenarios.length === 1 && (
+                    <p className="text-sm">
+                      {chosenDirectScenario!.season} · {chosenDirectScenario!.rate_year} ·
+                      P{chosenDirectScenario!.pax}
+                    </p>
+                  )}
+                  {availableDirectScenarios.length > 1 && (
+                    <Select
+                      value={chosenDirectScenario?.id ?? ""}
+                      onValueChange={setDirectScenarioId}
+                    >
+                      <SelectTrigger aria-label="Temporada de costos de la plantilla">
+                        <SelectValue placeholder="Seleccionar temporada" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableDirectScenarios.map((scenario) => (
+                          <SelectItem key={scenario.id} value={scenario.id}>
+                            {scenario.season} · {scenario.rate_year} · P{scenario.pax}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {chosenDirectScenario?.reconciliation_status === "difference" && (
+                    <p role="alert" className="text-sm text-brand-orange-deep">
+                      Conciliación pendiente: aprobado USD {chosenDirectScenario.approved_cost_usd} ·
+                      desglose USD {chosenDirectScenario.detail_cost_usd} ·
+                      diferencia USD {chosenDirectScenario.cost_difference_usd}.
+                    </p>
+                  )}
+                </div>
               )}
               <Button variant="ghost" disabled={create.isPending} onClick={changeTemplate}>
                 Cambiar plantilla
@@ -381,13 +451,18 @@ export function QuoteCreator({
                 disabled={
                   !valid ||
                   !selected ||
-                  !!incompatible ||
+                  (!chosenDirectScenario && !!incompatible) ||
+                  !chosenDirectScenario ||
+                  directScenarios.isFetching ||
                   template.isError ||
                   template.isFetching ||
                   create.isPending
                 }
                 onClick={() =>
-                  selected && create.mutate({ templateId: selected.id, scenarioId: null })
+                  selected && chosenDirectScenario && create.mutate({
+                    templateId: selected.id,
+                    scenarioId: chosenDirectScenario.id,
+                  })
                 }
               >
                 {create.isPending
