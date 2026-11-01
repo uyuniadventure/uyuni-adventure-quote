@@ -11,11 +11,17 @@ import {
   type QuoteBasics,
 } from "@/lib/quotes";
 import { suggestTemplates, templateImportWarnings } from "@/lib/quotes/suggestions";
-import { scenariosForTemplate, suggestCostScenarios } from "@/lib/quotes/scenario-suggestions";
+import {
+  directScenariosForTemplate,
+  isCompleteIsoDate,
+  scenariosForTemplate,
+  suggestCostScenarios,
+} from "@/lib/quotes/scenario-suggestions";
 import {
   templatePassengerDefaults,
   templatePassengerLabel,
   templatePassengerMismatch,
+  templateTcMismatch,
 } from "@/lib/quotes/template-defaults";
 import type { Enums, Json } from "@/types/db";
 import { Button } from "@/components/ui/button";
@@ -117,31 +123,34 @@ export function QuoteCreator({
   }, [useTemplate, template.data]);
   const selected = useTemplate ? template.data : undefined;
   const [directScenarioId, setDirectScenarioId] = useState("");
+  useEffect(() => {
+    setDirectScenarioId("");
+  }, [selected?.id, b.start_date, b.pax_paying]);
+  const directScenarioInputsReady =
+    isCompleteIsoDate(b.start_date) &&
+    Number.isInteger(Number(b.pax_paying)) &&
+    Number(b.pax_paying) > 0;
   const directScenarios = useQuery({
-    queryKey: ["direct-template-scenarios", selected?.id, selected?.sku, b.start_date, b.pax_paying],
-    enabled: useTemplate && !!selected && /^\\d{4}-\\d{2}-\\d{2}$/.test(b.start_date) &&
-      Number.isInteger(Number(b.pax_paying)) && Number(b.pax_paying) > 0,
-    queryFn: async () => {
-      const year = Number(b.start_date.slice(0, 4));
-      const { data, error } = await db
-        .from("tour_cost_scenarios")
-        .select("id,template_id,tour_sku,season,rate_year,pax,reconciliation_status,approved_cost_usd,detail_cost_usd,cost_difference_usd")
-        .eq("status", "activo")
-        .eq("tour_sku", selected!.sku)
-        .eq("rate_year", year)
-        .eq("pax", Number(b.pax_paying))
-        .order("season");
-      if (error) throw error;
-      return scenariosForTemplate(selected!, data ?? []);
-    },
+    queryKey: [
+      "direct-template-scenarios",
+      selected?.id,
+      selected?.sku,
+      b.start_date,
+      b.pax_paying,
+    ],
+    enabled: useTemplate && !!selected && directScenarioInputsReady,
+    retry: 1,
+    queryFn: () => directScenariosForTemplate(selected!, b.start_date, Number(b.pax_paying)),
   });
   const availableDirectScenarios = directScenarios.data ?? [];
-  const chosenDirectScenario = availableDirectScenarios.length === 1
-    ? availableDirectScenarios[0]
-    : availableDirectScenarios.find((scenario) => scenario.id === directScenarioId);
+  const chosenDirectScenario =
+    availableDirectScenarios.length === 1
+      ? availableDirectScenarios[0]
+      : availableDirectScenarios.find((scenario) => scenario.id === directScenarioId);
   const create = useQuoteCreation(b, onCreated);
   const incompatible = selected && templatePassengerMismatch(b, selected.quote_defaults);
-  const useReference = (raw: Json) => {
+  const incompatibleTc = selected && templateTcMismatch(b, selected.quote_defaults);
+  const applyReference = (raw: Json) => {
     const reference = templatePassengerDefaults(raw);
     setB((previous) => ({
       ...previous,
@@ -241,7 +250,7 @@ export function QuoteCreator({
                       .
                     </p>
                   )}
-                  {incompatible && !chosenDirectScenario && (
+                  {incompatible && (!chosenDirectScenario || incompatibleTc) && (
                     <div role="alert" className="space-y-2">
                       <p className="text-sm text-brand-orange-deep">
                         Los pasajeros no coinciden con la configuración de referencia. Restaura ese
@@ -249,7 +258,7 @@ export function QuoteCreator({
                       </p>
                       <Button
                         variant="outline"
-                        onClick={() => useReference(selected.quote_defaults)}
+                        onClick={() => applyReference(selected.quote_defaults)}
                       >
                         Usar escenario de referencia
                       </Button>
@@ -257,14 +266,39 @@ export function QuoteCreator({
                   )}
                 </>
               )}
-              {selected && validBasics(b) && (
+              {selected && (
                 <div className="space-y-2 rounded-md border p-3">
                   <p className="text-sm font-medium">Temporada de costos de la plantilla</p>
-                  {directScenarios.isPending && <p className="text-sm text-muted-foreground">Buscando escenarios económicos…</p>}
-                  {directScenarios.isError && (
-                    <p role="alert" className="text-sm text-destructive">
-                      No se pudieron consultar los escenarios. Reintenta antes de crear.
+                  {!validBasics(b) && (
+                    <p className="text-sm text-muted-foreground">
+                      Completa los datos básicos para crear la cotización.
                     </p>
+                  )}
+                  {!directScenarioInputsReady && (
+                    <p className="text-sm text-muted-foreground">
+                      Indica una fecha completa y una cantidad válida de pasajeros para consultar
+                      escenarios.
+                    </p>
+                  )}
+                  {directScenarioInputsReady && directScenarios.isFetching && (
+                    <p role="status" className="text-sm text-muted-foreground">
+                      Buscando escenarios económicos…
+                    </p>
+                  )}
+                  {directScenarios.isError && (
+                    <div role="alert" className="space-y-2">
+                      <p className="text-sm text-destructive">
+                        No se pudieron consultar los escenarios económicos. Reintenta antes de
+                        crear.
+                      </p>
+                      <Button
+                        variant="outline"
+                        disabled={directScenarios.isFetching}
+                        onClick={() => void directScenarios.refetch()}
+                      >
+                        Reintentar escenarios
+                      </Button>
+                    </div>
                   )}
                   {directScenarios.isSuccess && availableDirectScenarios.length === 0 && (
                     <p role="alert" className="text-sm text-brand-orange-deep">
@@ -274,8 +308,8 @@ export function QuoteCreator({
                   )}
                   {availableDirectScenarios.length === 1 && (
                     <p className="text-sm">
-                      {chosenDirectScenario!.season} · {chosenDirectScenario!.rate_year} ·
-                      P{chosenDirectScenario!.pax}
+                      {chosenDirectScenario!.season} · {chosenDirectScenario!.rate_year} · P
+                      {chosenDirectScenario!.pax}
                     </p>
                   )}
                   {availableDirectScenarios.length > 1 && (
@@ -297,9 +331,9 @@ export function QuoteCreator({
                   )}
                   {chosenDirectScenario?.reconciliation_status === "difference" && (
                     <p role="alert" className="text-sm text-brand-orange-deep">
-                      Conciliación pendiente: aprobado USD {chosenDirectScenario.approved_cost_usd} ·
-                      desglose USD {chosenDirectScenario.detail_cost_usd} ·
-                      diferencia USD {chosenDirectScenario.cost_difference_usd}.
+                      Conciliación pendiente: aprobado USD {chosenDirectScenario.approved_cost_usd}{" "}
+                      · desglose USD {chosenDirectScenario.detail_cost_usd} · diferencia USD{" "}
+                      {chosenDirectScenario.cost_difference_usd}.
                     </p>
                   )}
                 </div>
@@ -452,6 +486,7 @@ export function QuoteCreator({
                   !valid ||
                   !selected ||
                   (!chosenDirectScenario && !!incompatible) ||
+                  !!incompatibleTc ||
                   !chosenDirectScenario ||
                   directScenarios.isFetching ||
                   template.isError ||
@@ -459,7 +494,9 @@ export function QuoteCreator({
                   create.isPending
                 }
                 onClick={() =>
-                  selected && chosenDirectScenario && create.mutate({
+                  selected &&
+                  chosenDirectScenario &&
+                  create.mutate({
                     templateId: selected.id,
                     scenarioId: chosenDirectScenario.id,
                   })
@@ -483,7 +520,7 @@ export function QuoteCreator({
           basics={b}
           onBack={() => setStep(1)}
           onCreated={onCreated}
-          onUseReference={useReference}
+          onUseReference={applyReference}
         />
       )}
       <NewClientDialog
@@ -526,10 +563,9 @@ function useQuoteCreation(b: Basics, onCreated: (id: string) => void) {
           days_available: Number(b.days) || null,
         },
       };
-      const quote =
-        source
-          ? await createQuoteFromTemplateSelection(source.templateId, source.scenarioId, basics)
-          : await createEmptyQuote(basics);
+      const quote = source
+        ? await createQuoteFromTemplateSelection(source.templateId, source.scenarioId, basics)
+        : await createEmptyQuote(basics);
       return quote.id;
     },
     onSuccess: (id) => {
@@ -560,7 +596,13 @@ export function TemplateStep({
   const valid = validBasics(b);
   const [selectedScenarios, setSelectedScenarios] = useState<Record<string, string>>({});
   const scenarios = useQuery({
-    queryKey: ["quote-cost-scenarios", b.route_from, b.route_to, b.start_date, Number(b.pax_paying)],
+    queryKey: [
+      "quote-cost-scenarios",
+      b.route_from,
+      b.route_to,
+      b.start_date,
+      Number(b.pax_paying),
+    ],
     enabled: Number.isInteger(Number(b.pax_paying)) && Number(b.pax_paying) > 0,
     queryFn: () => suggestCostScenarios(b),
   });
@@ -594,12 +636,14 @@ export function TemplateStep({
       <div className="space-y-1">
         <h3 className="font-medium text-foreground">Plantillas compatibles</h3>
         <p className="text-sm text-muted-foreground">
-          Elige un tour para cargar su itinerario y, cuando estén disponibles, sus costos para {b.pax_paying || "—"} pasajero(s).
+          Elige un tour para cargar su itinerario y, cuando estén disponibles, sus costos para{" "}
+          {b.pax_paying || "—"} pasajero(s).
         </p>
       </div>
       {scenarios.isError && (
         <p role="alert" className="text-sm text-destructive">
-          No se pudo comprobar la disponibilidad de costos. Las plantillas todavía pueden crear un borrador sin costos.
+          No se pudo comprobar la disponibilidad de costos. Las plantillas todavía pueden crear un
+          borrador sin costos.
         </p>
       )}
       {q.isLoading && <p className="text-sm text-muted-foreground">Buscando plantillas…</p>}
@@ -613,7 +657,8 @@ export function TemplateStep({
       )}
       {!q.isError && q.data?.length === 0 && (
         <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No hay plantillas compatibles con esta ruta disponibles para tu usuario. Puedes empezar desde cero.
+          No hay plantillas compatibles con esta ruta disponibles para tu usuario. Puedes empezar
+          desde cero.
         </p>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
@@ -676,7 +721,9 @@ export function TemplateStep({
               {scenarios.isLoading ? (
                 <p className="text-xs text-muted-foreground">Comprobando costos…</p>
               ) : costScenarios.length === 0 ? (
-                <Badge variant="outline" className="self-start">Sin costos compatibles</Badge>
+                <Badge variant="outline" className="self-start">
+                  Sin costos compatibles
+                </Badge>
               ) : costScenarios.length === 1 ? (
                 <Badge variant="secondary" className="self-start">
                   Costos disponibles · {selectedScenario!.season} · P{selectedScenario!.pax}
@@ -707,7 +754,9 @@ export function TemplateStep({
               )}
               {selectedScenario?.reconciliation_status === "difference" && (
                 <p className="text-xs text-brand-orange-deep">
-                  Conciliación pendiente: aprobado USD {selectedScenario.approved_cost_usd} · desglose USD {selectedScenario.detail_cost_usd} · diferencia USD {selectedScenario.cost_difference_usd}
+                  Conciliación pendiente: aprobado USD {selectedScenario.approved_cost_usd} ·
+                  desglose USD {selectedScenario.detail_cost_usd} · diferencia USD{" "}
+                  {selectedScenario.cost_difference_usd}
                 </p>
               )}
               {warnings.length > 0 && (

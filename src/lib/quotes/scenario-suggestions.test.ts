@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { filterScenarioSuggestions, scenariosForTemplate } from "./scenario-suggestions";
+import {
+  filterScenarioSuggestions,
+  isCompleteIsoDate,
+  scenariosForTemplate,
+} from "./scenario-suggestions";
 
 const scenario = (id: string, tour_sku: string, pax = 2, rate_year = 2026) => ({
   id,
@@ -25,6 +29,16 @@ const scenarios = [
 ];
 
 describe("scenario suggestions", () => {
+  it.each(["2026-12-15", "2024-02-29"])("accepts the complete ISO date %s", (date) => {
+    expect(isCompleteIsoDate(date)).toBe(true);
+  });
+
+  it.each(["", "2026-12", "15/12/2026", "2026-02-29", "2026-13-01"])(
+    "rejects the incomplete or invalid date %s",
+    (date) => {
+      expect(isCompleteIsoDate(date)).toBe(false);
+    },
+  );
   it.each([
     ["SPA", "SPA", ["1"]],
     ["SPA", "UYU", ["2"]],

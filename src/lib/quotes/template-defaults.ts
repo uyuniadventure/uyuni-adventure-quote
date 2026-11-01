@@ -25,6 +25,10 @@ export function templatePassengerMismatch(
     (defaults.tc_count !== undefined && Number(basics.tc_count) !== defaults.tc_count)
   );
 }
+export function templateTcMismatch(basics: { tc_count: string | number }, raw: Json) {
+  const defaults = templatePassengerDefaults(raw);
+  return defaults.tc_count !== undefined && Number(basics.tc_count) !== defaults.tc_count;
+}
 export function templatePassengerLabel(raw: Json) {
   const defaults = templatePassengerDefaults(raw);
   return [

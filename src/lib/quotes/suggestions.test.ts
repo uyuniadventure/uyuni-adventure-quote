@@ -7,7 +7,11 @@ const transport = vi.hoisted(() => ({ client: null as ReturnType<typeof pgliteSu
 vi.mock("../db", () => ({ db: { from: (table: string) => transport.client!.from(table) } }));
 import { suggestTemplates, templateSuggestionError, templateImportWarnings } from "./suggestions";
 import { getTemplateForQuote, templateQuotePrefill, quoteCreationSearch } from "./template-entry";
-import { templatePassengerDefaults, templatePassengerMismatch } from "./template-defaults";
+import {
+  templatePassengerDefaults,
+  templatePassengerMismatch,
+  templateTcMismatch,
+} from "./template-defaults";
 
 let pg: Awaited<ReturnType<typeof createDatabase>>;
 const admin = randomUUID(),
@@ -209,6 +213,8 @@ it("keeps absent passenger defaults empty and respects explicit zero TC", () => 
     false,
   );
   expect(templatePassengerMismatch({ pax_paying: "2", tc_count: "1" }, { tc_count: 0 })).toBe(true);
+  expect(templateTcMismatch({ tc_count: "0" }, { pax_paying: 2, tc_count: 0 })).toBe(false);
+  expect(templateTcMismatch({ tc_count: "1" }, { pax_paying: 2, tc_count: 0 })).toBe(true);
   expect(() => templatePassengerDefaults({ pax_paying: -1 })).toThrow("configuración");
 });
 it("validates template URLs and gives an existing quote precedence", () => {

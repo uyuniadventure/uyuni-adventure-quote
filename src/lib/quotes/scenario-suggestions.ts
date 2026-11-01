@@ -29,6 +29,15 @@ export interface ScenarioSuggestionBasics {
   pax_paying?: string | number | null;
 }
 
+export function isCompleteIsoDate(value: string | null | undefined) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year!, month! - 1, day));
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() === month! - 1 && date.getUTCDate() === day
+  );
+}
+
 function scenarioStructuredRoute(scenarioId: string, days: readonly ScenarioDay[]) {
   const ordered = days
     .filter((day) => day.scenario_id === scenarioId)
@@ -59,7 +68,9 @@ export function filterScenarioSuggestions(
     if (!matchesSuggestionRoute(candidate, basics, locationCodes)) return [];
     const route = resolveSuggestionRoute(candidate, locationCodes);
     if (!route) return [];
-    return [{ ...scenario, suggested_route_from: route.route_from, suggested_route_to: route.route_to }];
+    return [
+      { ...scenario, suggested_route_from: route.route_from, suggested_route_to: route.route_to },
+    ];
   });
 }
 
@@ -68,7 +79,9 @@ export async function suggestCostScenarios(basics: ScenarioSuggestionBasics) {
   const year = scenarioYear(basics.start_date);
   let query = db
     .from("tour_cost_scenarios")
-    .select("id,template_id,tour_sku,rate_year,season,pax,approved_cost_usd,detail_cost_usd,cost_difference_usd,reconciliation_status,source_ref")
+    .select(
+      "id,template_id,tour_sku,rate_year,season,pax,approved_cost_usd,detail_cost_usd,cost_difference_usd,reconciliation_status,source_ref",
+    )
     .eq("status", "activo")
     .eq("pax", pax)
     .order("tour_sku")
@@ -107,4 +120,26 @@ export function scenariosForTemplate<
     )
     .slice()
     .sort((a, b) => a.season.localeCompare(b.season) || a.id.localeCompare(b.id));
+}
+
+export async function directScenariosForTemplate(
+  template: { id: string; sku: string },
+  startDate: string,
+  pax: number,
+) {
+  if (!isCompleteIsoDate(startDate))
+    throw new Error("La fecha de inicio no es una fecha ISO completa.");
+  if (!Number.isInteger(pax) || pax <= 0) throw new Error("Los pasajeros pagantes no son válidos.");
+  const { data, error } = await db
+    .from("tour_cost_scenarios")
+    .select(
+      "id,template_id,tour_sku,season,rate_year,pax,reconciliation_status,approved_cost_usd,detail_cost_usd,cost_difference_usd",
+    )
+    .eq("status", "activo")
+    .eq("tour_sku", template.sku)
+    .eq("rate_year", Number(startDate.slice(0, 4)))
+    .eq("pax", pax)
+    .order("season");
+  if (error) throw error;
+  return scenariosForTemplate(template, data ?? []);
 }

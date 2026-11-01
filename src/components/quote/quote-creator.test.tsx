@@ -7,13 +7,26 @@ import {
   templateSuggestionError,
   type TemplateSuggestion,
 } from "@/lib/quotes/suggestions";
-import { createEmptyQuote, createQuoteFromTemplateSelection, getTemplateForQuote } from "@/lib/quotes";
-import { suggestCostScenarios } from "@/lib/quotes/scenario-suggestions";
+import {
+  createEmptyQuote,
+  createQuoteFromTemplateSelection,
+  getTemplateForQuote,
+} from "@/lib/quotes";
+import {
+  directScenariosForTemplate,
+  suggestCostScenarios,
+} from "@/lib/quotes/scenario-suggestions";
 
 vi.mock("@/lib/db", () => ({
   db: {
-    from: () => {
-      throw new Error("La UI no consulta plantillas directamente");
+    from: (table: string) => {
+      if (table !== "clients") throw new Error(`Consulta directa inesperada: ${table}`);
+      const chain = {
+        select: () => chain,
+        eq: () => chain,
+        single: async () => ({ data: { type: "B2C", language: "es" }, error: null }),
+      };
+      return chain;
     },
   },
 }));
@@ -45,6 +58,11 @@ vi.mock("@/lib/quotes", () => ({
 vi.mock("@/components/catalog/kit", async (original) => ({
   ...(await original<typeof import("@/components/catalog/kit")>()),
   useLocationCodes: () => ({ data: [], isLoading: false }),
+  SearchPicker: ({ onPick }: { onPick: (option: { id: string; label: string }) => void }) => (
+    <button type="button" onClick={() => onPick({ id: "client", label: "Andrea" })}>
+      Elegir Andrea
+    </button>
+  ),
 }));
 vi.mock("./quote-ops", () => ({ latestFx: vi.fn(async () => ({ USD: 1 })) }));
 vi.mock("@/lib/quotes/suggestions", async (original) => ({
@@ -54,6 +72,7 @@ vi.mock("@/lib/quotes/suggestions", async (original) => ({
 vi.mock("@/lib/quotes/scenario-suggestions", async (original) => ({
   ...(await original<typeof import("@/lib/quotes/scenario-suggestions")>()),
   suggestCostScenarios: vi.fn(),
+  directScenariosForTemplate: vi.fn(),
 }));
 const basics = {
   client: { id: "client", label: "Cliente" },
@@ -111,7 +130,9 @@ function showDirectTemplate() {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
   vi.mocked(suggestCostScenarios).mockResolvedValue([]);
+  vi.mocked(directScenariosForTemplate).mockResolvedValue([]);
 });
 afterEach(cleanup);
 it("shows pending status and warnings, and creates through the library", async () => {
@@ -190,7 +211,9 @@ it("requires an explicit season when a template has multiple exact economic scen
   ]);
   show();
   expect(await screen.findByText(/Selecciona la temporada económica/)).toBeVisible();
-  expect(screen.getByRole("combobox", { name: "Temporada de costos para UYUSPA-4D3N" })).toBeVisible();
+  expect(
+    screen.getByRole("combobox", { name: "Temporada de costos para UYUSPA-4D3N" }),
+  ).toBeVisible();
   expect(screen.getByRole("button", { name: "Usar plantilla" })).toBeDisabled();
 });
 it("does not show legacy economic warnings or block template selection", async () => {
@@ -244,9 +267,7 @@ it("shows the missing migration after one retry and allows a successful manual r
 it("distinguishes an empty accessible catalogue from a request error", async () => {
   vi.mocked(suggestTemplates).mockResolvedValue([]);
   show();
-  expect(
-    await screen.findByText(/No hay plantillas compatibles con esta ruta/),
-  ).toBeVisible();
+  expect(await screen.findByText(/No hay plantillas compatibles con esta ruta/)).toBeVisible();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
 it("keeps the existing reference-pax warning and a way back to basic data", async () => {
@@ -276,4 +297,134 @@ it("prefills a direct template URL and reports an archived template", async () =
   );
   showDirectTemplate();
   expect(await screen.findByRole("alert")).toHaveTextContent("archivada");
+});
+
+const directScenario = (id: string, season: string, pax = 2, rate_year = 2026) => ({
+  id,
+  template_id: "template",
+  tour_sku: "UYUSPA-4D3N",
+  rate_year,
+  season,
+  pax,
+  approved_cost_usd: 100,
+  detail_cost_usd: 100,
+  cost_difference_usd: 0,
+  reconciliation_status: "matched",
+});
+
+async function completeDirectBasics(date = "2026-12-15", pax = 2) {
+  fireEvent.click(await screen.findByRole("button", { name: "Elegir Andrea" }));
+  fireEvent.change(screen.getByLabelText("Fecha de inicio"), { target: { value: date } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Pax pagantes" }), {
+    target: { value: String(pax) },
+  });
+}
+
+it("enables an ALL direct template scenario for a complete ISO date", async () => {
+  vi.mocked(getTemplateForQuote).mockResolvedValue(
+    pending as Awaited<ReturnType<typeof getTemplateForQuote>>,
+  );
+  vi.mocked(directScenariosForTemplate).mockResolvedValue([directScenario("all-p2", "ALL")]);
+  vi.mocked(createQuoteFromTemplateSelection).mockResolvedValue({ id: "quote-all" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplateSelection>
+  >);
+  const { onCreated } = showDirectTemplate();
+  expect(await screen.findByText(/Indica una fecha completa/)).toBeVisible();
+  expect(screen.queryByText("Buscando escenarios económicos…")).not.toBeInTheDocument();
+  await completeDirectBasics();
+  expect(
+    await screen.findByText((_, element) => element?.textContent === "ALL · 2026 · P2"),
+  ).toBeVisible();
+  expect(directScenariosForTemplate).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "template", sku: "UYUSPA-4D3N" }),
+    "2026-12-15",
+    2,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Crear cotización con UYUSPA-4D3N" }));
+  await waitFor(() =>
+    expect(createQuoteFromTemplateSelection).toHaveBeenCalledWith(
+      "template",
+      "all-p2",
+      expect.objectContaining({ start_date: "2026-12-15", pax_paying: 2 }),
+    ),
+  );
+  expect(onCreated).toHaveBeenCalledWith("quote-all");
+});
+
+it("requires DRY or RAIN again after date and passenger changes, without stale scenarios", async () => {
+  vi.mocked(getTemplateForQuote).mockResolvedValue(
+    pending as Awaited<ReturnType<typeof getTemplateForQuote>>,
+  );
+  vi.mocked(directScenariosForTemplate).mockImplementation(async (_template, _date, pax) => [
+    directScenario(`dry-p${pax}`, "DRY", pax),
+    directScenario(`rain-p${pax}`, "RAIN", pax),
+  ]);
+  vi.mocked(createQuoteFromTemplateSelection).mockResolvedValue({ id: "quote-rain" } as Awaited<
+    ReturnType<typeof createQuoteFromTemplateSelection>
+  >);
+  showDirectTemplate();
+  await completeDirectBasics("2026-02-15", 3);
+  const createButton = screen.getByRole("button", { name: "Crear cotización con UYUSPA-4D3N" });
+  expect(
+    await screen.findByRole("combobox", { name: "Temporada de costos de la plantilla" }),
+  ).toBeVisible();
+  expect(createButton).toBeDisabled();
+  fireEvent.click(screen.getByRole("combobox", { name: "Temporada de costos de la plantilla" }));
+  fireEvent.click(await screen.findByRole("option", { name: "RAIN · 2026 · P3" }));
+  await waitFor(() => expect(createButton).toBeEnabled());
+
+  fireEvent.change(screen.getByLabelText("Fecha de inicio"), {
+    target: { value: "2026-07-15" },
+  });
+  await waitFor(() =>
+    expect(directScenariosForTemplate).toHaveBeenLastCalledWith(expect.anything(), "2026-07-15", 3),
+  );
+  expect(createButton).toBeDisabled();
+  fireEvent.click(
+    await screen.findByRole("combobox", { name: "Temporada de costos de la plantilla" }),
+  );
+  fireEvent.click(await screen.findByRole("option", { name: "DRY · 2026 · P3" }));
+  await waitFor(() => expect(createButton).toBeEnabled());
+
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Pax pagantes" }), {
+    target: { value: "5" },
+  });
+  await waitFor(() =>
+    expect(directScenariosForTemplate).toHaveBeenLastCalledWith(expect.anything(), "2026-07-15", 5),
+  );
+  expect(createButton).toBeDisabled();
+  fireEvent.click(
+    await screen.findByRole("combobox", { name: "Temporada de costos de la plantilla" }),
+  );
+  fireEvent.click(await screen.findByRole("option", { name: "RAIN · 2026 · P5" }));
+  fireEvent.click(createButton);
+  await waitFor(() =>
+    expect(createQuoteFromTemplateSelection).toHaveBeenCalledWith(
+      "template",
+      "rain-p5",
+      expect.objectContaining({ pax_paying: 5 }),
+    ),
+  );
+  expect(createQuoteFromTemplateSelection).not.toHaveBeenCalledWith(
+    "template",
+    "rain-p3",
+    expect.anything(),
+  );
+});
+
+it("shows no-scenario and retryable error states without an infinite loader", async () => {
+  vi.mocked(getTemplateForQuote).mockResolvedValue(
+    pending as Awaited<ReturnType<typeof getTemplateForQuote>>,
+  );
+  vi.mocked(directScenariosForTemplate)
+    .mockRejectedValueOnce(new Error("Supabase unavailable"))
+    .mockRejectedValueOnce(new Error("Supabase unavailable"))
+    .mockResolvedValueOnce([]);
+  showDirectTemplate();
+  await completeDirectBasics("2027-02-15", 2);
+  expect(await screen.findByRole("alert")).toHaveTextContent("No se pudieron consultar");
+  expect(screen.queryByText("Buscando escenarios económicos…")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Reintentar escenarios" }));
+  expect(await screen.findByText(/No hay un escenario económico exacto/)).toBeVisible();
+  expect(screen.getByRole("button", { name: "Crear cotización con UYUSPA-4D3N" })).toBeDisabled();
 });
