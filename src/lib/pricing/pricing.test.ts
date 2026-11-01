@@ -113,6 +113,44 @@ describe("pricing", () => {
       total_cost_usd: 201,
     });
   });
+  it("charges the manual quantity for a generic room instead of the automatic room breakdown", () => {
+    const genericRoom: PricingItem = {
+      ...item,
+      id: "pds-standard-rain",
+      pricing_unit: "per_room",
+      room_type: "STANDARD",
+      applies_tc: false,
+      qty_override: 1,
+      rates: [{ ...rate, room_type: null, price_net: 487 }],
+    };
+    const automated = calculateQuote({
+      ...base,
+      pax_paying: 3,
+      tc_count: 0,
+      rooming: { paying: { DBL: 1, SGL: 1 }, tc: {} },
+      days: [{ day_number: 1, items: [{ ...genericRoom, qty_override: null }] }],
+    });
+    expect(automated.items[0]).toMatchObject({
+      status: "ok",
+      quantity: 2,
+      total_cost_usd: 974,
+    });
+    const manual = calculateQuote({
+      ...base,
+      pax_paying: 3,
+      tc_count: 0,
+      rooming: { paying: { DBL: 1, SGL: 1 }, tc: {} },
+      days: [{ day_number: 1, items: [genericRoom] }],
+    });
+    expect(manual.items[0]).toMatchObject({
+      status: "ok",
+      quantity: 1,
+      unit_cost_original: 487,
+      total_cost_usd: 487,
+    });
+    expect(manual.items[0].room_breakdown?.reduce((sum, room) => sum + room.total_cost_usd, 0)).toBe(487);
+  });
+
   it.each([
     ["2026-01-01", "RAIN"],
     ["2026-05-31", "RAIN"],
